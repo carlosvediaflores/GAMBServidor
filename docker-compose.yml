@@ -1,0 +1,26 @@
+version: "3.5"
+services:
+  app:
+    build: .
+    links:
+      - mongo
+      - rabbitmqcontainer
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/opt/app
+      - /opt/app/node_modules
+    environment:
+      DBHOST: "mongodb://172.18.0.2:27017"
+      DATABASE: "GAMB_BD"
+  
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    logging:
+      driver: none
+volumes:
+  mongodata:

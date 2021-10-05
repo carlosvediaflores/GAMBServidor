@@ -1,0 +1,39 @@
+
+Primero actualizamos
+sudo apt-get update
+
+Instalacion de retoques 
+sudo apt-get install gnome-tweak-tool
+sudo apt-get update
+
+
+instalacion de Plank 
+
+sudo add-apt-repository ppa:docky-core/stable
+
+sudo add-apt-repository ppa:ricotz/docky
+sudo apt-get update
+sudo apt-get install plank
+
+Gnome shell 
+sudo apt install chrome-gnome-shell
+
+
+Links de mis temas 
+
+Aplicaciones  y shell 
+https://www.gnome-look.org/p/1275087/
+https://www.gnome-look.org/p/1263666/
+
+Cursor 
+https://www.pling.com/p/1148692
+
+
+
+
+iconos
+https://www.gnome-look.org/p/1210856/
+
+Tema de plank
+https://www.pling.com/p/1311056
+

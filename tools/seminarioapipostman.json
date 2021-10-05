@@ -1,0 +1,148 @@
+{
+	"info": {
+		"_postman_id": "a9a393d4-5a04-48a4-9272-50a6ebb948c5",
+		"name": "api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "es Primo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "",
+				"description": "API"
+			},
+			"response": []
+		},
+		{
+			"name": "InserUser",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "Test1",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "test2@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "17843278483",
+							"type": "text"
+						}
+					]
+				},
+				"url": "http://localhost:8000/api/users",
+				"description": "insertUser"
+			},
+			"response": []
+		},
+		{
+			"name": "listaUsuarios",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8000/api/users"
+			},
+			"response": []
+		},
+		{
+			"name": "updateusers",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "username",
+							"value": "miniso",
+							"type": "text"
+						}
+					]
+				},
+				"url": "http://localhost:8000/api/users/608b0becfa23b80089abd246"
+			},
+			"response": []
+		},
+		{
+			"name": "deleteusers",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:8000/api/users/608b0becfa23b80089abd246"
+			},
+			"response": []
+		},
+		{
+			"name": "addUserRol",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "idRol",
+							"value": "608c5f5e2c3efa01033b1f88",
+							"type": "text"
+						}
+					]
+				},
+				"url": "http://localhost:8000/api/addrol/608b0d7c1444f1011d62fb77"
+			},
+			"response": []
+		},
+		{
+			"name": "createRol",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "dksjfkdsjfk",
+							"type": "text"
+						},
+						{
+							"key": "urn",
+							"value": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": "http://localhost:8000/api/roles"
+			},
+			"response": []
+		},
+		{
+			"name": "removeUserRol",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "idRol",
+							"value": "608c5f522c3efa01033b1f87",
+							"type": "text"
+						}
+					]
+				},
+				"url": "http://localhost:8000/api/removerol/608b0d7c1444f1011d62fb77"
+			},
+			"response": []
+		}
+	]
+}

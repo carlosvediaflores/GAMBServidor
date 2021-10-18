@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
 import BussinessRoles from "../businessController/BussinessRoles";
+import BussinesOrganizacion from "../businessController/BussinesOrganizacion";
+import BussinesSubdir from "../businessController/BussinesSubdir";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
 import Users, { ISimpleUser, IUser } from "../models/Users";
@@ -64,29 +66,10 @@ class RoutesController {
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
-    let id: string = request.params.id;
+    //let id: string = request.params.id;
     let res = await user.readUsers(request.params.id);
-    //const result: Array<IUser> = await user.readUsers();
     response.status(200).json( res );
   }
-  /*
-  public async getUserss(request: Request, response: Response) {
-
-    try {
-        let producto = await Users.findById(request.params.id);
-
-        if(!producto) {
-            request.status(404).json({ msg: 'No existe el producto' })
-        }
-       
-        response.json(producto);
-        
-    } catch (error) {
-        console.log(error);
-        response.status(500).send('Hubo un error');
-    }
-  }
-  */
   public async updateUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let id: string = request.params.id;
@@ -254,5 +237,76 @@ class RoutesController {
     }
     response.sendFile(userData.pathavatar);
   }
+  ///-----------Organizacion-------------------
+  public async createOrg(request: Request, response: Response) {
+    let org: BussinesOrganizacion = new BussinesOrganizacion();
+    var orgData: any = request.body;
+    let result = await org.addOrganizacion(orgData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getOrg(request: Request, response: Response) {
+    let org: BussinesOrganizacion = new BussinesOrganizacion();
+    let result = await org.readOrgs();
+    response.status(200).json( result );
+  }
+  public async getOr(request: Request, response: Response) {
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    //let id: string = request.params.id;
+    let res = await org.readOrgs(request.params.id);
+    response.status(200).json( res );
+  }
+  public async updateOr(request: Request, response: Response) {
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await org.updateOrg(id, params);
+    response.status(200).json(result);
+  }
+  public async removeOrg(request: Request, response: Response) {
+    let org: BussinesOrganizacion = new BussinesOrganizacion();
+    let idOrg: string = request.params.id;
+    let result = await org.deleteOrg(idOrg);
+    response.status(201).json({ serverResponse: result });
+  }
+
+  ///______________SUB DIRECCIONES__________________
+
+  public async createSubdir(request: Request, response: Response) {
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    var subdirData: any = request.body;
+    let result = await subdir.addSubdir(subdirData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getSubdir(request: Request, response: Response) {
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    let result = await subdir.getListSubdir();
+    response.status(200).json({ serverResponse: result });
+  }
+  public async updateSubdir(request: Request, response: Response) {
+    var subdir: BussinesSubdir = new BussinesSubdir();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await subdir.updateSubdi(id, params);
+    response.status(200).json(result);
+  }
+  public async removeSubdir(request: Request, response: Response) {
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    let idSubdir: string = request.params.id;
+    let result = await subdir.deleteSubdir(idSubdir);
+    response.status(201).json({ serverResponse: result });
+  }
+
 }
 export default RoutesController;

@@ -54,6 +54,44 @@ class Routes {
     app
       .route(`${this.routeparent}/roles/`)
       .get(this.routesController.getRoles);
+
+   ////////-------------ORGANIZACION ROUTES-------------------------
+    app
+      .route(`${this.routeparent}/org`)
+      .post(this.routesController.createOrg);
+    app
+      .route(`${this.routeparent}/org`)
+      .get(this.routesController.getOrg);
+
+    app
+      .route(`${this.routeparent}/org/:id`)
+      .put(this.routesController.updateOr);
+    app
+      .route(`${this.routeparent}/org/:id`)
+      .delete(this.routesController.removeOrg);
+    app
+      .route(`${this.routeparent}/org/:id`)
+      .get(this.routesController.getOr);
+
+      ///////////-----------SUB DIRECCION ROUTES--------------
+
+    app
+      .route(`${this.routeparent}/subdir`)
+      .post(this.routesController.createSubdir);
+    app
+      .route(`${this.routeparent}/subdir`)
+      .get(this.routesController.getSubdir);
+
+    app
+      .route(`${this.routeparent}/subdir/:id`)
+      .put(this.routesController.updateSubdir);
+    app
+      .route(`${this.routeparent}/subdir/:id`)
+      .delete(this.routesController.removeSubdir);
+
   }
+  
+
+
 }
 export default Routes;

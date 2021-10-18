@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from "mongoose";
+
 export interface IRoles extends Document {
     name: string,
     urn: string,

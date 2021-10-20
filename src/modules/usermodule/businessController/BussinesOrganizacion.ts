@@ -2,7 +2,7 @@
 import OrganizacionModel, { IOrganizacion } from "../models/Organizacion";
 import SubdireccionesModel, { ISubdireciones } from "../models/Subdireciones";
 class BussinesOrganizacion {
-
+    
     public async readOrgs(): Promise<Array<IOrganizacion>>;
     public async readOrgs(id: string): Promise<IOrganizacion>;
     public async readOrgs(query: any, skip: number, limit: number): Promise<Array<IOrganizacion>>;
@@ -30,6 +30,28 @@ class BussinesOrganizacion {
         } catch (err) {
             return err;
         }
+    }
+    public async addSub(idOr: string, idSub: string) {
+        let org = await OrganizacionModel.findOne({ _id: idOr });
+        if (org != null) {
+            var sub = await SubdireccionesModel.findOne({ _id: idSub });
+            if (sub != null) {
+                var checksub: Array<ISubdireciones> = org.subdirecciones.filter((item) => {
+                    if (sub._id.toString() == item._id.toString()) {
+                        return true;
+                    }
+                    return false;
+                });
+                console.log(checksub)
+                if (checksub.length == 0) {
+                    org.subdirecciones.push(sub);
+                    return await org.save();
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
     }
     /*public async getListOrg() {
         let result = await OrganizacionModel.find();

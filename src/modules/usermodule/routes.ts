@@ -79,12 +79,15 @@ class Routes {
       .route(`${this.routeparent}/subdir`)
       .post(this.routesController.createSubdir);
     app
+      .route(`${this.routeparent}/subdir/:id`)
+      .put(this.routesController.addSubdir);
+    app
       .route(`${this.routeparent}/subdir`)
       .get(this.routesController.getSubdir);
 
-    app
-      .route(`${this.routeparent}/subdir/:id`)
-      .put(this.routesController.updateSubdir);
+    //app
+      //.route(`${this.routeparent}/subdir/:id`)
+      //.put(this.routesController.updateSubdir);
     app
       .route(`${this.routeparent}/subdir/:id`)
       .delete(this.routesController.removeSubdir);

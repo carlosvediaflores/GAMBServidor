@@ -1,3 +1,4 @@
+import { IOrganizacion } from './../models/Organizacion';
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
 import BussinessRoles from "../businessController/BussinessRoles";
@@ -133,6 +134,37 @@ class RoutesController {
     let idUs: string = request.params.id;
     let idRol: string = request.body.idRol;
     let result = await roles.removeRol(idUs, idRol);
+    response.status(200).json({ serverResponse: result });
+  }
+  
+  public async addSubdir(request: Request, response: Response){
+    let idOrg: string = request.params.id;
+    //let idSub = request.body.idSub;
+    if (idOrg == null ) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+   
+    //var userResult: IUser = await orgToUpdate.save();
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    var subdirData: any = request.body;
+
+    var result1 = await subdir.addSubdir(subdirData);
+
+    let idSub = result1._id;
+    var result = await org.addSub(idOrg, idSub);
+    
+    //var result = subdirData
+    
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "no se pudo guardar" });
+      return;
+    }
     response.status(200).json({ serverResponse: result });
   }
 
@@ -291,8 +323,8 @@ class RoutesController {
   }
   public async getSubdir(request: Request, response: Response) {
     let subdir: BussinesSubdir = new BussinesSubdir();
-    let result = await subdir.getListSubdir();
-    response.status(200).json({ serverResponse: result });
+    let result = await subdir.readSub();
+    response.status(200).json( result );
   }
   public async updateSubdir(request: Request, response: Response) {
     var subdir: BussinesSubdir = new BussinesSubdir();

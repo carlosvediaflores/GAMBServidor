@@ -6,6 +6,7 @@ export interface ISimpleOrganizacion {
   subdirecciones?: Array<ISubdireciones>;
 }
 export interface IOrganizacion extends Document {
+    Array: any;
     nombredir: string;
     nombrecargo: string;
     subdirecciones: Array<ISubdireciones>;

@@ -70,7 +70,7 @@ class Routes {
       .route(`${this.routeparent}/org/:id`)
       .delete(this.routesController.removeOrg);
     app
-      .route(`${this.routeparent}/org/:id`)
+      .route(`${this.routeparent}/org/:nombredir`)
       .get(this.routesController.getOr);
 
       ///////////-----------SUB DIRECCION ROUTES--------------
@@ -91,6 +91,43 @@ class Routes {
     app
       .route(`${this.routeparent}/subdir/:id`)
       .delete(this.routesController.removeSubdir);
+
+      /////HOJA DE RUTA--------------------
+    app
+      .route(`${this.routeparent}/hoja`)
+      .post(this.routesController.createHojas);
+    app
+      .route(`${this.routeparent}/hoja`)
+      .get(this.routesController.getHojas);
+    app
+      .route(`${this.routeparent}/hoja/:id`)
+      .get(this.routesController.getHoja); 
+    app
+      .route(`${this.routeparent}/hoja/:id`)
+      .put(this.routesController.updateHoja);
+    app
+      .route(`${this.routeparent}/hoja/:id`)
+      .delete(this.routesController.removeHoja);
+
+     ///////////-----------SEGUIMIENTO ROUTES--------------
+
+    app
+     .route(`${this.routeparent}/segui`)
+     .post(this.routesController.createSegui);
+   app
+     .route(`${this.routeparent}/segui/:id`)
+     .put(this.routesController.addSegui);
+   app
+     .route(`${this.routeparent}/segui`)
+     .get(this.routesController.getSegui);
+
+  // app
+     //.route(`${this.routeparent}/segui/:id`)
+     //.put(this.routesController.updateSegui);
+   app
+     .route(`${this.routeparent}/segui/:id`)
+     .delete(this.routesController.removeSegui);
+
 
   }
   

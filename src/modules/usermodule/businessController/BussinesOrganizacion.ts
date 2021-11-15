@@ -1,15 +1,13 @@
-
 import OrganizacionModel, { IOrganizacion } from "../models/Organizacion";
 import SubdireccionesModel, { ISubdireciones } from "../models/Subdireciones";
-class BussinesOrganizacion {
-    
+class BussinesOrganizacion {  
     public async readOrgs(): Promise<Array<IOrganizacion>>;
-    public async readOrgs(id: string): Promise<IOrganizacion>;
+    public async readOrgs(nombredir: string): Promise<IOrganizacion>;
     public async readOrgs(query: any, skip: number, limit: number): Promise<Array<IOrganizacion>>;
 
     public async readOrgs(params1?: string | any, params2?: number, params3?: number): Promise<Array<IOrganizacion> | IOrganizacion> {
         if (params1 && typeof params1 == "string") {
-            var result: IOrganizacion = await OrganizacionModel.findOne({ _id: params1 });
+            var result: IOrganizacion = await OrganizacionModel.findOne({ nombredir: params1 });
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;

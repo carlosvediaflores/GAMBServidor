@@ -1,14 +1,18 @@
+import { IHojaruta } from './../models/Hojaruta';
 import { IOrganizacion } from './../models/Organizacion';
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
 import BussinessRoles from "../businessController/BussinessRoles";
 import BussinesOrganizacion from "../businessController/BussinesOrganizacion";
 import BussinesSubdir from "../businessController/BussinesSubdir";
+import BussinesSegui from '../businessController/BussinesSegui';
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
 import Users, { ISimpleUser, IUser } from "../models/Users";
 import isEmpty from "is-empty";
 import path from "path";
+import BusinessHoja from '../businessController/BussineHojaruta';
+import { ISeguimiento } from '../models/Seguimiento';
 interface Icredentials {
   email: string;
   password: string;
@@ -137,36 +141,7 @@ class RoutesController {
     response.status(200).json({ serverResponse: result });
   }
   
-  public async addSubdir(request: Request, response: Response){
-    let idOrg: string = request.params.id;
-    //let idSub = request.body.idSub;
-    if (idOrg == null ) {
-      response
-        .status(300)
-        .json({ serverResponse: "El id es necesario para crear subdir" });
-      return;
-    }
-    var org: BussinesOrganizacion = new BussinesOrganizacion();
-   
-    //var userResult: IUser = await orgToUpdate.save();
-    let subdir: BussinesSubdir = new BussinesSubdir();
-    var subdirData: any = request.body;
-
-    var result1 = await subdir.addSubdir(subdirData);
-
-    let idSub = result1._id;
-    var result = await org.addSub(idOrg, idSub);
-    
-    //var result = subdirData
-    
-    if (result == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "no se pudo guardar" });
-      return;
-    }
-    response.status(200).json({ serverResponse: result });
-  }
+  
 
   public async uploadPortrait(request: Request, response: Response) {
     var id: string = request.params.id;
@@ -282,6 +257,36 @@ class RoutesController {
     }
     response.status(201).json({ serverResponse: result });
   }
+  public async addSubdir(request: Request, response: Response){
+    let idOrg: string = request.params.id;
+    //let idSub = request.body.idSub;
+    if (idOrg == null ) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    //var userResult: IUser = await orgToUpdate.save();
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    var subdirData: any = request.body;
+    console.log(subdirData);
+    var result1 = await subdir.addSubdir(subdirData);
+
+    let idSub = result1._id;
+    var result = await org.addSub(idOrg, idSub);
+    
+    //var result = subdirData
+    console.log(result);
+    console.log(idSub);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "no se pudo guardar" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result });
+  }
   public async getOrg(request: Request, response: Response) {
     let org: BussinesOrganizacion = new BussinesOrganizacion();
     let result = await org.readOrgs();
@@ -290,7 +295,7 @@ class RoutesController {
   public async getOr(request: Request, response: Response) {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
     //let id: string = request.params.id;
-    let res = await org.readOrgs(request.params.id);
+    let res = await org.readOrgs(request.params.nombredir);
     response.status(200).json( res );
   }
   public async updateOr(request: Request, response: Response) {
@@ -339,6 +344,122 @@ class RoutesController {
     let result = await subdir.deleteSubdir(idSubdir);
     response.status(201).json({ serverResponse: result });
   }
+  ///////////////HOJA DE RUTA------------------------------
 
+  public async createHojas(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+
+    var hojaData = request.body;
+    hojaData["fecharesepcion"] =  new Date();
+    hojaData["fechadocumento"] = new Date();
+    hojaData["nuit"] = sha1(new Date().toString()).substr(0, 6);
+    hojaData["estado"] = "REGISTRADO";
+    let result = await hoja.addHoja(hojaData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getHojas(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    const result = await hoja.readHoja();
+    response.status(200).json( result );
+  }
+  public async getHoja(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    //let id: string = request.params.id;
+    let res = await hoja.readHoja(request.params.id);
+    response.status(200).json( res );
+  }
+  public async updateHoja(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await hoja.updateHojas(id, params);
+    response.status(200).json(result);
+  }
+  public async removeHoja(request: Request, response: Response) {
+    let hoja: BusinessHoja = new BusinessHoja();
+    let idHoja: string = request.params.id;
+    let result = await hoja.deleteHojas(idHoja);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async addSegui(request: Request, response: Response){
+    let idRuta: string = request.params.id;
+    //let idSub = request.body.idSub;
+    console.log(idRuta);
+    if (idRuta == null ) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var ruta: BusinessHoja = new BusinessHoja();
+    //var userResult: IUser = await orgToUpdate.save();
+    let segui: BussinesSegui = new BussinesSegui();
+    var seguiData: any = request.body;
+    console.log(seguiData);
+    var result1 = await segui.addSegui(seguiData);
+
+    let idSegui = result1._id;
+    var result = await ruta.addSeguim(idRuta, idSegui);
+    
+    //var result = subdirData
+   
+    console.log(result);
+    console.log(idSegui + idRuta);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "no se pudo guardar" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result });
+  }
+
+  ///-----------seguimiento---------------
+  public async createSegui(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+
+    var seguiData: any = request.body; 
+    //seguiData["fecharesepcion"] =  new Date();
+    seguiData["fechaderivado"] = new Date();
+    seguiData["estado"] = "REGISTRADO";
+    let result = await segui.addSegui(seguiData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getSeguis(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    const result: Array<ISeguimiento> = await segui.readSegui();
+    response.status(200).json( result );
+  }
+  public async getSegui(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    //let id: string = request.params.id;
+    let res = await segui.readSegui(request.params.id);
+    response.status(200).json( res );
+  }
+  public async updateSegui(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await segui.updateSegui(id, params);
+    response.status(200).json(result);
+  }
+  public async removeSegui(request: Request, response: Response) {
+    let segui: BussinesSegui = new BussinesSegui();
+    let idHoja: string = request.params.id;
+    let result = await segui.deleteSegui(idHoja);
+    response.status(201).json({ serverResponse: result });
+  }
 }
 export default RoutesController;

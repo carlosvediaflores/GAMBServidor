@@ -3,7 +3,7 @@ import SubdireccionModel, { ISubdireciones } from "./Subdireciones";
 export interface ISimpleOrganizacion {
   nombredir?: string;
   nombrecargo?: string;
-  subdirecciones?: Array<ISubdireciones>;
+  subdirecciones?: Array<ISubdireciones>; 
 }
 export interface IOrganizacion extends Document {
     Array: any;

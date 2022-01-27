@@ -19,6 +19,25 @@ class BussinesSegui {
 
         }
     }
+    public async readSeguis(): Promise<Array<ISeguimiento>>;
+    public async readSeguis(id: string): Promise<ISeguimiento>;
+    public async readSeguis(query: any, skip: number, limit: number): Promise<Array<ISeguimiento>>;
+
+    public async readSeguis(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISeguimiento> | ISeguimiento> {
+        if (params1 && typeof params1 == "string") {
+            var result: ISeguimiento = await SeguiModel.findOne({ idhj: params1 });
+            return result;
+        } else if (params1) {
+            let skip = params2 ? params2 : 0;
+            let limit = params3 ? params3 : 1;
+            let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1).skip(skip).limit(limit);
+            return listSegui;
+        } else {
+            let listSegui: Array<ISeguimiento> = await SeguiModel.find();
+            return listSegui;
+
+        }
+    }
     public async addSegui(segui: ISeguimiento) {
         try {
             let seguiDb = new SeguiModel(segui);
@@ -33,11 +52,12 @@ class BussinesSegui {
         return result;
     }*/
     
-    public async updateSegui(id: string, segui: any) {
+    public async updateSegui(id: string, segui: ISeguimiento) {
 
         let result = await SeguiModel.update({ _id: id }, { $set: segui });
         return result;
     }
+    
     public async deleteSegui(id: String) {
         let result = await SeguiModel.remove({ _id: id });
         ////----------////

@@ -25,7 +25,7 @@ export interface ISimpleHojaruta {
     }
     const hojarutaSchema: Schema = new Schema({
         nuit: { type: String},
-        fecharesepcion:  { type: Date},
+        fecharesepcion:  { type: Date, default: Date.now},
         fechadocumento:  { type: Date},
         tipodoc: { type: String },
         origen: { type: String },

@@ -45,6 +45,9 @@ class RoutesController {
       response.status(200).json( {
          email: loginUser.email,
          username: loginUser.username,
+         surnames: loginUser.surnames,
+         post: loginUser.post,
+         roles:loginUser.roles,
           token,
       });
       return;
@@ -298,6 +301,12 @@ class RoutesController {
     let res = await org.readOrgs(request.params.nombredir);
     response.status(200).json( res );
   }
+  public async getOrId(request: Request, response: Response) {
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    //let id: string = request.params.id;
+    let res = await org.readOrg(request.params.id);
+    response.status(200).json( res );
+  }
   public async updateOr(request: Request, response: Response) {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
     let id: string = request.params.id;
@@ -348,10 +357,9 @@ class RoutesController {
 
   public async createHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
-
+    
     var hojaData = request.body;
     hojaData["fecharesepcion"] =  new Date();
-    hojaData["fechadocumento"] = new Date();
     hojaData["nuit"] = sha1(new Date().toString()).substr(0, 6);
     hojaData["estado"] = "REGISTRADO";
     let result = await hoja.addHoja(hojaData);
@@ -366,13 +374,13 @@ class RoutesController {
   public async getHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     const result = await hoja.readHoja();
-    response.status(200).json( result );
+    response.status(200).json( { serverResponse: result } );
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     //let id: string = request.params.id;
     let res = await hoja.readHoja(request.params.id);
-    response.status(200).json( res );
+    response.status(200).json( { serverResponse: res } );
   }
   public async updateHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -387,10 +395,10 @@ class RoutesController {
     let result = await hoja.deleteHojas(idHoja);
     response.status(201).json({ serverResponse: result });
   }
+
   public async addSegui(request: Request, response: Response){
     let idRuta: string = request.params.id;
     //let idSub = request.body.idSub;
-    console.log(idRuta);
     if (idRuta == null ) {
       response
         .status(300)
@@ -401,25 +409,25 @@ class RoutesController {
     //var userResult: IUser = await orgToUpdate.save();
     let segui: BussinesSegui = new BussinesSegui();
     var seguiData: any = request.body;
+    seguiData["fechaderivado"] =  new Date();
+    seguiData["idhj"] = idRuta;
+    seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
+    seguiData["estado"] = "ENVIADO";
     console.log(seguiData);
     var result1 = await segui.addSegui(seguiData);
-
     let idSegui = result1._id;
     var result = await ruta.addSeguim(idRuta, idSegui);
-    
-    //var result = subdirData
-   
-    console.log(result);
-    console.log(idSegui + idRuta);
+    console.log(result +"esto es el resultado");
     if (result == null) {
       response
         .status(300)
-        .json({ serverResponse: "no se pudo guardar" });
+        .json({ serverResponse: "no se pudo guardar..." });
       return;
     }
     response.status(200).json({ serverResponse: result });
   }
 
+ 
   ///-----------seguimiento---------------
   public async createSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
@@ -444,7 +452,7 @@ class RoutesController {
   }
   public async getSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
-    //let id: string = request.params.id;
+    let id: string = request.params.id;
     let res = await segui.readSegui(request.params.id);
     response.status(200).json( res );
   }

@@ -51,6 +51,7 @@ class BusinessHoja {
         }
         return null;
     }
+    
     public async updateHojas(id: string, hoja: any) {
 
         let result = await HojaModel.update({ _id: id }, { $set: hoja });

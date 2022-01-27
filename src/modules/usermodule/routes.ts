@@ -72,6 +72,9 @@ class Routes {
     app
       .route(`${this.routeparent}/org/:nombredir`)
       .get(this.routesController.getOr);
+    app
+      .route(`${this.routeparent}/orgs/:id`)
+      .get(this.routesController.getOrId);
 
       ///////////-----------SUB DIRECCION ROUTES--------------
 
@@ -118,20 +121,18 @@ class Routes {
      .route(`${this.routeparent}/segui/:id`)
      .put(this.routesController.addSegui);
    app
-     .route(`${this.routeparent}/segui`)
+     .route(`${this.routeparent}/segui/:id`)
      .get(this.routesController.getSegui);
+   app  
+     .route(`${this.routeparent}/segui`)
+     .get(this.routesController.getSeguis);
 
-  // app
-     //.route(`${this.routeparent}/segui/:id`)
-     //.put(this.routesController.updateSegui);
+   app
+     .route(`${this.routeparent}/seguis/:id`)
+     .put(this.routesController.updateSegui);
    app
      .route(`${this.routeparent}/segui/:id`)
      .delete(this.routesController.removeSegui);
-
-
   }
-  
-
-
 }
 export default Routes;

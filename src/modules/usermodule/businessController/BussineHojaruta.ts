@@ -1,5 +1,6 @@
+import { query } from 'express';
 import HojaModel, { IHojaruta } from './../models/Hojaruta';
-import SeguientoModel, {ISeguimiento} from './../models/Seguimiento';
+import SeguientoModel, { ISeguimiento } from './../models/Seguimiento';
 class BusinessHoja {
     public async readHoja(): Promise<Array<IHojaruta>>;
     public async readHoja(id: string): Promise<IHojaruta>;
@@ -9,16 +10,39 @@ class BusinessHoja {
         if (params1 && typeof params1 == "string") {
             var result: IHojaruta = await HojaModel.findOne({ _id: params1 });
             return result;
-        } else if (params1) {
+
+        } else if (params1 && typeof params1 == "string") {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 1;
-            let listHoja: Array<IHojaruta> = await HojaModel.find(params1).skip(skip).limit(limit);
+            var filter = {
+                "$or": [
+                    { "nuit": { "$regex": params1, "$options": "i" } },
+                    { "origen": { "$regex": params1, "$options": "i" } }
+                    //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
+                ]
+            };
+            let listHoja: Array<IHojaruta> = await HojaModel.find(filter).skip(skip).limit(limit);
             return listHoja;
         } else {
-            let listHoja: Array<IHojaruta> = await HojaModel.find();
+            let listHoja: Array<IHojaruta> = await HojaModel.find().sort({ '_id': -1 });
             return listHoja;
 
         }
+    }
+    public async search(query?: any): Promise<Array<IHojaruta>>;
+    public async search(search: string | any, params2?: number, params3?: number) {
+        var filter = {
+            "$or": [
+                { "nuit": { "$regex": search, "$options": "i" } },
+                { "origen": { "$regex": search, "$options": "i" } }
+                //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
+            ]
+        };
+        let skip = params2 ? params2 : 0;
+        let limit = params3 ? params3 : 100;
+        let listHoja: Array<IHojaruta> = await HojaModel.find(filter).skip(skip).limit(limit);
+        return listHoja;
+
     }
     public async addHoja(hoja: IHojaruta) {
         try {
@@ -51,7 +75,7 @@ class BusinessHoja {
         }
         return null;
     }
-    
+
     public async updateHojas(id: string, hoja: any) {
 
         let result = await HojaModel.update({ _id: id }, { $set: hoja });

@@ -6,7 +6,7 @@ class BussinesSegui {
 
     public async readSegui(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISeguimiento> | ISeguimiento> {
         if (params1 && typeof params1 == "string") {
-            var result: ISeguimiento = await SeguiModel.findOne({ _id: params1 });
+            var result: ISeguimiento = await SeguiModel.findOne({ _id: params1});
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;
@@ -14,7 +14,7 @@ class BussinesSegui {
             let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1).skip(skip).limit(limit);
             return listSegui;
         } else {
-            let listSegui: Array<ISeguimiento> = await SeguiModel.find();
+            let listSegui: Array<ISeguimiento> = await SeguiModel.find().sort({'_id':-1});
             return listSegui;
 
         }

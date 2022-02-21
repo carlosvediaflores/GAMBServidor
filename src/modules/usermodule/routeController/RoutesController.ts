@@ -1,5 +1,6 @@
-import { IHojaruta } from './../models/Hojaruta';
+import { IHojaruta, ISimpleHojaruta } from './../models/Hojaruta';
 import { IOrganizacion } from './../models/Organizacion';
+
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
 import BussinessRoles from "../businessController/BussinessRoles";
@@ -360,7 +361,6 @@ class RoutesController {
     
     var hojaData = request.body;
     hojaData["fecharesepcion"] =  new Date();
-    hojaData["nuit"] = sha1(new Date().toString()).substr(0, 6);
     hojaData["estado"] = "REGISTRADO";
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
@@ -374,7 +374,7 @@ class RoutesController {
   public async getHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     const result = await hoja.readHoja();
-    response.status(200).json( { serverResponse: result } );
+    response.status(200).json( { serverResponse: result} );
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -382,6 +382,115 @@ class RoutesController {
     let res = await hoja.readHoja(request.params.id);
     response.status(200).json( { serverResponse: res } );
   }
+  public async searchHoja(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    var searchString = request.params.search;
+    let res = await hoja.search(searchString);  
+    response.status(200).json( { serverResponse: res } );
+  }
+
+  public async uploadHoja(request: Request, response: Response) {
+    var id: string = request.params.id;
+    if (!id) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para subir una foto" });
+      return;
+    }
+    var hoja: BusinessHoja = new BusinessHoja();
+    var hojaToUpdate: IHojaruta = await hoja.readHoja(id);
+    if (!hojaToUpdate) {
+      response.status(300).json({ serverResponse: "El Hoja de ruta no existe!" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploadhojaruta`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    /*var file: any = files.portrait;
+    if (!file) {
+      response.status(300).json({
+        serverResponse:
+          "error el archivo debe ser subido con el parametro portrait!",
+      });
+      return;
+    }*/
+    var key: Array<string> = Object.keys(files);
+    /**/
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 7);
+      var newname: string = `${filehash}_${file.name}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      hojaToUpdate.urihoja = "/api/gethojaruta/" + id;
+      hojaToUpdate.pathhoja = totalpath;
+      var hojaResult: IHojaruta = await hojaToUpdate.save();
+    }
+    var simpleUser: ISimpleHojaruta = {
+      nuit: hojaResult.nuit,
+      urihoja: hojaResult.urihoja,
+      pathhoja: hojaResult.pathhoja,
+    };
+    response.status(300).json({ serverResponse: simpleUser });
+    /*file.mv(totalpath, async (err: any, success: any) => {
+      if (err) {
+        response
+          .status(300)
+          .json({ serverResponse: "No se pudo almacenar el archivo" });
+        return;
+      }
+
+      userToUpdate.uriavatar = "/api/getportrait/" + id;
+      userToUpdate.pathavatar = totalpath;
+      var userResult: IUser = await userToUpdate.save();
+      var simpleUser: ISimpleUser = {
+        username: userResult.username,
+        uriavatar: userResult.uriavatar,
+        pathavatar: userResult.pathavatar,
+      };
+      response.status(300).json({ serverResponse: simpleUser });
+    });*/
+  }
+
+  public async getHojaRuta(request: Request, response: Response) {
+    var id: string = request.params.id;
+    if (!id) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var hoja: BusinessHoja = new BusinessHoja();
+    var hojaData: IHojaruta = await hoja.readHoja(id);
+    if (!hojaData) {
+      response.status(300).json({ serverResponse: "Error " });
+      return;
+    }
+    if (hojaData.pathhoja == null) {
+      response.status(300).json({ serverResponse: "No existe portrait " });
+      return;
+    }
+    response.sendFile(hojaData.pathhoja);
+    }
+
   public async updateHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     let id: string = request.params.id;

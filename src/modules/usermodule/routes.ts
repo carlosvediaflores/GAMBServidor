@@ -13,7 +13,7 @@ class Routes {
   private configureRoutes(app: Express) {
     //**--USER ROUTES--------------------------------------------------------------------------------------- */
     app.route(`${this.routeparent}/login`)
-       .post(this.routesController.login);
+      .post(this.routesController.login);
     app
       .route(`${this.routeparent}/users`)
       .post(this.routesController.createUsers);
@@ -42,7 +42,7 @@ class Routes {
     app
       .route(`${this.routeparent}/removerol/:id`)
       .put(this.routesController.removeUserRol);
-      
+
 
     //**--ROLES ROUTES--------------------------------------------------------------------------------------- */
     app
@@ -55,7 +55,7 @@ class Routes {
       .route(`${this.routeparent}/roles/`)
       .get(this.routesController.getRoles);
 
-   ////////-------------ORGANIZACION ROUTES-------------------------
+    ////////-------------ORGANIZACION ROUTES-------------------------
     app
       .route(`${this.routeparent}/org`)
       .post(this.routesController.createOrg);
@@ -76,7 +76,7 @@ class Routes {
       .route(`${this.routeparent}/orgs/:id`)
       .get(this.routesController.getOrId);
 
-      ///////////-----------SUB DIRECCION ROUTES--------------
+    ///////////-----------SUB DIRECCION ROUTES--------------
 
     app
       .route(`${this.routeparent}/subdir`)
@@ -89,13 +89,13 @@ class Routes {
       .get(this.routesController.getSubdir);
 
     //app
-      //.route(`${this.routeparent}/subdir/:id`)
-      //.put(this.routesController.updateSubdir);
+    //.route(`${this.routeparent}/subdir/:id`)
+    //.put(this.routesController.updateSubdir);
     app
       .route(`${this.routeparent}/subdir/:id`)
       .delete(this.routesController.removeSubdir);
 
-      /////HOJA DE RUTA--------------------
+    /////HOJA DE RUTA--------------------
     app
       .route(`${this.routeparent}/hoja`)
       .post(this.routesController.createHojas);
@@ -104,35 +104,44 @@ class Routes {
       .get(this.routesController.getHojas);
     app
       .route(`${this.routeparent}/hoja/:id`)
-      .get(this.routesController.getHoja); 
+      .get(this.routesController.getHoja);
     app
       .route(`${this.routeparent}/hoja/:id`)
       .put(this.routesController.updateHoja);
     app
       .route(`${this.routeparent}/hoja/:id`)
       .delete(this.routesController.removeHoja);
+    app
+      .route(`${this.routeparent}/hojasearch/:search`)
+      .get(this.routesController.searchHoja);
+    app
+      .route(`${this.routeparent}/uploadhojaruta/:id`)
+      .post(this.routesController.uploadHoja);
+    app
+      .route(`${this.routeparent}/gethojaruta/:id`)
+      .get(this.routesController.getHojaRuta);
 
-     ///////////-----------SEGUIMIENTO ROUTES--------------
+    ///////////-----------SEGUIMIENTO ROUTES--------------
 
     app
-     .route(`${this.routeparent}/segui`)
-     .post(this.routesController.createSegui);
-   app
-     .route(`${this.routeparent}/segui/:id`)
-     .put(this.routesController.addSegui);
-   app
-     .route(`${this.routeparent}/segui/:id`)
-     .get(this.routesController.getSegui);
-   app  
-     .route(`${this.routeparent}/segui`)
-     .get(this.routesController.getSeguis);
+      .route(`${this.routeparent}/segui`)
+      .post(this.routesController.createSegui);
+    app
+      .route(`${this.routeparent}/segui/:id`)
+      .put(this.routesController.addSegui);
+    app
+      .route(`${this.routeparent}/segui/:id`)
+      .get(this.routesController.getSegui);
+    app
+      .route(`${this.routeparent}/segui`)
+      .get(this.routesController.getSeguis);
 
-   app
-     .route(`${this.routeparent}/seguis/:id`)
-     .put(this.routesController.updateSegui);
-   app
-     .route(`${this.routeparent}/segui/:id`)
-     .delete(this.routesController.removeSegui);
+    app
+      .route(`${this.routeparent}/seguis/:id`)
+      .put(this.routesController.updateSegui);
+    app
+      .route(`${this.routeparent}/segui/:id`)
+      .delete(this.routesController.removeSegui);
   }
 }
 export default Routes;

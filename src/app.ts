@@ -35,6 +35,7 @@ class App {
     this.app.use(FileUpload({ limits: { fileSize: 50 * 1024 * 1024 } }));
   }
   public initApp() {
+ 
     this.app.use(Cors());
     console.log("LOAD MODULES");
     const userModule = new UserModules("/api", this.app);

@@ -1,7 +1,6 @@
 
 import mongoose, { Schema, Document } from "mongoose";
 import SeguimientoModel, { ISeguimiento } from "./Seguimiento";
-import Pagination from 'mongoose-paginate-v2';
 export interface ISimpleHojaruta {
   nuit?: string;
   fecharesepcion?: Date;
@@ -42,6 +41,4 @@ const hojarutaSchema: Schema = new Schema({
   urihoja: {type: String},
   pathhoja: {type: String}
 });
-
-hojarutaSchema.plugin(Pagination);
 export default mongoose.model<IHojaruta>("Hojaruta", hojarutaSchema);

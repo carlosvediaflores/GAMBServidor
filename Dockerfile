@@ -1,4 +1,4 @@
-FROM node
+FROM node:16.5.0-alpine
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 RUN npm install nodemon -g

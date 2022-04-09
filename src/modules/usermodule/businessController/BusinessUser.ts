@@ -49,7 +49,7 @@ class BusinessUser {
         let result = await UsersModel.remove({ _id: id });
         return result;
     }
-    public async addRol(idUs: string, idRol: string) {
+    /*public async addRol(idUs: string, idRol: string) {
         let user = await UsersModel.findOne({ _id: idUs });
         if (user != null) {
             var rol = await RolesModel.findOne({ _id: idRol });
@@ -90,6 +90,6 @@ class BusinessUser {
 
         }
         return null
-    }
+    }*/
 }
 export default BusinessUser;

@@ -9,13 +9,12 @@ export interface ISimpleHojaruta {
   origen?: string;
   estado?: string;
   referencia?: string;
-  archivo?: string;
   seguimiento?: Array<ISeguimiento>;
   urihoja?: string;
   pathhoja?: string;
 }
 export interface IHojaruta extends Document {
-  Array: any;
+
   nuit: string;
   fecharesepcion: Date;
   fechadocumento: Date;
@@ -23,10 +22,15 @@ export interface IHojaruta extends Document {
   origen?: string;
   estado?: string;
   referencia: string;
-  archivo: string;
   seguimiento: Array<ISeguimiento>;
   urihoja: string;
   pathhoja: string;
+  archivo:[{
+    urihoja: string, //la ruta de la imagen para http
+    pathhoja: string, //la ruta de donde se almacena la imagen en la servidor
+    name: string,
+    default: Boolean,
+  }];
 }
 const hojarutaSchema: Schema = new Schema({
   nuit: { type: String, required: true, unique: true },
@@ -36,9 +40,15 @@ const hojarutaSchema: Schema = new Schema({
   origen: { type: String },
   estado: { type: String },
   referencia: { type: String },
-  archivo: { type: String },
   seguimiento: { type: Array },
   urihoja: {type: String},
-  pathhoja: {type: String}
+  pathhoja: {type: String},
+  archivo:  {type:Array}
 });
 export default mongoose.model<IHojaruta>("Hojaruta", hojarutaSchema);
+
+/*var arch: any = hojaToUpdate.archivo
+      arch.urihoja  = "gethojaruta/" + id;
+      arch.pathhoja = totalpath;
+      arch.pathhoja = newname;
+      */

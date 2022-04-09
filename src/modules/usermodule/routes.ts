@@ -36,13 +36,13 @@ class Routes {
       .route(`${this.routeparent}/getportrait/:id`)
       .get(this.routesController.getPortrait);
 
-    app
+    /*app
       .route(`${this.routeparent}/addrol/:id`)
       .put(this.routesController.addRol);
     app
       .route(`${this.routeparent}/removerol/:id`)
       .put(this.routesController.removeUserRol);
-
+      */
 
     //**--ROLES ROUTES--------------------------------------------------------------------------------------- */
     app

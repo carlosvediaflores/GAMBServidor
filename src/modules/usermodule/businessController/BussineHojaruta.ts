@@ -4,25 +4,16 @@ import SeguientoModel, { ISeguimiento } from './../models/Seguimiento';
 class BusinessHoja {
     public async readHoja(): Promise<Array<IHojaruta>>;
     public async readHoja(id: string): Promise<IHojaruta>;
+    public async readHoja(nuit: number): Promise<IHojaruta>;
     public async readHoja(query: any, skip: number, limit: number): Promise<Array<IHojaruta>>;
-
     public async readHoja(params1?: string | any, params2?: number, params3?: number): Promise<Array<IHojaruta> | IHojaruta> {
         if (params1 && typeof params1 == "string") {
             var result: IHojaruta = await HojaModel.findOne({ _id: params1 });
             return result;
 
-        } else if (params1 && typeof params1 == "string") {
-            let skip = params2 ? params2 : 0;
-            let limit = params3 ? params3 : 1;
-            var filter = {
-                "$or": [
-                    { "nuit": { "$regex": params1, "$options": "i" } },
-                    { "origen": { "$regex": params1, "$options": "i" } }
-                    //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
-                ]
-            };
-            let listHoja: Array<IHojaruta> = await HojaModel.find(filter).skip(skip).limit(limit);
-            return listHoja;
+        } else if (params1) {
+            var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
+            return result;
         } else {
             let listHoja: Array<IHojaruta> = await HojaModel.find().sort({ '_id': -1 });
             return listHoja;
@@ -34,7 +25,9 @@ class BusinessHoja {
         var filter = {
             "$or": [
                 { "nuit": { "$regex": search, "$options": "i" } },
-                { "origen": { "$regex": search, "$options": "i" } }
+                { "origen": { "$regex": search, "$options": "i" } },
+                { "referencia": { "$regex": search, "$options": "i" } }
+                
                 //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
             ]
         };

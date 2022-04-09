@@ -53,7 +53,7 @@ class RoutesController {
       });
       return;
     }
-    response.status(200).json({ serverResponse: "Credenciales incorrectas" });
+    response.status(200).json({ serverResponse: "Credenciales incorrectas!!!" });
   }
   public async createUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -95,7 +95,7 @@ class RoutesController {
     let result = await user.deleteUsers(id);
     response.status(200).json({ serverResponse: result });
   }
-  public async addRol(request: Request, response: Response) {
+  /*public async addRol(request: Request, response: Response) {
     let idUs: string = request.params.id;
     let idRol = request.body.idRol;
     if (idUs == null && idRol == null) {
@@ -113,7 +113,7 @@ class RoutesController {
       return;
     }
     response.status(200).json({ serverResponse: result });
-  }
+  }*/
   public async createRol(request: Request, response: Response) {
     let roles: BussinessRoles = new BussinessRoles();
     var rolesData: any = request.body;
@@ -137,13 +137,13 @@ class RoutesController {
     let result = await roles.getListRol();
     response.status(200).json({ serverResponse: result });
   }
-  public async removeUserRol(request: Request, response: Response) {
+ /* public async removeUserRol(request: Request, response: Response) {
     let roles: BusinessUser = new BusinessUser();
     let idUs: string = request.params.id;
     let idRol: string = request.body.idRol;
     let result = await roles.removeRol(idUs, idRol);
     response.status(200).json({ serverResponse: result });
-  }
+  }*/
   
   
 
@@ -358,10 +358,13 @@ class RoutesController {
 
   public async createHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
-    
+    let res = await hoja.readHoja(request.params.id);
+    let nuit= res.nuit;
+    console.log(nuit)
     var hojaData = request.body;
     hojaData["fecharesepcion"] =  new Date();
     hojaData["estado"] = "REGISTRADO";
+    //hojaData["nuit"] = nuit + 1;
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
       response
@@ -412,16 +415,7 @@ class RoutesController {
     var dir = `${__dirname}/../../../../uploadhojaruta`;
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
-    /*var file: any = files.portrait;
-    if (!file) {
-      response.status(300).json({
-        serverResponse:
-          "error el archivo debe ser subido con el parametro portrait!",
-      });
-      return;
-    }*/
     var key: Array<string> = Object.keys(files);
-    /**/
     var copyDirectory = (totalpath: string, file: any) => {
       return new Promise((resolve, reject) => {
         file.mv(totalpath, (err: any, success: any) => {
@@ -440,16 +434,17 @@ class RoutesController {
       var newname: string = `${filehash}_${file.name}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
-      hojaToUpdate.urihoja = "/api/gethojaruta/" + id;
+      hojaToUpdate.urihoja  = "gethojaruta/" + id;
       hojaToUpdate.pathhoja = totalpath;
+      //arch.pathhoja = newname;
       var hojaResult: IHojaruta = await hojaToUpdate.save();
     }
-    var simpleUser: ISimpleHojaruta = {
+    var simpleHoja: ISimpleHojaruta = {
       nuit: hojaResult.nuit,
       urihoja: hojaResult.urihoja,
       pathhoja: hojaResult.pathhoja,
     };
-    response.status(300).json({ serverResponse: simpleUser });
+    response.status(300).json({ serverResponse: simpleHoja });
     /*file.mv(totalpath, async (err: any, success: any) => {
       if (err) {
         response

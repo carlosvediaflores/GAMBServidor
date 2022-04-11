@@ -118,7 +118,7 @@ class Routes {
       .route(`${this.routeparent}/uploadhojaruta/:id`)
       .post(this.routesController.uploadHoja);
     app
-      .route(`${this.routeparent}/gethojaruta/:id`)
+      .route(`${this.routeparent}/gethojaruta/:name`)
       .get(this.routesController.getHojaRuta);
 
     ///////////-----------SEGUIMIENTO ROUTES--------------
@@ -142,6 +142,27 @@ class Routes {
     app
       .route(`${this.routeparent}/segui/:id`)
       .delete(this.routesController.removeSegui);
+
+    //file------//
+    app
+      .route(`${this.routeparent}/file`)
+      .post(this.routesController.createFile);
+    app
+      .route(`${this.routeparent}/org`)
+      .get(this.routesController.getOrg);
+
+    app
+      .route(`${this.routeparent}/org/:id`)
+      .put(this.routesController.updateOr);
+    app
+      .route(`${this.routeparent}/org/:id`)
+      .delete(this.routesController.removeOrg);
+    app
+      .route(`${this.routeparent}/org/:nombredir`)
+      .get(this.routesController.getOr);
+    app
+      .route(`${this.routeparent}/orgs/:id`)
+      .get(this.routesController.getOrId);
   }
 }
 export default Routes;

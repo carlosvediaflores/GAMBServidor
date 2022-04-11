@@ -1,3 +1,4 @@
+import { IFiles } from './Files';
 
 import mongoose, { Schema, Document } from "mongoose";
 import SeguimientoModel, { ISeguimiento } from "./Seguimiento";
@@ -12,6 +13,7 @@ export interface ISimpleHojaruta {
   seguimiento?: Array<ISeguimiento>;
   urihoja?: string;
   pathhoja?: string;
+  archivo?:Array<IFiles>;
 }
 export interface IHojaruta extends Document {
 
@@ -25,12 +27,7 @@ export interface IHojaruta extends Document {
   seguimiento: Array<ISeguimiento>;
   urihoja: string;
   pathhoja: string;
-  archivo:[{
-    urihoja: string, //la ruta de la imagen para http
-    pathhoja: string, //la ruta de donde se almacena la imagen en la servidor
-    name: string,
-    default: Boolean,
-  }];
+  archivo:Array<IFiles>;
 }
 const hojarutaSchema: Schema = new Schema({
   nuit: { type: String, required: true, unique: true },

@@ -1,3 +1,4 @@
+import { IFiles } from './../models/Files';
 import { IHojaruta, ISimpleHojaruta } from './../models/Hojaruta';
 import { IOrganizacion } from './../models/Organizacion';
 
@@ -14,6 +15,7 @@ import isEmpty from "is-empty";
 import path from "path";
 import BusinessHoja from '../businessController/BussineHojaruta';
 import { ISeguimiento } from '../models/Seguimiento';
+import BussinesFile from '../businessController/BussinesFlies';
 interface Icredentials {
   email: string;
   password: string;
@@ -43,13 +45,13 @@ class RoutesController {
         { id: loginUser._id, email: loginUser.email },
         "secret"
       );
-      response.status(200).json( {
-         email: loginUser.email,
-         username: loginUser.username,
-         surnames: loginUser.surnames,
-         post: loginUser.post,
-         roles:loginUser.roles,
-          token,
+      response.status(200).json({
+        email: loginUser.email,
+        username: loginUser.username,
+        surnames: loginUser.surnames,
+        post: loginUser.post,
+        roles: loginUser.roles,
+        token,
       });
       return;
     }
@@ -71,13 +73,13 @@ class RoutesController {
   public async getUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     const result: Array<IUser> = await user.readUsers();
-    response.status(200).json( result );
+    response.status(200).json(result);
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     //let id: string = request.params.id;
     let res = await user.readUsers(request.params.id);
-    response.status(200).json( res );
+    response.status(200).json(res);
   }
   public async updateUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -137,15 +139,15 @@ class RoutesController {
     let result = await roles.getListRol();
     response.status(200).json({ serverResponse: result });
   }
- /* public async removeUserRol(request: Request, response: Response) {
-    let roles: BusinessUser = new BusinessUser();
-    let idUs: string = request.params.id;
-    let idRol: string = request.body.idRol;
-    let result = await roles.removeRol(idUs, idRol);
-    response.status(200).json({ serverResponse: result });
-  }*/
-  
-  
+  /* public async removeUserRol(request: Request, response: Response) {
+     let roles: BusinessUser = new BusinessUser();
+     let idUs: string = request.params.id;
+     let idRol: string = request.body.idRol;
+     let result = await roles.removeRol(idUs, idRol);
+     response.status(200).json({ serverResponse: result });
+   }*/
+
+
 
   public async uploadPortrait(request: Request, response: Response) {
     var id: string = request.params.id;
@@ -261,10 +263,10 @@ class RoutesController {
     }
     response.status(201).json({ serverResponse: result });
   }
-  public async addSubdir(request: Request, response: Response){
+  public async addSubdir(request: Request, response: Response) {
     let idOrg: string = request.params.id;
     //let idSub = request.body.idSub;
-    if (idOrg == null ) {
+    if (idOrg == null) {
       response
         .status(300)
         .json({ serverResponse: "El id es necesario para crear subdir" });
@@ -279,7 +281,7 @@ class RoutesController {
 
     let idSub = result1._id;
     var result = await org.addSub(idOrg, idSub);
-    
+
     //var result = subdirData
     console.log(result);
     console.log(idSub);
@@ -294,19 +296,19 @@ class RoutesController {
   public async getOrg(request: Request, response: Response) {
     let org: BussinesOrganizacion = new BussinesOrganizacion();
     let result = await org.readOrgs();
-    response.status(200).json( result );
+    response.status(200).json(result);
   }
   public async getOr(request: Request, response: Response) {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
     //let id: string = request.params.id;
     let res = await org.readOrgs(request.params.nombredir);
-    response.status(200).json( res );
+    response.status(200).json(res);
   }
   public async getOrId(request: Request, response: Response) {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
     //let id: string = request.params.id;
     let res = await org.readOrg(request.params.id);
-    response.status(200).json( res );
+    response.status(200).json(res);
   }
   public async updateOr(request: Request, response: Response) {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
@@ -339,7 +341,7 @@ class RoutesController {
   public async getSubdir(request: Request, response: Response) {
     let subdir: BussinesSubdir = new BussinesSubdir();
     let result = await subdir.readSub();
-    response.status(200).json( result );
+    response.status(200).json(result);
   }
   public async updateSubdir(request: Request, response: Response) {
     var subdir: BussinesSubdir = new BussinesSubdir();
@@ -359,10 +361,10 @@ class RoutesController {
   public async createHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     let res = await hoja.readHoja(request.params.id);
-    let nuit= res.nuit;
+    let nuit = res.nuit;
     console.log(nuit)
     var hojaData = request.body;
-    hojaData["fecharesepcion"] =  new Date();
+    hojaData["fecharesepcion"] = new Date();
     hojaData["estado"] = "REGISTRADO";
     //hojaData["nuit"] = nuit + 1;
     let result = await hoja.addHoja(hojaData);
@@ -377,19 +379,19 @@ class RoutesController {
   public async getHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     const result = await hoja.readHoja();
-    response.status(200).json( { serverResponse: result} );
+    response.status(200).json({ serverResponse: result });
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     //let id: string = request.params.id;
     let res = await hoja.readHoja(request.params.id);
-    response.status(200).json( { serverResponse: res } );
+    response.status(200).json({ serverResponse: res });
   }
   public async searchHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     var searchString = request.params.search;
-    let res = await hoja.search(searchString);  
-    response.status(200).json( { serverResponse: res } );
+    let res = await hoja.search(searchString);
+    response.status(200).json({ serverResponse: res });
   }
 
   public async uploadHoja(request: Request, response: Response) {
@@ -428,63 +430,82 @@ class RoutesController {
         });
       });
     };
+    let fil: BussinesFile = new BussinesFile();
+    var filData: any = request.body;
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 7);
-      var newname: string = `${filehash}_${file.name}`;
+      var newname: string = `${"GAMB"}_${filehash}_${file.name}`;
       var totalpath = `${absolutepath}/${newname}`;
-      await copyDirectory(totalpath, file);
-      hojaToUpdate.urihoja  = "gethojaruta/" + id;
-      hojaToUpdate.pathhoja = totalpath;
-      //arch.pathhoja = newname;
+      await copyDirectory(totalpath, file); 
       var hojaResult: IHojaruta = await hojaToUpdate.save();
-    }
-    var simpleHoja: ISimpleHojaruta = {
-      nuit: hojaResult.nuit,
-      urihoja: hojaResult.urihoja,
-      pathhoja: hojaResult.pathhoja,
-    };
-    response.status(300).json({ serverResponse: simpleHoja });
-    /*file.mv(totalpath, async (err: any, success: any) => {
-      if (err) {
+      filData["idhj"] = id;
+      filData["urihoja"] = "gethojaruta/" + newname;
+      filData["pathhoja"] = totalpath;
+      filData["namefile"] = newname;
+      var result1 = await fil.addFile(filData);
+      let idFile = result1._id;
+      var result = await hoja.addFiles(id, idFile);
+      if (result == null) {
         response
           .status(300)
-          .json({ serverResponse: "No se pudo almacenar el archivo" });
-        return;
+          .json({ serverResponse: "no se pudo guardar..." });
+        return;    
       }
+      /*file.mv(totalpath, async (err: any, success: any) => {
+        if (err) {
+          response
+            .status(300)
+            .json({ serverResponse: "No se pudo almacenar el archivo" });
+          return;
+        }
+  
+        userToUpdate.uriavatar = "/api/getportrait/" + id;
+        userToUpdate.pathavatar = totalpath;
+        var userResult: IUser = await userToUpdate.save();
+        var simpleUser: ISimpleUser = {
+          username: userResult.username,
+          uriavatar: userResult.uriavatar,
+          pathavatar: userResult.pathavatar,
+        };
+        response.status(300).json({ serverResponse: simpleUser });
+      });*/
+    }
+  }
 
-      userToUpdate.uriavatar = "/api/getportrait/" + id;
-      userToUpdate.pathavatar = totalpath;
-      var userResult: IUser = await userToUpdate.save();
-      var simpleUser: ISimpleUser = {
-        username: userResult.username,
-        uriavatar: userResult.uriavatar,
-        pathavatar: userResult.pathavatar,
-      };
-      response.status(300).json({ serverResponse: simpleUser });
-    });*/
+  public async createFile(request: Request, response: Response) {
+    var file: BussinesFile = new BussinesFile();
+    var fileData: any = request.body;
+    let result = await file.addFile(fileData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
   }
 
   public async getHojaRuta(request: Request, response: Response) {
-    var id: string = request.params.id;
-    if (!id) {
+    var name: string = request.params.name;
+    if (!name) {
       response
         .status(300)
         .json({ serverResponse: "Identificador no encontrado" });
       return;
     }
-    var hoja: BusinessHoja = new BusinessHoja();
-    var hojaData: IHojaruta = await hoja.readHoja(id);
-    if (!hojaData) {
+    var file: BussinesFile = new BussinesFile();
+    var fileData: IFiles = await file.readFile(name);
+    if (!fileData) {
       response.status(300).json({ serverResponse: "Error " });
       return;
     }
-    if (hojaData.pathhoja == null) {
+    if (fileData.pathhoja == null) {
       response.status(300).json({ serverResponse: "No existe portrait " });
       return;
     }
-    response.sendFile(hojaData.pathhoja);
-    }
+    response.sendFile(fileData.pathhoja);
+  }
 
   public async updateHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -500,10 +521,10 @@ class RoutesController {
     response.status(201).json({ serverResponse: result });
   }
 
-  public async addSegui(request: Request, response: Response){
+  public async addSegui(request: Request, response: Response) {
     let idRuta: string = request.params.id;
     //let idSub = request.body.idSub;
-    if (idRuta == null ) {
+    if (idRuta == null) {
       response
         .status(300)
         .json({ serverResponse: "El id es necesario para crear subdir" });
@@ -513,7 +534,7 @@ class RoutesController {
     //var userResult: IUser = await orgToUpdate.save();
     let segui: BussinesSegui = new BussinesSegui();
     var seguiData: any = request.body;
-    seguiData["fechaderivado"] =  new Date();
+    seguiData["fechaderivado"] = new Date();
     seguiData["idhj"] = idRuta;
     seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
     seguiData["estado"] = "ENVIADO";
@@ -521,7 +542,7 @@ class RoutesController {
     var result1 = await segui.addSegui(seguiData);
     let idSegui = result1._id;
     var result = await ruta.addSeguim(idRuta, idSegui);
-    console.log(result +"esto es el resultado");
+    console.log(result + "esto es el resultado");
     if (result == null) {
       response
         .status(300)
@@ -531,12 +552,12 @@ class RoutesController {
     response.status(200).json({ serverResponse: result });
   }
 
- 
+
   ///-----------seguimiento---------------
   public async createSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
 
-    var seguiData: any = request.body; 
+    var seguiData: any = request.body;
     //seguiData["fecharesepcion"] =  new Date();
     seguiData["fechaderivado"] = new Date();
     seguiData["estado"] = "REGISTRADO";
@@ -552,13 +573,13 @@ class RoutesController {
   public async getSeguis(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     const result: Array<ISeguimiento> = await segui.readSegui();
-    response.status(200).json( result );
+    response.status(200).json(result);
   }
   public async getSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     let id: string = request.params.id;
     let res = await segui.readSegui(request.params.id);
-    response.status(200).json( res );
+    response.status(200).json(res);
   }
   public async updateSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();

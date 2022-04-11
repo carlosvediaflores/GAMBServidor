@@ -1,3 +1,4 @@
+import FileModel, { IFiles } from './../models/Files';
 import { query } from 'express';
 import HojaModel, { IHojaruta } from './../models/Hojaruta';
 import SeguientoModel, { ISeguimiento } from './../models/Seguimiento';
@@ -78,21 +79,21 @@ class BusinessHoja {
         let result = await HojaModel.remove({ _id: id });
         return result;
     }
-    /*public async addRol(idUs: string, idRol: string) {
-        let user = await HojaModel.findOne({ _id: idUs });
-        if (user != null) {
-            var rol = await HojaModel.findOne({ _id: idRol });
-            if (rol != null) {
-                var checkrol: Array<IRoles> = user.roles.filter((item) => {
-                    if (rol._id.toString() == item._id.toString()) {
+   public async addFiles(idruta: string, idFile: string) {
+        let ruta = await HojaModel.findOne({ _id: idruta });
+        if (ruta != null) {
+            var fil = await FileModel.findOne({ _id: idFile });
+            if (fil != null) {
+                var checkrol: Array<IFiles> = ruta.archivo.filter((item) => {
+                    if (fil._id.toString() == item._id.toString()) {
                         return true;
                     }
                     return false;
                 });
                 console.log(checkrol)
                 if (checkrol.length == 0) {
-                    user.roles.push(rol);
-                    return await user.save();
+                    ruta.archivo.push(fil);
+                    return await ruta.save();
                 }
                 return null;
             }
@@ -100,6 +101,7 @@ class BusinessHoja {
         }
         return null;
     }
+     /*
     public async removeRol(idUs: string, idRol: string) {
         let user = await ModelHoja.findOne({ _id: idUs });
         var rol = await RolesModel.findOne({ _id: idRol });

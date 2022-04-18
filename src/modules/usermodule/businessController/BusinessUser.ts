@@ -26,7 +26,15 @@ class BusinessUser {
             return listUser;
 
         }
+    }  
+    public async readUser(email: string): Promise<IUser>;
+    public async readUser(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
+        if (params1 && typeof params1 == "string") {
+            var result: IUser = await UsersModel.findOne({ email: params1 });
+            return result;
+        }
     }
+    
     //addUsers
     //CRUD
  

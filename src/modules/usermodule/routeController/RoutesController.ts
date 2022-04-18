@@ -97,6 +97,12 @@ class RoutesController {
     let result = await user.deleteUsers(id);
     response.status(200).json({ serverResponse: result });
   }
+  public async getUs(request: Request, response: Response) {
+    var Us: BusinessUser = new BusinessUser();
+    //let id: string = request.params.id;
+    let res = await Us.readUser(request.params.email);
+    response.status(200).json({ serverResponse: res });
+  }
   /*public async addRol(request: Request, response: Response) {
     let idUs: string = request.params.id;
     let idRol = request.body.idRol;

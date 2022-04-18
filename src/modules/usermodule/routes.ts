@@ -24,6 +24,9 @@ class Routes {
       .route(`${this.routeparent}/users/:id`)
       .get(this.routesController.getUser);
     app
+      .route(`${this.routeparent}/user/:email`)
+      .get(this.routesController.getUs);
+    app
       .route(`${this.routeparent}/users/:id`)
       .put(this.routesController.updateUsers);
     app

@@ -14,7 +14,7 @@ class BussinesSegui {
             let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1).skip(skip).limit(limit);
             return listSegui;
         } else {
-            let listSegui: Array<ISeguimiento> = await SeguiModel.find().sort({'_id':-1});
+            let listSegui: Array<ISeguimiento> = await SeguiModel.find();
             return listSegui;
 
         }
@@ -38,6 +38,20 @@ class BussinesSegui {
 
         }
     }
+   
+    public async readSeguiO(query?: any): Promise<Array<ISeguimiento>>;
+    public async readSeguiO(params1?: string | any): Promise<Array<ISeguimiento> | ISeguimiento> {
+        var filter = {
+            "$or": [
+                { "destino": { "$regex": params1, "$options": "i" } },
+                //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
+            ]
+        };
+        
+        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ '_id': -1 });
+        return listSeguiO;
+    }
+
     public async addSegui(segui: ISeguimiento) {
         try {
             let seguiDb = new SeguiModel(segui);

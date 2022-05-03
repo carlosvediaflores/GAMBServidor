@@ -135,6 +135,9 @@ class Routes {
     app
       .route(`${this.routeparent}/segui/:id`)
       .get(this.routesController.getSegui);
+      app
+    .route(`${this.routeparent}/seguiO/:destino`)
+      .get(this.routesController.getSeguiO);
     app
       .route(`${this.routeparent}/segui`)
       .get(this.routesController.getSeguis);

@@ -587,6 +587,11 @@ class RoutesController {
     let res = await segui.readSegui(request.params.id);
     response.status(200).json(res);
   }
+  public async getSeguiO(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let res = await segui.readSeguiO(request.params.destino);
+    response.status(200).json(res);
+  }
   public async updateSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     let id: string = request.params.id;

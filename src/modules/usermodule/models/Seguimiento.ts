@@ -4,6 +4,7 @@ export interface ISimpleSeguimiento {
     nuit?: string;
     destino?: string;
     origen?: string ;
+    referencia?: string;
     detalles?: string ;
     instrucciones?:  string;
     fechaderivado?: Date;
@@ -15,6 +16,7 @@ export interface ISeguimiento extends Document {
     nuit: string;
     destino: string;
     origen: string ;
+    referencia: string;
     detalles: string ;
     instrucciones:  string;
     fechaderivado: Date;
@@ -26,6 +28,7 @@ const SeguiSchema = new Schema({
     nuit: { type: String},
     destino: { type: String},
     origen: { type: String },
+    referencia: { type: String },
     detalles: { type: String },
     instrucciones: { type: String },
     fechaderivado: { type: Date },

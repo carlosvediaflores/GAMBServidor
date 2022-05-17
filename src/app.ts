@@ -16,8 +16,7 @@ class App {
     let host: string = "mongodb://172.18.0.2:27017";
     let database: string = process.env.DATABASE || "GAMB_BD";
     let connectionString: string = `${host}/${database}`;
-    //let connectionString: string = `mongodb+srv://Calos:vendia782@cluster0.b9z1k.mongodb.net/GAMB_BD?retryWrites=true&w=majority`;
-
+    
     mongoose.connect(connectionString, {
       useNewUrlParser: true,
     });

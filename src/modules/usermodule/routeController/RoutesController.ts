@@ -399,7 +399,28 @@ class RoutesController {
     let res = await hoja.search(searchString);
     response.status(200).json({ serverResponse: res });
   }
-
+  public async asociarHoja(request: Request, response: Response) {
+    let idH: string = request.params.id;
+    let idA = request.body.idA;
+    if (idH == null && idA == null) {
+      response.status(300).json({
+        serverResponse: "No se definio id de usuario ni el id del rol",
+      });
+      return;
+    }
+    var user: BusinessHoja = new BusinessHoja();
+    var result1 = await user.asociarHojaA(idH, idA);
+    var result2 = await user.asociarHojaB(idH, idA);
+    if (result1 == null && result2 == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol o usuario no existen" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result1 });
+    response.status(200).json({ serverResponse: result2 });
+    
+  }
   public async uploadHoja(request: Request, response: Response) {
     var id: string = request.params.id;
     if (!id) {

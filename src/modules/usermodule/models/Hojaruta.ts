@@ -14,6 +14,7 @@ export interface ISimpleHojaruta {
   urihoja?: string;
   pathhoja?: string;
   archivo?:Array<IFiles>;
+  asociado?:Array<IHojaruta>;
 }
 export interface IHojaruta extends Document {
 
@@ -28,6 +29,7 @@ export interface IHojaruta extends Document {
   urihoja: string;
   pathhoja: string;
   archivo:Array<IFiles>;
+  asociado:Array<IHojaruta>;
 }
 const hojarutaSchema: Schema = new Schema({
   nuit: { type: String, required: true, unique: true },
@@ -40,7 +42,8 @@ const hojarutaSchema: Schema = new Schema({
   seguimiento: { type: Array },
   urihoja: {type: String},
   pathhoja: {type: String},
-  archivo:  {type:Array}
+  archivo:  {type:Array},
+  asociado: {type:Array}
 });
 export default mongoose.model<IHojaruta>("Hojaruta", hojarutaSchema);
 

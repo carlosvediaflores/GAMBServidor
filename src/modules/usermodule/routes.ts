@@ -123,6 +123,9 @@ class Routes {
     app
       .route(`${this.routeparent}/gethojaruta/:name`)
       .get(this.routesController.getHojaRuta);
+    app
+      .route(`${this.routeparent}/asociar/:id`)
+      .get(this.routesController.asociarHoja);
 
     ///////////-----------SEGUIMIENTO ROUTES--------------
 

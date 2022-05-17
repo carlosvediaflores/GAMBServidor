@@ -70,6 +70,31 @@ class BusinessHoja {
         return null;
     }
 
+    public async asociarHojaA(idH: string, idA: string) {
+        let hoja = await HojaModel.findOne({ _id: idH });
+        if (hoja != null) {
+            var aso = await HojaModel.findOne({ _id: idA });
+            if (aso != null) {
+                hoja.asociado.push(aso);
+                return await hoja.save();                                                                                                                                                                                                aso.save() ;         
+            }
+            return null;
+        }
+        return null;
+    }
+    public async asociarHojaB(idH: string, idA: string) {
+        let aso = await HojaModel.findOne({ _id: idA });
+        if (aso != null) {
+            var hoja = await HojaModel.findOne({ _id: idH });
+            if (hoja != null) {
+                aso.asociado.push(hoja);
+                return await aso.save();                                                                                                                                                                                                aso.save() ;         
+            }
+            return null;
+        }
+        return null;
+    }
+
     public async updateHojas(id: string, hoja: any) {
 
         let result = await HojaModel.update({ _id: id }, { $set: hoja });

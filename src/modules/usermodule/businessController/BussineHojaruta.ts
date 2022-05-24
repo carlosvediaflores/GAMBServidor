@@ -2,6 +2,7 @@ import FileModel, { IFiles } from './../models/Files';
 import { query } from 'express';
 import HojaModel, { IHojaruta } from './../models/Hojaruta';
 import SeguientoModel, { ISeguimiento } from './../models/Seguimiento';
+import { AnyArray } from 'mongoose';
 class BusinessHoja {
     public async readHoja(): Promise<Array<IHojaruta>>;
     public async readHoja(id: string): Promise<IHojaruta>;
@@ -70,24 +71,43 @@ class BusinessHoja {
         return null;
     }
 
-    public async asociarHojaA(idH: string, idA: string) {
-        let hoja = await HojaModel.findOne({ _id: idH });
+    public async asociarHojaA(NH: string, NA: any) {
+        let hoja = await HojaModel.findOne({ nuit: NH });
         if (hoja != null) {
-            var aso = await HojaModel.findOne({ _id: idA });
+            var aso:IHojaruta= await HojaModel.findOne({ nuit: NA });
+            var result1: any = {
+                _id: aso._id,
+                nuit: aso.nuit,
+                origen: aso.origen,
+                referencia:aso.referencia,
+                fechadocumento: aso.fechadocumento,
+                fecharesepcion: aso.fecharesepcion,
+                estado:aso.estado,
+             }      
             if (aso != null) {
-                hoja.asociado.push(aso);
+                hoja.asociado.push(result1);
                 return await hoja.save();                                                                                                                                                                                                aso.save() ;         
             }
             return null;
+            console.log({res:"ni se pudo suardar"})
         }
         return null;
     }
-    public async asociarHojaB(idH: string, idA: string) {
-        let aso = await HojaModel.findOne({ _id: idA });
+    public async asociarHojaB(NH: string, NA: any) {
+        let aso = await HojaModel.findOne({ nuit: NA });
         if (aso != null) {
-            var hoja = await HojaModel.findOne({ _id: idH });
+            var hoja:IHojaruta = await HojaModel.findOne({ nuit: NH });
+            var result2: any = {
+               _id: hoja._id,
+               nuit: hoja.nuit,
+               origen: hoja.origen,
+               referencia:hoja.referencia,
+               fechadocumento: hoja.fechadocumento,
+               fecharesepcion: hoja.fecharesepcion,
+               estado:hoja.estado,
+            }      
             if (hoja != null) {
-                aso.asociado.push(hoja);
+                aso.asociado.push(result2);
                 return await aso.save();                                                                                                                                                                                                aso.save() ;         
             }
             return null;

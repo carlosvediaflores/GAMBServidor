@@ -400,25 +400,24 @@ class RoutesController {
     response.status(200).json({ serverResponse: res });
   }
   public async asociarHoja(request: Request, response: Response) {
-    let idH: string = request.params.id;
-    let idA = request.body.idA;
-    if (idH == null && idA == null) {
+    let idH: string = request.params.nuit;
+    let params:any = request.body.params;
+    if (idH == null && params == null) {
       response.status(300).json({
         serverResponse: "No se definio id de usuario ni el id del rol",
       });
       return;
     }
     var user: BusinessHoja = new BusinessHoja();
-    var result1 = await user.asociarHojaA(idH, idA);
-    var result2 = await user.asociarHojaB(idH, idA);
+    var result1 = await user.asociarHojaA(idH, params);
+    var result2 = await user.asociarHojaB(idH, params);
     if (result1 == null && result2 == null) {
       response
         .status(300)
-        .json({ serverResponse: "El rol o usuario no existen" });
+        .json({ serverResponse: "No se pudo guardar" });
       return;
     }
-    response.status(200).json({ serverResponse: result1 });
-    response.status(200).json({ serverResponse: result2 });
+    response.status(200).json({ serverResponse: "ok" });
     
   }
   public async uploadHoja(request: Request, response: Response) {
@@ -565,18 +564,18 @@ class RoutesController {
     seguiData["idhj"] = idRuta;
     seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
     seguiData["estado"] = "ENVIADO";
-    console.log(seguiData);
+   // console.log(seguiData);
     var result1 = await segui.addSegui(seguiData);
-    let idSegui = result1._id;
-    var result = await ruta.addSeguim(idRuta, idSegui);
-    console.log(result + "esto es el resultado");
-    if (result == null) {
+    //let idSegui = result1._id;
+    //var result = await ruta.addSeguim(idRuta, idSegui);
+    //console.log(result + "esto es el resultado");
+    if (result1 == null) {
       response
         .status(300)
         .json({ serverResponse: "no se pudo guardar..." });
       return;
     }
-    response.status(200).json({ serverResponse: result });
+    response.status(200).json({ serverResponse: result1 });
   }
 
 

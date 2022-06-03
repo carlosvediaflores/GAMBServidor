@@ -399,19 +399,40 @@ class RoutesController {
     let res = await hoja.search(searchString);
     response.status(200).json({ serverResponse: res });
   }
-  public async asociarHoja(request: Request, response: Response) {
-    let idH: string = request.params.nuit;
-    let params:any = request.body.params;
-    if (idH == null && params == null) {
+  public async asociarHojas(request: Request, response: Response) {
+    let idH: string = request.params.nuid;
+    let idRol: string = request.body.idRol;
+    console.log(idH)
+    console.log(idRol)
+    if (idH == null && idRol == null) {
       response.status(300).json({
         serverResponse: "No se definio id de usuario ni el id del rol",
       });
       return;
     }
     var user: BusinessHoja = new BusinessHoja();
-    var result1 = await user.asociarHojaA(idH, params);
-    var result2 = await user.asociarHojaB(idH, params);
-    if (result1 == null && result2 == null) {
+    var result = await user.asociarHoja(idH, idRol);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol o usuario no existen, o esta asignando dolble rol" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result });
+  }
+  public async asociarHoja(request: Request, response: Response) {
+    let idH: string = request.params.nuit;
+    let asociado:any = request.body.asociado;
+    if (idH == null && asociado == null) {
+      response.status(300).json({
+        serverResponse: "No se definio id de usuario ni el id del rol",
+      });
+      return;
+    }
+    var user: BusinessHoja = new BusinessHoja();
+    var result1 = await user.asociarHojaA(idH, asociado);
+    var result2 = await user.asociarHojaB(idH, asociado);
+    if (result1 == null ) {
       response
         .status(300)
         .json({ serverResponse: "No se pudo guardar" });

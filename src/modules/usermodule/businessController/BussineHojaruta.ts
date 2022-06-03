@@ -35,7 +35,7 @@ class BusinessHoja {
         };
         let skip = params2 ? params2 : 0;
         let limit = params3 ? params3 : 100;
-        let listHoja: Array<IHojaruta> = await HojaModel.find(filter).skip(skip).limit(limit);
+        let listHoja: Array<IHojaruta> = await HojaModel.find(filter).skip(skip).limit(limit).sort({ '_id': -1 });
         return listHoja;
 
     }
@@ -63,6 +63,28 @@ class BusinessHoja {
                 if (checksub.length == 0) {
                     ruta.seguimiento.push(segui);
                     return await ruta.save();
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
+    }
+    public async asociarHoja(NH: string, NA: string) {
+        let hoja = await HojaModel.findOne({ nuit: NH });
+        if (hoja != null) {
+            var aso = await HojaModel.findOne({ nuit: NA });
+            if (aso != null) {
+                var checkrol: Array<IHojaruta> = hoja.asociado.filter((item) => {
+                    if (aso.nuit.toString() == item.nuit.toString()) {
+                        return true;
+                    }
+                    return false;
+                });
+                console.log(checkrol)
+                if (checkrol.length == 0) {
+                    hoja.asociado.push(aso);
+                    return await aso.save();
                 }
                 return null;
             }

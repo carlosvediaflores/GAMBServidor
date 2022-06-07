@@ -9,6 +9,7 @@ export interface ISimpleHojaruta {
   tipodoc?: string;
   origen?: string;
   estado?: string;
+  contacto?:string;
   referencia?: string;
   seguimiento?: Array<ISeguimiento>;
   urihoja?: string;
@@ -22,8 +23,9 @@ export interface IHojaruta extends Document {
   fecharesepcion: Date;
   fechadocumento: Date;
   tipodoc: string;
-  origen?: string;
-  estado?: string;
+  origen: string;
+  estado: string;
+  contacto: string;
   referencia: string;
   seguimiento: Array<ISeguimiento>;
   urihoja: string;
@@ -38,6 +40,7 @@ const hojarutaSchema: Schema = new Schema({
   tipodoc: { type: String },
   origen: { type: String },
   estado: { type: String },
+  contacto: {type: String},
   referencia: { type: String },
   seguimiento: { type: Array },
   urihoja: {type: String},

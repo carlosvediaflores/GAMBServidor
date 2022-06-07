@@ -400,25 +400,16 @@ class RoutesController {
     response.status(200).json({ serverResponse: res });
   }
   public async asociarHojas(request: Request, response: Response) {
-    let idH: string = request.params.nuid;
-    let idRol: string = request.body.idRol;
-    console.log(idH)
-    console.log(idRol)
-    if (idH == null && idRol == null) {
-      response.status(300).json({
-        serverResponse: "No se definio id de usuario ni el id del rol",
-      });
-      return;
-    }
-    var user: BusinessHoja = new BusinessHoja();
-    var result = await user.asociarHoja(idH, idRol);
-    if (result == null) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    //let id: string = request.params.id;
+    let res = await hoja.asodHoja(request.params.nuit);
+    if (res == null) {
       response
         .status(300)
-        .json({ serverResponse: "El rol o usuario no existen, o esta asignando dolble rol" });
+        .json({ serverResponse: "nulo" });
       return;
     }
-    response.status(200).json({ serverResponse: result });
+    response.status(200).json({ serverResponse: res });
   }
   public async asociarHoja(request: Request, response: Response) {
     let idH: string = request.params.nuit;
@@ -626,6 +617,12 @@ class RoutesController {
     var segui: BussinesSegui = new BussinesSegui();
     let id: string = request.params.id;
     let res = await segui.readSegui(request.params.id);
+    response.status(200).json(res);
+  }
+  public async getSeguiAs(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let nuit: string = request.params.nuit;
+    let res = await segui.readSeguiAs(request.params.nuit);
     response.status(200).json(res);
   }
   public async getSeguiO(request: Request, response: Response) {

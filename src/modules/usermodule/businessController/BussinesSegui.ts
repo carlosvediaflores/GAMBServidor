@@ -51,7 +51,19 @@ class BussinesSegui {
         let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ 'nuit': -1 });
         return listSeguiO;
     }
-
+    public async readSeguiAs(query?: any): Promise<Array<ISeguimiento>>;
+    public async readSeguiAs(params1?: string | any): Promise<Array<ISeguimiento> | ISeguimiento> {
+        var filter = {
+            "$or": [
+                { "nuit": { "$regex": params1, "$options": "i" } },
+                //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
+            ]
+        };
+        
+        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ 'nuit': -1 });
+        return listSeguiO;
+    }
+    
     public async addSegui(segui: ISeguimiento) {
         try {
             let seguiDb = new SeguiModel(segui);

@@ -126,6 +126,9 @@ class Routes {
     app
       .route(`${this.routeparent}/asociar/:nuit`)
       .put(this.routesController.asociarHoja);
+    app
+      .route(`${this.routeparent}/asociar/:nuit`)
+      .get(this.routesController.asociarHojas);
 
     ///////////-----------SEGUIMIENTO ROUTES--------------
 
@@ -151,6 +154,9 @@ class Routes {
     app
       .route(`${this.routeparent}/segui/:id`)
       .delete(this.routesController.removeSegui);
+    app
+      .route(`${this.routeparent}/seguias/:nuit`)
+      .get(this.routesController.getSeguiAs);
 
     //file------//
     app

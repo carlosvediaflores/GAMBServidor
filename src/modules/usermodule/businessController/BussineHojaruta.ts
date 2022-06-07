@@ -6,14 +6,29 @@ import { AnyArray } from 'mongoose';
 class BusinessHoja {
     public async readHoja(): Promise<Array<IHojaruta>>;
     public async readHoja(id: string): Promise<IHojaruta>;
-    public async readHoja(nuit: number): Promise<IHojaruta>;
+    public async readHoja(nuit: string): Promise<IHojaruta>;
     public async readHoja(query: any, skip: number, limit: number): Promise<Array<IHojaruta>>;
     public async readHoja(params1?: string | any, params2?: number, params3?: number): Promise<Array<IHojaruta> | IHojaruta> {
         if (params1 && typeof params1 == "string") {
             var result: IHojaruta = await HojaModel.findOne({ _id: params1 });
             return result;
 
-        } else if (params1) {
+        } else if (params1 && typeof params1 == "string") {
+            var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
+            return result;
+        } else {
+            let listHoja: Array<IHojaruta> = await HojaModel.find().sort({ '_id': -1 });
+            return listHoja;
+
+        }
+    }
+    public async asodHoja(nuit: string): Promise<IHojaruta>;
+    public async asodHoja(params1?: string | any, params2?: number, params3?: number): Promise<Array<IHojaruta> | IHojaruta> {
+        if (params1 && typeof params1 == "string") {
+            var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
+            return result;
+
+        } else if (params1 && typeof params1 == "string") {
             var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
             return result;
         } else {

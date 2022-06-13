@@ -83,6 +83,11 @@ class BussinesSegui {
         let result = await SeguiModel.update({ _id: id }, { $set: segui });
         return result;
     }
+    public async updateSeguiAs(nuit: string, segui: ISeguimiento) {
+
+        let result = await SeguiModel.updateMany({ nuit: nuit }, { $set: segui });
+        return result;
+    }
     
     public async deleteSegui(id: String) {
         let result = await SeguiModel.remove({ _id: id });

@@ -152,6 +152,9 @@ class Routes {
       .route(`${this.routeparent}/seguis/:id`)
       .put(this.routesController.updateSegui);
     app
+      .route(`${this.routeparent}/seguiaso/:nuit`)
+      .put(this.routesController.updateSeguiAs);
+    app
       .route(`${this.routeparent}/segui/:id`)
       .delete(this.routesController.removeSegui);
     app

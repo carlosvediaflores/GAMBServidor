@@ -38,9 +38,7 @@ class App {
  
     this.app.use(Cors());
     console.log("LOAD MODULES");
-    const userModule = new UserModules("/api", this.app);
-    
-  }
-  
+    const userModule = new UserModules("/api", this.app);    
+  } 
 }
 export default new App();

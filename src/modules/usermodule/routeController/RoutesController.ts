@@ -637,6 +637,13 @@ class RoutesController {
     var result = await segui.updateSegui(id, params);
     response.status(200).json(result);
   }
+  public async updateSeguiAs(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let nuit: string = request.params.nuit;
+    var params = request.body;
+    var result = await segui.updateSeguiAs(nuit, params);
+    response.status(200).json(result);
+  }
   public async removeSegui(request: Request, response: Response) {
     let segui: BussinesSegui = new BussinesSegui();
     let idHoja: string = request.params.id;

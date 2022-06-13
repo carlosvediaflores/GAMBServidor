@@ -2,7 +2,6 @@ import UsersModel, { IUser } from "../models/Users";
 import RolesModel, { IRoles } from "../models/Roles";
 class BusinessUser {
     constructor() {
-
     }
     /**
      * OverLoad
@@ -24,7 +23,6 @@ class BusinessUser {
         } else {
             let listUser: Array<IUser> = await UsersModel.find();
             return listUser;
-
         }
     }  
     public async readUser(email: string): Promise<IUser>;
@@ -33,11 +31,7 @@ class BusinessUser {
             var result: IUser = await UsersModel.findOne({ email: params1 });
             return result;
         }
-    }
-    
-    //addUsers
-    //CRUD
- 
+    } 
     public async addUsers(user: IUser) {
         try {
             let userDb = new UsersModel(user);

@@ -11,6 +11,7 @@ export interface ISimpleSeguimiento {
     fechaderivado?: Date;
     fecharecepcion?: string;
     estado?:  string;
+    asociado?: boolean;
 }
 export interface ISeguimiento extends Document {
     idhj:  string;
@@ -24,6 +25,7 @@ export interface ISeguimiento extends Document {
     fechaderivado: Date;
     fecharecepcion: string;
     estado:  string;
+    asociado?: boolean;
 }
 const SeguiSchema = new Schema({
     idhj: { type: String},
@@ -36,6 +38,7 @@ const SeguiSchema = new Schema({
     instrucciones: { type: String },
     fechaderivado: { type: Date },
     fecharecepcion: { type: String },
-    estado: { type: String}
+    estado: { type: String},
+    asociado:{type: Boolean}
 });
 export default mongoose.model<ISeguimiento>("seguimiento", SeguiSchema);

@@ -100,7 +100,7 @@ class RoutesController {
   public async getUs(request: Request, response: Response) {
     var Us: BusinessUser = new BusinessUser();
     //let id: string = request.params.id;
-    let res = await Us.readUser(request.params.email);
+    let res = await Us.readUser(request.params.post);
     response.status(200).json({ serverResponse: res });
   }
   /*public async addRol(request: Request, response: Response) {

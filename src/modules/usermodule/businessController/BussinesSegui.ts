@@ -60,7 +60,7 @@ class BussinesSegui {
             ]
         };
         
-        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ 'nuit': -1 });
+        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ '_id': 1 });
         return listSeguiO;
     }
     

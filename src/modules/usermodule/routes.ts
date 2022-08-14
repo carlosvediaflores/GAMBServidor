@@ -147,7 +147,6 @@ class Routes {
     app
       .route(`${this.routeparent}/segui`)
       .get(this.routesController.getSeguis);
-
     app
       .route(`${this.routeparent}/seguis/:id`)
       .put(this.routesController.updateSegui);

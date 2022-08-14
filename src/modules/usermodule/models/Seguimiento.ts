@@ -14,6 +14,9 @@ export interface ISimpleSeguimiento {
     asociado?: boolean;//14
     smsarchivo?:string;//15
     fecharespuesta?: Date;//16
+    copia?:string; //17
+    oficina?:string; //18 
+    nombre?:string; //19 
 }
 export interface ISeguimiento extends Document {
     idhj:  string;
@@ -30,6 +33,9 @@ export interface ISeguimiento extends Document {
     asociado: boolean;
     smsarchivo:string;
     fecharespuesta: Date;
+    copia:string;
+    oficina:string; 
+    nombre:string; 
 }
 const SeguiSchema = new Schema({
     idhj: { type: String},
@@ -45,6 +51,9 @@ const SeguiSchema = new Schema({
     estado: { type: String},
     asociado:{type: Boolean},
     smsarchivo:{type:String},
-    fecharespuesta:{type:Date}
+    fecharespuesta:{type:Date},
+    copia:{type:String},
+    oficina:{type:String},
+    nombre:{type:String}
 });
 export default mongoose.model<ISeguimiento>("seguimiento", SeguiSchema);

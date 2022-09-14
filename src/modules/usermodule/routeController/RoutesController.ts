@@ -490,24 +490,6 @@ class RoutesController {
           .json({ serverResponse: "no se pudo guardar..." });
         return;    
       }
-      /*file.mv(totalpath, async (err: any, success: any) => {
-        if (err) {
-          response
-            .status(300)
-            .json({ serverResponse: "No se pudo almacenar el archivo" });
-          return;
-        }
-  
-        userToUpdate.uriavatar = "/api/getportrait/" + id;
-        userToUpdate.pathavatar = totalpath;
-        var userResult: IUser = await userToUpdate.save();
-        var simpleUser: ISimpleUser = {
-          username: userResult.username,
-          uriavatar: userResult.uriavatar,
-          pathavatar: userResult.pathavatar,
-        };
-        response.status(300).json({ serverResponse: simpleUser });
-      });*/
     }
   }
 

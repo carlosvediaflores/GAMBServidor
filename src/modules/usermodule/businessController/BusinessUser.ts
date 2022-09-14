@@ -9,7 +9,7 @@ class BusinessUser {
      * **/
     public async readUsers(): Promise<Array<IUser>>;
     public async readUsers(id: string): Promise<IUser>;
-    public async readUsers(query: any, skip: number, limit: number): Promise<Array<IUser>>;
+    public async readUsers(query?: any, skip?: number, limit?: number): Promise<Array<IUser>>;
 
     public async readUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
@@ -21,7 +21,9 @@ class BusinessUser {
             let listUser: Array<IUser> = await UsersModel.find(params1).skip(skip).limit(limit);
             return listUser;
         } else {
-            let listUser: Array<IUser> = await UsersModel.find();
+            let skip = params2 ? params2 : 0;
+            let limit = params3 ? params3 : 10;
+            let listUser: Array<IUser> = await UsersModel.find().skip(skip).limit(limit);;
             return listUser;
         }
     }  

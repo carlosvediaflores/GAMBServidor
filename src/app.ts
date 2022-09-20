@@ -6,6 +6,7 @@ import SlaiderModule from "./modules/webpagemodule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
+import WebpageModule from "./modules/webpagemodule/init";
 class App { 
   public app: Express = express();
   public mongooseClient: Mongoose;

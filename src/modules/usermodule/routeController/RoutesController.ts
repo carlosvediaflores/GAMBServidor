@@ -16,6 +16,8 @@ import path from "path";
 import BusinessHoja from '../businessController/BussineHojaruta';
 import { ISeguimiento } from '../models/Seguimiento';
 import BussinesFile from '../businessController/BussinesFlies';
+import paginate from 'mongoose-paginate-v2';
+//import   paginate   from  "mongoose-paginate-ts" ; 
 interface Icredentials {
   email: string;
   password: string;
@@ -38,7 +40,7 @@ class RoutesController {
     }
     credentials.password = sha1(credentials.password);
     const user: BusinessUser = new BusinessUser();
-    let result: Array<IUser> = await user.readUsers(credentials, 0, 1);
+    let result: Array<IUser> = await user.loginUsers(credentials, 0, 1);
     if (result.length == 1) {
       var loginUser: IUser = result[0];
       var token: string = jsonwebtoken.sign(
@@ -72,7 +74,35 @@ class RoutesController {
   }
   public async getUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
-    const result: Array<IUser> = await user.readUsers();
+    const result1: Array<IUser> = await user.readUsers();
+    var totalDocs = result1.length;
+    var limit = parseInt(request.params.limit,10)||100;
+    var page =parseInt(request.params.page,10) || 0;
+    var totalpage= Math.ceil(totalDocs/limit);
+    var skip=limit*(page-1);
+    if (page==1 || !page || page == undefined){
+      skip=0;
+    }else{
+      if(page<=totalDocs){
+        skip=limit*(page-1)
+      }
+      skip=0;
+    }
+    const result: Array<IUser> = await user.readUsers({},limit,skip);
+    response
+        .status(200)
+        .json({
+          serverResponse:result,
+          totalDocs,
+          limit,
+          totalpage,
+          page
+        });
+      return;
+  }
+  public async listarUsers(request: Request, response: Response) {
+    var user: BusinessUser = new BusinessUser();  
+    const result = await user.listar({});
     response.status(200).json(result);
   }
   public async getUser(request: Request, response: Response) {
@@ -366,26 +396,48 @@ class RoutesController {
 
   public async createHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
-    let res = await hoja.readHoja(request.params.id);
-    let nuit = res.nuit;
-    console.log(nuit)
     var hojaData = request.body;
     hojaData["fecharesepcion"] = new Date();
     hojaData["estado"] = "REGISTRADO";
-    //hojaData["nuit"] = nuit + 1;
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
       response
         .status(300)
-        .json({ serverResponse: "El rol tiene parametros no validos" });
+        .json({ serverResponse: "No se registro" });
       return;
     }
     response.status(201).json({ serverResponse: result });
   }
   public async getHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
-    const result = await hoja.readHoja();
-    response.status(200).json({ serverResponse: result });
+    const result1 = await hoja.total({});
+    var totalDocs = result1;
+    var limit = parseInt(request.params.limit,10)||10;
+    var page =parseInt(request.params.page,10) || 0;
+    var totalpage= Math.ceil(totalDocs/limit);
+    var skip=0
+    if (page==1 || !page || page == undefined){
+      skip=0;
+    }else{
+      if(page<=totalDocs){
+        skip=limit*(page-1)
+        skip=skip+1;
+      }else{
+        skip=0;
+      }      
+    }
+    const result  = await hoja.readHoja({},limit,skip);
+    response
+    .status(200)
+    .json({
+      serverResponse:result,
+      totalDocs,
+      limit,
+      totalpage,
+      page,
+      skip
+    });
+  return;
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -413,7 +465,7 @@ class RoutesController {
   }
   public async asociarHoja(request: Request, response: Response) {
     let idH: string = request.params.nuit;
-    let asociado:any = request.body.asociado;
+    let asociado: any = request.body.asociado;
     if (idH == null && asociado == null) {
       response.status(300).json({
         serverResponse: "No se definio id de usuario ni el id del rol",
@@ -423,14 +475,14 @@ class RoutesController {
     var user: BusinessHoja = new BusinessHoja();
     var result1 = await user.asociarHojaA(idH, asociado);
     var result2 = await user.asociarHojaB(idH, asociado);
-    if (result1 == null ) {
+    if (result1 == null) {
       response
         .status(300)
         .json({ serverResponse: "No se pudo guardar" });
       return;
     }
     response.status(200).json({ serverResponse: "ok" });
-    
+
   }
   public async uploadHoja(request: Request, response: Response) {
     var id: string = request.params.id;
@@ -475,7 +527,7 @@ class RoutesController {
       var filehash: string = sha1(new Date().toString()).substr(0, 7);
       var newname: string = `${"GAMB"}_${filehash}_${file.name}`;
       var totalpath = `${absolutepath}/${newname}`;
-      await copyDirectory(totalpath, file); 
+      await copyDirectory(totalpath, file);
       var hojaResult: IHojaruta = await hojaToUpdate.save();
       filData["idhj"] = id;
       filData["urihoja"] = "gethojaruta/" + newname;
@@ -488,7 +540,7 @@ class RoutesController {
         response
           .status(300)
           .json({ serverResponse: "no se pudo guardar..." });
-        return;    
+        return;
       }
     }
   }
@@ -558,7 +610,7 @@ class RoutesController {
     seguiData["idhj"] = idRuta;
     seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
     seguiData["estado"] = "ENVIADO";
-   // console.log(seguiData);
+    // console.log(seguiData);
     var result1 = await segui.addSegui(seguiData);
     //let idSegui = result1._id;
     //var result = await ruta.addSeguim(idRuta, idSegui);

@@ -1,46 +1,49 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISimpleBlog {
-    titulo?: string;
-    subtitulo?: string;
-    detalle?: string;
-    slug?: string;
-    estract?: string;
-    contenido?:string;
-    categoria?:string;
-    estado?:boolean;
-    uriblog?:string;
-    pathblog?:string;
-    createAt?: Date;
-    updateAt?: Date;
+  title?: string;
+  subtitle?: string;
+  img?: string;
+  body?: string;
+  iframe?: string;
+  status?: boolean;
+  user?:string;
+  category?:string;
+  tag?:string;
+  uri?:string;
+  path?:string;
+  createAt?: Date;
+  updateAt?: Date;
   }
 export interface IBlog extends Document {
-    titulo: string;
-    subtitulo: string;
-    detalle: string;
-    slug: string;
-    estract: string;
-    contenido:string;
-    categoria:string;
-    estado:boolean;
-    uriblog:string;
-    pathblog:string;
-    createAt: Date;
-    updateAt: Date;
+  title: string;
+  subtitle: string;
+  img: string;
+  body: string;
+  iframe: string;
+  status: boolean;
+  user:string;
+  category:string;
+  tag:string;
+  uri:string;
+  path:string;
+  createAt: Date;
+  updateAt: Date;
   }
   const blogSchema: Schema = new Schema({
-    titulo: {type: String},
-    subtitulo: {type: String},
-    detalle: {type: String},
-    slug: {type: String},
-    estract: {type: String},
-    contenido: {type: String},
-    categoria: {type: String},
-    estado: {type: String},
-    uriblog: {type: String},
-    pathblog: {type: String},
-    createAt: {type: Date},
-    updateAt: {type: Date}
+    title: {type: String},
+    subtitle: {type: String},
+    img:{type:String},
+    body: {type: String},
+    iframe: {type: String},
+    status: {type: Boolean},
+    user:{type: String},
+    category:{type: String},
+    tag:{type: String},
+    uri:{type: String},
+    path:{type: String},
+    createAt:{type: String},
+    updateAt:{type: String}
     
   });
-  export default mongoose.model<IBlog>("wpblog", blogSchema);
+  export default mongoose.model<IBlog>("wppost", blogSchema);

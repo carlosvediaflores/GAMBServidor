@@ -1,5 +1,5 @@
 import { IFiles } from './Files';
-
+import paginate from 'mongoose-paginate-v2';
 import mongoose, { Schema, Document } from "mongoose";
 import SeguimientoModel, { ISeguimiento } from "./Seguimiento";
 export interface ISimpleHojaruta {
@@ -48,10 +48,5 @@ const hojarutaSchema: Schema = new Schema({
   archivo:  {type:Array},
   asociado: {type:Array}
 });
-export default mongoose.model<IHojaruta>("Hojaruta", hojarutaSchema);
-
-/*var arch: any = hojaToUpdate.archivo
-      arch.urihoja  = "gethojaruta/" + id;
-      arch.pathhoja = totalpath;
-      arch.pathhoja = newname;
-      */
+hojarutaSchema.plugin(paginate);
+export default mongoose.model<IHojaruta, mongoose.PaginateModel<IHojaruta>>("Hojaruta", hojarutaSchema);

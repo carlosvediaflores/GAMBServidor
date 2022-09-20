@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
+import paginate from 'mongoose-paginate-v2';
+//import  {  mongoosePagination ,  Pagination  }  from  "mongoose-paginate-ts" ;
 import RolesModel, { IRoles } from "./Roles";
 
 export interface ISimpleUser {
@@ -30,17 +32,19 @@ export interface IUser extends Document {
   pathavatar: string;
 }
 const userSchema: Schema = new Schema({
-  username: { type: String},
+  username: { type: String },
   surnames: { type: String },
-  ci: { type:String },
+  ci: { type: String },
   numberphone: { type: Number },
   email: { type: String, required: true, unique: true },
-  birthdate: { type: Date},
+  birthdate: { type: Date },
   registerdate: { type: Date, required: true },
   password: { type: String, required: true },
-  post: { type:String },
+  post: { type: String },
   roles: { type: String },
   uriavatar: { type: String },
   pathavatar: { type: String },
 });
-export default mongoose.model<IUser>("User", userSchema);
+userSchema.plugin(paginate);
+const model = mongoose.model<IUser, mongoose.PaginateModel<IUser>>('User', userSchema, 'users');
+export default model;

@@ -22,10 +22,10 @@ class BussBlog{
             return listBlog;
         }
     }  
-    public async readUser(post: string): Promise<IBlog>;
-    public async readUser(params1?: string | any, params2?: number, params3?: number): Promise<Array<IBlog> | IBlog> {
+    public async readPost(img: string): Promise<IBlog>;
+    public async readPost(params1?: string | any, params2?: number, params3?: number): Promise<Array<IBlog> | IBlog> {
         if (params1 && typeof params1 == "string") {
-            var result: IBlog = await BlogModule.findOne({ post: params1 });
+            var result: IBlog = await BlogModule.findOne({ img: params1 });
             return result;
         }
     } 

@@ -18,7 +18,10 @@ class Routes {
       .route(`${this.routeparent}/users`)
       .post(this.routesController.createUsers);
     app
-      .route(`${this.routeparent}/users`)
+      .route(`${this.routeparent}/listar`)
+      .get(this.routesController.listarUsers);
+    app
+      .route(`${this.routeparent}/users/:limit?/:page?`)
       .get(this.routesController.getUsers);
     app
       .route(`${this.routeparent}/users/:id`)
@@ -103,7 +106,7 @@ class Routes {
       .route(`${this.routeparent}/hoja`)
       .post(this.routesController.createHojas);
     app
-      .route(`${this.routeparent}/hoja`)
+      .route(`${this.routeparent}/hojas/:limit?/:page?`)
       .get(this.routesController.getHojas);
     app
       .route(`${this.routeparent}/hoja/:id`)
@@ -141,8 +144,8 @@ class Routes {
     app
       .route(`${this.routeparent}/segui/:id`)
       .get(this.routesController.getSegui);
-      app
-    .route(`${this.routeparent}/seguiO/:destino`)
+    app
+      .route(`${this.routeparent}/seguiO/:destino`)
       .get(this.routesController.getSeguiO);
     app
       .route(`${this.routeparent}/segui`)

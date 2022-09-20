@@ -1,4 +1,6 @@
-import UsersModel, { IUser } from "../models/Users";
+import { query } from 'express';
+
+import UsersModel, { IUser} from "../models/Users";
 import RolesModel, { IRoles } from "../models/Roles";
 class BusinessUser {
     constructor() {
@@ -9,9 +11,24 @@ class BusinessUser {
      * **/
     public async readUsers(): Promise<Array<IUser>>;
     public async readUsers(id: string): Promise<IUser>;
-    public async readUsers(query?: any, skip?: number, limit?: number): Promise<Array<IUser>>;
+    public async readUsers(query?: any,limit?: number, skip?: number): Promise<Array<IUser>>;
 
     public async readUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
+        if (params1 && typeof params1 == "string") {
+            var result: IUser = await UsersModel.findOne({ _id: params1 });
+            return result;
+        } else if (params1) {
+            let skip = params3;
+            let limit = params2;
+            let result: Array<IUser> = await UsersModel.find({}).limit(limit).skip(skip);
+            return result;
+        } else {
+            let listUser: Array<IUser> = await UsersModel.find();
+            return listUser;
+        }
+    }
+    public async loginUsers(query?: any, skip?: number, limit?: number): Promise<Array<IUser>>;
+    public async loginUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
             var result: IUser = await UsersModel.findOne({ _id: params1 });
             return result;
@@ -27,13 +44,24 @@ class BusinessUser {
             return listUser;
         }
     }  
+    public async listar({}) {
+        var query={};
+        var options: any = {
+            sort: { date: -1 },
+            lean: true,
+            offset: 20,
+            limit: 5,
+        };
+        var result = await UsersModel.paginate(query, options);
+        return result;
+    }
     public async readUser(post: string): Promise<IUser>;
     public async readUser(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
             var result: IUser = await UsersModel.findOne({ post: params1 });
             return result;
         }
-    } 
+    }
     public async addUsers(user: IUser) {
         try {
             let userDb = new UsersModel(user);

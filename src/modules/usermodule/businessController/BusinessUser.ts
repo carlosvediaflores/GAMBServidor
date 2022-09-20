@@ -44,17 +44,6 @@ class BusinessUser {
             return listUser;
         }
     }  
-    public async listar({}) {
-        var query={};
-        var options: any = {
-            sort: { date: -1 },
-            lean: true,
-            offset: 20,
-            limit: 5,
-        };
-        var result = await UsersModel.paginate(query, options);
-        return result;
-    }
     public async readUser(post: string): Promise<IUser>;
     public async readUser(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {

@@ -18,9 +18,6 @@ class Routes {
       .route(`${this.routeparent}/users`)
       .post(this.routesController.createUsers);
     app
-      .route(`${this.routeparent}/listar`)
-      .get(this.routesController.listarUsers);
-    app
       .route(`${this.routeparent}/users/:limit?/:page?`)
       .get(this.routesController.getUsers);
     app

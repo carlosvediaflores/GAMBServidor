@@ -16,8 +16,6 @@ import path from "path";
 import BusinessHoja from '../businessController/BussineHojaruta';
 import { ISeguimiento } from '../models/Seguimiento';
 import BussinesFile from '../businessController/BussinesFlies';
-import paginate from 'mongoose-paginate-v2';
-//import   paginate   from  "mongoose-paginate-ts" ; 
 interface Icredentials {
   email: string;
   password: string;
@@ -99,11 +97,6 @@ class RoutesController {
           page
         });
       return;
-  }
-  public async listarUsers(request: Request, response: Response) {
-    var user: BusinessUser = new BusinessUser();  
-    const result = await user.listar({});
-    response.status(200).json(result);
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();

@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import * as bodyParser from "body-parser";
 import UserModules from "./modules/usermodule/init";
 import ConvenioModule from "./modules/conveniomodule/init";
-//import SlaiderModule from "./modules/webpagemodule/init";
+import SlaiderModule from "./modules/webpagemodule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
@@ -43,7 +43,7 @@ class App {
     console.log("LOAD MODULES");
     const userModule = new UserModules("/api", this.app);    
     const convenioModule = new ConvenioModule("/api", this.app);
-   // const slaiderModule = new SlaiderModule("/api", this.app);
+    const slaiderModule = new SlaiderModule("/api", this.app);
   } 
 }
 export default new App();

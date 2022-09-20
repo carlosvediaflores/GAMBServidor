@@ -44,6 +44,7 @@ class BussinesSegui {
         var filter = {
             "$or": [
                 { "destino": { "$regex": params1, "$options": "i" } },
+                { "estado": { "$regex": params1, "$options": "i" } }
                 //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
             ]
         };

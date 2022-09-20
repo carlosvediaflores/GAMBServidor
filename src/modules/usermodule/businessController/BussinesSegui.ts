@@ -39,17 +39,22 @@ class BussinesSegui {
         }
     }
    
-    public async readSeguiO(query?: any): Promise<Array<ISeguimiento>>;
-    public async readSeguiO(params1?: string | any): Promise<Array<ISeguimiento> | ISeguimiento> {
+    public async readSeguiO(query?: any, limit?: number, skip?: number): Promise<Array<ISeguimiento>>;
+    public async readSeguiO(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISeguimiento> | ISeguimiento> {
         var filter = {
             "$or": [
                 { "destino": { "$regex": params1, "$options": "i" } },
                 //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
             ]
         };
-        
-        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ 'nuit': -1 });
+        let skip = params3;
+        let limit = params2;
+        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).limit(limit).skip(skip).sort({ 'nuit': -1 });
         return listSeguiO;
+    }
+    public async total({}) {
+        var result = await SeguiModel.count();
+        return result;
     }
     public async readSeguiAs(query?: any): Promise<Array<ISeguimiento>>;
     public async readSeguiAs(params1?: string | any): Promise<Array<ISeguimiento> | ISeguimiento> {

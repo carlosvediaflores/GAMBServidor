@@ -661,8 +661,34 @@ class RoutesController {
   }
   public async getSeguiO(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
-    let res = await segui.readSeguiO(request.params.destino);
-    response.status(200).json(res);
+    var destino = request.params.destino
+    var limit = parseInt(request.params.limit,10)||500;
+    var page =parseInt(request.params.page,10) || 0;
+    var skip=0;
+    var totalDocs=0;
+    var totalpage=0;
+    if (page==1 || !page || page == undefined){
+      skip=0;
+    }else{
+      if(page<=totalDocs){
+        skip=limit*(page-1)
+        skip=skip+1;
+      }else{
+        skip=0;
+      }      
+    }
+    let res = await segui.readSeguiO(destino,limit,skip);
+    response
+    .status(200)
+    .json({
+      serverResponse:res,
+      totalDocs,
+      limit,
+      totalpage,
+      page,
+      skip
+    });
+  return;
   }
   public async updateSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();

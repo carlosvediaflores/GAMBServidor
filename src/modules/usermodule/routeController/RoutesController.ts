@@ -655,7 +655,7 @@ class RoutesController {
   public async getSeguiO(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     var destino = request.params.destino
-    var limit = parseInt(request.params.limit,10)||500;
+    var limit = parseInt(request.params.limit,10)||3000;
     var page =parseInt(request.params.page,10) || 0;
     var skip=0;
     var totalDocs=0;

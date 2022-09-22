@@ -1,5 +1,5 @@
+import RoutesController from "./routeController/routesController";
 import { Express } from "express";
-import RoutesController from "./routecontroller/RoutesController";
 class Routes {
     private routesController: RoutesController;
     private routeparent: string;

@@ -1,27 +1,27 @@
-import { IFiles } from './../models/Files';
-import { IHojaruta, ISimpleHojaruta } from './../models/Hojaruta';
-import { IOrganizacion } from './../models/Organizacion';
+import { IFiles } from "./../models/Files";
+import { IHojaruta, ISimpleHojaruta } from "./../models/Hojaruta";
+import { IOrganizacion } from "./../models/Organizacion";
 
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
 import BussinessRoles from "../businessController/BussinessRoles";
 import BussinesOrganizacion from "../businessController/BussinesOrganizacion";
 import BussinesSubdir from "../businessController/BussinesSubdir";
-import BussinesSegui from '../businessController/BussinesSegui';
+import BussinesSegui from "../businessController/BussinesSegui";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
 import Users, { ISimpleUser, IUser } from "../models/Users";
 import isEmpty from "is-empty";
 import path from "path";
-import BusinessHoja from '../businessController/BussineHojaruta';
-import { ISeguimiento } from '../models/Seguimiento';
-import BussinesFile from '../businessController/BussinesFlies';
+import BusinessHoja from "../businessController/BussineHojaruta";
+import { ISeguimiento } from "../models/Seguimiento";
+import BussinesFile from "../businessController/BussinesFlies";
 interface Icredentials {
   email: string;
   password: string;
 }
 class RoutesController {
-  constructor() { }
+  constructor() {}
   public async login(request: Request, response: Response) {
     var credentials: Icredentials = request.body;
     if (credentials.email == undefined) {
@@ -55,14 +55,18 @@ class RoutesController {
       });
       return;
     }
-    response.status(200).json({ serverResponse: "Credenciales incorrectas!!!" });
+    response
+      .status(200)
+      .json({ serverResponse: "Credenciales incorrectas!!!" });
   }
   public async createUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
 
     var userData = request.body;
     if (userData["password"] == null) {
-      response.status(200).json({ serverResponse: { error: "Paramétros Incorrectos" } })
+      response
+        .status(200)
+        .json({ serverResponse: { error: "Paramétros Incorrectos" } });
       return;
     }
     userData["registerdate"] = new Date();
@@ -74,29 +78,27 @@ class RoutesController {
     var user: BusinessUser = new BusinessUser();
     const result1: Array<IUser> = await user.readUsers();
     var totalDocs = result1.length;
-    var limit = parseInt(request.params.limit,10)||100;
-    var page =parseInt(request.params.page,10) || 0;
-    var totalpage= Math.ceil(totalDocs/limit);
-    var skip=limit*(page-1);
-    if (page==1 || !page || page == undefined){
-      skip=0;
-    }else{
-      if(page<=totalDocs){
-        skip=limit*(page-1)
+    var limit = parseInt(request.params.limit, 10) || 100;
+    var page = parseInt(request.params.page, 10) || 0;
+    var totalpage = Math.ceil(totalDocs / limit);
+    var skip = limit * (page - 1);
+    if (page == 1 || !page || page == undefined) {
+      skip = 0;
+    } else {
+      if (page <= totalDocs) {
+        skip = limit * (page - 1);
       }
-      skip=0;
+      skip = 0;
     }
-    const result: Array<IUser> = await user.readUsers({},limit,skip);
-    response
-        .status(200)
-        .json({
-          serverResponse:result,
-          totalDocs,
-          limit,
-          totalpage,
-          page
-        });
-      return;
+    const result: Array<IUser> = await user.readUsers({}, limit, skip);
+    response.status(200).json({
+      serverResponse: result,
+      totalDocs,
+      limit,
+      totalpage,
+      page,
+    });
+    return;
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -176,8 +178,6 @@ class RoutesController {
      response.status(200).json({ serverResponse: result });
    }*/
 
-
-
   public async uploadPortrait(request: Request, response: Response) {
     var id: string = request.params.id;
     if (!id) {
@@ -251,8 +251,7 @@ class RoutesController {
       userToUpdate.pathavatar = totalpath;
       var userResult: IUser = await userToUpdate.save();
       var simpleUser: ISimpleUser = {
-        username: userResult.username,
-        uriavatar: userResult.uriavatar,
+        username: userResult.user.sort({ '_id': -1 });avatar,
         pathavatar: userResult.pathavatar,
       };
       response.status(300).json({ serverResponse: simpleUser });
@@ -305,19 +304,13 @@ class RoutesController {
     //var userResult: IUser = await orgToUpdate.save();
     let subdir: BussinesSubdir = new BussinesSubdir();
     var subdirData: any = request.body;
-    console.log(subdirData);
     var result1 = await subdir.addSubdir(subdirData);
-
     let idSub = result1._id;
     var result = await org.addSub(idOrg, idSub);
 
     //var result = subdirData
-    console.log(result);
-    console.log(idSub);
     if (result == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "no se pudo guardar" });
+      response.status(300).json({ serverResponse: "no se pudo guardar" });
       return;
     }
     response.status(200).json({ serverResponse: result });
@@ -394,9 +387,7 @@ class RoutesController {
     hojaData["estado"] = "REGISTRADO";
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "No se registro" });
+      response.status(300).json({ serverResponse: "No se registro" });
       return;
     }
     response.status(201).json({ serverResponse: result });
@@ -405,32 +396,30 @@ class RoutesController {
     var hoja: BusinessHoja = new BusinessHoja();
     const result1 = await hoja.total({});
     var totalDocs = result1;
-    var limit = parseInt(request.params.limit,10)||10;
-    var page =parseInt(request.params.page,10) || 0;
-    var totalpage= Math.ceil(totalDocs/limit);
-    var skip=0
-    if (page==1 || !page || page == undefined){
-      skip=0;
-    }else{
-      if(page<=totalDocs){
-        skip=limit*(page-1)
-        skip=skip+1;
-      }else{
-        skip=0;
-      }      
+    var limit = parseInt(request.params.limit, 10) || 10;
+    var page = parseInt(request.params.page, 10) || 0;
+    var totalpage = Math.ceil(totalDocs / limit);
+    var skip = 0;
+    if (page == 1 || !page || page == undefined) {
+      skip = 0;
+    } else {
+      if (page <= totalDocs) {
+        skip = limit * (page - 1);
+        skip = skip + 1;
+      } else {
+        skip = 0;
+      }
     }
-    const result  = await hoja.readHoja({},limit,skip);
-    response
-    .status(200)
-    .json({
-      serverResponse:result,
+    const result = await hoja.readHoja({}, limit, skip);
+    response.status(200).json({
+      serverResponse: result,
       totalDocs,
       limit,
       totalpage,
       page,
-      skip
+      skip,
     });
-  return;
+    return;
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -449,9 +438,7 @@ class RoutesController {
     //let id: string = request.params.id;
     let res = await hoja.asodHoja(request.params.nuit);
     if (res == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "nulo" });
+      response.status(300).json({ serverResponse: "nulo" });
       return;
     }
     response.status(200).json({ serverResponse: res });
@@ -469,13 +456,10 @@ class RoutesController {
     var result1 = await user.asociarHojaA(idH, asociado);
     var result2 = await user.asociarHojaB(idH, asociado);
     if (result1 == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "No se pudo guardar" });
+      response.status(300).json({ serverResponse: "No se pudo guardar" });
       return;
     }
     response.status(200).json({ serverResponse: "ok" });
-
   }
   public async uploadHoja(request: Request, response: Response) {
     var id: string = request.params.id;
@@ -488,7 +472,9 @@ class RoutesController {
     var hoja: BusinessHoja = new BusinessHoja();
     var hojaToUpdate: IHojaruta = await hoja.readHoja(id);
     if (!hojaToUpdate) {
-      response.status(300).json({ serverResponse: "El Hoja de ruta no existe!" });
+      response
+        .status(300)
+        .json({ serverResponse: "El Hoja de ruta no existe!" });
       return;
     }
     if (isEmpty(request.files)) {
@@ -530,9 +516,7 @@ class RoutesController {
       let idFile = result1._id;
       var result = await hoja.addFiles(id, idFile);
       if (result == null) {
-        response
-          .status(300)
-          .json({ serverResponse: "no se pudo guardar..." });
+        response.status(300).json({ serverResponse: "no se pudo guardar..." });
         return;
       }
     }
@@ -609,14 +593,11 @@ class RoutesController {
     //var result = await ruta.addSeguim(idRuta, idSegui);
     //console.log(result + "esto es el resultado");
     if (result1 == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "no se pudo guardar..." });
+      response.status(300).json({ serverResponse: "no se pudo guardar..." });
       return;
     }
     response.status(200).json({ serverResponse: result1 });
   }
-
 
   ///-----------seguimiento---------------
   public async createSegui(request: Request, response: Response) {
@@ -654,34 +635,100 @@ class RoutesController {
   }
   public async getSeguiO(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
-    var destino = request.params.destino
-    var limit = parseInt(request.params.limit,10)||3000;
-    var page =parseInt(request.params.page,10) || 0;
-    var skip=0;
-    var totalDocs=0;
-    var totalpage=0;
-    if (page==1 || !page || page == undefined){
-      skip=0;
-    }else{
-      if(page<=totalDocs){
-        skip=limit*(page-1)
-        skip=skip+1;
-      }else{
-        skip=0;
-      }      
+    var destino = request.params.destino;
+    var limit = parseInt(request.params.limit, 10) || 3000;
+    var page = parseInt(request.params.page, 10) || 0;
+    var skip = 0;
+    var totalDocs = 0;
+    var totalpage = 0;
+    if (page == 1 || !page || page == undefined) {
+      skip = 0;
+    } else {
+      if (page <= totalDocs) {
+        skip = limit * (page - 1);
+        skip = skip + 1;
+      } else {
+        skip = 0;
+      }
     }
-    let res = await segui.readSeguiO(destino,limit,skip);
-    response
-    .status(200)
-    .json({
-      serverResponse:res,
+    let res = await segui.readSeguiO(destino, limit, skip);
+    response.status(200).json({
+      serverResponse: res,
       totalDocs,
       limit,
       totalpage,
       page,
-      skip
+      skip,
     });
-  return;
+    return;
+  }
+  public async getOficina(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.destino != null) {
+      var expresion = new RegExp(params.destino);
+      filter["destino"] = expresion;
+    }
+    if (params.estado != null) {
+      var expresion = new RegExp(params.estado);
+      filter["estado"] = expresion;
+    }
+    if (params.nuit != null) {
+      var expresion = new RegExp(params.nuit);
+      filter["nuit"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if ( Object.entries(aux).length > 0) { 
+      filter["fecharecepcion"] = aux;
+    }
+    let respost: Array<ISeguimiento> = await segui.readOficina(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { nuit: -1 };
+    }
+    let res: Array<ISeguimiento> = await segui.readOficina(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
   }
   public async updateSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();

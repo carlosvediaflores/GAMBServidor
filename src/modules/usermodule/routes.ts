@@ -65,7 +65,6 @@ class Routes {
     app
       .route(`${this.routeparent}/org`)
       .get(this.routesController.getOrg);
-
     app
       .route(`${this.routeparent}/org/:id`)
       .put(this.routesController.updateOr);
@@ -144,6 +143,9 @@ class Routes {
     app
       .route(`${this.routeparent}/seguiO/:destino/:limit?/:skip?`)
       .get(this.routesController.getSeguiO);
+    app
+      .route(`${this.routeparent}/oficina`)
+      .get(this.routesController.getOficina);
     app
       .route(`${this.routeparent}/segui`)
       .get(this.routesController.getSeguis);

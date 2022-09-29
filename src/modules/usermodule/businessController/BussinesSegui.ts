@@ -19,6 +19,17 @@ class BussinesSegui {
 
         }
     }
+    public async readOficina(): Promise<Array<ISeguimiento>>;
+    public async readOficina(id: string): Promise<ISeguimiento>;
+    public async readOficina(query: any, skip?: number, limit?: number, order?:any): Promise<Array<ISeguimiento>>;
+
+    public async readOficina(params1?: string | any, params2?: number, params3?: number, order?:any): Promise<Array<ISeguimiento> | ISeguimiento> { 
+            let skip = params2;
+            let limit = params3;
+        
+            let listSegui = await SeguiModel.find(params1).skip(skip).limit(limit).sort(order);
+            return listSegui;
+    }
     public async readSeguis(): Promise<Array<ISeguimiento>>;
     public async readSeguis(id: string): Promise<ISeguimiento>;
     public async readSeguis(query: any, skip: number, limit: number): Promise<Array<ISeguimiento>>;
@@ -30,7 +41,7 @@ class BussinesSegui {
         } else if (params1) {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 1;
-            let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1).skip(skip).limit(limit);
+            let listSegui: Array<ISeguimiento> = await SeguiModel.find({params1}).skip(skip).limit(limit);
             return listSegui;
         } else {
             let listSegui: Array<ISeguimiento> = await SeguiModel.find();

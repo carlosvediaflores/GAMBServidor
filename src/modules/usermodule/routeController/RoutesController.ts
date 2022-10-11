@@ -421,6 +421,75 @@ class RoutesController {
     });
     return;
   }
+  public async getHojaRutas(request: Request, response: Response) {
+    var segui: BusinessHoja = new BusinessHoja();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.origen != null) {
+      var expresion = new RegExp(params.origen);
+      filter["origen"] = expresion;
+    }
+    if (params.referencia != null) {
+      var expresion = new RegExp(params.referencia);
+      filter["referencia"] = expresion;
+    }
+    if (params.nuit != null) {
+      var expresion = new RegExp(params.nuit);
+      filter["nuit"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if ( Object.entries(aux).length > 0) { 
+      filter["fecharecepcion"] = aux;
+    }
+    let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IHojaruta> = await segui.readHojaRuta(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+      order
+    });
+    return;
+  }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     //let id: string = request.params.id;

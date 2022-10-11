@@ -105,6 +105,9 @@ class Routes {
       .route(`${this.routeparent}/hojas/:limit?/:page?`)
       .get(this.routesController.getHojas);
     app
+      .route(`${this.routeparent}/hojaRuta`)
+      .get(this.routesController.getHojaRutas);
+    app
       .route(`${this.routeparent}/hoja/:id`)
       .get(this.routesController.getHoja);
     app

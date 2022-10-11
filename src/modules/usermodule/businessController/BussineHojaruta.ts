@@ -23,6 +23,16 @@ class BusinessHoja {
             return listHoja;
         }
     }
+    public async readHojaRuta(): Promise<Array<IHojaruta>>;
+    public async readHojaRuta(id: string): Promise<IHojaruta>;
+    public async readHojaRuta(query: any, skip?: number, limit?: number, order?:any): Promise<Array<IHojaruta>>;
+    
+    public async readHojaRuta(params1?: string | any, params2?: number, params3?: number, order?:any): Promise<Array<IHojaruta> | IHojaruta> { 
+            let skip = params2;
+            let limit = params3;
+            let listSegui = await HojaModel.find(params1).skip(skip).limit(limit).sort(order);
+            return listSegui;
+    }
     public async total({}) {
         var result = await HojaModel.count();
         return result;

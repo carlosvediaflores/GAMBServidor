@@ -16,7 +16,7 @@ class BussinesSegui {
         } else {
             let listSegui: Array<ISeguimiento> = await SeguiModel.find();
             return listSegui;
-
+ 
         }
     }
     public async readOficina(): Promise<Array<ISeguimiento>>;
@@ -26,7 +26,6 @@ class BussinesSegui {
     public async readOficina(params1?: string | any, params2?: number, params3?: number, order?:any): Promise<Array<ISeguimiento> | ISeguimiento> { 
             let skip = params2;
             let limit = params3;
-        
             let listSegui = await SeguiModel.find(params1).skip(skip).limit(limit).sort(order);
             return listSegui;
     }
@@ -45,7 +44,7 @@ class BussinesSegui {
             return listSegui;
         } else {
             let listSegui: Array<ISeguimiento> = await SeguiModel.find();
-            return listSegui;
+            return listSegui; 
 
         }
     }

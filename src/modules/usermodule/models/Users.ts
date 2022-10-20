@@ -42,6 +42,10 @@ const userSchema: Schema = new Schema({
   roles: { type: String },
   uriavatar: { type: String },
   pathavatar: { type: String },
+},
+{
+  timestamps: true,
+  versionKey: false,
 });
 
 const model = mongoose.model<IUser>('User', userSchema);

@@ -7,5 +7,9 @@ export interface ISimpleCategory {
     }
     const caregorySchema: Schema = new Schema({
         category: {type: String},
+    },
+    {
+      timestamps: true,
+      versionKey: false,
     });
     export default mongoose.model<ICategory>("wpcategory", caregorySchema);

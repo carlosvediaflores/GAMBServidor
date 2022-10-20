@@ -15,5 +15,9 @@ export interface IOrganizacion extends Document {
     nombredir: { type: String},
     nombrecargo: { type: String },
     subdirecciones: { type: Array },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
   });
 export default mongoose.model<IOrganizacion>("Organizacion", orgSchema);

@@ -46,5 +46,8 @@ const hojarutaSchema: Schema = new Schema({
   pathhoja: {type: String},
   archivo:  {type:Array},
   asociado: {type:Array}
+},{
+  timestamps: true,
+  versionKey: false,
 });
 export default mongoose.model<IHojaruta>("Hojaruta", hojarutaSchema);

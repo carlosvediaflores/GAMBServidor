@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, Decimal128 } from "mongoose";
+import { IEntidad } from "./Entidad";
 
 export interface ISimpleConvenio {
-    nombre?: string;
+    codigo?: string;
     objeto?: string;
-    entidad?: string;
+    entidad?: Array<IEntidad>;
     fechafirma?: Date;
     representantes?: string;
     monto?:number;
@@ -15,9 +16,9 @@ export interface ISimpleConvenio {
     tipo?: string;
   }
 export interface IConvenio extends Document {
-    nombre: string;
+    codigo: string;
     objeto: string;
-    entidad: string;
+    entidad: Array<IEntidad>;
     fechafirma: Date;
     representantes: string;
     monto:number;
@@ -27,21 +28,27 @@ export interface IConvenio extends Document {
     desembolso: string;
     estadomonto: string;
     tipo: string;
+    user: string
   }
   const convenioSchema: Schema = new Schema({
-    nombre:{ type: String, requiered: true },
+    codigo:{ type: String, requiered: true },
     objeto: { type: String },
-    entidad: { type: String},
+    entidad:  {type: [Schema.Types.ObjectId], ref: "cventidades" },
     fechafirma: {type: Date, requiered: true},
     representantes: { type: String},
     monto: { type: String, requiered: true},
     plazo: { type: String, requiered: true},
     estado:{type: String, requiered: true},
-    entiejecutora: {type: String},
+    empresaejecutora: {type: String},
     desembolso: {type: String},
     estadomonto: {type: String, requiered: true},
-    tipo: {type: String, requiered: true}
+    tipo: {type: String, requiered: true},
+    user: {type: Schema.Types.ObjectId, ref: 'User',required: true}
     
+  },
+  {
+    timestamps: true,
+    versionKey: false,
   });
 
-export default mongoose.model<IConvenio>("convenio", convenioSchema);
+export default mongoose.model<IConvenio>("cvconvenio", convenioSchema);

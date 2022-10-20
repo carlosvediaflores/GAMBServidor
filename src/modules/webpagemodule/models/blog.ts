@@ -45,5 +45,9 @@ export interface IBlog extends Document {
     createAt:{type: String},
     updateAt:{type: String}
     
+  },
+  {
+    timestamps: true,
+    versionKey: false,
   });
   export default mongoose.model<IBlog>("wppost", blogSchema);

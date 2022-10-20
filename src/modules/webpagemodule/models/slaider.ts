@@ -32,6 +32,10 @@ export interface ISlaider extends Document {
     createAt:{type: Date},
     updateAt:{type: Date}
     
+  },
+  {
+    timestamps: true,
+    versionKey: false,
   });
 
 export default mongoose.model<ISlaider>("wpslaider", slaiderSchema);

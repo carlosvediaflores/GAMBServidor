@@ -6,5 +6,9 @@ const SubdirSchema = new Schema({
     nombredir: { type: String },
     nombresubdir: { type: String, required: true, unique: true },
     nombrecargosubdir: { type: String}
-});
+},
+{
+    timestamps: true,
+    versionKey: false,
+  });
 export default mongoose.model<ISubdireciones>("Subdirecciones", SubdirSchema);

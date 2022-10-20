@@ -9,5 +9,9 @@ const RolesSchema = new Schema({
     name: { type: String, required: true, unique: true },
     //urn: { type: String, required: true },
     //method: { type: String, required: true }
-});
+},
+{
+    timestamps: true,
+    versionKey: false,
+  });
 export default mongoose.model<IRoles>("Roles", RolesSchema);

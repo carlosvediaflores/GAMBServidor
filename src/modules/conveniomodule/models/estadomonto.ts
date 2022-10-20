@@ -15,6 +15,9 @@ export interface IEstmonto extends Document {
     saldo: { type: Number},
     totaltrans: { type: Number}
     
+  }, {
+    timestamps: true,
+    versionKey: false,
   });
 
-export default mongoose.model<IEstmonto>("estadomonto", estmontoSchema);
+export default mongoose.model<IEstmonto>("cvestadomonto", estmontoSchema);

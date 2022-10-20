@@ -55,5 +55,9 @@ const SeguiSchema = new Schema({
     copia:{type:String},
     oficina:{type:String},
     nombre:{type:String}
-});
+},
+{
+    timestamps: true,
+    versionKey: false,
+  });
 export default mongoose.model<ISeguimiento>("seguimiento", SeguiSchema);

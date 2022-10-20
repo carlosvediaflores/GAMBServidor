@@ -18,7 +18,7 @@ class BussConvenio{
             let listConvenio: Array<IConvenio> = await ConvenioModule.find(params1).skip(skip).limit(limit);
             return listConvenio;
         } else {
-            let listConvenio: Array<IConvenio> = await ConvenioModule.find();
+            let listConvenio: Array<IConvenio> = await ConvenioModule.find().populate('user').populate('entidad');
             return listConvenio;
         }
     }  

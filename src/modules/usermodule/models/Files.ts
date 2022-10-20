@@ -16,5 +16,9 @@ const FileSchema = new Schema({
     urihoja: { type: String},
     pathhoja: { type: String},
     namefile: { type: String }
-});
+},{
+    timestamps: true,
+    versionKey: false,
+  }
+);
 export default mongoose.model<IFiles>("files", FileSchema);

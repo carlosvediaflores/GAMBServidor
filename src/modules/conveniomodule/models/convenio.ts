@@ -4,46 +4,52 @@ import { IEntidad } from "./Entidad";
 export interface ISimpleConvenio {
     codigo?: string;
     objeto?: string;
-    entidad?: Array<IEntidad>;
-    fechafirma?: Date;
+    entidades?: Array<IEntidad>;
+    firma?: Date;
     representantes?: string;
-    monto?:number;
+    montototal?:number;
     plazo?: string;
     estado?: string;
-    entiejecutora?: string;
+    entidadejecutora?: string;
+    empresaecutota?:string;
     desembolso?: string;
     estadomonto?: string;
     tipo?: string;
   }
 export interface IConvenio extends Document {
     codigo: string;
+    nombre: string;
     objeto: string;
-    entidad: Array<IEntidad>;
-    fechafirma: Date;
+    entidades: Array<IEntidad>;
+    firma: Date;
     representantes: string;
-    monto:number;
-    plazo: string;
+    montototal:number;
+    plazo: number;
     estado: string;
-    entiejecutora: string;
+    entidadejecutora: string;
+    empresaecutota:string;
     desembolso: string;
     estadomonto: string;
     tipo: string;
     user: string
   }
   const convenioSchema: Schema = new Schema({
-    codigo:{ type: String, requiered: true },
+    codigo:{ type: String, required: true },
+    nombre:{type:String},
     objeto: { type: String },
-    entidad:  {type: [Schema.Types.ObjectId], ref: "cventidades" },
-    fechafirma: {type: Date, requiered: true},
-    representantes: { type: String},
-    monto: { type: String, requiered: true},
-    plazo: { type: String, requiered: true},
-    estado:{type: String, requiered: true},
-    empresaejecutora: {type: String},
-    desembolso: {type: String},
-    estadomonto: {type: String, requiered: true},
-    tipo: {type: String, requiered: true},
-    user: {type: Schema.Types.ObjectId, ref: 'User',required: true}
+    //entidades:  [{ type: Schema.Types.ObjectId, ref: "cventidades"}],
+    //entidades:  {type: [Schema.Types.ObjectId], ref: "cventidades"},
+    entidades: {type: Array},
+    firma: {type: Date},
+    plazo: { type: Number},
+    estado:{type: String},
+    montototal:{type:Number},
+    entidadejecutora: {type: Schema.Types.ObjectId, ref: 'cventidades'},
+    empresaejecutora: {type: Schema.Types.ObjectId, ref: 'cvempresa'},
+   // desembolso: {type: String},
+   // estadomonto: {type: String},
+    tipo: {type: String},
+    //user: {type: Schema.Types.ObjectId, ref: 'User'}
     
   },
   {

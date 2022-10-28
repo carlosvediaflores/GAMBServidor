@@ -30,6 +30,11 @@ class RoutesController{
         const result: Array<IEntidad> = await entidad.readEntidad();
         response.status(200).json(result);
       }
+      public async getEnti(request: Request, response: Response) {
+        var entidad: BussEntidad = new BussEntidad();
+        let repres = await entidad.readEntidad(request.params.id);
+        response.status(200).json(repres);
+      }
       public async updateEntidad(request: Request, response: Response) {
         var entidad: BussEntidad = new BussEntidad();
         let id: string = request.params.id;
@@ -46,7 +51,6 @@ class RoutesController{
       //*--------------Reprentantes------------------- *//
       public async createRepres(request: Request, response: Response) {
         var repres: BussRepres = new BussRepres();
-    
         var entidadData = request.body;
         let result = await repres.addRepres(entidadData);
         response.status(201).json({ serverResponse: result });
@@ -58,8 +62,8 @@ class RoutesController{
         response.status(200).json(result);
       }
       public async getReprese(request: Request, response: Response) {
-        var user: BussRepres = new BussRepres();
-        let repres = await user.readRepres(request.params.id);
+        var repre: BussRepres = new BussRepres();
+        let repres = await repre.readRepres(request.params.id);
         response.status(200).json(repres);
       }
       public async updateRepres(request: Request, response: Response) {
@@ -78,16 +82,43 @@ class RoutesController{
        //*--------------Convenios------------------- *//
        public async createConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
-    
         var entidadData = request.body;
+        var enti:any =entidadData.entidades;
+        var total = 0;
+        enti.forEach(function (ent:any) {
+          total=total+ent.monto
+        }); 
+        console.log(total);
+        entidadData["montototal"] = total;
         let result = await convenio.addConvenio(entidadData);
         response.status(201).json({ serverResponse: result });
       }
-
       public async getConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
         const result: Array<IConvenio> = await convenio.readConvenio();
         response.status(200).json(result);
+      }
+      public async addEntidad(request: Request, response: Response) {
+        let idConve: string = request.params.id;
+        let idEnti: string = request.body.entidad;
+        if (idConve == null && idEnti == null) {
+          response.status(300).json({
+            serverResponse: "No se definio id de usuario ni el id del rol",
+          });
+          return;
+        }
+        var convenio: BussConvenio = new BussConvenio();
+        var result = await convenio.addEntidad(idConve, idEnti);
+        if (result == null) {
+          response.status(300).json({ serverResponse: "No se pudo guardar" });
+          return;
+        }
+        response.status(200).json({ serverResponse: result });
+      }
+      public async getConveni(request: Request, response: Response) {
+        var convenio: BussConvenio = new BussConvenio();
+        let repres = await convenio.readConvenio(request.params.id);
+        response.status(200).json(repres);
       }
       public async updateConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();

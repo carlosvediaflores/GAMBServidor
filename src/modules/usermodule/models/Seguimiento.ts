@@ -1,19 +1,19 @@
 import mongoose, {  Document, Schema } from "mongoose";
 export interface ISimpleSeguimiento {
-    idhj?:  string;//9
-    nuit?: string;//11
-    destino?: string;//3
+    idhj?:  string;//10
+    nuit?: string;//12
+    destino?: string;//4
     origen?: string ;//16
     referencia?: string;//13
     origenhr?: string;//14
-    detalles?: string ;//4
+    detalles?: string ;//5
     recibidox?:  string;//20
-    fechaderivado?: Date;//6
-    fecharecepcion?: string;//7
-    estado?:  string;//5
-    asociado?: boolean;//15
-    smsarchivo?:string;//12
-    fecharespuesta?: Date;//8
+    fechaderivado?: Date;//7
+    fecharecepcion?: string;//8
+    estado?:  string;//6
+    asociado?: boolean;//3
+    smsarchivo?:string;//13
+    fecharespuesta?: Date;//9
     copia?:string; //17
     oficina?:string; //18 
     nombre?:string; //19 

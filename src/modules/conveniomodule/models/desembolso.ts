@@ -16,9 +16,9 @@ export interface IDesembolso extends Document {
 }
 const desSchema: Schema = new Schema(
   {
-    fecha: { type: String, requiered: true },
-    fuente: { type: String, requiered: true },
-    cuenta: { type: String, requiered: true },
+    fecha: { type: String, required: true },
+    fuente: { type: String, required: true },
+    cuenta: { type: String, required: true },
     uriconpro: { type: String },
     pathcompro: { type: String },
   },

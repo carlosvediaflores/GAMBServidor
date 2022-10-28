@@ -18,7 +18,7 @@ class BussRepres{
             let listRepres: Array<IRepresentante> = await RepresentanteModel.find(params1).skip(skip).limit(limit);
             return listRepres;
         } else {
-            let listRepres: Array<IRepresentante> = await RepresentanteModel.find().populate('entidad');
+            let listRepres: Array<IRepresentante> = await RepresentanteModel.find();
             return listRepres;
         }
     }  

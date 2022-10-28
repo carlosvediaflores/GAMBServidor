@@ -1,41 +1,35 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { IRepresentante } from "./Representante";
 
 export interface ISimpleEntidad {
-    nombre?: string;
-    representante?: Array<IRepresentante>;
+    text?: string;
+    representante?: string;
     telefono?: string;
     nit?: number;
     email?: string;
-    urilogo?: string;
-    pathlogo?: string;
-    cuenta?:number;
-    montofinan?:number;  
+    cuenta?:number
   }
 export interface IEntidad extends Document {
-    nombre: string;
-    representante: Array<IRepresentante>;
+    text: string;
+    representante: string;
     telefono: string;
     nit: number;
-    email: string;
-    urilogo: string;
-    pathlogo: string;
-    cuenta:number;  
-    montofinan:number; 
+    cuenta:number
   }
   const entidadSchema: Schema = new Schema({
-    nombre:{ type: String, requiered: true, unique: true },
-    representante: {type: [Schema.Types.ObjectId], ref: "cvrepresentantes" } ,
+    text:{ type: String, required: true, unique: true },
+    representante:{type: Schema.Types.ObjectId, ref: 'cvrepresentantes',required: true},
     telefono: { type: String, unique: true},
     nit: {type: Number, unique: true},
-    email: { type: String, unique: true},
-    urilogo: { type: String},
-    pathlogo: { type: String},
-    cuenta: { type: Number},
-    montofinan: { type: Number}
+    cuenta: { type: Number, required: true, unique: true},
   },{
     timestamps: true,
     versionKey: false,
   });
+  entidadSchema.method('toJSON', function() {
+    const { __v, _id,  ...object } = this.toObject();
+    object.id = _id;
+    //object.text = nombre;
+    return object;
+})
 
 export default mongoose.model<IEntidad>("cventidades", entidadSchema);

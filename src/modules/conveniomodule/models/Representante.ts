@@ -8,7 +8,7 @@ export interface ISimpleRepresentante {
     email?: string;
     urirepres?: string;
     pathrepres?: string;
-    entidad?: string
+    estado?: boolean
   }
 export interface IRepresentante extends Document {
     nombre: string;
@@ -19,23 +19,20 @@ export interface IRepresentante extends Document {
     email: string;
     urirepres: string;
     pathrepres: string;
-    entidad: string
+    estado: boolean
   }
   const represSchema: Schema = new Schema({
-    nombre:{ type: String, requiered: true },
-    apellidos: { type: String, requiered: true },
-    cargo: { type: String, requiered: true},
+    nombre:{ type: String, required: true },
+    apellidos: { type: String, required: true },
+    cargo: { type: String, required: true},
     telefono: {type: String},
-    ci: {type: String, unique: true},
-    email: { type: String, unique: true},
+    ci: {type: String},
+    email: { type: String},
     urirepres: { type: String},
     pathrepres: { type: String},
-    entidad: {  type: Schema.Types.ObjectId,
-      ref: 'cventidades'}
-    
+    estado:{type:Boolean, default:true}
   }, {
     timestamps: true,
     versionKey: false,
   });
-
 export default mongoose.model<IRepresentante>("cvrepresentantes", represSchema);

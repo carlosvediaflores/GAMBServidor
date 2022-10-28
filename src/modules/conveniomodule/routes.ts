@@ -19,6 +19,9 @@ class Routes {
             .get(this.routesController.getEntidad);
         app
             .route(`${this.routeparent}/entidad/:id`)
+            .get(this.routesController.getEnti);
+        app
+            .route(`${this.routeparent}/entidad/:id`)
             .put(this.routesController.updateEntidad);
         app
             .route(`${this.routeparent}/entidad/:id`)
@@ -48,10 +51,16 @@ class Routes {
             .get(this.routesController.getConvenio);
         app
             .route(`${this.routeparent}/convenio/:id`)
+            .get(this.routesController.getConveni);
+        app
+            .route(`${this.routeparent}/convenio/:id`)
             .put(this.routesController.updateConvenio);
         app
             .route(`${this.routeparent}/convenio/:id`)
             .delete(this.routesController.removeConvenio);
+        app
+            .route(`${this.routeparent}/addentidad/:id`)
+            .put(this.routesController.addEntidad);
         //*------------Routes Desembolso--------*//
         app
             .route(`${this.routeparent}/desem`)

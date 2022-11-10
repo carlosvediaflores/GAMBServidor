@@ -4,7 +4,7 @@ export interface ISimpleSeguimiento {
     nuit?: string;//12
     destino?: string;//4
     origen?: string ;//16
-    referencia?: string;//13
+    referencia?: string;//15
     origenhr?: string;//14
     detalles?: string ;//5
     recibidox?:  string;//20

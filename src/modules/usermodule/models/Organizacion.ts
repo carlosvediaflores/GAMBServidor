@@ -14,7 +14,7 @@ export interface IOrganizacion extends Document {
   const orgSchema: Schema = new Schema({
     nombredir: { type: String},
     nombrecargo: { type: String },
-    subdirecciones: { type: Array },
+    subdirecciones: {type: [Schema.Types.ObjectId], ref: "Subdirecciones"}
   },
   {
     timestamps: true,

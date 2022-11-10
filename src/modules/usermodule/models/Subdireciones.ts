@@ -5,7 +5,7 @@ export interface ISubdireciones extends Document {
 const SubdirSchema = new Schema({
     nombredir: { type: String },
     nombresubdir: { type: String, required: true, unique: true },
-    nombrecargosubdir: { type: String}
+    archivofi: { type: Array}
 },
 {
     timestamps: true,

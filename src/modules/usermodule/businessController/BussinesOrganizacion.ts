@@ -7,7 +7,7 @@ class BussinesOrganizacion {
 
     public async readOrgs(params1?: string | any, params2?: number, params3?: number): Promise<Array<IOrganizacion> | IOrganizacion> {
         if (params1 && typeof params1 == "string") {
-            var result: IOrganizacion = await OrganizacionModel.findOne({ nombredir: params1 });
+            var result: IOrganizacion = await OrganizacionModel.findOne({ nombredir: params1 }).populate('subdirecciones');
             //var result: IOrganizacion = await OrganizacionModel.findOne({ _id: params1 });
             return result;
         } else if (params1) {
@@ -17,7 +17,7 @@ class BussinesOrganizacion {
             return listUser;
         } 
         else {
-            let listUser: Array<IOrganizacion> = await OrganizacionModel.find();
+            let listUser: Array<IOrganizacion> = await OrganizacionModel.find().populate('subdirecciones');
             return listUser;
 
         }
@@ -29,7 +29,7 @@ class BussinesOrganizacion {
     public async readOrg(params1?: string | any, params2?: number, params3?: number): Promise<Array<IOrganizacion> | IOrganizacion> {
         if (params1 && typeof params1 == "string") {
             //var result: IOrganizacion = await OrganizacionModel.findOne({ nombredir: params1 });
-            var result: IOrganizacion = await OrganizacionModel.findOne({ _id: params1 });
+            var result: IOrganizacion = await OrganizacionModel.findOne({ _id: params1 }).populate('subdirecciones');
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;
@@ -65,7 +65,7 @@ class BussinesOrganizacion {
                 });
                 console.log(checksub)
                 if (checksub.length == 0) {
-                    org.subdirecciones.push(sub);
+                    org.subdirecciones.push(sub._id);
                     return await org.save();
                 }
                 return null;

@@ -88,7 +88,6 @@ class RoutesController{
         enti.forEach(function (ent:any) {
           total=total+ent.monto
         }); 
-        console.log(total);
         entidadData["montototal"] = total;
         let result = await convenio.addConvenio(entidadData);
         response.status(201).json({ serverResponse: result });

@@ -456,12 +456,9 @@ class RoutesController {
     if ( Object.entries(aux).length > 0) { 
       filter["fecharecepcion"] = aux;
     }
-    let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
-      if (skip <= totalpage && skip >= 2) {
+      if ( skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -474,17 +471,18 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    let res: Array<IHojaruta> = await segui.readHojaRuta(
-      filter,
-      skip,
-      limit,
-      order
-    );
+    const [ res, totalDocs ] = await Promise.all([
+      segui.readHojaRuta(filter,
+        skip,
+        limit,
+        order),
+       segui.total({})
+    ])
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage,
+      totalpage: number = Math.ceil(totalDocs/ limit),
       skip,
       order
     });

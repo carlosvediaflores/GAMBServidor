@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Decimal128 } from "mongoose";
 import { IEntidad } from "./Entidad";
 import { IFilescv } from "./files";
+import { ITransferencia } from "./transferencia";
 
 export interface IConvenio extends Document {
     codigo: string;
@@ -18,7 +19,8 @@ export interface IConvenio extends Document {
     estadomonto: string;
     tipo: string;
     user: string;
-    files: Array<IFilescv>
+    files: Array<IFilescv>;
+    transferencia: Array<ITransferencia>
   }
   const convenioSchema: Schema = new Schema({
     codigo:{ type: String, required: true },
@@ -36,7 +38,8 @@ export interface IConvenio extends Document {
    // desembolso: {type: String},
    // estadomonto: {type: String},
     tipo: {type: String},
-    files:{type: [Schema.Types.ObjectId], ref: "cvfiles"}
+    files:{type: [Schema.Types.ObjectId], ref: "cvfiles"},
+    transferencia:{type: [Schema.Types.ObjectId], ref: "cvtransferencia"}
     //user: {type: Schema.Types.ObjectId, ref: 'User'}
     
   },

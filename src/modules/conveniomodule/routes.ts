@@ -67,6 +67,12 @@ class Routes {
         app
             .route(`${this.routeparent}/getfileconvenio/:name`)
             .get(this.routesController.getFileConv);
+        app
+            .route(`${this.routeparent}/addtransferencia/:id`)
+            .post(this.routesController.addTransf);
+        app
+            .route(`${this.routeparent}/getFileTransf/:name`)
+            .get(this.routesController.getTransf);
         //*------------Routes Desembolso--------*//
         app
             .route(`${this.routeparent}/desem`)
@@ -93,6 +99,10 @@ class Routes {
         app
             .route(`${this.routeparent}/estmonto/:id`)
             .delete(this.routesController.removeEstmonto);
+            //-------files----//
+        app
+            .route(`${this.routeparent}/filescv`)
+            .get(this.routesController.getFilescv);
     }
 }
 export default Routes;

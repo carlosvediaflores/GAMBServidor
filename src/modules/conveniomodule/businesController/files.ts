@@ -18,7 +18,16 @@ class BussFiles{
             let listFiles: Array<IFilescv> = await filesModule.find(params1).skip(skip).limit(limit);
             return listFiles;
         } else {
-            let listFiles: Array<IFilescv> = await filesModule.find();
+            let listFiles: Array<IFilescv> = await filesModule.find() .populate({
+                path: "idcv",
+                model: "cvconvenio",
+                populate: { path: "files", model: "cvfiles"},
+              })
+              .populate({
+                path: "idcv",
+                model: "cvconvenio",
+                populate: { path:"transferencia",model:"cvtransferencia"},
+              });
             return listFiles;
         }
     }
@@ -29,6 +38,10 @@ class BussFiles{
             return result;
         }
     } 
+    public async deleteFiles(id: string) {
+        let result = await filesModule.remove({ _id: id });
+        return result;
+    }
     public async addFilecv(filecv: IFilescv) {
         try {
             let fileDb = new filesModule(filecv);

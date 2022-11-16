@@ -7,7 +7,7 @@ export interface IFilescv extends Document {
     typefile: string;
 }
 const FileSchema = new Schema({
-    idcv: { type: String},
+    idcv: { type: Schema.Types.ObjectId, ref: 'cvconvenio'},
     uriconvenio: { type: String},
     patconvenio: { type: String},
     namefile: { type: String},

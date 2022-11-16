@@ -6,17 +6,18 @@ import isEmpty from "is-empty";
 import path from "path";
 
 import { IEstmonto } from './../models/estadomonto';
-import { IDesembolso } from './../models/desembolso';
+import { ITransferencia } from './../models/transferencia';
 import { IRepresentante } from './../models/Representante';
-import Entidad, {IEntidad, ISimpleEntidad} from "../models/Entidad";
+import Entidad, {IEntidad} from "../models/Entidad";
 import BussEntidad from "../businesController/Entidad";
 import BussRepres from "../businesController/Representante";
 import BussConvenio from '../businesController/convenio';
-import BussDesem from '../businesController/desembolso';
+import BussTransf from '../businesController/tranferencia';
 import BussEstadoMonto from '../businesController/estadomonto';
 import { IConvenio } from "../models/convenio";
 import { IFilescv } from "../models/files";
 import BussFiles from "../businesController/files";
+import BussDesem from "../businesController/tranferencia";
 class RoutesController{
     //*--------------Entidad------------------- *//
     public async createEntidad(request: Request, response: Response) {
@@ -215,9 +216,90 @@ class RoutesController{
         }
         response.sendFile(fileData.patconvenio);
       }
+      public async addTransf(request: Request, response: Response) {
+        var id: string = request.params.id;
+        if (!id) {
+          response
+            .status(300)
+            .json({ serverResponse: "El id es necesario para subir un archivo" });
+          return;
+        }
+        var trsnf: BussConvenio = new BussConvenio();
+        var trsnfToUpdate: IConvenio = await trsnf.readConvenio(id);
+        if (!trsnfToUpdate) {
+          response
+            .status(300)
+            .json({ serverResponse: "convenio no existe!" });
+          return;
+        }
+        if (isEmpty(request.files)) {
+          response
+            .status(300)
+            .json({ serverResponse: "No existe un archivo adjunto" });
+          return;
+        }
+        var dir = `${__dirname}/../../../../uploadhojaruta`;
+        var absolutepath = path.resolve(dir);
+        var files: any = request.files;
+        var key: Array<string> = Object.keys(files);
+        var copyDirectory = (totalpath: string, file: any) => {
+          return new Promise((resolve, reject) => {
+            file.mv(totalpath, (err: any, success: any) => {
+              if (err) {
+                resolve(false);
+                return;
+              }
+              resolve(true);
+              return;
+            });
+          });
+        };
+        let fil: BussDesem = new BussDesem();
+        var filData: any = request.body;
+        for (var i = 0; i < key.length; i++) {
+          var file: any = files[key[i]];
+          var filehash: string = sha1(new Date().toString()).substr(0, 7);
+          var newname: string = `${"GAMB"}_${filehash}_${file.name}`;
+          var totalpath = `${absolutepath}/${newname}`;
+          await copyDirectory(totalpath, file);
+          var hojaResult: IConvenio = await trsnfToUpdate.save();
+          filData["idcv"] = id;
+          filData["uricompro"] = "getcomprovante/" + newname;
+          filData["pathcompro"] = totalpath;
+          filData["namefile"] = newname;
+          var result1 = await fil.addDesem(filData);
+          let idFile = result1._id;
+          var result = await trsnf.addDesem(id, idFile);
+          if (result == null) {
+            response.status(300).json({ serverResponse: "no se pudo guardar..." });
+            return;
+          }
+          response.status(200).json({ serverResponse: "se subió con éxito" });
+        }
+      }
+      public async getTransf(request: Request, response: Response) {
+        var name: string = request.params.name;
+        if (!name) {
+          response
+            .status(300)
+            .json({ serverResponse: "Identificador no encontrado" });
+          return;
+        }
+        var filecv: BussDesem = new BussDesem();
+        var fileData: ITransferencia = await filecv.readtranf(name);
+        if (!fileData) {
+          response.status(300).json({ serverResponse: "Error " });
+          return;
+        }
+        if (fileData.pathcompro == null) {
+          response.status(300).json({ serverResponse: "No existe portrait " });
+          return;
+        }
+        response.sendFile(fileData.pathcompro);
+      }
          //*--------------Desembolso------------------- *//
        public async createDesem(request: Request, response: Response) {
-        var desem: BussDesem = new BussDesem();
+        var desem: BussTransf = new BussTransf();
     
         var entidadData = request.body;
         let result = await desem.addDesem(entidadData);
@@ -225,19 +307,19 @@ class RoutesController{
       }
 
       public async getDesem(request: Request, response: Response) {
-        var desem: BussDesem = new BussDesem();
-        const result: Array<IDesembolso> = await desem.readDesem();
+        var desem: BussTransf = new BussTransf();
+        const result: Array<ITransferencia> = await desem.readDesem();
         response.status(200).json(result);
       }
       public async updateDesem(request: Request, response: Response) {
-        var desem: BussDesem = new BussDesem();
+        var desem: BussTransf = new BussTransf();
         let id: string = request.params.id;
         var params = request.body;
         var result = await desem.updateDesem(id, params);
         response.status(200).json(result);
       }
       public async removeDesem(request: Request, response: Response) {
-        var desem: BussDesem = new BussDesem();
+        var desem: BussTransf = new BussTransf();
         let id: string = request.params.id;
         let result = await desem.deleteDesem(id);
         response.status(200).json({ serverResponse: "Se elimino el Desembolso" });
@@ -269,5 +351,11 @@ class RoutesController{
         let result = await desem.deleteEstmonto(id);
         response.status(200).json({ serverResponse: "Se elimino el EstadoMonto" });
       } 
+      ///-------FILE---------//
+      public async getFilescv(request: Request, response: Response) {
+        var files: BussFiles = new BussFiles();
+        const result: Array<IFilescv> = await files.readFile();
+        response.status(200).json(result);
+      }
 }
 export default RoutesController;

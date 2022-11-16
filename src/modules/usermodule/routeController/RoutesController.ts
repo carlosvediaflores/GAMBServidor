@@ -16,6 +16,8 @@ import path from "path";
 import BusinessHoja from "../businessController/BussineHojaruta";
 import { ISeguimiento } from "../models/Seguimiento";
 import BussinesFile from "../businessController/BussinesFlies";
+import {IArchivo} from "../models/archivo";
+import BussnesArchivo from "../businessController/BusinessArch";
 interface Icredentials {
   email: string;
   password: string;
@@ -365,6 +367,12 @@ class RoutesController {
     let result = await subdir.readSub();
     response.status(200).json(result);
   }
+  public async getSubUni(request: Request, response: Response) {
+    var subUni: BussinesSubdir = new BussinesSubdir();
+    //let id: string = request.params.id;
+    let res = await subUni.readSub(request.params.nombredir);
+    response.status(200).json(res);
+  }
   public async updateSubdir(request: Request, response: Response) {
     var subdir: BussinesSubdir = new BussinesSubdir();
     let id: string = request.params.id;
@@ -377,6 +385,47 @@ class RoutesController {
     let idSubdir: string = request.params.id;
     let result = await subdir.deleteSubdir(idSubdir);
     response.status(201).json({ serverResponse: result });
+  }
+  ////ARCHIVO/////
+  public async createArch(request: Request, response: Response) {
+    let subdir: BussnesArchivo = new BussnesArchivo();
+    var subdirData: any = request.body;
+    let result = await subdir.addArch(subdirData);
+    if (result == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El rol tiene parametros no validos" });
+      return;
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async addArch(request: Request, response: Response) {
+    let idSegui: string = request.params.id;
+    if (idSegui == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var segui: BussinesSegui = new BussinesSegui();
+    let arch: BussnesArchivo = new BussnesArchivo();
+    var subdirData: any = request.body;
+    var result1 = await arch.addArch(subdirData);
+    let idArch = result1._id;
+    var result = await segui.addArchivo(idSegui, idArch);
+
+    //var result = subdirData
+    if (result == null) {
+      response.status(300).json({ serverResponse: "no se pudo guardar" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result });
+  }
+  public async getArc(request: Request, response: Response) {
+    var subUni: BussnesArchivo = new BussnesArchivo();
+    //let id: string = request.params.id;
+    let res = await subUni.readArch(request.params.nombredir);
+    response.status(200).json(res);
   }
   ///////////////HOJA DE RUTA------------------------------
 

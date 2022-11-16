@@ -15,6 +15,8 @@ import BussConvenio from '../businesController/convenio';
 import BussDesem from '../businesController/desembolso';
 import BussEstadoMonto from '../businesController/estadomonto';
 import { IConvenio } from "../models/convenio";
+import { IFilescv } from "../models/files";
+import BussFiles from "../businesController/files";
 class RoutesController{
     //*--------------Entidad------------------- *//
     public async createEntidad(request: Request, response: Response) {
@@ -132,8 +134,88 @@ class RoutesController{
         let result = await convenio.deleteConvenio(id);
         response.status(200).json({ serverResponse: "Se elimino el Convenio" });
       }
-     
-       //*--------------Desembolso------------------- *//
+      public async uploadConvenio(request: Request, response: Response) {
+        var id: string = request.params.id;
+        if (!id) {
+          response
+            .status(300)
+            .json({ serverResponse: "El id es necesario para subir un archivo" });
+          return;
+        }
+        var convenio: BussConvenio = new BussConvenio();
+        var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
+        if (!convenioToUpdate) {
+          response
+            .status(300)
+            .json({ serverResponse: "convenio no existe!" });
+          return;
+        }
+        if (isEmpty(request.files)) {
+          response
+            .status(300)
+            .json({ serverResponse: "No existe un archivo adjunto" });
+          return;
+        }
+        var dir = `${__dirname}/../../../../uploadhojaruta`;
+        var absolutepath = path.resolve(dir);
+        var files: any = request.files;
+        var key: Array<string> = Object.keys(files);
+        var copyDirectory = (totalpath: string, file: any) => {
+          return new Promise((resolve, reject) => {
+            file.mv(totalpath, (err: any, success: any) => {
+              if (err) {
+                resolve(false);
+                return;
+              }
+              resolve(true);
+              return;
+            });
+          });
+        };
+        let fil: BussFiles = new BussFiles();
+        var filData: any = request.body;
+        for (var i = 0; i < key.length; i++) {
+          var file: any = files[key[i]];
+          var filehash: string = sha1(new Date().toString()).substr(0, 7);
+          var newname: string = `${"GAMB"}_${filehash}_${file.name}`;
+          var totalpath = `${absolutepath}/${newname}`;
+          await copyDirectory(totalpath, file);
+          var hojaResult: IConvenio = await convenioToUpdate.save();
+          filData["idcv"] = id;
+          filData["uriconvenio"] = "getfileconvenio/" + newname;
+          filData["patconvenio"] = totalpath;
+          filData["namefile"] = newname;
+          var result1 = await fil.addFilecv(filData);
+          let idFile = result1._id;
+          var result = await convenio.addFiles(id, idFile);
+          if (result == null) {
+            response.status(300).json({ serverResponse: "no se pudo guardar..." });
+            return;
+          }
+          response.status(200).json({ serverResponse: "se subió con éxito" });
+        }
+      }
+      public async getFileConv(request: Request, response: Response) {
+        var name: string = request.params.name;
+        if (!name) {
+          response
+            .status(300)
+            .json({ serverResponse: "Identificador no encontrado" });
+          return;
+        }
+        var filecv: BussFiles = new BussFiles();
+        var fileData: IFilescv = await filecv.readcv(name);
+        if (!fileData) {
+          response.status(300).json({ serverResponse: "Error " });
+          return;
+        }
+        if (fileData.patconvenio == null) {
+          response.status(300).json({ serverResponse: "No existe portrait " });
+          return;
+        }
+        response.sendFile(fileData.patconvenio);
+      }
+         //*--------------Desembolso------------------- *//
        public async createDesem(request: Request, response: Response) {
         var desem: BussDesem = new BussDesem();
     

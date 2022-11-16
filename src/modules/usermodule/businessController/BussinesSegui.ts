@@ -1,4 +1,5 @@
 import SeguiModel, { ISeguimiento } from "../models/Seguimiento";
+import ArchivoModel, {IArchivo} from "../models/archivo";
 class BussinesSegui {
     public async readSegui(): Promise<Array<ISeguimiento>>;
     public async readSegui(id: string): Promise<ISeguimiento>;
@@ -26,7 +27,7 @@ class BussinesSegui {
     public async readOficina(params1?: string | any, params2?: number, params3?: number, order?:any): Promise<Array<ISeguimiento> | ISeguimiento> { 
             let skip = params2;
             let limit = params3;
-            let listSegui = await SeguiModel.find(params1).skip(skip).limit(limit).sort(order);
+            let listSegui = await SeguiModel.find(params1).skip(skip).limit(limit).sort(order).populate("archivofi");
             return listSegui;
     }
     public async readSeguis(): Promise<Array<ISeguimiento>>;
@@ -76,7 +77,7 @@ class BussinesSegui {
             ]
         };
         
-        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ '_id': 1 });
+        let listSeguiO: Array<ISeguimiento> = await SeguiModel.find(filter).sort({ '_id': 1 }).populate("archivofi");
         return listSeguiO;
     }
     
@@ -109,6 +110,28 @@ class BussinesSegui {
         let result = await SeguiModel.remove({ _id: id });
         ////----------////
         return result;
+    }
+    public async addArchivo(idSegui: string, idArch: string) {
+        let segui = await SeguiModel.findOne({ _id: idSegui });
+        if (segui != null) {
+            var arch = await ArchivoModel.findOne({ _id: idArch });
+            if (arch != null) {
+                var checksub: Array<IArchivo> = segui.archivofi.filter((item) => {
+                    if (arch._id.toString() == item._id.toString()) {
+                        return true;
+                    }
+                    return false;
+                });
+                console.log(checksub)
+                if (checksub.length == 0) {
+                    segui.archivofi.push(arch._id);
+                    return await segui.save();
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
     }
 
 }

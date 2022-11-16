@@ -1,5 +1,7 @@
+import convenio from "../models/convenio";
 import ConvenioModule, { IConvenio } from "../models/convenio";
 import EntidadModule, { IEntidad } from "../models/Entidad";
+import filesModule, { IFilescv } from "../models/files";
 
 class BussConvenio {
   constructor() {}
@@ -34,10 +36,11 @@ class BussConvenio {
           populate: { path: "representante", model: "cvrepresentantes" },
         })
         .populate("entidadejecutora")
-        .populate("user");
+        .populate("user").populate("files");
       return listConvenio;
     }
   }
+  
   public async readUser(post: string): Promise<IConvenio>;
   public async readUser(
     params1?: string | any,
@@ -88,5 +91,28 @@ class BussConvenio {
     }
     return null;
   }
+
+  public async addFiles(idcv: string, idFile: string) {
+    let convenio = await ConvenioModule.findOne({ _id: idcv });
+    if (convenio != null) {
+        var fil = await filesModule.findOne({ _id: idFile });
+        if (fil != null) {
+            var checkrol: Array<IFilescv> = convenio.files.filter((item) => {
+                if (fil._id.toString() == item._id.toString()) {
+                    return true;
+                }
+                return false;
+            });
+            console.log(checkrol)
+            if (checkrol.length == 0) {
+              convenio.files.push(fil);
+                return await convenio.save();
+            }
+            return null;
+        }
+        return null;
+    }
+    return null;
+}
 }
 export default BussConvenio;

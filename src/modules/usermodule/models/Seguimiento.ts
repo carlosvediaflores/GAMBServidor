@@ -1,4 +1,5 @@
 import mongoose, {  Document, Schema } from "mongoose";
+import { IArchivo } from "./archivo";
 export interface ISimpleSeguimiento {
     idhj?:  string;//10
     nuit?: string;//12
@@ -36,6 +37,7 @@ export interface ISeguimiento extends Document {
     copia:string;
     oficina:string; 
     nombre:string; 
+    archivofi:Array<IArchivo>;
 }
 const SeguiSchema = new Schema({
     idhj: { type: String},
@@ -54,7 +56,8 @@ const SeguiSchema = new Schema({
     fecharespuesta:{type:Date},
     copia:{type:String},
     oficina:{type:String},
-    nombre:{type:String}
+    nombre:{type:String},
+    archivofi:{type: [Schema.Types.ObjectId], ref: "hrarchivo"}
 },
 {
     timestamps: true,

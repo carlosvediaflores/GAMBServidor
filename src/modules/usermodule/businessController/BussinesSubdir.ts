@@ -6,7 +6,7 @@ class BussinesSubdir {
 
     public async readSub(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISubdireciones> | ISubdireciones> {
         if (params1 && typeof params1 == "string") {
-            var result: ISubdireciones = await SubdireccionesModel.findOne({ _id: params1 });
+            var result: ISubdireciones = await SubdireccionesModel.findOne({ nombresubdir: params1 });
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;

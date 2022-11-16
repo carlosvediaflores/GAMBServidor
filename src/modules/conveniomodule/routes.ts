@@ -61,6 +61,12 @@ class Routes {
         app
             .route(`${this.routeparent}/addentidad/:id`)
             .put(this.routesController.addEntidad);
+        app
+            .route(`${this.routeparent}/uploadconvenio/:id`)
+            .post(this.routesController.uploadConvenio);
+        app
+            .route(`${this.routeparent}/getfileconvenio/:name`)
+            .get(this.routesController.getFileConv);
         //*------------Routes Desembolso--------*//
         app
             .route(`${this.routeparent}/desem`)

@@ -89,7 +89,9 @@ class Routes {
     app
       .route(`${this.routeparent}/subdir`)
       .get(this.routesController.getSubdir);
-
+    app
+      .route(`${this.routeparent}/subdir/:nombredir`)
+      .get(this.routesController.getSubUni);
     //app
     //.route(`${this.routeparent}/subdir/:id`)
     //.put(this.routesController.updateSubdir);
@@ -185,6 +187,17 @@ class Routes {
     app
       .route(`${this.routeparent}/orgs/:id`)
       .get(this.routesController.getOrId);
+
+      //-----Archivos---//
+    app
+      .route(`${this.routeparent}/arch`)
+      .get(this.routesController.getArc);
+    app
+      .route(`${this.routeparent}/arch`)
+      .post(this.routesController.createArch);
+    app
+      .route(`${this.routeparent}/addarch/:id`)
+      .put(this.routesController.addArch);
   }
 }
 export default Routes;

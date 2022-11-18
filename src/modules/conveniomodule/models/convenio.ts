@@ -11,14 +11,16 @@ export interface IConvenio extends Document {
     firma: Date;
     representantes: string;
     montototal:number;
-    plazo: number;
+    montototaltrans:number;
+    saldo:any;
+    plazo: any;
     estado: string;
     entidadejecutora: string;
     empresaecutota:string;
     desembolso: string;
     estadomonto: string;
-    tipo: string;
-    user: string;
+    tipo: number;
+    user: number;
     files: Array<IFilescv>;
     transferencia: Array<ITransferencia>
   }
@@ -33,6 +35,8 @@ export interface IConvenio extends Document {
     plazo: { type: Number},
     estado:{type: String},
     montototal:{type:Number},
+    montototaltrans:{type:Number},
+    saldo:{type:Number},
     entidadejecutora: {type: Schema.Types.ObjectId, ref: 'cventidades'},
     empresaejecutora: {type: Schema.Types.ObjectId, ref: 'cvempresa'},
    // desembolso: {type: String},

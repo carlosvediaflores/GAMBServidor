@@ -1,20 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-
-export interface ISimpleBlog {
-  title?: string;
-  subtitle?: string;
-  img?: string;
-  body?: string;
-  iframe?: string;
-  status?: boolean;
-  user?:string;
-  category?:string;
-  tag?:string;
-  uri?:string;
-  path?:string;
-  createAt?: Date;
-  updateAt?: Date;
-  }
 export interface IBlog extends Document {
   title: string;
   subtitle: string;

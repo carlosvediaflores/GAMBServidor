@@ -12,7 +12,7 @@ export interface IEntidad extends Document {
     representante:{type: Schema.Types.ObjectId, ref: 'cvrepresentantes'},
     telefono: { type: String, unique: true},
     nit: {type: Number, unique: true},
-    cuenta: { type: Number, required: true, unique: true},
+    cuenta: { type: Number, unique: true},
   },{
     timestamps: true,
     versionKey: false,

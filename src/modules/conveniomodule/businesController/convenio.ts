@@ -20,7 +20,7 @@ class BussConvenio {
     params3?: number
   ): Promise<Array<IConvenio> | IConvenio> {
     if (params1 && typeof params1 == "string") {
-      var result: IConvenio = await ConvenioModule.findOne({ _id: params1 });
+      var result: IConvenio = await ConvenioModule.findOne({ _id: params1 }).populate("transferencia");
       return result;
     } else if (params1) {
       let skip = params2 ? params2 : 0;

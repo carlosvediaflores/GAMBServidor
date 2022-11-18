@@ -6,6 +6,9 @@ export interface ITransferencia extends Document {
   fuente: string;
   cuenta: string;
   importe: number;
+  total: number;
+  saldo: number;
+  totaldes:number;
   uriconpro: string;
   pathcompro: string;
   namefile: string,
@@ -18,6 +21,9 @@ const desSchema: Schema = new Schema(
     fuente: { type: String},
     cuenta: { type: String},
     importe: { type: Number},
+    total: { type: Number},
+    saldo: { type: Number},
+    totaldes: { type: Number},
     uricompro: { type: String },
     pathcompro: { type: String },
     namefile: { type: String}

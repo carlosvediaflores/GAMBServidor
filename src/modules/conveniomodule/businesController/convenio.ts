@@ -11,23 +11,37 @@ class BussConvenio {
   public async readConvenio(
     query: any,
     skip: number,
-    limit: number
+    limit: number,
+    order: any
   ): Promise<Array<IConvenio>>;
 
   public async readConvenio(
     params1?: string | any,
     params2?: number,
-    params3?: number
+    params3?: number,
+    order?: any
   ): Promise<Array<IConvenio> | IConvenio> {
     if (params1 && typeof params1 == "string") {
-      var result: IConvenio = await ConvenioModule.findOne({ _id: params1 }).populate("transferencia");
+      var result: IConvenio = await ConvenioModule.findOne({
+        _id: params1,
+      }).populate("transferencia");
       return result;
     } else if (params1) {
-      let skip = params2 ? params2 : 0;
-      let limit = params3 ? params3 : 1;
+      let skip = params2;
+      let limit = params3;
       let listConvenio: Array<IConvenio> = await ConvenioModule.find(params1)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .sort(order)
+        .populate({
+          path: "entidad",
+          model: "cventidades",
+          populate: { path: "representante", model: "cvrepresentantes" },
+        })
+        .populate("entidadejecutora")
+        .populate("user")
+        .populate("files")
+        .populate("transferencia");
       return listConvenio;
     } else {
       let listConvenio: Array<IConvenio> = await ConvenioModule.find()
@@ -43,7 +57,10 @@ class BussConvenio {
       return listConvenio;
     }
   }
-
+  public async total({}) {
+    var result = await ConvenioModule.count();
+    return result;
+  }
   public async readUser(post: string): Promise<IConvenio>;
   public async readUser(
     params1?: string | any,
@@ -122,12 +139,14 @@ class BussConvenio {
     if (convenio != null) {
       var fil = await transfeModel.findOne({ _id: idFile });
       if (fil != null) {
-        var checkrol: Array<ITransferencia> = convenio.transferencia.filter((item) => {
-          if (fil._id.toString() == item._id.toString()) {
-            return true;
+        var checkrol: Array<ITransferencia> = convenio.transferencia.filter(
+          (item) => {
+            if (fil._id.toString() == item._id.toString()) {
+              return true;
+            }
+            return false;
           }
-          return false;
-        });
+        );
         console.log(checkrol);
         if (checkrol.length == 0) {
           convenio.transferencia.push(fil);

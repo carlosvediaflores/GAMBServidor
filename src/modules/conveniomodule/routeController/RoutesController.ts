@@ -95,6 +95,73 @@ class RoutesController{
         let result = await convenio.addConvenio(entidadData);
         response.status(201).json({ serverResponse: result });
       }
+      public async getConvenios(request: Request, response: Response) {
+        var segui: BussConvenio = new BussConvenio();
+        var filter: any = {};
+        var params: any = request.query;
+        var limit = 0;
+        var skip = 0;
+        var aux: any = {};
+        var order: any = {};
+        var select = "";
+        if (params.nombre != null) {
+          var expresion = new RegExp(params.nombre);
+          filter["nombre"] = expresion;
+        }
+        if (params.codigo != null) {
+          var expresion = new RegExp(params.codigo);
+          filter["codigo"] = expresion;
+        }
+        if (params.entidades != null) {
+          var expresion = new RegExp(params.entidades);
+          filter["entidades"] = expresion;
+        }
+        if (params.limit) {
+          limit = parseInt(params.limit);
+        }
+        if (params.dategt != null) {
+          var gt = params.dategt;
+          aux["$gt"] = gt;
+        }
+        if (params.datelt != null) {
+          var lt = params.datelt;
+          aux["$lt"] = lt;
+        }
+        if ( Object.entries(aux).length > 0) { 
+          filter["firma"] = aux;
+        }
+        if (params.skip) {
+          skip = parseInt(params.skip);
+          if ( skip >= 2) {
+            skip = limit * (skip - 1);
+          } else {
+            skip = 0;
+          }
+        }
+        if (params.order != null) {
+          var data = params.order.split(",");
+          var number = parseInt(data[1]);
+          order[data[0]] = number;
+        } else {
+          order = { _id: -1 };
+        }
+        const [ res, totalDocs ] = await Promise.all([
+          segui.readConvenio(filter,
+            skip,
+            limit,
+            order),
+           segui.total({})
+        ])
+        response.status(200).json({
+          serverResponse: res,
+          totalDocs,
+          limit,
+          totalpage: number = Math.ceil(totalDocs/ limit),
+          skip,
+          order
+        });
+        return;
+      }
       public async getConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
         const result: Array<IConvenio> = await convenio.readConvenio();
@@ -264,7 +331,7 @@ class RoutesController{
           await copyDirectory(totalpath, file);
           var hojaResult: IConvenio = await trsnfToUpdate.save();
           filData["idcv"] = id;
-          filData["uricompro"] = "getcomprovante/" + newname;
+          filData["uricompro"] = "getcomprobante/" + newname;
           filData["pathcompro"] = totalpath;
           filData["namefile"] = newname;
           var result1 = await fil.addDesem(filData);

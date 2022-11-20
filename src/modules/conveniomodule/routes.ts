@@ -50,6 +50,9 @@ class Routes {
             .route(`${this.routeparent}/convenio`)
             .get(this.routesController.getConvenio);
         app
+            .route(`${this.routeparent}/convenios`)
+            .get(this.routesController.getConvenios);
+        app
             .route(`${this.routeparent}/convenio/:id`)
             .get(this.routesController.getConveni);
         app
@@ -71,7 +74,7 @@ class Routes {
             .route(`${this.routeparent}/addtransferencia/:id`)
             .post(this.routesController.addTransf);
         app
-            .route(`${this.routeparent}/getFileTransf/:name`)
+            .route(`${this.routeparent}/getcomprobante/:name`)
             .get(this.routesController.getTransf);
         //*------------Routes Desembolso--------*//
         app

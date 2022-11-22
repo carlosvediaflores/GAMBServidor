@@ -56,8 +56,14 @@ class Routes {
             .route(`${this.routeparent}/convenio/:id`)
             .get(this.routesController.getConveni);
         app
+            .route(`${this.routeparent}/searchconvenio/:search`)
+            .get(this.routesController.searchCV);
+        app
             .route(`${this.routeparent}/convenio/:id`)
             .put(this.routesController.updateConvenio);
+        app
+            .route(`${this.routeparent}/editarestado/:id`)
+            .put(this.routesController.editarEstado);
         app
             .route(`${this.routeparent}/convenio/:id`)
             .delete(this.routesController.removeConvenio);

@@ -92,6 +92,7 @@ class RoutesController{
           total=total+ent.monto
         }); 
         entidadData["montototal"] = total;
+        entidadData["estado"] = "REGISTRADO";
         let result = await convenio.addConvenio(entidadData);
         response.status(201).json({ serverResponse: result });
       }
@@ -162,6 +163,12 @@ class RoutesController{
         });
         return;
       }
+      public async searchCV(request: Request, response: Response) {
+        var convenio: BussConvenio = new BussConvenio();
+        var searchString = request.params.search;
+        let res = await convenio.search(searchString);
+        response.status(200).json({ serverResponse: res });
+      }
       public async getConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
         const result: Array<IConvenio> = await convenio.readConvenio();
@@ -190,6 +197,19 @@ class RoutesController{
         response.status(200).json(repres);
       }
       public async updateConvenio(request: Request, response: Response) {
+        var convenio: BussConvenio = new BussConvenio();
+        let id: string = request.params.id;
+        var params = request.body;
+        var enti:any =params.entidades;
+        var total = 0;
+        enti.forEach(function (ent:any) {
+          total=total+ent.monto
+        }); 
+        params["montototal"] = total;
+        var result = await convenio.updateConvenio(id, params);
+        response.status(200).json(result);
+      }
+      public async editarEstado(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
         let id: string = request.params.id;
         var params = request.body;

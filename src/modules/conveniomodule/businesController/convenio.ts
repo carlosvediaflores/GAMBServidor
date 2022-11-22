@@ -61,6 +61,38 @@ class BussConvenio {
     var result = await ConvenioModule.count();
     return result;
   }
+  public async search(query?: any): Promise<Array<IConvenio>>;
+  public async search(
+    search: string | any,
+    params2?: number,
+    params3?: number
+  ) {
+    var filter = {
+      $or: [
+        { codigo: { $regex: search, $options: "i" } },
+        { nombre: { $regex: search, $options: "i" } },
+        //{ entidades: { $regex: search, $options: "i" } },
+
+        //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
+      ],
+    };
+    let skip = params2 ? params2 : 0;
+    let limit = params3 ? params3 : 100;
+    let listConvenio: Array<IConvenio> = await ConvenioModule.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .sort({ _id: -1 })
+      .populate({
+        path: "entidad",
+        model: "cventidades",
+        populate: { path: "representante", model: "cvrepresentantes" },
+      })
+      .populate("entidadejecutora")
+      .populate("user")
+      .populate("files")
+      .populate("transferencia");
+    return listConvenio;
+  }
   public async readUser(post: string): Promise<IConvenio>;
   public async readUser(
     params1?: string | any,

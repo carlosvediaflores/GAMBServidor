@@ -9,6 +9,7 @@ export interface IConvenio extends Document {
     objeto: string;
     entidades: Array<IEntidad>;
     firma: Date;
+    fechafin: Date;
     representantes: string;
     montototal:number;
     montototaltrans:number;
@@ -32,6 +33,7 @@ export interface IConvenio extends Document {
     //entidades:  {type: [Schema.Types.ObjectId], ref: "cventidades"},
     entidades: {type: Array},
     firma: {type: Date},
+    fechafin: {type: Date},
     plazo: { type: Number},
     estado:{type: String},
     montototal:{type:Number},

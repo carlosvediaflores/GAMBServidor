@@ -1,20 +1,20 @@
 import mongoose, {  Document, Schema } from "mongoose";
 import { IArchivo } from "./archivo";
 export interface ISimpleSeguimiento {
-    idhj?:  string;//10
-    nuit?: string;//12
-    destino?: string;//4
-    origen?: string ;//16
-    referencia?: string;//15
-    origenhr?: string;//14
-    detalles?: string ;//5
-    recibidox?:  string;//20
-    fechaderivado?: Date;//7
-    fecharecepcion?: string;//8
-    estado?:  string;//6
+    idhj?:  string;//9
+    nuit?: string;//11
+    destino?: string;//3
+    origen?: string ;//13
+    referencia?: string;//14
+    origenhr?: string;//15
+    detalles?: string ;//4
+    recibidox?:  string;//16
+    fechaderivado?: Date;//6
+    fecharecepcion?: string;//7
+    estado?:  string;//5
     asociado?: boolean;//3
-    smsarchivo?:string;//13
-    fecharespuesta?: Date;//9
+    smsarchivo?:string;//12 
+    fecharespuesta?: Date;//8
     copia?:string; //17
     oficina?:string; //18 
     nombre?:string; //19 
@@ -37,7 +37,7 @@ export interface ISeguimiento extends Document {
     copia:string;
     oficina:string; 
     nombre:string; 
-    archivofi:Array<IArchivo>;
+    archivofi:Array<IArchivo>;//20
 }
 const SeguiSchema = new Schema({
     idhj: { type: String},

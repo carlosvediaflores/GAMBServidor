@@ -3,7 +3,7 @@ export interface ISubdireciones extends Document {
     
 }
 const SubdirSchema = new Schema({
-    nombredir: { type: String },
+    sigla: { type: String },
     nombresubdir: { type: String, required: true, unique: true },
     archivofi: { type: Array}
 },

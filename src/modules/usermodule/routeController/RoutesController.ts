@@ -427,6 +427,19 @@ class RoutesController {
     let res = await subUni.readArch(request.params.nombredir);
     response.status(200).json(res);
   }
+  public async updateArch(request: Request, response: Response) {
+    var arch: BussnesArchivo = new BussnesArchivo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await arch.updateArch(id, params);
+    response.status(200).json(result);
+  }
+  public async removeArch(request: Request, response: Response) {
+    let arch: BussnesArchivo = new BussnesArchivo();
+    let idArch: string = request.params.id;
+    let result = await arch.deleteArch(idArch);
+    response.status(201).json({ serverResponse: result });
+  }
   ///////////////HOJA DE RUTA------------------------------
 
   public async createHojas(request: Request, response: Response) {

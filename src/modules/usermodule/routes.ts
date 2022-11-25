@@ -198,6 +198,12 @@ class Routes {
     app
       .route(`${this.routeparent}/addarch/:id`)
       .put(this.routesController.addArch);
+    app
+      .route(`${this.routeparent}/arch/:id`)
+      .put(this.routesController.updateArch);
+    app
+      .route(`${this.routeparent}/arch/:id`)
+      .delete(this.routesController.removeArch);
   }
 }
 export default Routes;

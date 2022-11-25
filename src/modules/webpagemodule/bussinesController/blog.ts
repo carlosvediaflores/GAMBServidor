@@ -6,22 +6,26 @@ class BussBlog{
     }
     public async readBlog(): Promise<Array<IBlog>>;
     public async readBlog(id: string): Promise<IBlog>;
-    public async readBlog(query: any, skip: number, limit: number): Promise<Array<IBlog>>;
+    public async readBlog(query: any, skip: number, limit: number, order:any): Promise<Array<IBlog>>;
 
-    public async readBlog(params1?: string | any, params2?: number, params3?: number): Promise<Array<IBlog> | IBlog> {
+    public async readBlog(params1?: string | any, params2?: number, params3?: number, order?: any): Promise<Array<IBlog> | IBlog> {
         if (params1 && typeof params1 == "string") {
             var result: IBlog = await BlogModule.findOne({ _id: params1 });
             return result;
         } else if (params1) {
-            let skip = params2 ? params2 : 0;
-            let limit = params3 ? params3 : 1;
-            let listBlog: Array<IBlog> = await BlogModule.find(params1).skip(skip).limit(limit);
+            let skip = params2;
+            let limit = params3;
+            let listBlog: Array<IBlog> = await BlogModule.find(params1).skip(skip).limit(limit).sort(order);
             return listBlog;
         } else {
             let listBlog: Array<IBlog> = await BlogModule.find();
             return listBlog;
         }
     }  
+    public async total({}) {
+        var result = await BlogModule.count();
+        return result;
+      }
     public async readPost(img: string): Promise<IBlog>;
     public async readPost(params1?: string | any, params2?: number, params3?: number): Promise<Array<IBlog> | IBlog> {
         if (params1 && typeof params1 == "string") {

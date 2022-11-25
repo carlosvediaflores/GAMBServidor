@@ -4,11 +4,11 @@ class BussSlaider{
     constructor(){
 
     }
-    public async readSlaider(): Promise<Array<ISlaider>>;
-    public async readSlaider(id: string): Promise<ISlaider>;
-    public async readSlaider(query: any, skip: number, limit: number): Promise<Array<ISlaider>>;
+    public async readSlaiders(): Promise<Array<ISlaider>>;
+    public async readSlaiders(id: string): Promise<ISlaider>;
+    public async readSlaiders(query: any, skip: number, limit: number): Promise<Array<ISlaider>>;
 
-    public async readSlaider(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISlaider> | ISlaider> {
+    public async readSlaiders(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISlaider> | ISlaider> {
         if (params1 && typeof params1 == "string") {
             var result: ISlaider = await SlaiderModule.findOne({ _id: params1 });
             return result;
@@ -29,7 +29,7 @@ class BussSlaider{
             return result;
         }
     } 
-    public async readSliders(query?: any): Promise<Array<ISlaider>>;
+   /* public async readSliders(query?: any): Promise<Array<ISlaider>>;
     public async readSliders(search: string | any, params2?: number, params3?: number) {
         var filter = {
             "$or": [
@@ -41,7 +41,7 @@ class BussSlaider{
         let listSlider: Array<ISlaider> = await SlaiderModule.find(filter).skip(skip).limit(limit).sort({ '_id': 1 });
         return listSlider;
 
-    } 
+    } */
     public async addSlaider(slaider: ISlaider) {
         try {
             let convenioDb = new SlaiderModule(slaider);

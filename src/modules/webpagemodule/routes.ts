@@ -22,9 +22,9 @@ class Routes {
         app
             .route(`${this.routeparent}/slaider/:id`)
             .get(this.routesController.getSlider);
-        app
+        /*app
             .route(`${this.routeparent}/getslider/:search`)
-            .get(this.routesController.getSliders);
+            .get(this.routesController.getSliders);*/
         app
             .route(`${this.routeparent}/slaider/:id`)
             .put(this.routesController.updateSlaider);
@@ -59,6 +59,9 @@ class Routes {
         app
             .route(`${this.routeparent}/getimgpost/:name`)
             .get(this.routesController.getImgPost);
+        app
+            .route(`${this.routeparent}/blogs`)
+            .get(this.routesController.getBlogs);
         //*------------Routes Category--------*//
         app
             .route(`${this.routeparent}/category`)

@@ -11,8 +11,6 @@ export interface IBlog extends Document {
   tag:string;
   uri:string;
   path:string;
-  createAt: Date;
-  updateAt: Date;
   }
   const blogSchema: Schema = new Schema({
     title: {type: String},
@@ -20,7 +18,7 @@ export interface IBlog extends Document {
     img:{type:String},
     body: {type: String},
     iframe: {type: String},
-    status: {type: Boolean},
+    status: {type: Boolean, default: true},
     user:{type: String},
     category:{type: String},
     tag:{type: String},

@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs";
 
 import BussSlaider from '../bussinesController/slaider';
-import { ISlaider, ISimpleSlaider } from './../models/slaider';
+import { ISlaider} from './../models/slaider';
 import BussBlog from "../bussinesController/blog";
 import { IBlog } from './../models/blog';
 import BussCategory from "../bussinesController/category";
@@ -23,21 +23,21 @@ class RoutesController {
 
   public async getSlaider(request: Request, response: Response) {
     var entidad: BussSlaider = new BussSlaider();
-    const result: Array<ISlaider> = await entidad.readSlaider();
+    const result: Array<ISlaider> = await entidad.readSlaiders();
     response.status(200).json(result);
   }
   public async getSlider(request: Request, response: Response) {
     var slider: BussSlaider = new BussSlaider();
     //let id: string = request.params.id;
-    let res = await slider.readSlaider(request.params.id);
+    let res = await slider.readSlaiders(request.params.id);
     response.status(200).json({ serverResponse: res });
   }
-  public async getSliders(request: Request, response: Response) {
+  /*public async getSliders(request: Request, response: Response) {
     var slider: BussSlaider = new BussSlaider();
     var searchString = request.params.search;
     let res = await slider.readSliders(searchString);
     response.status(200).json({ serverResponse: res });
-  }
+  }*/
   public async updateSlaider(request: Request, response: Response) {
     var entidad: BussSlaider = new BussSlaider();
     let id: string = request.params.id;
@@ -54,7 +54,7 @@ class RoutesController {
   public async uploadSlider(request: Request, response: Response) {
     var slider: BussSlaider = new BussSlaider();
     var id: string = request.params.id;
-    var sliderToUpdate: ISlaider = await slider.readSlaider(id);
+    var sliderToUpdate: ISlaider = await slider.readSlaiders(id);
     if (!sliderToUpdate) {
       response.status(300).json({ serverResponse: "Slider no existe!" });
       return;
@@ -162,6 +162,65 @@ class RoutesController {
     var blog: BussBlog = new BussBlog();
     const result: Array<IBlog> = await blog.readBlog();
     response.status(200).json(result);
+  }
+  public async getBlogs(request: Request, response: Response) {
+    var blogs: BussBlog = new BussBlog();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.category != null) {
+      var expresion = new RegExp(params.category);
+      filter["category"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if ( Object.entries(aux).length > 0) { 
+      filter["createdAt"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if ( skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    const [ res, totalDocs ] = await Promise.all([
+      blogs.readBlog(filter,
+        skip,
+        limit,
+        order),
+        blogs.total({})
+    ])
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: number = Math.ceil(totalDocs/ limit),
+      skip,
+      order
+    });
+    return;
   }
   public async getPost(request: Request, response: Response) {
     var post: BussBlog = new BussBlog();

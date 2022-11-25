@@ -7,8 +7,6 @@ export interface ISlaider extends Document {
     user:string;
     urislaider: string;
     patsslaider: string;
-    createAt: Date;
-    updateAt: Date;
   }
   const slaiderSchema: Schema = new Schema({
     titulo: {type: String},
@@ -18,8 +16,6 @@ export interface ISlaider extends Document {
     user:{type: String},
     urislaider:{type: String},
     patsslaider: {type: String},
-    createAt:{type: Date},
-    updateAt:{type: Date}
     
   },
   {

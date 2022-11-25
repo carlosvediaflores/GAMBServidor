@@ -23,10 +23,7 @@ export interface IBlog extends Document {
     category:{type: String},
     tag:{type: String},
     uri:{type: String},
-    path:{type: String},
-    createAt:{type: String},
-    updateAt:{type: String}
-    
+    path:{type: String}    
   },
   {
     timestamps: true,

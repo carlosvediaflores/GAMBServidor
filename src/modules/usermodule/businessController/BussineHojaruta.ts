@@ -53,7 +53,12 @@ class BusinessHoja {
     let listSegui = await HojaModel.find(params1)
       .skip(skip)
       .limit(limit)
-      .sort(order);
+      .sort(order)
+      .populate({
+        path: "seguimiento",
+        model: "seguimiento",
+        populate: { path: "archivofi", model: "hrarchivo" },
+      });
     return listSegui;
   }
   public async total({}) {

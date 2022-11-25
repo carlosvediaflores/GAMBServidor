@@ -41,7 +41,7 @@ const hojarutaSchema: Schema = new Schema({
   estado: { type: String },
   contacto: {type: String},
   referencia: { type: String },
-  seguimiento: { type: Array },
+  seguimiento: {type: [Schema.Types.ObjectId], ref: "seguimiento"},
   urihoja: {type: String},
   pathhoja: {type: String},
   archivo:  {type:Array},

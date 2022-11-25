@@ -716,10 +716,10 @@ class RoutesController {
     seguiData["idhj"] = idRuta;
     seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
     seguiData["estado"] = "ENVIADO";
-    // console.log(seguiData);
+    console.log(seguiData);
     var result1 = await segui.addSegui(seguiData);
-    //let idSegui = result1._id;
-    //var result = await ruta.addSeguim(idRuta, idSegui);
+    let idSegui = result1._id;
+    var result = await ruta.addSeguim(idRuta, idSegui);
     //console.log(result + "esto es el resultado");
     if (result1 == null) {
       response.status(300).json({ serverResponse: "no se pudo guardar..." });

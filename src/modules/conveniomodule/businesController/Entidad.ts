@@ -1,5 +1,5 @@
 import EntidadModel, { IEntidad } from './../models/Entidad';
-
+import RepresentanteModel, { IRepresentante } from './../models/Representante';
 class BussEntidad{
     constructor(){
 
@@ -46,6 +46,28 @@ class BussEntidad{
         let result = await EntidadModel.remove({ _id: id });
         return result;
     }
+    public async addRepres(idEnti: string, idRepres: string) {
+        let enti = await EntidadModel.findOne({ _id: idEnti });
+        if (enti != null) {
+          var repres = await RepresentanteModel.findOne({ _id: idRepres });
+          if (repres != null) {
+            var checksub: Array<IRepresentante> = enti.representante.filter((item) => {
+              if (repres._id.toString() == item._id.toString()) {
+                return true;
+              }
+              return false;
+            });
+            console.log(checksub);
+            if (checksub.length == 0) {
+                enti.representante.push(repres);
+              return await enti.save();
+            }
+            return null;
+          }
+          return null;
+        }
+        return null;
+      }
 
 }
 export default BussEntidad;

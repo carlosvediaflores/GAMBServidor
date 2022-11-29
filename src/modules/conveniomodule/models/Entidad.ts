@@ -1,15 +1,20 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { IRepresentante } from "./Representante";
 
 export interface IEntidad extends Document {
-    nombre: string;
-    representante: string;
+    denominacion: string;
+    codigo: string;
+    sigla:string;
+    representante: Array<IRepresentante>;
     telefono: string;
     nit: number;
     cuenta:number
   }
   const entidadSchema: Schema = new Schema({
-    nombre:{ type: String, required: true, unique: true },
-    representante:{type: Schema.Types.ObjectId, ref: 'cvrepresentantes'},
+    denominacion:{ type: String, required: true, unique: true },
+    sigla:{type:String},
+    codigo:{type:String},
+    representante:{type: [Schema.Types.ObjectId], ref: "cvrepresentantes"},
     telefono: { type: String, unique: true},
     nit: {type: Number, unique: true},
     cuenta: { type: Number, unique: true},

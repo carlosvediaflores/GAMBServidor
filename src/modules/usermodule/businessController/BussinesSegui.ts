@@ -7,7 +7,7 @@ class BussinesSegui {
 
     public async readSegui(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISeguimiento> | ISeguimiento> {
         if (params1 && typeof params1 == "string") {
-            var result: ISeguimiento = await SeguiModel.findOne({ _id: params1});
+            var result: ISeguimiento = await SeguiModel.findOne({ _id: params1}).populate("archivofi");
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;

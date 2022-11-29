@@ -51,6 +51,31 @@ class RoutesController{
         let result = await entidad.deleteEntidad(id);
         response.status(200).json({ serverResponse: "Se elimino la entidad" });
       }
+      public async addRepres(request: Request, response: Response) {
+        let identi: string = request.params.id;
+        //let idSub = request.body.idSub;
+        if (identi == null) {
+          response
+            .status(300)
+            .json({ serverResponse: "El id es necesario para crear subdir" });
+          return;
+        }
+        var ruta: BussEntidad = new BussEntidad();
+        //var userResult: IUser = await orgToUpdate.save();
+        let repres: BussRepres = new BussRepres();
+        var represData: any = request.body;
+        represData["identi"] = identi;
+        console.log(represData);
+        var result1 = await repres.addRepres(represData);
+        let idSegui = result1._id;
+        var result = await ruta.addRepres(identi, idSegui);
+        //console.log(result + "esto es el resultado");
+        if (result1 == null) {
+          response.status(300).json({ serverResponse: "no se pudo guardar..." });
+          return;
+        }
+        response.status(200).json({ serverResponse: result1 });
+      }
       //*--------------Reprentantes------------------- *//
       public async createRepres(request: Request, response: Response) {
         var repres: BussRepres = new BussRepres();

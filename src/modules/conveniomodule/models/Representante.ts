@@ -11,6 +11,7 @@ export interface ISimpleRepresentante {
     estado?: boolean
   }
 export interface IRepresentante extends Document {
+    identi: string;
     nombre: string;
     apellidos: string;
     cargo: string;
@@ -22,6 +23,7 @@ export interface IRepresentante extends Document {
     estado: boolean
   }
   const represSchema: Schema = new Schema({
+    identi:{type: Schema.Types.ObjectId, ref: 'cventidades'},
     nombre:{ type: String, required: true },
     apellidos: { type: String, required: true },
     cargo: { type: String, required: true},

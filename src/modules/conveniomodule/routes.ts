@@ -26,6 +26,9 @@ class Routes {
         app
             .route(`${this.routeparent}/entidad/:id`)
             .delete(this.routesController.removeEntidad);
+        app
+            .route(`${this.routeparent}/addrepresentante/:id`)
+            .put(this.routesController.addRepres);
         //*------------Routes Representantes--------*//
         app
             .route(`${this.routeparent}/repres`)

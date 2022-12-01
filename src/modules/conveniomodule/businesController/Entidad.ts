@@ -57,7 +57,6 @@ class BussEntidad{
               }
               return false;
             });
-            console.log(checksub);
             if (checksub.length == 0) {
                 enti.representante.push(repres);
               return await enti.save();

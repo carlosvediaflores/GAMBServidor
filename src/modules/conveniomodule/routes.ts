@@ -115,6 +115,26 @@ class Routes {
         app
             .route(`${this.routeparent}/filescv`)
             .get(this.routesController.getFilescv);
+
+            //-------entities--//
+        app
+            .route(`${this.routeparent}/entity`)
+            .post(this.routesController.createEntity);
+        app
+            .route(`${this.routeparent}/entity`)
+            .get(this.routesController.getEntities);
+        app
+            .route(`${this.routeparent}/entity/:id`)
+            .get(this.routesController.getEntity);
+        app
+            .route(`${this.routeparent}/entityCod/:codigo`)
+            .get(this.routesController.getEntityCod);
+        app
+            .route(`${this.routeparent}/entity/:id`)
+            .put(this.routesController.updateEntity);
+        app
+            .route(`${this.routeparent}/entity/:id`)
+            .delete(this.routesController.removeEntity);
     }
 }
 export default Routes;

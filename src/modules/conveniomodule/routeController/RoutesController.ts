@@ -8,7 +8,7 @@ import path from "path";
 import { IEstmonto } from './../models/estadomonto';
 import { ITransferencia } from './../models/transferencia';
 import { IRepresentante } from './../models/Representante';
-import Entidad, {IEntidad} from "../models/Entidad";
+import {IEntidad} from "../models/Entidad";
 import BussEntidad from "../businesController/Entidad";
 import BussRepres from "../businesController/Representante";
 import BussConvenio from '../businesController/convenio';
@@ -18,6 +18,8 @@ import { IConvenio } from "../models/convenio";
 import { IFilescv } from "../models/files";
 import BussFiles from "../businesController/files";
 import BussDesem from "../businesController/tranferencia";
+import BussEntity from "../businesController/entity";
+import { IEntity } from "../models/entities";
 class RoutesController{
     //*--------------Entidad------------------- *//
     public async createEntidad(request: Request, response: Response) {
@@ -111,10 +113,10 @@ class RoutesController{
        public async createConvenio(request: Request, response: Response) {
         var convenio: BussConvenio = new BussConvenio();
         var entidadData = request.body;
-        var enti:any =entidadData.entidades;
+        var enti:any = entidadData.entidades;
         var total = 0;
         enti.forEach(function (ent:any) {
-          total=total+ent.monto
+          total= parseInt(total+ent.monto); 
         }); 
         entidadData["montototal"] = total;
         entidadData["estado"] = "REGISTRADO";
@@ -228,7 +230,7 @@ class RoutesController{
         var enti:any =params.entidades;
         var total = 0;
         enti.forEach(function (ent:any) {
-          total=total+ent.monto
+          total= parseInt(total+ent.monto); 
         }); 
         params["montototal"] = total;
         var result = await convenio.updateConvenio(id, params);
@@ -468,6 +470,44 @@ class RoutesController{
         var files: BussFiles = new BussFiles();
         const result: Array<IFilescv> = await files.readFile();
         response.status(200).json(result);
+      }
+
+      //----------ENTITIE------------//
+      public async createEntity(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        var entidadData = request.body;
+        let result = await entity.addEntity(entidadData);
+        response.status(201).json({ serverResponse: result });
+      }
+
+      public async getEntities(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        const result: Array<IEntity> = await entity.readEntity();
+        response.status(200).json(result);
+      }
+      public async getEntity(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        let repres = await entity.readEntity(request.params.id);
+        response.status(200).json(repres);
+      }
+      public async getEntityCod(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        let codigo: number = parseInt(request.params.codigo);
+        let repres = await entity.readEntityCod(codigo);
+        response.status(200).json(repres);
+      }
+      public async updateEntity(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        let id: string = request.params.id;
+        var params = request.body;
+        var result = await entity.updateEntity(id, params);
+        response.status(200).json(result);
+      }
+      public async removeEntity(request: Request, response: Response) {
+        var entity: BussEntity = new BussEntity();
+        let id: string = request.params.id;
+        let result = await entity.deleteEntity(id);
+        response.status(200).json({ serverResponse: "Se elimino la entidad" });
       }
 }
 export default RoutesController;

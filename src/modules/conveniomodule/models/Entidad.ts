@@ -3,7 +3,7 @@ import { IRepresentante } from "./Representante";
 
 export interface IEntidad extends Document {
     denominacion: string;
-    codigo: string;
+    codigo: number;
     sigla:string;
     representante: Array<IRepresentante>;
     telefono: string;
@@ -11,13 +11,13 @@ export interface IEntidad extends Document {
     cuenta:number
   }
   const entidadSchema: Schema = new Schema({
-    denominacion:{ type: String, required: true, unique: true },
-    sigla:{type:String},
-    codigo:{type:String},
+    denominacion:{ type: String, unique: true},
+    sigla:{type:String, unique: true},
+    codigo:{type:Number, unique: true},
     representante:{type: [Schema.Types.ObjectId], ref: "cvrepresentantes"},
-    telefono: { type: String, unique: true},
-    nit: {type: Number, unique: true},
-    cuenta: { type: Number, unique: true},
+    telefono: { type: String},
+    nit: {type: Number},
+    cuenta: { type: Number},
   },{
     timestamps: true,
     versionKey: false,

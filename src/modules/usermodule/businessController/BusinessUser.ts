@@ -17,6 +17,7 @@ class BusinessUser {
         if (params1 && typeof params1 == "string") {
             var result: IUser = await UsersModel.findOne({ _id: params1 });
             return result;
+            
         } else if (params1) {
             let skip = params3;
             let limit = params2;

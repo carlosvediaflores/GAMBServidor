@@ -7,7 +7,7 @@ export interface ISimpleUser {
   ci?: string;
   numberphone?: number;
   email?: string;
-  birthdate?: Date;
+  birthday?: Date;
   registerdate?: Date;
   password?: string;
   post?: string;
@@ -21,7 +21,7 @@ export interface IUser extends Document {
   ci: string;
   numberphone: number;
   email: string;
-  birthdate: Date;
+  birthday: Date;
   registerdate: Date;
   password: string;
   post: string;
@@ -35,11 +35,11 @@ const userSchema: Schema = new Schema({
   ci: { type: String },
   numberphone: { type: Number },
   email: { type: String, required: true, unique: true },
-  birthdate: { type: Date },
+  birthday: { type: Date },
   registerdate: { type: Date, required: true },
   password: { type: String, required: true },
   post: { type: String },
-  roles: { type: String },
+  roles: { type: String, default: "SUPER_USER" },
   uriavatar: { type: String },
   pathavatar: { type: String },
 },
@@ -47,6 +47,5 @@ const userSchema: Schema = new Schema({
   timestamps: true,
   versionKey: false,
 });
-
 const model = mongoose.model<IUser>('User', userSchema);
 export default model;

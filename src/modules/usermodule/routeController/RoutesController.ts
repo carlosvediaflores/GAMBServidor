@@ -1,6 +1,7 @@
 import { IFiles } from "./../models/Files";
 import { IHojaruta, ISimpleHojaruta } from "./../models/Hojaruta";
 import { IOrganizacion } from "./../models/Organizacion";
+const ObjectId = require("mongoose").Types.ObjectId;
 
 import { Request, Response } from "express";
 import BusinessUser from "../businessController/BusinessUser";
@@ -13,11 +14,13 @@ import jsonwebtoken from "jsonwebtoken";
 import Users, { ISimpleUser, IUser } from "../models/Users";
 import isEmpty from "is-empty";
 import path from "path";
+import fs from "fs";
 import BusinessHoja from "../businessController/BussineHojaruta";
 import { ISeguimiento } from "../models/Seguimiento";
 import BussinesFile from "../businessController/BussinesFlies";
-import {IArchivo} from "../models/archivo";
+import { IArchivo } from "../models/archivo";
 import BussnesArchivo from "../businessController/BusinessArch";
+import { isValidObjectId } from "mongoose";
 interface Icredentials {
   email: string;
   password: string;
@@ -78,35 +81,22 @@ class RoutesController {
   }
   public async getUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
-    const result1: Array<IUser> = await user.readUsers();
-    var totalDocs = result1.length;
-    var limit = parseInt(request.params.limit, 10) || 100;
-    var page = parseInt(request.params.page, 10) || 0;
-    var totalpage = Math.ceil(totalDocs / limit);
-    var skip = limit * (page - 1);
-    if (page == 1 || !page || page == undefined) {
-      skip = 0;
-    } else {
-      if (page <= totalDocs) {
-        skip = limit * (page - 1);
-      }
-      skip = 0;
-    }
-    const result: Array<IUser> = await user.readUsers({}, limit, skip);
-    response.status(200).json({
-      serverResponse: result,
-      totalDocs,
-      limit,
-      totalpage,
-      page,
-    });
-    return;
+    const result: Array<IUser> = await user.readUsers();
+    response.status(200).json({ serverResponse: result });
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
-    //let id: string = request.params.id;
-    let res = await user.readUsers(request.params.id);
-    response.status(200).json(res);
+    let id: string = request.params.id;
+    if (ObjectId.isValid(id)) {
+      if (String(new ObjectId(id)) === id) {
+        let res = await user.readUsers(id);
+        response.status(300).json({ serverResponse: res });
+      return;
+      }
+      
+    }
+    
+    response.status(200).json("errrorr");
   }
   public async updateUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -515,12 +505,12 @@ class RoutesController {
       var lt = params.datelt;
       aux["$lt"] = lt;
     }
-    if ( Object.entries(aux).length > 0) { 
+    if (Object.entries(aux).length > 0) {
       filter["fecharecepcion"] = aux;
     }
     if (params.skip) {
       skip = parseInt(params.skip);
-      if ( skip >= 2) {
+      if (skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -533,20 +523,17 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    const [ res, totalDocs ] = await Promise.all([
-      segui.readHojaRuta(filter,
-        skip,
-        limit,
-        order),
-       segui.total({})
-    ])
+    const [res, totalDocs] = await Promise.all([
+      segui.readHojaRuta(filter, skip, limit, order),
+      segui.total({}),
+    ]);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage: number = Math.ceil(totalDocs/ limit),
+      totalpage: (number = Math.ceil(totalDocs / limit)),
       skip,
-      order
+      order,
     });
     return;
   }
@@ -823,7 +810,7 @@ class RoutesController {
       var lt = params.datelt;
       aux["$lt"] = lt;
     }
-    if ( Object.entries(aux).length > 0) { 
+    if (Object.entries(aux).length > 0) {
       filter["fecharecepcion"] = aux;
     }
     let respost: Array<ISeguimiento> = await segui.readOficina(filter);

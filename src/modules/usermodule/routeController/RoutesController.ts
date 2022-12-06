@@ -90,13 +90,11 @@ class RoutesController {
     if (ObjectId.isValid(id)) {
       if (String(new ObjectId(id)) === id) {
         let res = await user.readUsers(id);
-        response.status(300).json({ serverResponse: res });
-      return;
+        response.status(200).json({ serverResponse: res });
+        return;
       }
-      
     }
-    
-    response.status(200).json("errrorr");
+    response.status(300).json("No es un Indentificador");
   }
   public async updateUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -149,7 +147,7 @@ class RoutesController {
         .json({ serverResponse: "El rol tiene parametros no validos" });
       return;
     }
-    response.status(201).json({ serverResponse: result });
+    response.status(200).json({ serverResponse: result });
   }
   public async removeRol(request: Request, response: Response) {
     let roles: BussinessRoles = new BussinessRoles();
@@ -171,12 +169,26 @@ class RoutesController {
    }*/
 
   public async uploadPortrait(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var id: string = request.params.id;
     if (!id) {
       response
         .status(300)
         .json({ serverResponse: "El id es necesario para subir una foto" });
       return;
+    }
+    if (!ObjectId.isValid(id)) {
+      if (String(new ObjectId(id)) === id) {
+        let res = await user.readUsers(id);
+        response.status(300).json("No es un Indentificador");
+        return;
+      }
     }
     var user: BusinessUser = new BusinessUser();
     var userToUpdate: IUser = await user.readUsers(id);
@@ -190,19 +202,10 @@ class RoutesController {
         .json({ serverResponse: "No existe un archivo adjunto" });
       return;
     }
-    var dir = `${__dirname}/../../../../avatarfiles`;
+    var dir = `${__dirname}/../../../../uploads/users`;
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
-    /*var file: any = files.portrait;
-    if (!file) {
-      response.status(300).json({
-        serverResponse:
-          "error el archivo debe ser subido con el parametro portrait!",
-      });
-      return;
-    }*/
     var key: Array<string> = Object.keys(files);
-    /**/
     var copyDirectory = (totalpath: string, file: any) => {
       return new Promise((resolve, reject) => {
         file.mv(totalpath, (err: any, success: any) => {
@@ -215,6 +218,9 @@ class RoutesController {
         });
       });
     };
+    pathViejo = userToUpdate.pathavatar;
+    borrarImagen(pathViejo);
+
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 7);
@@ -230,24 +236,7 @@ class RoutesController {
       uriavatar: userResult.uriavatar,
       pathavatar: userResult.pathavatar,
     };
-    response.status(300).json({ serverResponse: simpleUser });
-    /*file.mv(totalpath, async (err: any, success: any) => {
-      if (err) {
-        response
-          .status(300)
-          .json({ serverResponse: "No se pudo almacenar el archivo" });
-        return;
-      }
-
-      userToUpdate.uriavatar = "/api/getportrait/" + id;
-      userToUpdate.pathavatar = totalpath;
-      var userResult: IUser = await userToUpdate.save();
-      var simpleUser: ISimpleUser = {
-        username: userResult.user.sort({ '_id': -1 });avatar,
-        pathavatar: userResult.pathavatar,
-      };
-      response.status(300).json({ serverResponse: simpleUser });
-    });*/
+    response.status(200).json({ serverResponse: simpleUser });
   }
 
   public async getPortrait(request: Request, response: Response) {

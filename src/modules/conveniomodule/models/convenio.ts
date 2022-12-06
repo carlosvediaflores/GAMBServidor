@@ -1,12 +1,14 @@
 import mongoose, { Schema, Document, Decimal128 } from "mongoose";
 import { IEntidad } from "./Entidad";
 import { IFilescv } from "./files";
+import {IFinaciadoras} from "../models/finaciadoras"
 import { ITransferencia } from "./transferencia";
 
 export interface IConvenio extends Document {
     codigo: string;
     nombre: string;
     objeto: string;
+    financiadoras: Array<IFinaciadoras>;
     entidades: Array<IEntidad>;
     firma: Date;
     fechafin: Date;
@@ -29,16 +31,16 @@ export interface IConvenio extends Document {
     codigo:{ type: String, required: true },
     nombre:{type:String},
     objeto: { type: String },
-    //entidades:  [{ type: Schema.Types.ObjectId, ref: "cventidades"}],
-    //entidades:  {type: [Schema.Types.ObjectId], ref: "cventidades"},
-    entidades: {type: Array},
+    //entidades:  [{ type: Schema.Types.ObjectId, ref: "cvfinanciadoras"}],
+    financiadoras:  [{ type: Schema.Types.ObjectId, ref: "cvfinanciadoras"}],
+    entidades: {type: [Schema.Types.ObjectId], ref: "cvfiles"},
     firma: {type: Date},
     fechafin: {type: Date},
     plazo: { type: Number},
-    estado:{type: String},
-    montototal:{type:Number},
+    estado:{type: String, default: "REGISTRADO"},
+    montototal:{type:String,default:"0"},
     montototaltrans:{type:Number},
-    saldo:{type:Number},
+    saldo:{type:String, default: "0"},
     entidadejecutora: {type: Schema.Types.ObjectId, ref: 'cventidades'},
     empresaejecutora: {type: Schema.Types.ObjectId, ref: 'cvempresa'},
    // desembolso: {type: String},

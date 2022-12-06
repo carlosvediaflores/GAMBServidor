@@ -1,7 +1,7 @@
-import convenio from "../models/convenio";
 import ConvenioModule, { IConvenio } from "../models/convenio";
 import EntidadModule, { IEntidad } from "../models/Entidad";
 import filesModule, { IFilescv } from "../models/files";
+import financModule, {IFinaciadoras} from "../models/finaciadoras"
 import transfeModel, { ITransferencia } from "../models/transferencia";
 
 class BussConvenio {
@@ -24,7 +24,12 @@ class BussConvenio {
     if (params1 && typeof params1 == "string") {
       var result: IConvenio = await ConvenioModule.findOne({
         _id: params1,
-      }).populate("transferencia");
+      }).populate("transferencia")
+      .populate({
+        path: "financiadoras",
+        model: "cvfinanciadoras",
+        populate: { path: "entidad", model: "cventidades" },
+      });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -34,14 +39,14 @@ class BussConvenio {
         .limit(limit)
         .sort(order)
         .populate({
-          path: "entidad",
-          model: "cventidades",
-          populate: { path: "representante", model: "cvrepresentantes" },
+          path: "financiadoras",
+          model: "cvfinanciadoras",
+          populate: { path: "entidad", model: "cventidades" },
         })
         .populate("entidadejecutora")
         .populate("user")
         .populate("files")
-        .populate("transferencia");
+        .populate("transferencia")
       return listConvenio;
     } else {
       let listConvenio: Array<IConvenio> = await ConvenioModule.find()
@@ -132,7 +137,6 @@ class BussConvenio {
           }
           return false;
         });
-        console.log(checkrol);
         if (checkrol.length == 0) {
           convenio.entidades.push(enti);
           return await convenio.save();
@@ -155,7 +159,6 @@ class BussConvenio {
           }
           return false;
         });
-        console.log(checkrol);
         if (checkrol.length == 0) {
           convenio.files.push(fil);
           return await convenio.save();
@@ -179,9 +182,29 @@ class BussConvenio {
             return false;
           }
         );
-        console.log(checkrol);
         if (checkrol.length == 0) {
           convenio.transferencia.push(fil);
+          return await convenio.save();
+        }
+        return null;
+      }
+      return null;
+    }
+    return null;
+  }
+  public async addfinanc(idcv: string, idFile: string) {
+    let convenio = await ConvenioModule.findOne({ _id: idcv });
+    if (convenio != null) {
+      var fil = await financModule.findOne({ _id: idFile });
+      if (fil != null) {
+        var checkrol: Array<IFinaciadoras> = convenio.financiadoras.filter((item) => {
+          if (fil._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checkrol.length == 0) {
+          convenio.financiadoras.push(fil);
           return await convenio.save();
         }
         return null;

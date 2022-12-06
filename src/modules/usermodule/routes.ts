@@ -21,7 +21,7 @@ class Routes {
       .route(`${this.routeparent}/users/:limit?/:page?`)
       .get(this.routesController.getUsers);
     app
-      .route(`${this.routeparent}/user/:id`)
+      .route(`${this.routeparent}/users/:id`)
       .get(this.routesController.getUser);
     app
       .route(`${this.routeparent}/user/:post`)

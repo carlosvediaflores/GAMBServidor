@@ -86,15 +86,9 @@ class RoutesController {
   }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
-    let id: string = request.params.id;
-    if (ObjectId.isValid(id)) {
-      if (String(new ObjectId(id)) === id) {
-        let res = await user.readUsers(id);
-        response.status(200).json({ serverResponse: res });
-        return;
-      }
-    }
-    response.status(300).json("No es un Indentificador");
+    //let id: string = request.params.id;
+    let res = await user.readUsers(request.params.id);
+    response.status(200).json(res);
   }
   public async updateUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();

@@ -2,13 +2,13 @@ import mongoose, {  Document, Schema } from "mongoose";
 export interface IFinaciadoras extends Document {
     idcv:  string;
     tipo: string;
-    monto: number;
+    monto: string;
     entidad: string
 }
 const FileSchema = new Schema({
     idcv: { type: Schema.Types.ObjectId, ref: 'cvconvenio'},
     tipo: { type: String},
-    monto: { type: Number},
+    monto: { type: String},
     entidad: { type: Schema.Types.ObjectId, ref: 'cvendidades'},
 },{
     timestamps: true,

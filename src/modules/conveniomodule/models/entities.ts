@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
 export interface IEntity extends Document {
     denominacion: string;
-    codigo: Number;
+    codigo: number;
     sigla:string;
   }
   const entitySchema: Schema = new Schema({

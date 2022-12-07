@@ -90,25 +90,18 @@ class BussinesSegui {
             return err;
         }
     }
-   /* public async getListSubdir() {
-        let result = await SubdireccionesModel.find();
-        return result;
-    }*/
-    
+     
     public async updateSegui(id: string, segui: ISeguimiento) {
-
         let result = await SeguiModel.update({ _id: id }, { $set: segui });
         return result;
     }
     public async updateSeguiAs(nuit: string, segui: ISeguimiento) {
-
         let result = await SeguiModel.updateMany({ nuit: nuit }, { $set: segui });
         return result;
     }
     
     public async deleteSegui(id: String) {
         let result = await SeguiModel.remove({ _id: id });
-        ////----------////
         return result;
     }
     public async addArchivo(idSegui: string, idArch: string) {
@@ -122,7 +115,6 @@ class BussinesSegui {
                     }
                     return false;
                 });
-                console.log(checksub)
                 if (checksub.length == 0) {
                     segui.archivofi.push(arch._id);
                     return await segui.save();

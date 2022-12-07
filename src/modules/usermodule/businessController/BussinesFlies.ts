@@ -44,6 +44,5 @@ class BussinesFile {
         ////----------////
         return result;
     }
-
 }
 export default BussinesFile;

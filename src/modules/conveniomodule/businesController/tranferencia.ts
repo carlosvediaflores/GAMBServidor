@@ -28,7 +28,8 @@ class BussDesem{
                 path: "idcv",
                 model: "cvconvenio",
                 populate: { path:"transferencia",model:"cvtransferencia"},
-              });
+              })
+              .populate("partidas");
             return listDesem;
         }
     }  

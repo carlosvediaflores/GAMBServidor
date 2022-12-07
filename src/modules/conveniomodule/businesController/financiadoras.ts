@@ -52,17 +52,17 @@ class BussFinanc{
         return listFinanc;
       }
     }
-    public async addFinanc(convenio: IFinaciadoras) {
+    public async addFinanc(financ: IFinaciadoras) {
       try {
-        let finanDb = new FinanModule(convenio);
+        let finanDb = new FinanModule(financ);
         let result = await finanDb.save();
         return result;
       } catch (err) {
         return err;
       }
     }
-    public async updateFinanc(id: string, convenio: any) {
-      let result = await FinanModule.update({ _id: id }, { $set: convenio });
+    public async updateFinanc(id: string, financ: any) {
+      let result = await FinanModule.update({ _id: id }, { $set: financ });
       return result;
     }
     public async deleteFinanc(id: string) {

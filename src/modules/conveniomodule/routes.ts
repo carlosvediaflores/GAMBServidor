@@ -136,7 +136,7 @@ class Routes {
     app
       .route(`${this.routeparent}/entity/:id`)
       .delete(this.routesController.removeEntity);
-    //-------entities--//
+    //-------Financiadoras--//
     app
       .route(`${this.routeparent}/financiadora`)
       .post(this.routesController.createFinanc);
@@ -152,6 +152,25 @@ class Routes {
     app
       .route(`${this.routeparent}/financiadora/:id`)
       .delete(this.routesController.removeFinanc);
+    //-------partidas--//
+    app
+      .route(`${this.routeparent}/partida`)
+      .post(this.routesController.createPartida);
+    app
+      .route(`${this.routeparent}/partidas`)
+      .get(this.routesController.getPartidas);
+    app
+      .route(`${this.routeparent}/partida/:id`)
+      .get(this.routesController.getPartida);
+    app
+      .route(`${this.routeparent}/partidaCod/:codigo`)
+      .get(this.routesController.getPartidaCod);
+    app
+      .route(`${this.routeparent}/partida/:id`)
+      .put(this.routesController.updatePartida);
+    app
+      .route(`${this.routeparent}/partida/:id`)
+      .delete(this.routesController.removePartida);
   }
 }
 export default Routes;

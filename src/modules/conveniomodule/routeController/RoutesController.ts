@@ -21,6 +21,8 @@ import BussEntity from "../businesController/entity";
 import { IEntity } from "../models/entities";
 import { IFinaciadoras } from "../models/finaciadoras";
 import BussFinanc from "../businesController/financiadoras";
+import BussPartida from "../businesController/partidasg"
+import {IPartidas} from "../models/partidasg"
 class RoutesController {
   //*--------------Entidad------------------- *//
   public async createEntidad(request: Request, response: Response) {
@@ -208,9 +210,9 @@ class RoutesController {
     let financ: BussFinanc = new BussFinanc();
     var represData: any = request.body;
     var monto = represData.monto;
-    var montoInt= monto.replace(/\./g, '');
+    //var montoInt= monto.replace(/\,/g, '');
     represData["idcv"] = idconv;
-    represData["monto"] = montoInt;
+    //represData["monto"] = montoInt;
     var result1 = await financ.addFinanc(represData);
     let idFinanc = result1._id;
     var result = await conve.addfinanc(idconv, idFinanc);
@@ -553,13 +555,50 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await financ.updateFinanc(id, params);
-    response.status(200).json(result);
+    response.status(200).json("Se modificó con éxito");
   }
   public async removeFinanc(request: Request, response: Response) {
     var financ: BussFinanc = new BussFinanc();
     let id: string = request.params.id;
     let result = await financ.deleteFinanc(id);
     response.status(200).json({ serverResponse: "Se elimino el EstadoMonto" });
+  }
+  //----------PARTIDAS------------//
+  public async createPartida(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    var entidadData = request.body;
+    let result = await partida.addPartida(entidadData);
+    response.status(201).json({ serverResponse: result });
+  }
+
+  public async getPartidas(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    const result: Array<IPartidas> = await partida.readPartida();
+    response.status(200).json(result);
+  }
+  public async getPartida(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    let repres = await partida.readPartida(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async getPartidaCod(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    let codigo: number = parseInt(request.params.codigo);
+    let repres = await partida.readPartidaCod(codigo);
+    response.status(200).json(repres);
+  }
+  public async updatePartida(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await partida.updatePartida(id, params);
+    response.status(200).json(result);
+  }
+  public async removePartida(request: Request, response: Response) {
+    var partida: BussPartida = new BussPartida();
+    let id: string = request.params.id;
+    let result = await partida.deletePartida(id);
+    response.status(200).json({ serverResponse: "Se elimino la entidad" });
   }
 }
 export default RoutesController;

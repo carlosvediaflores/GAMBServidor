@@ -2,7 +2,6 @@ import FileModel, { IFiles } from "./../models/Files";
 import { query } from "express";
 import HojaModel, { IHojaruta } from "./../models/Hojaruta";
 import SeguientoModel, { ISeguimiento } from "./../models/Seguimiento";
-import { AnyArray } from "mongoose";
 class BusinessHoja {
   public async readHoja(): Promise<Array<IHojaruta>>;
   public async readHoja(id: string): Promise<IHojaruta>;
@@ -125,7 +124,6 @@ class BusinessHoja {
           }
           return false;
         });
-        console.log(checksub);
         if (checksub.length == 0) {
           ruta.seguimiento.push(segui);
           return await ruta.save();
@@ -147,7 +145,6 @@ class BusinessHoja {
           }
           return false;
         });
-        console.log(checkrol);
         if (checkrol.length == 0) {
           hoja.asociado.push(aso);
           return await aso.save();
@@ -224,7 +221,6 @@ class BusinessHoja {
           }
           return false;
         });
-        console.log(checkrol);
         if (checkrol.length == 0) {
           ruta.archivo.push(fil);
           return await ruta.save();

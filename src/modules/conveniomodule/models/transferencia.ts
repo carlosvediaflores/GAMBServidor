@@ -1,10 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { IPartidas } from "./partidasg";
 export interface ITransferencia extends Document {
   idcv:string;
   entidad:string
   fecha: Date;
   fuente: string;
   cuenta: string;
+  partida:Array<IPartidas>
   importe: number;
   total: number;
   saldo: number;
@@ -20,6 +22,7 @@ const desSchema: Schema = new Schema(
     fecha: { type: Date},
     fuente: { type: String},
     cuenta: { type: String},
+    partida:{type: Schema.Types.ObjectId, ref: 'partidas'},
     importe: { type: Number},
     total: { type: Number},
     saldo: { type: Number},

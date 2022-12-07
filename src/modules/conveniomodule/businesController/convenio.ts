@@ -24,7 +24,12 @@ class BussConvenio {
     if (params1 && typeof params1 == "string") {
       var result: IConvenio = await ConvenioModule.findOne({
         _id: params1,
-      }).populate("transferencia")
+      })
+      .populate({
+        path: "transferencia",
+        model: "cvtransferencia",
+        populate: { path: "partida", model: "partidas" },
+      })
       .populate({
         path: "financiadoras",
         model: "cvfinanciadoras",
@@ -43,10 +48,14 @@ class BussConvenio {
           model: "cvfinanciadoras",
           populate: { path: "entidad", model: "cventidades" },
         })
+        .populate({
+          path: "transferencia",
+          model: "cvtransferencia",
+          populate: { path: "partida", model: "partidas" },
+        })
         .populate("entidadejecutora")
         .populate("user")
         .populate("files")
-        .populate("transferencia")
       return listConvenio;
     } else {
       let listConvenio: Array<IConvenio> = await ConvenioModule.find()

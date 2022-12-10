@@ -687,7 +687,6 @@ class RoutesController {
     seguiData["idhj"] = idRuta;
     seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
     seguiData["estado"] = "ENVIADO";
-    console.log(seguiData);
     var result1 = await segui.addSegui(seguiData);
     let idSegui = result1._id;
     var result = await ruta.addSeguim(idRuta, idSegui);

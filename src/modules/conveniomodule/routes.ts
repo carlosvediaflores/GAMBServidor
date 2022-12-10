@@ -171,6 +171,25 @@ class Routes {
     app
       .route(`${this.routeparent}/partida/:id`)
       .delete(this.routesController.removePartida);
+    //-------rubros--//
+    app
+      .route(`${this.routeparent}/rubro`)
+      .post(this.routesController.createRubro);
+    app
+      .route(`${this.routeparent}/rubros`)
+      .get(this.routesController.getRubros);
+    app
+      .route(`${this.routeparent}/rubro/:id`)
+      .get(this.routesController.getRubro);
+    app
+      .route(`${this.routeparent}/rubroCod/:codigo`)
+      .get(this.routesController.getRubroCod);
+    app
+      .route(`${this.routeparent}/rubro/:id`)
+      .put(this.routesController.updateRubro);
+    app
+      .route(`${this.routeparent}/rubro/:id`)
+      .delete(this.routesController.removeRubro);
   }
 }
 export default Routes;

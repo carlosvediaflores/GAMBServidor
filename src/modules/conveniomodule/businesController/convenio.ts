@@ -25,11 +25,7 @@ class BussConvenio {
       var result: IConvenio = await ConvenioModule.findOne({
         _id: params1,
       })
-      .populate({
-        path: "transferencia",
-        model: "cvtransferencia",
-        populate: { path: "partida", model: "partidas" },
-      })
+      .populate("transferencia")
       .populate({
         path: "financiadoras",
         model: "cvfinanciadoras",
@@ -48,11 +44,7 @@ class BussConvenio {
           model: "cvfinanciadoras",
           populate: { path: "entidad", model: "cventidades" },
         })
-        .populate({
-          path: "transferencia",
-          model: "cvtransferencia",
-          populate: { path: "partida", model: "partidas" },
-        })
+        .populate("transferencia")
         .populate("entidadejecutora")
         .populate("user")
         .populate("files")

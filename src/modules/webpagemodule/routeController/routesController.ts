@@ -1,17 +1,19 @@
-
 import { Request, Response } from "express";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
 import isEmpty from "is-empty";
 import path from "path";
 import fs from "fs";
+const ObjectId = require("mongoose").Types.ObjectId;
 
-import BussSlaider from '../bussinesController/slaider';
-import { ISlaider} from './../models/slaider';
+import BussSlaider from "../bussinesController/slaider";
+import { ISlaider } from "./../models/slaider";
 import BussBlog from "../bussinesController/blog";
-import { IBlog } from './../models/blog';
+import { IBlog } from "./../models/blog";
 import BussCategory from "../bussinesController/category";
-import { ICategory } from './../models/category';
+import { ICategory } from "./../models/category";
+import { IGaceta } from "../models/gaceta";
+import BussGaceta from "../bussinesController/gaceta";
 class RoutesController {
   //*--------------Slider------------------- *//
   public async createSlaider(request: Request, response: Response) {
@@ -64,8 +66,8 @@ class RoutesController {
       var Result = await slider.updateSlaider(id, filData);
       response.status(200).json({ serverResponse: "Slider modificado" });
       return;
-    } 
-    if(isEmpty(request.files)){
+    }
+    if (isEmpty(request.files)) {
       response
         .status(300)
         .json({ serverResponse: "No existe un archivo adjunto" });
@@ -92,8 +94,8 @@ class RoutesController {
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 7);
-        var ext: string = "jpg"
-        var newname: string = `${'GAMB'}_${filehash}.${ext}`;
+        var ext: string = "jpg";
+        var newname: string = `${"GAMB"}_${filehash}.${ext}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         sliderData.img = newname;
@@ -101,12 +103,9 @@ class RoutesController {
         sliderData.patsslaider = totalpath;
         var sliderResult: ISlaider = await slider.addSlaider(sliderData);
       }
-      response
-        .status(200)
-        .json({
-          serverResponse:
-            sliderResult
-        });
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
       return;
     }
     var filData: any = request.body;
@@ -116,8 +115,8 @@ class RoutesController {
       //var nameimg: string = file.name;
       //var extesplit = nameimg.split('\.');
       //var fileext: string = extesplit[1];
-      var ext: string = "jpg"
-      var newname: string = `${'GAMB'}_${filehash}.${ext}`;
+      var ext: string = "jpg";
+      var newname: string = `${"GAMB"}_${filehash}.${ext}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.img = newname;
@@ -187,12 +186,12 @@ class RoutesController {
       var lt = params.datelt;
       aux["$lt"] = lt;
     }
-    if ( Object.entries(aux).length > 0) { 
+    if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
     if (params.skip) {
       skip = parseInt(params.skip);
-      if ( skip >= 2) {
+      if (skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -205,20 +204,17 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    const [ res, totalDocs ] = await Promise.all([
-      blogs.readBlog(filter,
-        skip,
-        limit,
-        order),
-        blogs.total({})
-    ])
+    const [res, totalDocs] = await Promise.all([
+      blogs.readBlog(filter, skip, limit, order),
+      blogs.total({}),
+    ]);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage: number = Math.ceil(totalDocs/ limit),
+      totalpage: (number = Math.ceil(totalDocs / limit)),
       skip,
-      order
+      order,
     });
     return;
   }
@@ -254,8 +250,8 @@ class RoutesController {
       var Result = await post.updateBlog(id, filData);
       response.status(200).json({ serverResponse: "Post modificado" });
       return;
-    } 
-    if(isEmpty(request.files)){
+    }
+    if (isEmpty(request.files)) {
       response
         .status(300)
         .json({ serverResponse: "No existe un archivo adjunto" });
@@ -282,8 +278,8 @@ class RoutesController {
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 7);
-        var ext: string = "jpg"
-        var newname: string = `${'GAMB'}_${filehash}.${ext}`;
+        var ext: string = "jpg";
+        var newname: string = `${"GAMB"}_${filehash}.${ext}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         postData.img = newname;
@@ -291,12 +287,9 @@ class RoutesController {
         postData.path = totalpath;
         var sliderResult: IBlog = await post.addBlog(postData);
       }
-      response
-        .status(200)
-        .json({
-          serverResponse:
-            sliderResult
-        });
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
       return;
     }
     var filData: any = request.body;
@@ -306,8 +299,8 @@ class RoutesController {
       //var nameimg: string = file.name;
       //var extesplit = nameimg.split('\.');
       //var fileext: string = extesplit[1];
-      var ext: string = "jpg"
-      var newname: string = `${'GAMB'}_${filehash}.${ext}`;
+      var ext: string = "jpg";
+      var newname: string = `${"GAMB"}_${filehash}.${ext}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.img = newname;
@@ -340,8 +333,8 @@ class RoutesController {
     }
     response.sendFile(postData.path);
   }
-   //* ---------------Category--------------*//
-   public async createCategory(request: Request, response: Response) {
+  //* ---------------Category--------------*//
+  public async createCategory(request: Request, response: Response) {
     var blog: BussCategory = new BussCategory();
     var blogData = request.body;
     let result = await blog.addCategory(blogData);
@@ -371,6 +364,190 @@ class RoutesController {
     let id: string = request.params.id;
     let result = await blog.deleteCategory(id);
     response.status(200).json({ serverResponse: "Se elimino la blog" });
+  }
+  //* ---------------GACETA--------------*//
+  public async getGacetas(request: Request, response: Response) {
+    var blogs: BussGaceta = new BussGaceta();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.category != null) {
+      var expresion = new RegExp(params.category);
+      filter["category"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    const [res, totalDocs] = await Promise.all([
+      blogs.readGaceta(filter, skip, limit, order),
+      blogs.total({}),
+    ]);
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: (number = Math.ceil(totalDocs / limit)),
+      skip,
+      order,
+    });
+    return;
+  }
+  public async getGaceta(request: Request, response: Response) {
+    var gaceta: BussGaceta = new BussGaceta();
+    //let id: string = request.params.id;
+    let res = await gaceta.readGaceta(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async removeGaceta(request: Request, response: Response) {
+    var gaceta: BussGaceta = new BussGaceta();
+    let id: string = request.params.id;
+    let result = await gaceta.deleteGaceta(id);
+    response.status(200).json({ serverResponse: "Se elimino la blog" });
+  }
+  public async uploadGaceta(request: Request, response: Response) {
+    var gaceta: BussGaceta = new BussGaceta();
+    var id: string = request.params.id;
+    var gacetaToUpdate: IGaceta = await gaceta.readGaceta(id);
+    if (!gacetaToUpdate) {
+      response.status(300).json({ serverResponse: "Post no existe!" });
+      return;
+    }
+    if (isEmpty(request.files) && id) {
+      var filData: any = request.body;
+      var Result = await gaceta.updateGaceta(id, filData);
+      response.status(200).json({ serverResponse: "Post modificado" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/gaceta`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (!id) {
+      var gacetaData = request.body;
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${
+          gacetaData.numero
+        }_${filehash}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        gacetaData.archivo = newname;
+        gacetaData.uri = "getgaceta/" + newname;
+        gacetaData.path = totalpath;
+        var sliderResult: IGaceta = await gaceta.addGaceta(gacetaData);
+      }
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
+      return;
+    }
+    var filData: any = request.body;
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${
+        filData.numero
+      }_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      filData.uri = "getgaceta/" + newname;
+      filData.path = totalpath;
+      var Result = await gaceta.updateGaceta(id, filData);
+      response.status(200).json({ serverResponse: "gaceta modificado" });
+      return;
+    }
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  public async getImgGaceta(request: Request, response: Response) {
+    var name: string = request.params.name;
+    if (!name) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var gaceta: BussGaceta = new BussGaceta();
+    var gacetaData: IGaceta = await gaceta.readGaceta(name);
+    if (!gacetaData) {
+      response.status(300).json({ serverResponse: "Error " });
+      return;
+    }
+    if (gacetaData.path == null) {
+      response.status(300).json({ serverResponse: "No existe imagen " });
+      return;
+    }
+    response.sendFile(gacetaData.path);
   }
 }
 export default RoutesController;

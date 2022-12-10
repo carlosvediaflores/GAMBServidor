@@ -23,6 +23,8 @@ import { IFinaciadoras } from "../models/finaciadoras";
 import BussFinanc from "../businesController/financiadoras";
 import BussPartida from "../businesController/partidasg"
 import {IPartidas} from "../models/partidasg"
+import BussRubro from "../businesController/rubros";
+import { IRubros } from "../models/rubros";
 class RoutesController {
   //*--------------Entidad------------------- *//
   public async createEntidad(request: Request, response: Response) {
@@ -437,8 +439,8 @@ class RoutesController {
   public async createDesem(request: Request, response: Response) {
     var desem: BussTransf = new BussTransf();
 
-    var entidadData = request.body;
-    let result = await desem.addDesem(entidadData);
+    var desemData = request.body;
+    let result = await desem.addDesem(desemData);
     response.status(201).json({ serverResponse: result });
   }
 
@@ -570,7 +572,6 @@ class RoutesController {
     let result = await partida.addPartida(entidadData);
     response.status(201).json({ serverResponse: result });
   }
-
   public async getPartidas(request: Request, response: Response) {
     var partida: BussPartida = new BussPartida();
     const result: Array<IPartidas> = await partida.readPartida();
@@ -598,7 +599,43 @@ class RoutesController {
     var partida: BussPartida = new BussPartida();
     let id: string = request.params.id;
     let result = await partida.deletePartida(id);
-    response.status(200).json({ serverResponse: "Se elimino la entidad" });
+    response.status(200).json({ serverResponse: "Se elimino un partida de Gasto" });
+  }
+  //----------RUBROS------------//
+  public async createRubro(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    var entidadData = request.body;
+    let result = await partida.addRubro(entidadData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getRubros(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    const result: Array<IRubros> = await partida.readRubro();
+    response.status(200).json(result);
+  }
+  public async getRubro(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    let repres = await partida.readRubro(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async getRubroCod(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    let codigo: number = parseInt(request.params.codigo);
+    let repres = await partida.readRubroCod(codigo);
+    response.status(200).json(repres);
+  }
+  public async updateRubro(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await partida.updateRubro(id, params);
+    response.status(200).json(result);
+  }
+  public async removeRubro(request: Request, response: Response) {
+    var partida: BussRubro = new BussRubro();
+    let id: string = request.params.id;
+    let result = await partida.deleteRubro(id);
+    response.status(200).json({ serverResponse: "Se elimino Rubro" });
   }
 }
 export default RoutesController;

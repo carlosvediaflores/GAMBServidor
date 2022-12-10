@@ -51,6 +51,7 @@ class RoutesController {
         "secret"
       );
       response.status(200).json({
+        id: loginUser._id,
         email: loginUser.email,
         username: loginUser.username,
         surnames: loginUser.surnames,

@@ -91,6 +91,9 @@ class Routes {
     app
       .route(`${this.routeparent}/gacetas`)
       .get(this.routesController.getGacetas);
+    app
+      .route(`${this.routeparent}/gaceta/:id`)
+      .put(this.routesController.updateGaceta);
   }
 }
 export default Routes;

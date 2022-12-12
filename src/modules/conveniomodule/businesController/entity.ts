@@ -21,9 +21,9 @@ class BussEntity{
             return listEntidad;
         }
     }  
-    public async readEntityCod(codigo: number): Promise<IEntity>;
-    public async readEntityCod(params1?: number | any, params2?: number, params3?: number): Promise<Array<IEntity> | IEntity> {
-        if (params1) {
+    public async readEntityCod(codigo: string | any): Promise<IEntity>;
+    public async readEntityCod(params1?: string | any, params2?: number, params3?: number): Promise<Array<IEntity> | IEntity> {
+        if (params1 && typeof params1 == "string") {
             var result: IEntity = await entityModel.findOne({ codigo: params1 });
             return result;
         }

@@ -371,17 +371,17 @@ class RoutesController {
     var filter: any = {};
     var params: any = request.query;
     var limit = 0;
+    var status:boolean=true
     var skip = 0;
     var aux: any = {};
     var order: any = {};
     var select = "";
-    if (params.category != null) {
-      var expresion = new RegExp(params.category);
-      filter["category"] = expresion;
+    if (params.estado != null) {
+      filter["estado"] = status;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
-    }
+    } 
     if (params.dategt != null) {
       var gt = params.dategt;
       aux["$gt"] = gt;
@@ -538,7 +538,7 @@ class RoutesController {
       return;
     }
     var gaceta: BussGaceta = new BussGaceta();
-    var gacetaData: IGaceta = await gaceta.readGaceta(name);
+    var gacetaData: IGaceta = await gaceta.readGacetaFile(name);
     if (!gacetaData) {
       response.status(300).json({ serverResponse: "Error " });
       return;
@@ -548,6 +548,13 @@ class RoutesController {
       return;
     }
     response.sendFile(gacetaData.path);
+  }
+  public async updateGaceta(request: Request, response: Response) {
+    var gaceta: BussGaceta = new BussGaceta();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await gaceta.updateGaceta(id, params);
+    response.status(200).json({res:"se editó"});
   }
 }
 export default RoutesController;

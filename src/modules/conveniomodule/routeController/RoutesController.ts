@@ -516,7 +516,7 @@ class RoutesController {
   }
   public async getEntityCod(request: Request, response: Response) {
     var entity: BussEntity = new BussEntity();
-    let codigo: number = parseInt(request.params.codigo);
+    let codigo = request.params.codigo;
     let repres = await entity.readEntityCod(codigo);
     response.status(200).json(repres);
   }

@@ -4,6 +4,7 @@ export interface IGaceta extends Document {
   detalle: string;
   numero: number;
   archivo: string;
+  estado:boolean;
   uri:string;
   path:string;
   usuario:string
@@ -13,6 +14,7 @@ export interface IGaceta extends Document {
     detalle: {type: String},
     numero: {type: Number},
     archivo:{type:String},
+    estado:{type:Boolean, default:false},
     uri:{type: String},
     path:{type: String},
     usuario: {type: Schema.Types.ObjectId, ref: 'User'}    

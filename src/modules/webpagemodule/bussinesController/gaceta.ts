@@ -26,10 +26,10 @@ class BussGaceta{
         var result = await gacetaModule.count();
         return result;
       }
-    public async readPost(file: string): Promise<IGaceta>;
-    public async readPost(params1?: string | any, params2?: number, params3?: number): Promise<Array<IGaceta> | IGaceta> {
+    public async readGacetaFile(archivo: string): Promise<IGaceta>;
+    public async readGacetaFile(params1?: string | any, params2?: number, params3?: number): Promise<Array<IGaceta> | IGaceta> {
         if (params1 && typeof params1 == "string") {
-            var result: IGaceta = await gacetaModule.findOne({ file: params1 });
+            var result: IGaceta = await gacetaModule.findOne({ archivo: params1 });
             return result;
         }
     } 

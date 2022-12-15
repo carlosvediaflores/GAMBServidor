@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IGaceta extends Document {
   titulo: string;
   detalle: string;
-  numero: number;
+  numero: string;
   archivo: string;
   estado:boolean;
   uri:string;
@@ -12,7 +12,7 @@ export interface IGaceta extends Document {
   const blogSchema: Schema = new Schema({
     titulo: {type: String},
     detalle: {type: String},
-    numero: {type: Number},
+    numero: {type: String},
     archivo:{type:String},
     estado:{type:Boolean, default:false},
     uri:{type: String},

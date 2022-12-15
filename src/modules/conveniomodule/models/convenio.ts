@@ -43,11 +43,9 @@ export interface IConvenio extends Document {
     saldo:{type:String, default: "0"},
     entidadejecutora: {type: Schema.Types.ObjectId, ref: 'cventidades'},
     empresaejecutora: {type: Schema.Types.ObjectId, ref: 'cvempresa'},
-   // desembolso: {type: String},
-   // estadomonto: {type: String},
     tipo: {type: String},
     files:{type: [Schema.Types.ObjectId], ref: "cvfiles"},
-    transferencia:{type: [Schema.Types.ObjectId], ref: "cvtransferencia"}
+    transferencia:{type: [Schema.Types.ObjectId], ref: "cvtransferencia"},
     //user: {type: Schema.Types.ObjectId, ref: 'User'}
     
   },

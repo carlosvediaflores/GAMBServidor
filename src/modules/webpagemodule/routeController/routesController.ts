@@ -257,7 +257,7 @@ class RoutesController {
         .json({ serverResponse: "No existe un archivo adjunto" });
       return;
     }
-    var dir = `${__dirname}/../../../../uploadhojaruta`;
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/post`;
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
     var key: Array<string> = Object.keys(files);
@@ -379,6 +379,18 @@ class RoutesController {
     if (params.estado != null) {
       filter["estado"] = status;
     }
+    if (params.titulo != null) {
+      var expresion = new RegExp(params.titulo);
+      filter["titulo"] = expresion;
+    }
+    /* if (params.numero != null) {
+      var expresion = new RegExp(params.numero);
+      filter["numero"] = expresion;
+    }
+    if (params.detalle != null) {
+      var expresion = new RegExp(params.detalle);
+      filter["detalle"] = expresion;
+    } */
     if (params.limit) {
       limit = parseInt(params.limit);
     } 
@@ -428,26 +440,49 @@ class RoutesController {
     let res = await gaceta.readGaceta(request.params.id);
     response.status(200).json({ serverResponse: res });
   }
+  public async searchGaceta(request: Request, response: Response) {
+    var gaceta: BussGaceta = new BussGaceta();
+    var searchString = request.params.search;
+    let res = await gaceta.search(searchString);
+    response.status(200).json({ serverResponse: res });
+  }
   public async removeGaceta(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var gaceta: BussGaceta = new BussGaceta();
     let id: string = request.params.id;
+    let res  = await gaceta.readGaceta(id);
     let result = await gaceta.deleteGaceta(id);
-    response.status(200).json({ serverResponse: "Se elimino la blog" });
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Se eliminó la gaceta" });
   }
   public async uploadGaceta(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var gaceta: BussGaceta = new BussGaceta();
     var id: string = request.params.id;
     var gacetaToUpdate: IGaceta = await gaceta.readGaceta(id);
     if (!gacetaToUpdate) {
-      response.status(300).json({ serverResponse: "Post no existe!" });
+      response.status(300).json({ serverResponse: "Gaceta no existe!" });
       return;
     }
     if (isEmpty(request.files) && id) {
       var filData: any = request.body;
       var Result = await gaceta.updateGaceta(id, filData);
-      response.status(200).json({ serverResponse: "Post modificado" });
+      response.status(200).json({ serverResponse: "Gaceta modificado" });
       return;
-    }
+    } 
     if (isEmpty(request.files)) {
       response
         .status(300)
@@ -471,7 +506,7 @@ class RoutesController {
       });
     };
     if (!id) {
-      var gacetaData = request.body;
+      var filData = request.body;
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -486,14 +521,14 @@ class RoutesController {
           });
         }
         var newname: string = `${"GAMB"}_${
-          gacetaData.numero
+          filData.numero
         }_${filehash}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
-        gacetaData.archivo = newname;
-        gacetaData.uri = "getgaceta/" + newname;
-        gacetaData.path = totalpath;
-        var sliderResult: IGaceta = await gaceta.addGaceta(gacetaData);
+        filData.archivo = newname;
+        filData.uri = "getgaceta/" + newname;
+        filData.path = totalpath;
+        var sliderResult: IGaceta = await gaceta.addGaceta(filData);
       }
       response.status(200).json({
         serverResponse: sliderResult,
@@ -515,17 +550,21 @@ class RoutesController {
         });
       }
       var newname: string = `${"GAMB"}_${
-        filData.numero
+        gacetaToUpdate.numero
       }_${filehash}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
-      filData.uri = "getgaceta/" + newname;
+      pathViejo = gacetaToUpdate.path;
+      borrarImagen(pathViejo);
       filData.path = totalpath;
+      filData.uri = "getgaceta/" + newname;
       var Result = await gaceta.updateGaceta(id, filData);
       response.status(200).json({ serverResponse: "gaceta modificado" });
       return;
     }
+    /* pathViejo = filData.path;
+    borrarImagen(pathViejo); */
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
@@ -540,10 +579,14 @@ class RoutesController {
     var gaceta: BussGaceta = new BussGaceta();
     var gacetaData: IGaceta = await gaceta.readGacetaFile(name);
     if (!gacetaData) {
-      response.status(300).json({ serverResponse: "Error " });
+      const pathImg = path.join( __dirname, `/../../../../uploads/no-hay-archivo.png` );
+      response.sendFile( pathImg );
+      //response.status(300).json({ serverResponse: "Error " });
       return;
     }
     if (gacetaData.path == null) {
+      const pathImg = path.join( __dirname, `/../../../../uploads/no-hay-archivo.png` );
+      response.sendFile( pathImg );
       response.status(300).json({ serverResponse: "No existe imagen " });
       return;
     }

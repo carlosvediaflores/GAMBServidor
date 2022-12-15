@@ -4,6 +4,7 @@ export interface IGaceta extends Document {
   detalle: string;
   numero: string;
   archivo: string;
+  fecha:Date;
   estado:boolean;
   uri:string;
   path:string;
@@ -14,6 +15,7 @@ export interface IGaceta extends Document {
     detalle: {type: String},
     numero: {type: String},
     archivo:{type:String},
+    fecha:{type:Date},
     estado:{type:Boolean, default:false},
     uri:{type: String},
     path:{type: String},

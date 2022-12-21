@@ -1,4 +1,5 @@
 import BlogModule, { IBlog } from "../models/blog";
+import imgpostModule, {IPost} from "../models/imgpost";
 
 class BussBlog{
     constructor(){
@@ -15,10 +16,10 @@ class BussBlog{
         } else if (params1) {
             let skip = params2;
             let limit = params3;
-            let listBlog: Array<IBlog> = await BlogModule.find(params1).skip(skip).limit(limit).sort(order);
+            let listBlog: Array<IBlog> = await BlogModule.find(params1).skip(skip).limit(limit).sort(order).populate("imgs");
             return listBlog;
         } else {
-            let listBlog: Array<IBlog> = await BlogModule.find();
+            let listBlog: Array<IBlog> = await BlogModule.find().populate("imgs");
             return listBlog;
         }
     }  
@@ -50,5 +51,26 @@ class BussBlog{
         let result = await BlogModule.remove({ _id: id });
         return result;
     }
+    public async addImgs(idcv: string, idFile: string) {
+        let imgpost = await BlogModule.findOne({ _id: idcv });
+        if (imgpost != null) {
+          var fil = await imgpostModule.findOne({ _id: idFile });
+          if (fil != null) {
+            var checkrol: Array<IPost> = imgpost.imgs.filter((item) => {
+              if (fil._id.toString() == item._id.toString()) {
+                return true;
+              }
+              return false;
+            });
+            if (checkrol.length == 0) {
+              imgpost.imgs.push(fil);
+              return await imgpost.save();
+            }
+            return null;
+          }
+          return null;
+        }
+        return null;
+      }
 }
 export default BussBlog;

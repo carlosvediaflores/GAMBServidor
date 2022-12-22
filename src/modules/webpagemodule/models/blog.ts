@@ -9,6 +9,7 @@ export interface IBlog extends Document {
   status: boolean;
   user:string;
   category:string;
+  slug: string;
   tag:string;
   }
   const blogSchema: Schema = new Schema({
@@ -18,10 +19,10 @@ export interface IBlog extends Document {
     body: {type: String},
     iframe: {type: String},
     status: {type: Boolean, default: true},
-    user:{type: String},
+    user:{type: Schema.Types.ObjectId, ref: 'User'},
     category:{type: String},
+    slug:{type:String},
     tag:{type: String},
-    usuario: {type: Schema.Types.ObjectId, ref: 'User'}    
   },
   {
     timestamps: true,

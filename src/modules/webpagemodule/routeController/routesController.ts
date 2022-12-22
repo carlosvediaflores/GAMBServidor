@@ -75,7 +75,7 @@ class RoutesController {
         .json({ serverResponse: "No existe un archivo adjunto" });
       return;
     }
-    var dir = `${__dirname}/../../../../uploadhojaruta`;
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/sliders`;
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
     var key: Array<string> = Object.keys(files);
@@ -168,11 +168,15 @@ class RoutesController {
     var blogs: BussBlog = new BussBlog();
     var filter: any = {};
     var params: any = request.query;
+    var status: boolean = true;
     var limit = 0;
     var skip = 0;
     var aux: any = {};
     var order: any = {};
     var select = "";
+    if (params.status != null) {
+      filter["status"] = status;
+    }
     if (params.category != null) {
       var expresion = new RegExp(params.category);
       filter["category"] = expresion;
@@ -270,8 +274,8 @@ class RoutesController {
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
     var key: Array<string> = Object.keys(files);
-    var fileData: Array<string> = files.images
-    console.log(fileData.length)
+    var fileData: Array<string> = files.images;
+    var tam = fileData.length;
     var copyDirectory = (totalpath: string, file: any) => {
       return new Promise((resolve, reject) => {
         file.mv(totalpath, (err: any, success: any) => {
@@ -288,10 +292,16 @@ class RoutesController {
       let fil: BussImgpost = new BussImgpost();
       var postData1 = request.body;
       var postData = request.body;
+      var file: any;
       var postResult: IBlog = await post.addBlog(postData1);
-      for (var i = 0; i < fileData.length; i++) {
-        var file: any = fileData[i];
-        
+      if(tam==undefined){
+        tam=1
+        file = fileData; 
+      }
+      for (var i = 0; i < tam; i++) {
+        if(tam>=2){
+          file = fileData[i];
+        }      
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension

@@ -6,12 +6,12 @@ class BussBlog{
 
     }
     public async readBlog(): Promise<Array<IBlog>>;
-    public async readBlog(id: string): Promise<IBlog>;
+    public async readBlog(slug: string): Promise<IBlog>;
     public async readBlog(query: any, skip: number, limit: number, order:any): Promise<Array<IBlog>>;
 
     public async readBlog(params1?: string | any, params2?: number, params3?: number, order?: any): Promise<Array<IBlog> | IBlog> {
         if (params1 && typeof params1 == "string") {
-            var result: IBlog = await BlogModule.findOne({ _id: params1 }).populate("imgs").populate("user");
+            var result: IBlog = await BlogModule.findOne({ slug: params1 }).populate("imgs").populate("user");
             return result;
         } else if (params1) {
             let skip = params2;

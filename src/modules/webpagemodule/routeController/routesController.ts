@@ -4,6 +4,8 @@ import jsonwebtoken from "jsonwebtoken";
 import isEmpty from "is-empty";
 import path from "path";
 import fs from "fs";
+import slug from "slugify";
+import sharp from "sharp";
 const ObjectId = require("mongoose").Types.ObjectId;
 
 import BussSlaider from "../bussinesController/slaider";
@@ -292,16 +294,29 @@ class RoutesController {
       let fil: BussImgpost = new BussImgpost();
       var postData1 = request.body;
       var postData = request.body;
+      var slugPost = slug(postData1.title, { lower: true });
+      postData1.slug = slugPost;
       var file: any;
       var postResult: IBlog = await post.addBlog(postData1);
-      if(tam==undefined){
-        tam=1
-        file = fileData; 
+      if (tam == undefined) {
+        tam = 1;
+        file = fileData;
       }
       for (var i = 0; i < tam; i++) {
-        if(tam>=2){
+        if (tam >= 2) {
           file = fileData[i];
-        }      
+        }
+        var processedImage = sharp(file.data);
+        var resizedImage = processedImage.resize(1024, 768, {
+          fit: "contain",
+          background: "#FFF",
+        });
+        let resizedImageBuffer;
+        try {
+          resizedImageBuffer = await resizedImage.toBuffer();
+        } catch (error) {
+          console.log({ error });
+        }
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension
@@ -311,22 +326,26 @@ class RoutesController {
             ok: false,
             msg: "No es una extensión permitida",
           });
-        } 
+        }
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
         var newname: string = `${"GAMB"}_${filehash}${i}.${extensionArchivo}`;
-        var totalpath = `${absolutepath}/${newname}`;       
-        await copyDirectory(totalpath, file);
+        var totalpath = `${absolutepath}/${newname}`;
+        var nueva = `${'nuevaruta'}/${newname}`;
+        fs.writeFileSync(totalpath, resizedImageBuffer)
+        //await copyDirectory(totalpath, file);
         postData.archivo = newname;
         postData.uri = "getimgpost/" + newname;
-        postData.path = totalpath;       
+        postData.path = totalpath;
         let idPost = postResult._id;
         var result1 = await fil.addImgpost(postData);
         let idFile = result1._id;
         var result = await post.addImgs(idPost, idFile);
         if (result == null) {
-          response.status(300).json({ serverResponse: "no se pudo guardar..." });
+          response
+            .status(300)
+            .json({ serverResponse: "no se pudo guardar..." });
           return;
-        } 
+        }
       }
       response.status(200).json({
         serverResponse: postResult,
@@ -555,6 +574,8 @@ class RoutesController {
     };
     if (!id) {
       var filData = request.body;
+      var sluGaceta = slug(filData.numero);
+      console.log(sluGaceta);
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -568,9 +589,7 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${
-          filData.numero
-        }_${filehash}.${extensionArchivo}`;
+        var newname: string = `${"GAMB"}_${sluGaceta}_${filehash}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
@@ -584,6 +603,7 @@ class RoutesController {
       return;
     }
     var filData: any = request.body;
+    var sluGaceta = slug(filData.numero);
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -597,9 +617,7 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${
-        gacetaToUpdate.numero
-      }_${filehash}.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${sluGaceta}_${filehash}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;

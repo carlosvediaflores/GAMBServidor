@@ -21,12 +21,6 @@ class Routes {
       .get(this.routesController.getSlider);
     app
       .route(`${this.routeparent}/slaider/:id`)
-      .get(this.routesController.getSlider);
-    /*app
-            .route(`${this.routeparent}/getslider/:search`)
-            .get(this.routesController.getSliders);*/
-    app
-      .route(`${this.routeparent}/slaider/:id`)
       .put(this.routesController.updateSlaider);
     app
       .route(`${this.routeparent}/slaider/:id`)
@@ -37,14 +31,17 @@ class Routes {
     app
       .route(`${this.routeparent}/getimgslider/:name`)
       .get(this.routesController.getImgslider);
-    //*------------Routes Blog--------*//
+    //*------------Routes Blog------- getPostId-*//
     app
       .route(`${this.routeparent}/blog`)
       .post(this.routesController.createBlog);
     app.route(`${this.routeparent}/blog`).get(this.routesController.getBlog);
     app
-      .route(`${this.routeparent}/blog/:id`)
+      .route(`${this.routeparent}/blog/:slug`)
       .get(this.routesController.getPost);
+    app
+      .route(`${this.routeparent}/blogid/:id`)
+      .get(this.routesController.getPostId);
     app
       .route(`${this.routeparent}/blog/:id`)
       .put(this.routesController.updateBlog);
@@ -75,7 +72,7 @@ class Routes {
       .route(`${this.routeparent}/category/:id`)
       .delete(this.routesController.removeCategory);
     //*------------Routes Gaceta--------*//
-    
+
     app
       .route(`${this.routeparent}/gaceta/:id`)
       .get(this.routesController.getGaceta);

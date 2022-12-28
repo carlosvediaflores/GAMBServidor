@@ -33,7 +33,14 @@ class BussBlog{
             var result: IBlog = await BlogModule.findOne({ img: params1 });
             return result;
         }
-    } 
+    }
+    public async readPostId(id: string): Promise<IBlog>;
+    public async readPostId(params1?: string | any, params2?: number, params3?: number): Promise<Array<IBlog> | IBlog> {
+        if (params1 && typeof params1 == "string") {
+            var result: IBlog = await BlogModule.findOne({ _id: params1 }).populate("imgs").populate("user");
+            return result;
+        }
+    }
     public async addBlog(blog: IBlog) {
         try {
             let blogDb = new BlogModule(blog);

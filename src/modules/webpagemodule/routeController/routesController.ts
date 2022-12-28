@@ -26,11 +26,73 @@ class RoutesController {
     let result = await entidad.addSlaider(entidadData);
     response.status(201).json({ serverResponse: result });
   }
-
   public async getSlaider(request: Request, response: Response) {
-    var entidad: BussSlaider = new BussSlaider();
-    const result: Array<ISlaider> = await entidad.readSlaiders();
-    response.status(200).json(result);
+    var slider: BussSlaider = new BussSlaider();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var status: boolean = true;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.estado != null) {
+      filter["estado"] = status;
+    }
+    if (params.titulo != null) {
+      var expresion = new RegExp(params.titulo);
+      filter["titulo"] = expresion;
+    }
+    /* if (params.numero != null) {
+      var expresion = new RegExp(params.numero);
+      filter["numero"] = expresion;
+    }
+    if (params.detalle != null) {
+      var expresion = new RegExp(params.detalle);
+      filter["detalle"] = expresion;
+    } */
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    const [res, totalDocs] = await Promise.all([
+      slider.readSlaiders(filter, skip, limit, order),
+      slider.total({}),
+    ]);
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: (number = Math.ceil(totalDocs / limit)),
+      skip,
+      order,
+    });
+    return;
   }
   public async getSlider(request: Request, response: Response) {
     var slider: BussSlaider = new BussSlaider();
@@ -38,12 +100,6 @@ class RoutesController {
     let res = await slider.readSlaiders(request.params.id);
     response.status(200).json({ serverResponse: res });
   }
-  /*public async getSliders(request: Request, response: Response) {
-    var slider: BussSlaider = new BussSlaider();
-    var searchString = request.params.search;
-    let res = await slider.readSliders(searchString);
-    response.status(200).json({ serverResponse: res });
-  }*/
   public async updateSlaider(request: Request, response: Response) {
     var entidad: BussSlaider = new BussSlaider();
     let id: string = request.params.id;
@@ -52,12 +108,29 @@ class RoutesController {
     response.status(200).json(result);
   }
   public async removeSlaider(request: Request, response: Response) {
-    var entidad: BussSlaider = new BussSlaider();
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var slider: BussSlaider = new BussSlaider();
     let id: string = request.params.id;
-    let result = await entidad.deleteSlaider(id);
+    let res = await slider.readSlaiders(request.params.id);
+    let result = await slider.deleteSlaider(id);
+    pathViejo = res.patsslaider;
+    borrarImagen(pathViejo);
     response.status(200).json({ serverResponse: "Se elimino con exito" });
   }
   public async uploadSlider(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var slider: BussSlaider = new BussSlaider();
     var id: string = request.params.id;
     var sliderToUpdate: ISlaider = await slider.readSlaiders(id);
@@ -97,11 +170,32 @@ class RoutesController {
       var sliderData = request.body;
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
-        var filehash: string = sha1(new Date().toString()).substr(0, 7);
-        var ext: string = "jpg";
-        var newname: string = `${"GAMB"}_${filehash}.${ext}`;
+        var processedImage = sharp(file.data);
+        var resizedImage = processedImage.resize(1920, 800, {
+      /*     fit: "contain",
+          background: "#FFF", */
+        });
+        let resizedImageBuffer;
+        try {
+          resizedImageBuffer = await resizedImage.toBuffer();
+        } catch (error) {
+          console.log({ error });
+        }
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["png", "jpg", "jpeg", "gif", "pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
-        await copyDirectory(totalpath, file);
+        fs.writeFileSync(totalpath, resizedImageBuffer)
+        //await copyDirectory(totalpath, file);
         sliderData.img = newname;
         sliderData.urislaider = "getimgslider/" + newname;
         sliderData.patsslaider = totalpath;
@@ -115,15 +209,35 @@ class RoutesController {
     var filData: any = request.body;
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
-      var filehash: string = sha1(new Date().toString()).substr(0, 7);
-      //var nameimg: string = file.name;
-      //var extesplit = nameimg.split('\.');
-      //var fileext: string = extesplit[1];
-      var ext: string = "jpg";
-      var newname: string = `${"GAMB"}_${filehash}.${ext}`;
+      var processedImage = sharp(file.data);
+        var resizedImage = processedImage.resize(1920, 800, {
+      /*     fit: "contain",
+          background: "#FFF", */
+        });
+        let resizedImageBuffer;
+        try {
+          resizedImageBuffer = await resizedImage.toBuffer();
+        } catch (error) {
+          console.log({ error });
+        }
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);     
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["png", "jpg", "jpeg", "gif", "pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
-      await copyDirectory(totalpath, file);
+      fs.writeFileSync(totalpath, resizedImageBuffer)
+      //await copyDirectory(totalpath, file);
       filData.img = newname;
+      pathViejo = sliderToUpdate.patsslaider;
+      borrarImagen(pathViejo);
       filData.urislaider = "getimgslider/" + newname;
       filData.patsslaider = totalpath;
       var Result = await slider.updateSlaider(id, filData);
@@ -229,7 +343,13 @@ class RoutesController {
   public async getPost(request: Request, response: Response) {
     var post: BussBlog = new BussBlog();
     //let id: string = request.params.id;
-    let res = await post.readBlog(request.params.id);
+    let res = await post.readBlog(request.params.slug);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async getPostId(request: Request, response: Response) {
+    var post: BussBlog = new BussBlog();
+    //let id: string = request.params.id;
+    let res = await post.readPostId(request.params.id);
     response.status(200).json({ serverResponse: res });
   }
   public async updateBlog(request: Request, response: Response) {
@@ -240,8 +360,24 @@ class RoutesController {
     response.status(200).json(result);
   }
   public async removeBlog(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var imgpost: BussImgpost = new BussImgpost();
     var blog: BussBlog = new BussBlog();
     let id: string = request.params.id;
+    let res = await blog.readPostId(request.params.id);
+    let imgs = res.imgs
+    imgs.forEach(async (data:any) => {
+      let id = data._id
+      pathViejo = data.path;
+      borrarImagen(pathViejo);
+      let result = await imgpost.deleteImgpost(id);    
+    });
     let result = await blog.deleteBlog(id);
     response.status(200).json({ serverResponse: "Se elimino la blog" });
   }
@@ -307,7 +443,7 @@ class RoutesController {
           file = fileData[i];
         }
         var processedImage = sharp(file.data);
-        var resizedImage = processedImage.resize(1024, 768, {
+        var resizedImage = processedImage.resize(1024, 800, {
           fit: "contain",
           background: "#FFF",
         });
@@ -330,7 +466,6 @@ class RoutesController {
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
         var newname: string = `${"GAMB"}_${filehash}${i}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
-        var nueva = `${'nuevaruta'}/${newname}`;
         fs.writeFileSync(totalpath, resizedImageBuffer)
         //await copyDirectory(totalpath, file);
         postData.archivo = newname;

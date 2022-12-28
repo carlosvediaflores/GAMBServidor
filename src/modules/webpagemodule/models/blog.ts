@@ -7,6 +7,7 @@ export interface IBlog extends Document {
   body: string;
   iframe: string;
   status: boolean;
+  fecha:Date;
   user:string;
   category:string;
   slug: string;
@@ -17,8 +18,9 @@ export interface IBlog extends Document {
     subtitle: {type: String},
     imgs: [{ type: Schema.Types.ObjectId, ref: "wpimgposts"}],
     body: {type: String},
-    iframe: {type: String},
+    iframe: {type: String, default:null},
     status: {type: Boolean, default: true},
+    fecha:{type:Date},
     user:{type: Schema.Types.ObjectId, ref: 'User'},
     category:{type: String},
     slug:{type:String},

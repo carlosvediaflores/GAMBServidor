@@ -172,7 +172,7 @@ class RoutesController {
         var file: any = files[key[i]];
         var processedImage = sharp(file.data);
         var resizedImage = processedImage.resize(1920, 800, {
-      /*     fit: "contain",
+          /*     fit: "contain",
           background: "#FFF", */
         });
         let resizedImageBuffer;
@@ -194,7 +194,7 @@ class RoutesController {
         }
         var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
-        fs.writeFileSync(totalpath, resizedImageBuffer)
+        fs.writeFileSync(totalpath, resizedImageBuffer);
         //await copyDirectory(totalpath, file);
         sliderData.img = newname;
         sliderData.urislaider = "getimgslider/" + newname;
@@ -210,17 +210,17 @@ class RoutesController {
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var processedImage = sharp(file.data);
-        var resizedImage = processedImage.resize(1920, 800, {
-      /*     fit: "contain",
+      var resizedImage = processedImage.resize(1920, 800, {
+        /*     fit: "contain",
           background: "#FFF", */
-        });
-        let resizedImageBuffer;
-        try {
-          resizedImageBuffer = await resizedImage.toBuffer();
-        } catch (error) {
-          console.log({ error });
-        }
-      var filehash: string = sha1(new Date().toString()).substr(0, 5);     
+      });
+      let resizedImageBuffer;
+      try {
+        resizedImageBuffer = await resizedImage.toBuffer();
+      } catch (error) {
+        console.log({ error });
+      }
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
@@ -233,7 +233,7 @@ class RoutesController {
       }
       var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
-      fs.writeFileSync(totalpath, resizedImageBuffer)
+      fs.writeFileSync(totalpath, resizedImageBuffer);
       //await copyDirectory(totalpath, file);
       filData.img = newname;
       pathViejo = sliderToUpdate.patsslaider;
@@ -371,12 +371,12 @@ class RoutesController {
     var blog: BussBlog = new BussBlog();
     let id: string = request.params.id;
     let res = await blog.readPostId(request.params.id);
-    let imgs = res.imgs
-    imgs.forEach(async (data:any) => {
-      let id = data._id
+    let imgs = res.imgs;
+    imgs.forEach(async (data: any) => {
+      let id = data._id;
       pathViejo = data.path;
       borrarImagen(pathViejo);
-      let result = await imgpost.deleteImgpost(id);    
+      let result = await imgpost.deleteImgpost(id);
     });
     let result = await blog.deleteBlog(id);
     response.status(200).json({ serverResponse: "Se elimino la blog" });
@@ -391,8 +391,8 @@ class RoutesController {
     let pathViejo = "";
     var post: BussBlog = new BussBlog();
     var id: string = request.params.id;
-    var postToUpdate: IBlog = await post.readBlog(id);
-    if (!postToUpdate) {
+    var postToUpdate: IBlog = await post.readPostId(id);
+    if (!postToUpdate && id) {
       response.status(300).json({ serverResponse: "Post no existe!" });
       return;
     }
@@ -466,7 +466,7 @@ class RoutesController {
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
         var newname: string = `${"GAMB"}_${filehash}${i}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
-        fs.writeFileSync(totalpath, resizedImageBuffer)
+        fs.writeFileSync(totalpath, resizedImageBuffer);
         //await copyDirectory(totalpath, file);
         postData.archivo = newname;
         postData.uri = "getimgpost/" + newname;
@@ -482,36 +482,69 @@ class RoutesController {
           return;
         }
       }
+    } else {
+      let fil: BussImgpost = new BussImgpost();
+      var filData: any = request.body;
+      var filData1: any = request.body;
+      let res = await post.readPostId(id);
+      let imgs = res.imgs;
+      imgs.forEach(async (data: any) => {
+        let id = data._id;
+        pathViejo = data.path;
+        borrarImagen(pathViejo);
+        let result = await fil.deleteImgpost(id);
+      });
+      var slugPost = slug(filData.title, { lower: true });
+      filData.slug = slugPost;
+      var file: any;
+      var Result = await post.updateBlog(id, filData);
+      if (tam == undefined) {
+        tam = 1;
+        file = fileData;
+      }
+      for (var i = 0; i < tam; i++) {
+        if (tam >= 2) {
+          file = fileData[i];
+        }
+        var processedImage = sharp(file.data);
+        var resizedImage = processedImage.resize(1024, 800, {
+          fit: "contain",
+          background: "#FFF",
+        });
+        let resizedImageBuffer;
+        try {
+          resizedImageBuffer = await resizedImage.toBuffer();
+        } catch (error) {
+          console.log({ error });
+        }
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["png", "jpg", "jpeg", "gif", "pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${filehash}${i}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        fs.writeFileSync(totalpath, resizedImageBuffer);
+        //await copyDirectory(totalpath, file);
+        filData1.archivo = newname;
+        filData1.uri = "getimgpost/" + newname;
+        filData1.path = totalpath;
+        var result1 = await fil.addImgpost(filData1);
+        let idFile = result1._id;
+        var result = await post.addImgs(id, idFile);
+      }
       response.status(200).json({
-        serverResponse: postResult,
+        serverResponse: filData,
       });
       return;
     }
-    var filData: any = request.body;
-    for (var i = 0; i < key.length; i++) {
-      var file: any = files[key[i]];
-      var filehash: string = sha1(new Date().toString()).substr(0, 5);
-      var nombreCortado = file.name.split(".");
-      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-      // Validar extension
-      var extensionesValidas = ["png", "jpg", "jpeg", "gif", "pdf"];
-      if (!extensionesValidas.includes(extensionArchivo)) {
-        return response.status(400).json({
-          ok: false,
-          msg: "No es una extensión permitida",
-        });
-      }
-      var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
-      var totalpath = `${absolutepath}/${newname}`;
-      await copyDirectory(totalpath, file);
-      filData.img = newname;
-      filData.uri = "getimgpost/" + newname;
-      filData.path = totalpath;
-      filData.uri = "getgaceta/" + newname;
-      var Result = await post.updateBlog(id, filData);
-      response.status(200).json({ serverResponse: "Post modificado" });
-      return;
-    }
+
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
@@ -833,8 +866,18 @@ class RoutesController {
     response.status(200).json(result);
   }
   public async removeImgpost(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var imgpost: BussImgpost = new BussImgpost();
     let id: string = request.params.id;
+    let res = await imgpost.readImgpost(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
     let result = await imgpost.deleteImgpost(id);
     response.status(200).json({ serverResponse: "Se elimino la imgpost" });
   }

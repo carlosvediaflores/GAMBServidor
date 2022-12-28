@@ -94,6 +94,15 @@ class Routes {
     app
       .route(`${this.routeparent}/searchgaceta/:search`)
       .get(this.routesController.searchGaceta);
+
+    //*------------Routes IMGPOT--------*//
+
+    app
+      .route(`${this.routeparent}/imgpost/:id`)
+      .delete(this.routesController.removeImgpost);
+    app
+      .route(`${this.routeparent}/imgpost/:id`)
+      .put(this.routesController.updateImgpost);
   }
 }
 export default Routes;

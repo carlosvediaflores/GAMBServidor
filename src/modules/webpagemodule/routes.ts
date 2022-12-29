@@ -103,6 +103,44 @@ class Routes {
     app
       .route(`${this.routeparent}/imgpost/:id`)
       .put(this.routesController.updateImgpost);
+
+    //*------------Routes POA--------*//
+    app.route(`${this.routeparent}/poa/:id`).get(this.routesController.getPoa);
+    app
+      .route(`${this.routeparent}/poa/:id`)
+      .delete(this.routesController.removePoa);
+    app
+      .route(`${this.routeparent}/uploadpoa/:id?`)
+      .post(this.routesController.uploadPoa);
+    app
+      .route(`${this.routeparent}/getpoa/:name`)
+      .get(this.routesController.getImgPoa);
+    app.route(`${this.routeparent}/poas`).get(this.routesController.getPoas);
+    app
+      .route(`${this.routeparent}/poa/:id`)
+      .put(this.routesController.updatePoa);
+    app
+      .route(`${this.routeparent}/searchpoa/:search`)
+      .get(this.routesController.searchPoa);
+
+    //*------------Routes PTDI--------*//
+    app.route(`${this.routeparent}/ptdi/:id`).get(this.routesController.getPtdi);
+    app
+      .route(`${this.routeparent}/ptdi/:id`)
+      .delete(this.routesController.removePtdi);
+    app
+      .route(`${this.routeparent}/uploadptdi/:id?`)
+      .post(this.routesController.uploadPtdi);
+    app
+      .route(`${this.routeparent}/getptdi/:name`)
+      .get(this.routesController.getImgPtdi);
+    app.route(`${this.routeparent}/ptdis`).get(this.routesController.getPtdis);
+    app
+      .route(`${this.routeparent}/ptdi/:id`)
+      .put(this.routesController.updatePtdi);
+    app
+      .route(`${this.routeparent}/searchptdi/:search`)
+      .get(this.routesController.searchPtdi);
   }
 }
 export default Routes;

@@ -478,23 +478,30 @@ class RoutesController {
       var expresion = new RegExp(params.nuit);
       filter["nuit"] = expresion;
     }
+    if (params.fecharesepcion != null) {
+      var expresion = new RegExp(params.fecharesepcion);
+      filter["fecharesepcion"] = expresion;
+    }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
     if (params.dategt != null) {
       var gt = params.dategt;
-      aux["$gt"] = gt;
+      aux["$gte"] = gt;
     }
     if (params.datelt != null) {
       var lt = params.datelt;
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
-      filter["fecharecepcion"] = aux;
+      filter["fecharesepcion"] = aux;
     }
+    let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
-      if (skip >= 2) {
+      if (skip <= totalpage && skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -507,15 +514,16 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    const [res, totalDocs] = await Promise.all([
+    let res: Array<IHojaruta> = await segui.readHojaRuta(filter, skip, limit, order);
+    /* const [res, totalDocs] = await Promise.all([
       segui.readHojaRuta(filter, skip, limit, order),
       segui.total({}),
-    ]);
+    ]); */
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage: (number = Math.ceil(totalDocs / limit)),
+      totalpage,
       skip,
       order,
     });
@@ -777,6 +785,10 @@ class RoutesController {
     if (params.estado != null) {
       var expresion = new RegExp(params.estado);
       filter["estado"] = expresion;
+    }
+    if (params.fecharecepcion != null) {
+      var expresion = new RegExp(params.fecharecepcion);
+      filter["fecharecepcion"] = expresion;
     }
     if (params.nuit != null) {
       var expresion = new RegExp(params.nuit);

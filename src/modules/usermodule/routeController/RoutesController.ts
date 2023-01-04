@@ -806,7 +806,7 @@ class RoutesController {
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
-      filter["fecharecepcion"] = aux;
+      filter["fechaderivado"] = aux;
     }
     let respost: Array<ISeguimiento> = await segui.readOficina(filter);
     var totalDocs = respost.length;

@@ -1,20 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import RolesModel, { IRoles } from "./Roles";
-
-export interface ISimpleUser {
-  username?: string;
-  surnames?: string;
-  ci?: string;
-  numberphone?: number;
-  email?: string;
-  birthday?: Date;
-  registerdate?: Date;
-  password?: string;
-  post?: string;
-  roles?: string;
-  uriavatar?: string;
-  pathavatar?: string;
-}
+import { ISubdireciones } from "./Subdireciones";
 export interface IUser extends Document {
   username: string;
   surnames: string;
@@ -24,6 +10,7 @@ export interface IUser extends Document {
   birthday: Date;
   registerdate: Date;
   password: string;
+  cargo: Array<ISubdireciones>
   post: string;
   roles: string;
   uriavatar: string;
@@ -38,6 +25,7 @@ const userSchema: Schema = new Schema({
   birthday: { type: Date },
   registerdate: { type: Date, required: true },
   password: { type: String, required: true },
+  cargo: {type: Schema.Types.ObjectId, ref: 'Subdirecciones'},
   post: { type: String },
   roles: { type: String, default: "SUPER_USER" },
   uriavatar: { type: String },

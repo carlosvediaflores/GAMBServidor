@@ -3,6 +3,7 @@ import * as bodyParser from "body-parser";
 import UserModules from "./modules/usermodule/init";
 import ConvenioModule from "./modules/conveniomodule/init";
 import SlaiderModule from "./modules/webpagemodule/init";
+import AlmacenesModule from "./modules/almacenesModule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
@@ -43,6 +44,7 @@ class App {
     const userModule = new UserModules("/api", this.app);    
     const convenioModule = new ConvenioModule("/api", this.app);
     const slaiderModule = new SlaiderModule("/api", this.app);
+    const almacennes = new AlmacenesModule("/api", this.app)
   } 
 }
 export default new App();

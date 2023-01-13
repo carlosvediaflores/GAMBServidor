@@ -11,7 +11,7 @@ import BussinesSubdir from "../businessController/BussinesSubdir";
 import BussinesSegui from "../businessController/BussinesSegui";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
-import Users, { ISimpleUser, IUser } from "../models/Users";
+import Users, {IUser } from "../models/Users";
 import isEmpty from "is-empty";
 import path from "path";
 import fs from "fs";
@@ -226,12 +226,12 @@ class RoutesController {
       userToUpdate.pathavatar = totalpath;
       var userResult: IUser = await userToUpdate.save();
     }
-    var simpleUser: ISimpleUser = {
+    /* var simpleUser: ISimpleUser = {
       username: userResult.username,
       uriavatar: userResult.uriavatar,
       pathavatar: userResult.pathavatar,
     };
-    response.status(200).json({ serverResponse: simpleUser });
+    response.status(200).json({ serverResponse: simpleUser }); */
   }
 
   public async getPortrait(request: Request, response: Response) {

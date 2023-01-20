@@ -46,6 +46,20 @@ class BussProveedor {
       return result;
     }
   }
+  public async searchProveedor(query?: any): Promise<Array<IProveedor>>;
+  public async searchProveedor(
+    search: string | any,
+  ) {
+    var filter = {
+      $or: [
+        { compania: { $regex: search, $options: "i" } },
+        { representante: { $regex: search, $options: "i" } },
+        { razon_social: { $regex: search, $options: "i" } }
+      ],
+    };
+    let listPrograma: Array<IProveedor> = await proveedorModel.find(filter).sort({ _id: -1 })
+    return listPrograma;
+  }
   public async addProveedor(Proveedor: IProveedor) {
     try {
       let proveedorDb = new proveedorModel(Proveedor);

@@ -17,7 +17,7 @@ class BussSubCategoria {
     order?:any
   ): Promise<Array<ISubCategoria> | ISubCategoria> {
     if (params1 && typeof params1 == "string") {
-      var result: ISubCategoria = await (await subCategoriaModel.findOne({ _id: params1 })).populate("idcategoria");
+      var result: ISubCategoria = await (await subCategoriaModel.findOne({ _id: params1 })).populate(" id_partida");
       return result;
     } else if (params1) {
       let skip = params2;
@@ -27,10 +27,10 @@ class BussSubCategoria {
         .skip(skip)
         .limit(limit)
         .sort(order)
-        .populate("idcategoria");
+        .populate(" id_partida");
       return listSubCategoria;
     } else {
-      let listSubCategoria: Array<ISubCategoria> = await subCategoriaModel.find().populate("idcategoria");
+      let listSubCategoria: Array<ISubCategoria> = await subCategoriaModel.find().populate(" id_partida");
       return listSubCategoria;
     }
   }
@@ -46,6 +46,19 @@ class BussSubCategoria {
       });
       return result;
     }
+  }
+  public async searchSubCategoria(query?: any): Promise<Array<ISubCategoria>>;
+  public async searchSubCategoria(
+    search: string | any,
+  ) {
+    var filter = {
+      $or: [
+        { codigo: { $regex: search, $options: "i" } },
+        { denominacion: { $regex: search, $options: "i" } }
+      ],
+    };
+    let listSearchSubCat: Array<ISubCategoria> = await subCategoriaModel.find(filter).sort({ _id: -1 })
+    return listSearchSubCat;
   }
   public async addSubCategoria(subcategoria: ISubCategoria) {
     try {

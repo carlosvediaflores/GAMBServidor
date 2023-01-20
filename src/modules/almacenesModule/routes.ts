@@ -28,6 +28,9 @@ class Routes {
     app
       .route(`${this.routeparent}/categoria/:id`)
       .delete(this.routesController.removeCategoria);
+    app
+      .route(`${this.routeparent}/searchCat/:search`)
+      .get(this.routesController.searchCat);
     //-------SUB-CATEGORIAS--//
     app
       .route(`${this.routeparent}/subCategoria`)
@@ -47,12 +50,15 @@ class Routes {
     app
       .route(`${this.routeparent}/subCategoria/:id`)
       .delete(this.routesController.removeSubCategoria);
+    app
+      .route(`${this.routeparent}/searchSubCat/:search`)
+      .get(this.routesController.searchSubCategoria);
     //-------PROVEEDORES--//
     app
       .route(`${this.routeparent}/proveedor`)
       .post(this.routesController.createProveedores);
     app
-      .route(`${this.routeparent}/proveedor`)
+      .route(`${this.routeparent}/proveedores`)
       .get(this.routesController.getProveedoress);
     app
       .route(`${this.routeparent}/proveedor/:id`)
@@ -66,6 +72,75 @@ class Routes {
     app
       .route(`${this.routeparent}/proveedor/:id`)
       .delete(this.routesController.removeProveedores);
+    app
+      .route(`${this.routeparent}/searchProveedor/:search`)
+      .get(this.routesController.searchProveedor);
+    //-------PROGRAMA--//
+    app
+      .route(`${this.routeparent}/programa`)
+      .post(this.routesController.createPrograma);
+    app
+      .route(`${this.routeparent}/programas`)
+      .get(this.routesController.getProgramas);
+    app
+      .route(`${this.routeparent}/programa/:id`)
+      .get(this.routesController.getPrograma);
+    app
+      .route(`${this.routeparent}/programaCod/:codigo`)
+      .get(this.routesController.getProgramaCod);
+    app
+      .route(`${this.routeparent}/programa/:id`)
+      .put(this.routesController.updatePrograma);
+    app
+      .route(`${this.routeparent}/programa/:id`)
+      .delete(this.routesController.removePrograma);
+    app
+      .route(`${this.routeparent}/searchProg/:search`)
+      .get(this.routesController.searchProg);
+    //-------PROYECTO--//
+    app
+      .route(`${this.routeparent}/proyecto`)
+      .post(this.routesController.createProyecto);
+    app
+      .route(`${this.routeparent}/proyectos`)
+      .get(this.routesController.getProyectos);
+    app
+      .route(`${this.routeparent}/proyecto/:id`)
+      .get(this.routesController.getProyecto);
+    app
+      .route(`${this.routeparent}/proyectoCod/:codigo`)
+      .get(this.routesController.getProyectoCod);
+    app
+      .route(`${this.routeparent}/proyecto/:id`)
+      .put(this.routesController.updateProyecto);
+    app
+      .route(`${this.routeparent}/proyecto/:id`)
+      .delete(this.routesController.removeProyecto);
+    app
+      .route(`${this.routeparent}/searchProy/:search`)
+      .get(this.routesController.searchProy);
+    //-------ACTIVIDAD--//
+    app
+      .route(`${this.routeparent}/actividad`)
+      .post(this.routesController.createActividad);
+    app
+      .route(`${this.routeparent}/actividades`)
+      .get(this.routesController.getActividades);
+    app
+      .route(`${this.routeparent}/actividad/:id`)
+      .get(this.routesController.getActividad);
+    app
+      .route(`${this.routeparent}/actividadCod/:codigo`)
+      .get(this.routesController.getActividadCod);
+    app
+      .route(`${this.routeparent}/actividad/:id`)
+      .put(this.routesController.updateActividad);
+    app
+      .route(`${this.routeparent}/actividad/:id`)
+      .delete(this.routesController.removeActividad);
+    app
+      .route(`${this.routeparent}/searchActividad/:search`)
+      .get(this.routesController.searchActividad);
   }
 }
 export default Routes;

@@ -33,6 +33,19 @@ class BussCategoria {
       return listCategoria;
     }
   }
+  public async searchCat(query?: any): Promise<Array<ICategoria>>;
+  public async searchCat(
+    search: string | any,
+  ) {
+    var filter = {
+      $or: [
+        { codigo: { $regex: search, $options: "i" } },
+        { denominacion: { $regex: search, $options: "i" } },
+      ],
+    };
+    let listConvenio: Array<ICategoria> = await categoriaModel.find(filter).sort({ _id: -1 })
+    return listConvenio;
+  }
   public async readCategoriaCod(codigo: string | any): Promise<ICategoria>;
   public async readCategoriaCod(
     params1?: string | any,

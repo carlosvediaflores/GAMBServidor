@@ -1,4 +1,5 @@
 import poaModule, { IPoa } from "../models/poa";
+import archivoPoaModule, {IArchivoPoa} from "../models/archivo_poa";
 
 class BussPoa {
   constructor() {}
@@ -21,7 +22,8 @@ class BussPoa {
       var result: IPoa = await poaModule
         .findOne({ _id: params1 })
         .populate("usuario")
-        .populate("ley");
+        .populate("ley")
+        .populate("archivo");
       return result;
     } else if (params1) {
       let skip = params2;
@@ -32,13 +34,15 @@ class BussPoa {
         .limit(limit)
         .sort(order)
         .populate("usuario")
-        .populate("ley");
+        .populate("ley")
+        .populate("archivo");
       return listPoa;
     } else {
       let listPoa: Array<IPoa> = await poaModule
         .find()
         .populate("usuario")
-        .populate("ley");
+        .populate("ley")
+        .populate("archivo");
       return listPoa;
     }
   }
@@ -46,7 +50,7 @@ class BussPoa {
     var result = await poaModule.count();
     return result;
   }
-  public async readPoaFile(archivo: string): Promise<IPoa>;
+  /* public async readPoaFile(archivo: string): Promise<IPoa>;
   public async readPoaFile(
     params1?: string | any,
   ): Promise<Array<IPoa> | IPoa> {
@@ -54,7 +58,7 @@ class BussPoa {
       var result: IPoa = await poaModule.findOne({ archivo: params1 });
       return result;
     }
-  }
+  } */
   public async search(query?: any): Promise<Array<IPoa>>;
   public async search(
     search: string | any | boolean,
@@ -94,6 +98,27 @@ class BussPoa {
   public async deletePoa(id: string) {
     let result = await poaModule.remove({ _id: id });
     return result;
+  }
+  public async addArcivoPoa(idcv: string, idFile: string) {
+    let archivo = await poaModule.findOne({ _id: idcv });
+    if (archivo != null) {
+      var fil = await archivoPoaModule.findOne({ _id: idFile });
+      if (fil != null) {
+        var checkrol: Array<IArchivoPoa> = archivo.archivo.filter((item) => {
+          if (fil._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checkrol.length == 0) {
+          archivo.archivo.push(fil);
+          return await archivo.save();
+        }
+        return null;
+      }
+      return null;
+    }
+    return null;
   }
 }
 export default BussPoa;

@@ -114,7 +114,7 @@ class Routes {
       .post(this.routesController.uploadPoa);
     app
       .route(`${this.routeparent}/getpoa/:name`)
-      .get(this.routesController.getImgPoa);
+      .get(this.routesController.getArchivoPoa);
     app.route(`${this.routeparent}/poas`).get(this.routesController.getPoas);
     app
       .route(`${this.routeparent}/poa/:id`)
@@ -122,9 +122,18 @@ class Routes {
     app
       .route(`${this.routeparent}/searchpoa/:search`)
       .get(this.routesController.searchPoa);
+    //*------------Routes ARCHIVO POA--------*//
+    app
+      .route(`${this.routeparent}/archivoPoa/:id`)
+      .delete(this.routesController.deleteArchivoPoa);
+    app
+      .route(`${this.routeparent}/archivoPoa/:id`)
+      .put(this.routesController.updateArchivoPoa);
 
     //*------------Routes PTDI--------*//
-    app.route(`${this.routeparent}/ptdi/:id`).get(this.routesController.getPtdi);
+    app
+      .route(`${this.routeparent}/ptdi/:id`)
+      .get(this.routesController.getPtdi);
     app
       .route(`${this.routeparent}/ptdi/:id`)
       .delete(this.routesController.removePtdi);

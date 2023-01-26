@@ -1,24 +1,21 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { IArchivoPoa } from "./archivo_poa";
 export interface IPoa extends Document {
+  gestion: number;
   titulo: string;
-  detalle: string;
+  descripcion: string;
   ley: string;
-  archivo: string;
-  fecha:Date;
+  archivo: Array<IArchivoPoa>;
   estado:boolean;
-  uri:string;
-  path:string;
   usuario:string
   }
   const poaSchema: Schema = new Schema({
+    gestion:{type:Number},
     titulo: {type: String},
-    detalle: {type: String},
+    descripcion: {type: String},
     ley:{type: Schema.Types.ObjectId, ref: 'wpgaceta'},
-    archivo:{type:String},
-    fecha:{type:Date},
+    archivo:[{ type: Schema.Types.ObjectId, ref: "wpArchivoPoa"}],
     estado:{type:Boolean, default:false},
-    uri:{type: String},
-    path:{type: String},
     usuario: {type: Schema.Types.ObjectId, ref: 'User'}    
   },
   {

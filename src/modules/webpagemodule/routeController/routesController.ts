@@ -18,10 +18,12 @@ import { IGaceta } from "../models/gaceta";
 import BussGaceta from "../bussinesController/gaceta";
 import { IPost } from "../models/imgpost";
 import BussImgpost from "../bussinesController/imgpost";
-import { IPoa } from "../models/poa";
+import poa, { IPoa } from "../models/poa";
 import BussPoa from "../bussinesController/poa";
 import { IPtdi } from "../models/ptdi";
 import BussPtdi from "../bussinesController/ptdi";
+import { IArchivoPoa } from "../models/archivo_poa";
+import BussArchivoPoa from "../bussinesController/archivo_poa";
 class RoutesController {
   //*--------------Slider------------------- *//
   public async createSlaider(request: Request, response: Response) {
@@ -934,7 +936,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { gestion: -1 };
     }
     const [res, totalDocs] = await Promise.all([
       blogs.readPoa(filter, skip, limit, order),
@@ -971,21 +973,20 @@ class RoutesController {
     };
     let pathViejo = "";
     var Poa: BussPoa = new BussPoa();
+    let fil: BussArchivoPoa = new BussArchivoPoa();
     let id: string = request.params.id;
-    let res = await Poa.readPoa(id);
+    let res = await Poa.readPoa(request.params.id);
+    let poas = res.archivo;
+    poas.forEach(async (data: any) => {
+      let id = data._id;
+      pathViejo = data.path;
+      borrarImagen(pathViejo);
+      let result = await fil.deleteArchivoPoa(id);
+    });
     let result = await Poa.deletePoa(id);
-    pathViejo = res.path;
-    borrarImagen(pathViejo);
     response.status(200).json({ serverResponse: "Se eliminó la Poa" });
   }
   public async uploadPoa(request: Request, response: Response) {
-    const borrarImagen: any = (path: any) => {
-      if (fs.existsSync(path)) {
-        // borrar la imagen anterior
-        fs.unlinkSync(path);
-      }
-    };
-    let pathViejo = "";
     var Poa: BussPoa = new BussPoa();
     var id: string = request.params.id;
     var PoaToUpdate: IPoa = await Poa.readPoa(id);
@@ -1022,37 +1023,44 @@ class RoutesController {
       });
     };
     if (!id) {
+      let fil: BussArchivoPoa = new BussArchivoPoa();
+      var poaData1 = request.body;
       var filData = request.body;
-      var sluPoa = slug(filData.titulo);
+      //var sluPoa = slug(filData.titulo);
+      var poaResult: IPoa = await Poa.addPoa(poaData1);
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension
-        var extensionesValidas = ["pdf"];
+        var extensionesValidas = ["pdf","xls","xlsx","docx", ".jpg"];
         if (!extensionesValidas.includes(extensionArchivo)) {
           return response.status(400).json({
             ok: false,
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${sluPoa}_${filehash}.${extensionArchivo}`;
+        var newname: string = `${"POA"}_${poaData1.descripcion}_${poaData1.gestion}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
         filData.uri = "getpoa/" + newname;
         filData.path = totalpath;
-        var sliderResult: IPoa = await Poa.addPoa(filData);
+        let idPoa = poaResult._id;
+        var result1 = await fil.addArchivoPoa(filData);
+        let idFile = result1._id;
+        var result = await Poa.addArcivoPoa(idPoa, idFile);     
       }
       response.status(200).json({
-        serverResponse: sliderResult,
+        serverResponse: result,
       });
       return;
     }
     var filData: any = request.body;
-    var sluPoa = slug(filData.titulo);
     for (var i = 0; i < key.length; i++) {
+      let fil: BussArchivoPoa = new BussArchivoPoa();
+      let poa = await Poa.readPoa(id)
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
       var nombreCortado = file.name.split(".");
@@ -1065,24 +1073,23 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${sluPoa}_${filehash}.${extensionArchivo}`;
+      var newname: string = `${"POA"}_${filData.descripcion}_${poa.gestion}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
-      pathViejo = PoaToUpdate.path;
-      borrarImagen(pathViejo);
       filData.path = totalpath;
       filData.uri = "getpoa/" + newname;
-      var Result = await Poa.updatePoa(id, filData);
+      var result1 = await fil.addArchivoPoa(filData);
+      let idFile = result1._id;
+      var result = await Poa.addArcivoPoa(id, idFile);
       response.status(200).json({ serverResponse: "Poa modificado" });
       return;
     }
-    /* pathViejo = filData.path;
-    borrarImagen(pathViejo); */
+    
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
-  public async getImgPoa(request: Request, response: Response) {
+  public async getArchivoPoa(request: Request, response: Response) {
     var name: string = request.params.name;
     if (!name) {
       response
@@ -1090,8 +1097,8 @@ class RoutesController {
         .json({ serverResponse: "Identificador no encontrado" });
       return;
     }
-    var Poa: BussPoa = new BussPoa();
-    var PoaData: IPoa = await Poa.readPoaFile(name);
+    var Poa: BussArchivoPoa = new BussArchivoPoa();
+    var PoaData: IArchivoPoa = await Poa.readArchivoPoaFile(name);
     if (!PoaData) {
       const pathImg = path.join(
         __dirname,
@@ -1117,7 +1124,31 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await Poa.updatePoa(id, params);
-    response.status(200).json({ res: "se editó" });
+    response.status(200).json({ res: "se editó" });  
+  }
+  //* ---------------ARCHIVO POA--------------*//
+  public async deleteArchivoPoa(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var PoaArch: BussArchivoPoa = new BussArchivoPoa();
+    let id: string = request.params.id;
+    let res = await PoaArch.readArchivoPoa(id);
+    let result = await PoaArch.deleteArchivoPoa(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Se elimino" });
+  }
+  public async updateArchivoPoa(request: Request, response: Response) {
+    var PoaArch: BussArchivoPoa = new BussArchivoPoa();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await PoaArch.updateArchivoPoa(id, params);
+    response.status(200).json({ res: "se editó" });  
   }
   //* ---------------PTDI--------------*//
   public async getPtdis(request: Request, response: Response) {
@@ -1168,7 +1199,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { gestion: -1 };
     }
     const [res, totalDocs] = await Promise.all([
       blogs.readPtdi(filter, skip, limit, order),

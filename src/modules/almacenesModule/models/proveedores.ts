@@ -11,14 +11,14 @@ export interface IProveedor extends Document {
     ususario: string;
   }
   const proveedorSchema: Schema = new Schema({
-    compania:{ type: String, required: true, unique: true },
-    representante:{type: String, required: true, unique: true},
+    compania:{ type: String },
+    representante:{type: String},
     razon_social: {type: String},
     nit: {type: Number},
     telefono: {type: Number},
     direccion: {type: String},
     ciudad: {type: String},
-    estado: {type: Boolean},
+    estado: {type: Boolean, default:true},
     ususario: { type: Schema.Types.ObjectId, ref: 'User'}
   },{
     timestamps: true,

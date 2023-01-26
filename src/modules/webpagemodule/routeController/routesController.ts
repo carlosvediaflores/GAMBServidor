@@ -1034,7 +1034,7 @@ class RoutesController {
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension
-        var extensionesValidas = ["pdf","xls","xlsx","docx", ".jpg"];
+        var extensionesValidas = ["pdf"];
         if (!extensionesValidas.includes(extensionArchivo)) {
           return response.status(400).json({
             ok: false,
@@ -1066,7 +1066,7 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf"];
+      var extensionesValidas = ["pdf","xls","xlsx","docx","jpg"];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,

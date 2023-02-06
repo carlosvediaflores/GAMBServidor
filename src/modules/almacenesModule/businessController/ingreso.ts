@@ -17,7 +17,7 @@ class BussIngreso {
     order?:any
   ): Promise<Array<IIngreso> | IIngreso> {
     if (params1 && typeof params1 == "string") {
-      var result: IIngreso = await ingresosModel.findOne({ _id: params1 }).populate("idPartida");
+      var result: IIngreso = await ingresosModel.findOne({ _id: params1 }).populate("idProveedor").populate("idUsuario");
       return result;
     } else if (params1) {
       let skip = params2;
@@ -26,10 +26,10 @@ class BussIngreso {
         .find(params1)
         .skip(skip)
         .limit(limit)
-        .sort(order).populate("idPartida");
+        .sort(order).populate("idProveedor").populate("idUsuario");
       return listIngreso;
     } else {
-      let listIngresos: Array<IIngreso> = await ingresosModel.find().populate("idPartida");
+      let listIngresos: Array<IIngreso> = await ingresosModel.find().populate("idProveedor").populate("idUsuario");
       return listIngresos;
     }
   }
@@ -45,7 +45,7 @@ class BussIngreso {
         //{ unidadDeMedida: { $regex: search, $options: "i" } },
       ],
     };
-    let listConvenio: Array<IIngreso> = await ingresosModel.find(filter).sort({ _id: -1 }).populate("idPartida")
+    let listConvenio: Array<IIngreso> = await ingresosModel.find(filter).sort({ _id: -1 }).populate("idProveedor").populate("idUsuario");
     return listConvenio;
   }
   public async addIngreso(Ingreso: IIngreso) {

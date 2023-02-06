@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, Number } from "mongoose";
-export interface IIngreso extends Document {
+import mongoose, { Schema, Document } from "mongoose";
+export interface IEgreso extends Document {
   articulos: [];
   categoriaProgra: string;
   concepto: string;
@@ -10,7 +10,7 @@ export interface IIngreso extends Document {
   idProveedor: string;
   idUsuario: string;
 }
-const ingresoSchema: Schema = new Schema(
+const egresoSchema: Schema = new Schema(
   {
     articulos: { type: Array},
     categoriaProgra: { type: String, required: true},
@@ -27,4 +27,4 @@ const ingresoSchema: Schema = new Schema(
     versionKey: false,
   }
 );
-export default mongoose.model<IIngreso>("alm_ingresos", ingresoSchema);
+export default mongoose.model<IEgreso>("alm_egresos", egresoSchema);

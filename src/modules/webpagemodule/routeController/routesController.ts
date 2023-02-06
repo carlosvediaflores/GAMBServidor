@@ -24,6 +24,8 @@ import { IPtdi } from "../models/ptdi";
 import BussPtdi from "../bussinesController/ptdi";
 import { IArchivoPoa } from "../models/archivo_poa";
 import BussArchivoPoa from "../bussinesController/archivo_poa";
+import { IRendicion } from "../models/rendiciones";
+import BussRendicion from "../bussinesController/rendiciones";
 class RoutesController {
   //*--------------Slider------------------- *//
   public async createSlaider(request: Request, response: Response) {
@@ -659,7 +661,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { fecha: -1 };
     }
     const [res, totalDocs] = await Promise.all([
       blogs.readGaceta(filter, skip, limit, order),
@@ -749,7 +751,6 @@ class RoutesController {
     if (!id) {
       var filData = request.body;
       var sluGaceta = slug(filData.numero);
-      console.log(sluGaceta);
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -1382,6 +1383,229 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await Ptdi.updatePtdi(id, params);
+    response.status(200).json({ res: "se editó" });
+  }
+  //* ---------------RENDICIONEs--------------*//
+  public async getRendicions(request: Request, response: Response) {
+    var blogs: BussRendicion = new BussRendicion();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var status: boolean = true;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.estado != null) {
+      filter["estado"] = status;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { gestion: -1 };
+    }
+    const [res, totalDocs] = await Promise.all([
+      blogs.readRendicion(filter, skip, limit, order),
+      blogs.total({}),
+    ]);
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: (number = Math.ceil(totalDocs / limit)),
+      skip,
+      order,
+    });
+    return;
+  }
+  public async getRendicion(request: Request, response: Response) {
+    var Rendicion: BussRendicion = new BussRendicion();
+    //let id: string = request.params.id;
+    let res = await Rendicion.readRendicion(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async searchRendicion(request: Request, response: Response) {
+    var Rendicion: BussRendicion = new BussRendicion();
+    var searchString = request.params.search;
+    let res = await Rendicion.searchRendicion(searchString);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async removeRendicion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Rendicion: BussRendicion = new BussRendicion();
+    let id: string = request.params.id;
+    let res = await Rendicion.readRendicion(id);
+    let result = await Rendicion.deleteRendicion(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Se eliminó la Rendicion" });
+  }
+  public async uploadRendicion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Rendicion: BussRendicion = new BussRendicion();
+    var id: string = request.params.id;
+    var RendicionToUpdate: IRendicion = await Rendicion.readRendicion(id);
+    if (!RendicionToUpdate) {
+      response.status(300).json({ serverResponse: "Rendicion no existe!" });
+      return;
+    }
+    if (isEmpty(request.files) && id) {
+      var filData: any = request.body;
+      var Result = await Rendicion.updateRendicion(id, filData);
+      response.status(200).json({ serverResponse: "Rendicion modificado" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/plani`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (!id) {
+      var filData = request.body;
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        filData.archivo = newname;
+        filData.uri = "getrendicion/" + newname;
+        filData.path = totalpath;
+        var sliderResult: IRendicion = await Rendicion.addRendicion(filData);
+      }
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
+      return;
+    }
+    var filData: any = request.body;
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      pathViejo = RendicionToUpdate.path;
+      borrarImagen(pathViejo);
+      filData.path = totalpath;
+      filData.uri = "getrendicion/" + newname;
+      var Result = await Rendicion.updateRendicion(id, filData);
+      response.status(200).json({ serverResponse: "Rendicion modificado" });
+      return;
+    }
+    /* pathViejo = filData.path;
+    borrarImagen(pathViejo); */
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  public async getFileRendicion(request: Request, response: Response) {
+    var name: string = request.params.name;
+    if (!name) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Rendicion: BussRendicion = new BussRendicion();
+    var RendicionData: IRendicion = await Rendicion.readRendicionFile(name);
+    if (!RendicionData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      //response.status(300).json({ serverResponse: "Error " });
+      return;
+    }
+    if (RendicionData.path == null) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      response.status(300).json({ serverResponse: "No existe imagen " });
+      return;
+    }
+    response.sendFile(RendicionData.path);
+  }
+  public async updateRendicion(request: Request, response: Response) {
+    var Rendicion: BussRendicion = new BussRendicion();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Rendicion.updateRendicion(id, params);
     response.status(200).json({ res: "se editó" });
   }
 }

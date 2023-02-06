@@ -17,7 +17,7 @@ class BussSubCategoria {
     order?:any
   ): Promise<Array<ISubCategoria> | ISubCategoria> {
     if (params1 && typeof params1 == "string") {
-      var result: ISubCategoria = await (await subCategoriaModel.findOne({ _id: params1 })).populate(" id_partida");
+      var result: ISubCategoria = (await subCategoriaModel.findOne({ _id: params1 })).populate(" id_partida");
       return result;
     } else if (params1) {
       let skip = params2;

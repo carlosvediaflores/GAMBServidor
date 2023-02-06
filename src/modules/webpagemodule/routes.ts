@@ -150,6 +150,28 @@ class Routes {
     app
       .route(`${this.routeparent}/searchptdi/:search`)
       .get(this.routesController.searchPtdi);
+    //*------------Routes Rendiciones--------*//
+    app
+      .route(`${this.routeparent}/rendicion/:id`)
+      .get(this.routesController.getRendicion);
+    app
+      .route(`${this.routeparent}/rendicion/:id`)
+      .delete(this.routesController.removeRendicion);
+    app
+      .route(`${this.routeparent}/uploadrendicion/:id?`)
+      .post(this.routesController.uploadRendicion);
+    app
+      .route(`${this.routeparent}/getrendicion/:name`)
+      .get(this.routesController.getFileRendicion);
+    app
+      .route(`${this.routeparent}/rendiciones`)
+      .get(this.routesController.getRendicions);
+    app
+      .route(`${this.routeparent}/rendicion/:id`)
+      .put(this.routesController.updateRendicion);
+    app
+      .route(`${this.routeparent}/searchrendicion/:search`)
+      .get(this.routesController.searchRendicion);
   }
 }
 export default Routes;

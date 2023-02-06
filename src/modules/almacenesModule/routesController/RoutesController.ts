@@ -6,6 +6,8 @@ import path from "path";
 import fs from "fs";
 import slug from "slugify";
 import sharp from "sharp";
+//import csv from "fast-csv";
+import * as csv from "@fast-csv/parse";
 
 import { ICategoria } from "../models/categorias";
 import BussCategoria from "../businessController/categorias";
@@ -19,6 +21,14 @@ import { IProyecto } from "../models/proyecto";
 import BussProyecto from "../businessController/proyecto";
 import { IActividad } from "../models/actividad";
 import BussActividad from "../businessController/actididad";
+import { ISegPoa } from "../models/seg_poa";
+import BussSegPoa from "../businessController/seg_poa";
+import { IArticulo } from "../models/articulos";
+import BussArticulo from "../businessController/articulos";
+import { IMedida } from "../models/medidas";
+import BussMedida from "../businessController/medidas";
+import { IIngreso } from "../models/ingreso";
+import BussIngreso from "../businessController/ingreso";
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   //----------CATEGORIA------------//
@@ -329,8 +339,8 @@ class RoutesController {
   public async createPrograma(request: Request, response: Response) {
     var Programa: BussPrograma = new BussPrograma();
     var ProgramaData = request.body;
-    let year=new Date();
-    ProgramaData["gestion"] = year.getFullYear()
+    let year = new Date();
+    ProgramaData["gestion"] = year.getFullYear();
     let result = await Programa.addPrograma(ProgramaData);
     response.status(201).json({ serverResponse: result });
   }
@@ -433,9 +443,9 @@ class RoutesController {
     var Proyecto: BussProyecto = new BussProyecto();
     var Programa: BussPrograma = new BussPrograma();
     var ProyectoData = request.body;
-    let idPrograma = ProyectoData.id_programa
+    let idPrograma = ProyectoData.id_programa;
     let programa = await Programa.readPrograma(idPrograma);
-    ProyectoData["cat_prog"] = `${programa.codigo} ${ProyectoData.codigo} 000`
+    ProyectoData["cat_prog"] = `${programa.codigo} ${ProyectoData.codigo} 000`;
     let result = await Proyecto.addProyecto(ProyectoData);
     response.status(201).json({ serverResponse: result });
   }
@@ -539,9 +549,11 @@ class RoutesController {
     var Actividad: BussActividad = new BussActividad();
     var Programa: BussPrograma = new BussPrograma();
     var ActividadData = request.body;
-    let idPrograma = ActividadData.id_programa
+    let idPrograma = ActividadData.id_programa;
     let programa = await Programa.readPrograma(idPrograma);
-    ActividadData["cat_prog"] = `${programa.codigo} 000 ${ActividadData.codigo}`
+    ActividadData[
+      "cat_prog"
+    ] = `${programa.codigo} 000 ${ActividadData.codigo}`;
     let result = await Actividad.addActividad(ActividadData);
     response.status(201).json({ serverResponse: result });
   }
@@ -639,6 +651,420 @@ class RoutesController {
     let id: string = request.params.id;
     let result = await Actividad.deleteActividad(id);
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
+  }
+  //////Seguimiento Poa-------//
+  public async uploadCsvPoa(request: Request, response: Response) {
+    var segPoa: BussSegPoa = new BussSegPoa();
+    var id: string = request.params.id;
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/csv`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    var filData = request.body;
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["csv"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      filData.uri = "getgaceta/" + newname;
+      filData.path = totalpath;
+      //csv
+      let totalRecords: Array<any> = [];
+      console.log(path.resolve(__dirname, totalpath));
+      fs.createReadStream(path.resolve(__dirname, totalpath))
+        .pipe(csv.parse({ headers: true, discardUnmappedColumns: true }))
+        .on("error", (error) => console.error(error))
+        .on("data", (row) => {
+          totalRecords.push(row)
+        })
+        .on("end", async (rowCount: number) =>{
+          const result = await segPoa.addSegPoaCsv(totalRecords);
+          console.log(`Parsed ${rowCount} rows`)
+        });
+       
+    }
+    response.status(200).json({
+      serverResponse: "Se ejucutó con éxito"
+    });
+    return;
+  }
+  public async readSegPoa(request: Request, response: Response) {
+    var segPoa: BussSegPoa = new BussSegPoa();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<ISegPoa> = await segPoa.readSegPoa();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<ISegPoa> = await segPoa.readSegPoa(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async searchSegPoa(request: Request, response: Response) {
+    var segPoa: BussSegPoa = new BussSegPoa();
+    var searchSegPoa = request.params.search;
+    let res = await segPoa.searchSegPoa(searchSegPoa);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async getCatProg(request: Request, response: Response) {
+    var segPoa: BussSegPoa = new BussSegPoa();
+    let res = await segPoa.getCatProg();
+    response.status(200).json({ serverResponse: res });
+  }
+  //----------ARTICULO------------//
+  public async createArticulo(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    var ArticuloData = request.body;
+    let result = await Articulo.addArticulo(ArticuloData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getArticulos(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.codigo != null) {
+      var expresion = new RegExp(params.codigo);
+      filter["codigo"] = expresion;
+    }
+    if (params.denominacion != null) {
+      var expresion = new RegExp(params.denominacion);
+      filter["denominacion"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IArticulo> = await Articulo.readArticulo();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IArticulo> = await Articulo.readArticulo(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async searchArticulo(request: Request, response: Response) {
+    var convenio: BussArticulo = new BussArticulo();
+    var searchArticulo = request.params.search;
+    let res = await convenio.searchArticulo(searchArticulo);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async getArticulo(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    let result = await Articulo.readArticulo(request.params.id);
+    response.status(200).json(result);
+  }
+  public async getArticuloCod(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    let codigo = request.params.codigo;
+    let result = await Articulo.readArticuloCod(codigo);
+    response.status(200).json(result);
+  }
+  public async updateArticulo(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Articulo.updateArticulo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeArticulo(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    let id: string = request.params.id;
+    let result = await Articulo.deleteArticulo(id);
+    response.status(200).json({ serverResponse: "Se elimino la Articulo" });
+  }
+  //----------MEIDIDAs------------//
+  public async createMedida(request: Request, response: Response) {
+    var Medida: BussMedida = new BussMedida();
+    var MedidaData = request.body;
+    let result = await Medida.addMedida(MedidaData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getMedidas(request: Request, response: Response) {
+    var Medida: BussMedida = new BussMedida();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IMedida> = await Medida.readMedida();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IMedida> = await Medida.readMedida(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async getMedida(request: Request, response: Response) {
+    var Medida: BussMedida = new BussMedida();
+    let repres = await Medida.readMedida(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async updateMedida(request: Request, response: Response) {
+    var Medida: BussMedida = new BussMedida();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Medida.updateMedida(id, params);
+    response.status(200).json(result);
+  }
+  public async removeMedida(request: Request, response: Response) {
+    var Medida: BussMedida = new BussMedida();
+    let id: string = request.params.id;
+    let result = await Medida.deleteMedida(id);
+    response.status(200).json({ serverResponse: "Se elimino la Medida" });
+  }
+  public async searchMedida(request: Request, response: Response) {
+    var medida: BussMedida = new BussMedida();
+    var searchMedida = request.params.search;
+    let res = await medida.searchMedida(searchMedida);
+    response.status(200).json({ serverResponse: res });
+  }
+  //----------INGRESO------------//
+  public async createIngreso(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    var Articulo: BussArticulo = new BussArticulo();
+    var IngresoData = request.body;
+    let result = await Ingreso.addIngreso(IngresoData);
+      result.articulos.forEach(async (data:any) => {
+        let articulos= data
+        let articulo = await Articulo.readArticulo(articulos.id);
+        let stock:Number = articulo.cantidad + parseInt(articulos.cantidad);
+        var params: any = request.body;
+        params["cantidad"]=stock;
+        var result = await Articulo.updateArticulo(articulos.id, params);
+      });
+    response.status(201).json({ serverResponse:"Se Registró un Ingreso" });
+  }
+  public async getIngresos(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IIngreso> = await Ingreso.readIngreso();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IIngreso> = await Ingreso.readIngreso(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async searchIngreso(request: Request, response: Response) {
+    var convenio: BussIngreso = new BussIngreso();
+    var searchIngreso = request.params.search;
+    let res = await convenio.searchIngreso(searchIngreso);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async getIngreso(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    let repres = await Ingreso.readIngreso(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async updateIngreso(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Ingreso.updateIngreso(id, params);
+    response.status(200).json(result);
+  }
+  public async removeIngreso(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    let id: string = request.params.id;
+    let result = await Ingreso.deleteIngreso(id);
+    response.status(200).json({ serverResponse: "Se elimino la Ingreso" });
   }
 }
 export default RoutesController;

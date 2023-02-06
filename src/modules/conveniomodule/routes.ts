@@ -160,6 +160,9 @@ class Routes {
       .route(`${this.routeparent}/partidas`)
       .get(this.routesController.getPartidas);
     app
+      .route(`${this.routeparent}/partidasAlm`)
+      .get(this.routesController.getPartidasAlm);
+    app
       .route(`${this.routeparent}/partida/:id`)
       .get(this.routesController.getPartida);
     app

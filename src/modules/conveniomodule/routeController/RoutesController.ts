@@ -21,8 +21,8 @@ import BussEntity from "../businesController/entity";
 import { IEntity } from "../models/entities";
 import { IFinaciadoras } from "../models/finaciadoras";
 import BussFinanc from "../businesController/financiadoras";
-import BussPartida from "../businesController/partidasg"
-import {IPartidas} from "../models/partidasg"
+import BussPartida from "../businesController/partidasg";
+import { IPartidas } from "../models/partidasg";
 import BussRubro from "../businesController/rubros";
 import { IRubros } from "../models/rubros";
 class RoutesController {
@@ -313,10 +313,12 @@ class RoutesController {
     var filData: any = request.body;
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
-      var nombreCortado = file.name.split('.'); 
-      var extensionArchivo = nombreCortado[ nombreCortado.length - 1 ];
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
-      var newname: string = `${"GAMB"}_${filehash}_${filData.typefile}.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filehash}_${
+        filData.typefile
+      }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       var hojaResult: IConvenio = await convenioToUpdate.save();
@@ -395,9 +397,11 @@ class RoutesController {
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
-      var nombreCortado = file.name.split('.'); 
-      var extensionArchivo = nombreCortado[ nombreCortado.length - 1 ];
-      var newname: string = `${"GAMB"}_${filehash}_${trsnfToUpdate.codigo}.${extensionArchivo}`;
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      var newname: string = `${"GAMB"}_${filehash}_${
+        trsnfToUpdate.codigo
+      }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       var hojaResult: IConvenio = await trsnfToUpdate.save();
@@ -577,6 +581,39 @@ class RoutesController {
     const result: Array<IPartidas> = await partida.readPartida();
     response.status(200).json(result);
   }
+  public async getPartidasAlm(request: Request, response: Response) {
+    var SubCategoria: BussPartida = new BussPartida();
+    var filter: any = {};
+    var params: any = request.query;
+    var aux: any = {};
+    var order: any = {};
+    if (params.codgt != null) {
+      var gt = params.codgt;
+      aux["$gt"] = gt;
+    }
+    if (params.codlt != null) {
+      var lt = params.codlt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["codigo"] = aux;
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IPartidas> = await SubCategoria.readPartida(
+      filter,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+    });
+    return;
+  }
   public async getPartida(request: Request, response: Response) {
     var partida: BussPartida = new BussPartida();
     let repres = await partida.readPartida(request.params.id);
@@ -599,7 +636,9 @@ class RoutesController {
     var partida: BussPartida = new BussPartida();
     let id: string = request.params.id;
     let result = await partida.deletePartida(id);
-    response.status(200).json({ serverResponse: "Se elimino un partida de Gasto" });
+    response
+      .status(200)
+      .json({ serverResponse: "Se elimino un partida de Gasto" });
   }
   //----------RUBROS------------//
   public async createRubro(request: Request, response: Response) {

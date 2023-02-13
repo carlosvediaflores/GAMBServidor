@@ -172,6 +172,14 @@ class Routes {
     app
       .route(`${this.routeparent}/searchrendicion/:search`)
       .get(this.routesController.searchRendicion);
+
+    //////////COUNTER
+    app
+      .route(`${this.routeparent}/visitas`)
+      .get(this.routesController.totalVistas);
+    app
+      .route(`${this.routeparent}/visitas`)
+      .post(this.routesController.createCounter);
   }
 }
 export default Routes;

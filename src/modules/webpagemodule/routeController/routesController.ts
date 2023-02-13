@@ -26,6 +26,7 @@ import { IArchivoPoa } from "../models/archivo_poa";
 import BussArchivoPoa from "../bussinesController/archivo_poa";
 import { IRendicion } from "../models/rendiciones";
 import BussRendicion from "../bussinesController/rendiciones";
+import BussCounter from "../bussinesController/counter";
 class RoutesController {
   //*--------------Slider------------------- *//
   public async createSlaider(request: Request, response: Response) {
@@ -902,7 +903,7 @@ class RoutesController {
     if (params.estado != null) {
       filter["estado"] = status;
     }
-   /*  if (params.titulo != null) {
+    /*  if (params.titulo != null) {
       var expresion = new RegExp(params.titulo);
       filter["titulo"] = expresion;
     }
@@ -1042,7 +1043,9 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"POA"}_${poaData1.descripcion}_${poaData1.gestion}.${extensionArchivo}`;
+        var newname: string = `${"POA"}_${poaData1.descripcion}_${
+          poaData1.gestion
+        }.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
@@ -1051,7 +1054,7 @@ class RoutesController {
         let idPoa = poaResult._id;
         var result1 = await fil.addArchivoPoa(filData);
         let idFile = result1._id;
-        var result = await Poa.addArcivoPoa(idPoa, idFile);     
+        var result = await Poa.addArcivoPoa(idPoa, idFile);
       }
       response.status(200).json({
         serverResponse: result,
@@ -1061,20 +1064,22 @@ class RoutesController {
     var filData: any = request.body;
     for (var i = 0; i < key.length; i++) {
       let fil: BussArchivoPoa = new BussArchivoPoa();
-      let poa = await Poa.readPoa(id)
+      let poa = await Poa.readPoa(id);
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf","xls","xlsx","docx","jpg"];
+      var extensionesValidas = ["pdf", "xls", "xlsx", "docx", "jpg"];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"POA"}_${filData.descripcion}_${poa.gestion}.${extensionArchivo}`;
+      var newname: string = `${"POA"}_${filData.descripcion}_${
+        poa.gestion
+      }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
@@ -1086,7 +1091,7 @@ class RoutesController {
       response.status(200).json({ serverResponse: "Poa modificado" });
       return;
     }
-    
+
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
@@ -1125,7 +1130,7 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await Poa.updatePoa(id, params);
-    response.status(200).json({ res: "se editó" });  
+    response.status(200).json({ res: "se editó" });
   }
   //* ---------------ARCHIVO POA--------------*//
   public async deleteArchivoPoa(request: Request, response: Response) {
@@ -1149,7 +1154,7 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await PoaArch.updateArchivoPoa(id, params);
-    response.status(200).json({ res: "se editó" });  
+    response.status(200).json({ res: "se editó" });
   }
   //* ---------------PTDI--------------*//
   public async getPtdis(request: Request, response: Response) {
@@ -1165,7 +1170,7 @@ class RoutesController {
     if (params.estado != null) {
       filter["estado"] = status;
     }
-   /*  if (params.titulo != null) {
+    /*  if (params.titulo != null) {
       var expresion = new RegExp(params.titulo);
       filter["titulo"] = expresion;
     }
@@ -1527,7 +1532,9 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
+        var newname: string = `${"GAMB"}_${filData.descripcion}_${
+          filData.gestion
+        }.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
@@ -1554,7 +1561,9 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filData.descripcion}_${
+        filData.gestion
+      }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
@@ -1607,6 +1616,30 @@ class RoutesController {
     var params = request.body;
     var result = await Rendicion.updateRendicion(id, params);
     response.status(200).json({ res: "se editó" });
+  }
+
+  ///COUNTER
+  public async createCounter(request: Request, response: Response) {
+    var count: BussCounter = new BussCounter();
+    const res: any = await count.totalVistas();
+    let result: any;
+    if (isEmpty(res)) {
+      var countData = request.body;
+      result = await count.addCounter(countData);
+    } else {
+      const resp: any = res[0];
+      let id: string = resp._id;
+      var params: any = request.body;
+      params["visitas"] = resp.visitas + 1;
+      result = await count.updateVisitas(id, params);
+    }
+    response.status(201).json({ serverResponse: result });
+  }
+  public async totalVistas(request: Request, response: Response) {
+    var count: BussCounter = new BussCounter();
+    //let id: string = request.params.id;
+    let res = await count.totalVistas();
+    response.status(200).json(res);
   }
 }
 export default RoutesController;

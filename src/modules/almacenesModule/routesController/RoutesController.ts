@@ -27,7 +27,7 @@ import { IArticulo } from "../models/articulos";
 import BussArticulo from "../businessController/articulos";
 import { IMedida } from "../models/medidas";
 import BussMedida from "../businessController/medidas";
-import { IIngreso } from "../models/ingreso";
+import ingreso, { IIngreso } from "../models/ingreso";
 import BussIngreso from "../businessController/ingreso";
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
@@ -705,16 +705,15 @@ class RoutesController {
         .pipe(csv.parse({ headers: true, discardUnmappedColumns: true }))
         .on("error", (error) => console.error(error))
         .on("data", (row) => {
-          totalRecords.push(row)
+          totalRecords.push(row);
         })
-        .on("end", async (rowCount: number) =>{
+        .on("end", async (rowCount: number) => {
           const result = await segPoa.addSegPoaCsv(totalRecords);
-          console.log(`Parsed ${rowCount} rows`)
+          console.log(`Parsed ${rowCount} rows`);
         });
-       
     }
     response.status(200).json({
-      serverResponse: "Se ejucutó con éxito"
+      serverResponse: "Se ejucutó con éxito",
     });
     return;
   }
@@ -976,16 +975,26 @@ class RoutesController {
     var Ingreso: BussIngreso = new BussIngreso();
     var Articulo: BussArticulo = new BussArticulo();
     var IngresoData = request.body;
-    let result = await Ingreso.addIngreso(IngresoData);
-      result.articulos.forEach(async (data:any) => {
-        let articulos= data
-        let articulo = await Articulo.readArticulo(articulos.id);
-        let stock:Number = articulo.cantidad + parseInt(articulos.cantidad);
-        var params: any = request.body;
-        params["cantidad"]=stock;
-        var result = await Articulo.updateArticulo(articulos.id, params);
-      });
-    response.status(201).json({ serverResponse:"Se Registró un Ingreso" });
+    let result: any;
+    const resp: any = await Ingreso.readIngreso();
+    if (isEmpty(resp)) {
+      IngresoData["numero"] = 1
+      result = await Ingreso.addIngreso(IngresoData);
+    }else{
+      const resp1: any = resp[0];
+      let num = resp1.numero + 1;
+      IngresoData["numero"] = num;
+      result = await Ingreso.addIngreso(IngresoData);
+    } 
+    result.articulos.forEach(async (data: any) => {
+      let articulos = data;
+      let articulo = await Articulo.readArticulo(articulos.id);
+      let stock: Number = articulo.cantidad + parseInt(articulos.cantidad);
+      var params: any = request.body;
+      params["cantidad"] = stock;
+      var result = await Articulo.updateArticulo(articulos.id, params);
+    });
+    response.status(201).json({ serverResponse: result });
   }
   public async getIngresos(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();

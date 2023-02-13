@@ -8,6 +8,7 @@ export interface IEgreso extends Document {
   numero:number;
   estado: boolean;
   idProveedor: string;
+  idPersona: string;
   idUsuario: string;
 }
 const egresoSchema: Schema = new Schema(
@@ -20,6 +21,7 @@ const egresoSchema: Schema = new Schema(
     numero: { type: Number},
     estado: {type: Boolean, default:true},
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
+    idPersona: { type: Schema.Types.ObjectId, ref: "User" },
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
   },
   {

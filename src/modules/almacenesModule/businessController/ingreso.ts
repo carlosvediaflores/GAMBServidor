@@ -29,7 +29,7 @@ class BussIngreso {
         .sort(order).populate("idProveedor").populate("idUsuario");
       return listIngreso;
     } else {
-      let listIngresos: Array<IIngreso> = await ingresosModel.find().populate("idProveedor").populate("idUsuario");
+      let listIngresos: Array<IIngreso> = await ingresosModel.find().populate("idProveedor").populate("idUsuario").limit(1).sort({_id:-1});
       return listIngresos;
     }
   }

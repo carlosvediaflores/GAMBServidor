@@ -214,6 +214,54 @@ class Routes {
     app
       .route(`${this.routeparent}/searchingreso/:search`)
       .get(this.routesController.searchIngreso);
+    //-------EGRESOS--//
+    app
+      .route(`${this.routeparent}/egreso`)
+      .post(this.routesController.createEgreso);
+    app
+      .route(`${this.routeparent}/egresos`)
+      .get(this.routesController.getEgresos);
+    app
+      .route(`${this.routeparent}/egreso/:id`)
+      .get(this.routesController.getEgreso);
+    app
+      .route(`${this.routeparent}/egreso/:id`)
+      .put(this.routesController.updateEgreso);
+    app
+      .route(`${this.routeparent}/egreso/:id`)
+      .delete(this.routesController.removeEgreso);
+    app
+      .route(`${this.routeparent}/searchegreso/:search`)
+      .get(this.routesController.searchEgreso);
+    //////////COUNTER
+    app
+      .route(`${this.routeparent}/almPartidas`)
+      .get(this.routesController.partidasAlm);
+    app
+      .route(`${this.routeparent}/partidaAlm`)
+      .post(this.routesController.createPartida);
+    app
+      .route(`${this.routeparent}/egresoya/:id`)
+      .get(this.routesController.egreso);
+    //-------COMPRAS--//
+    app
+      .route(`${this.routeparent}/compra`)
+      .post(this.routesController.createCompra);
+    app
+      .route(`${this.routeparent}/compras`)
+      .get(this.routesController.getCompras);
+    app
+      .route(`${this.routeparent}/compra/:id`)
+      .get(this.routesController.getCompra);
+    app
+      .route(`${this.routeparent}/compra/:id`)
+      .put(this.routesController.updateCompra);
+    app
+      .route(`${this.routeparent}/compra/:id`)
+      .delete(this.routesController.removeCompra);
+    app
+      .route(`${this.routeparent}/searchCompra/:search?`)
+      .get(this.routesController.searchCompra);
   }
 }
 export default Routes;

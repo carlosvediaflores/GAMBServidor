@@ -71,7 +71,7 @@ class BussArticulo {
     }
   }
   public async updateArticulo(id: string, Articulo: any) {
-    let result = await articulosModel.update({ _id: id }, { $set: Articulo });
+    let result = await articulosModel.updateOne({ _id: id }, { $set: Articulo });
     return result;
   }
   public async deleteArticulo(id: string) {

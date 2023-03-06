@@ -1,25 +1,23 @@
 import mongoose, { Schema, Document } from "mongoose";
+import compraModel, { ICompra } from "../models/compras";
+import { ISalida } from "./salida";
 export interface IEgreso extends Document {
-  articulos: [];
-  categoriaProgra: string;
+  productos: Array<ISalida>;
   concepto: string;
   fecha: number;
-  numeroFactura: string;
-  numero:number;
-  estado: boolean;
+  numeroEgreso:number;
+  estadoEgreso: string;
   idProveedor: string;
   idPersona: string;
   idUsuario: string;
 }
 const egresoSchema: Schema = new Schema(
   {
-    articulos: { type: Array},
-    categoriaProgra: { type: String, required: true},
+    productos: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}],
     concepto: { type: String },
     fecha: { type: Date, default:new Date},
-    numeroFactura: { type: String },
-    numero: { type: Number},
-    estado: {type: Boolean, default:true},
+    numeroSalida: { type: Number},
+    estadoEgreso: {type: String, default:"REGISTRADO"},
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
     idPersona: { type: Schema.Types.ObjectId, ref: "User" },
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },

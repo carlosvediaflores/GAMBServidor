@@ -3,14 +3,16 @@ export interface ISegPoa extends Document {
   cat_programatica: string;
   partida: string;
   proyect_acti: string;
-  presupuesto_inicial: string
+  presupuesto_vigente: string
 }
 const SegPoaSchema: Schema = new Schema(
   {
     cat_programatica: { type: String },
     partida: { type: String},
     proyect_acti: { type: String },
-    presupuesto_inicial:{type: String}
+    presupuesto_vigente:{type: String},
+    ejecucion_presupuestaria:{type: String},
+    saldo:{type: String}
   },
   {
     timestamps: true,

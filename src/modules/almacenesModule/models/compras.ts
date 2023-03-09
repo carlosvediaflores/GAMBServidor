@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
+import salidaModel, { ISalida } from "../models/salida";
 export interface ICompra extends Document {
   ubicacion:string;
   cantidadCompra: number;
@@ -10,6 +11,7 @@ export interface ICompra extends Document {
   idProducto:string;
   idArticulo:string;
   idEntrada: string;
+  salidas: Array<ISalida>
 }
 const compraSchema: Schema = new Schema(
   {
@@ -23,6 +25,7 @@ const compraSchema: Schema = new Schema(
     idProducto:{type: String},
     idArticulo: {type: Schema.Types.ObjectId, ref: "alm_articulos" },
     idEntrada: { type: Schema.Types.ObjectId, ref: "alm_ingresos" },
+    salidas: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}]
   },
   {
     timestamps: true,

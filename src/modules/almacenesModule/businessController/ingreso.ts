@@ -1,5 +1,6 @@
 import ingresosModel, { IIngreso } from "../models/ingreso";
 import compraModel, { ICompra } from "../models/compras";
+import egresoModel, { IEgreso } from "../models/egreso";
 class BussIngreso {
   constructor() {}
   public async readIngreso(): Promise<Array<IIngreso>>;
@@ -23,6 +24,7 @@ class BussIngreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idEgreso")
         .populate({
           path: "productos",
           model: "alm_compras",
@@ -45,6 +47,7 @@ class BussIngreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idEgreso")
         .populate({
           path: "productos",
           model: "alm_compras",
@@ -61,6 +64,7 @@ class BussIngreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idEgreso")
         .populate({
           path: "productos",
           model: "alm_compras",
@@ -93,6 +97,7 @@ class BussIngreso {
       .populate("idProveedor")
       .populate("idUsuario")
       .populate("idPersona")
+      .populate("idEgreso")
       .populate({
         path: "productos",
         model: "alm_compras",
@@ -130,6 +135,27 @@ class BussIngreso {
         });
         if (checkrol.length == 0) {
           ingreso.productos.push(compra);
+          return await ingreso.save();
+        }
+        return null;
+      }
+      return null;
+    }
+    return null;
+  }
+  public async addEgresos(idIngreso: string, idEgreso: string) {
+    let ingreso = await ingresosModel.findOne({ _id: idIngreso });
+    if (ingreso != null) {
+      var egreso = await egresoModel.findOne({ _id: idEgreso });
+      if (egreso != null) {
+        var checkrol: Array<IEgreso> = ingreso.idEgreso.filter((item) => {
+          if (egreso._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checkrol.length == 0) {
+          ingreso.idEgreso.push(egreso);
           return await ingreso.save();
         }
         return null;

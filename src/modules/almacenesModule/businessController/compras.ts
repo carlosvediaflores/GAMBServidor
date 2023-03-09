@@ -1,4 +1,5 @@
 import compraModel, { ICompra } from "../models/compras";
+import salidaModel, { ISalida } from "../models/salida";
 class BussCompra {
   constructor() {}
   public async readCompra(): Promise<Array<ICompra>>;
@@ -20,7 +21,11 @@ class BussCompra {
       var result: ICompra = await compraModel
         .findOne({ _id: params1 })
         .populate("idArticulo")
-        .populate("idEntrada");
+        .populate("idEntrada")
+        .populate({
+          path: "salidas",
+          model: "alm_salidas",
+        });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -31,13 +36,21 @@ class BussCompra {
         .limit(limit)
         .sort(order)
         .populate("idArticulo")
-        .populate("idEntrada");
+        .populate("idEntrada")
+        .populate({
+          path: "salidas",
+          model: "alm_salidas",
+        });
       return listCompra;
     } else {
       let listCompras: Array<ICompra> = await compraModel
         .find()
         .populate("idArticulo")
-        .populate("idEntrada");
+        .populate("idEntrada")
+        .populate({
+          path: "salidas",
+          model: "alm_salidas",
+        });
       return listCompras;
     }
   }
@@ -99,6 +112,27 @@ class BussCompra {
   public async deleteCompra(id: string) {
     let result = await compraModel.remove({ _id: id });
     return result;
+  }
+  public async addSalidas(idCompra: string, idSalida: string) {
+    let compra = await compraModel.findOne({ _id: idCompra });
+    if (compra != null) {
+      var salida = await salidaModel.findOne({ _id: idSalida });
+      if (salida != null) {
+        var checkrol: Array<ISalida> = compra.salidas.filter((item) => {
+          if (salida._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checkrol.length == 0) {
+          compra.salidas.push(salida);
+          return await compra.save();
+        }
+        return null;
+      }
+      return null;
+    }
+    return null;
   }
 }
 export default BussCompra;

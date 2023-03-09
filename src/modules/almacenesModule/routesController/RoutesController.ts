@@ -1092,10 +1092,48 @@ class RoutesController {
   }
   public async removeIngreso(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
+    var Articulo: BussArticulo = new BussArticulo();
+    var compra: BussCompra = new BussCompra();
+    var salida: BussSalida = new BussSalida();
+    var egreso: BussEgreso = new BussEgreso();
     let id: string = request.params.id;
     let entrada = await Ingreso.readIngreso(id);
-    //console.log("entradda",entrada.productos[0])
-    //let result = await Ingreso.deleteIngreso(id);
+    var egresoData = request.body;
+    let productos: any = entrada.productos
+    if(entrada.estado==="REGISTRADO"){
+      for(let i = 0; i < productos.length ; i++){
+        let data: any = productos[i];
+        let SimpleArt: any = await Articulo.readArticulo(data.idArticulo._id)
+        let ArticuloSimple: any = SimpleArt[0]
+        let stock: Number = ArticuloSimple.cantidad - data.cantidadCompra;
+        egresoData.cantidad = stock;
+        let result1 = await Articulo.updateArticulo(data.idArticulo._id, egresoData);
+        let removeCompra = await compra.deleteCompra(data._id)
+      }
+      let result = await Ingreso.deleteIngreso(id);
+      response.status(200).json({ serverResponse: "Se elimino Ingreso" });
+      return;
+    }
+    for(let i = 0; i < productos.length ; i++){
+      let data: any = productos[i];
+      //let SimpleArt: any = await Articulo.readArticulo(data.idArticulo._id)
+      //let ArticuloSimple: any = SimpleArt[0]
+      //let stock: Number = ArticuloSimple.cantidad + data.cantidadCompra;
+      //egresoData.cantidad = stock;
+      let result1 = await Articulo.updateArticulo(data.idArticulo._id, egresoData);
+      let removeCompra = await compra.deleteCompra(data._id)
+    }
+    let salidas: any = entrada.idEgreso
+    for(let j = 0; j < salidas.length ; j++){
+      let dataSalida = salidas[j]
+      let productoSal: any = dataSalida.productos
+      for(let k = 0; k < productoSal.length ; k++){
+        let productoSalida = productoSal[k]
+        let removeSalida = await salida.deleteSalida(productoSalida)
+      }
+      let removeEgreso = await egreso.deleteEgreso(dataSalida._id)
+  }
+    let result = await Ingreso.deleteIngreso(id);
     response.status(200).json({ serverResponse: "Se elimino Ingreso" });
   }
   //----------EGRESO------------//
@@ -1107,26 +1145,6 @@ class RoutesController {
     var articulo: BussArticulo = new BussArticulo();
     var EgresoData = request.body;
     let result: any;
-    let next: boolean = true;
-    console.log("data", EgresoData);
-    /*for(let i = 0 ; i < EgresoData.articulos.length; i++){
-      let data = EgresoData.articulos[i];
-      let articulo = await Articulo.readArticulo(data.id);
-      let stock:Number = articulo.cantidad - parseInt(data.cantidadCompra);
-      if (stock < 0) {
-        next=false
-      }
-    } */
-    console.log(next);
-    if (!next) {
-      response
-        .status(300)
-        .json({
-          serverResponse:
-            "UNO DE LOS ARTICULOS QUE ESTA SOLICITANDO LO SUPERA LA CANTIDAD EXISTENTE",
-        });
-      return;
-    }
     const resp: any = await Egreso.getNumEgreso();
     if (isEmpty(resp)) {
       EgresoData["numeroSalida"] = 1;
@@ -1140,33 +1158,31 @@ class RoutesController {
     console.log(result);
     for (let i = 0; i < EgresoData.articulos.length; i++) {
       let data = EgresoData.articulos[i];
-      console.log("listaData", data);
       let listCompra = await compra.readCompra(data.idCompra);
-      console.log("articulos", listCompra.idArticulo);
-      console.log("listaCompra", listCompra);
       let entrada: any = listCompra.idEntrada;
-      //let stock:Number = articulo.idArticulo - parseInt(data.cantidad);
+      let Simplearticulo: any = listCompra.idArticulo;
       EgresoData.cantidadSalida = data.cantidadSalida;
       EgresoData.idCompra = data.idCompra;
       EgresoData.catProgra = data.catProgra;
       EgresoData.idEgreso = result._id;
-      EgresoData.estado = "SALIDA";
-      console.log("entrada", listCompra.idEntrada);
       let resultSalida = await salida.addSalida(EgresoData);
       let idSalida = resultSalida._id;
       var resultAdd = await Egreso.addSalidas(result._id, idSalida);
-      console.log("compra", listCompra.stockCompra);
-      console.log("salida", EgresoData.cantidadSalida);
+      var compraAdd = await compra.addSalidas(data.idCompra, idSalida);
+      let stock:Number = Simplearticulo.cantidad - EgresoData.cantidadSalida;
       let stockCompra: Number =
       listCompra.stockCompra - EgresoData.cantidadSalida;
       EgresoData.stockCompra = stockCompra;
-      console.log("stock", stockCompra);
+      EgresoData.cantidad = stock;
+      if(stockCompra===0){
+        EgresoData.estadoCompra = "AGOTADO";
+      }
+      let result1 = await articulo.updateArticulo(Simplearticulo._id, EgresoData);
       let resultCompra = await compra.updateCompra(data.idCompra, EgresoData);
       const ENTRADA: ISimpleIngreso = {
         estado:"SALIDA",
       }
       var resul = await ingreso.updateIngreso(entrada._id, ENTRADA);
-      //let result1 = await Articulo.updateArticulo(articulo.id, params);
     }
     response.status(201).json({ serverResponse: result });
   }
@@ -1279,7 +1295,6 @@ class RoutesController {
     var compra: BussCompra = new BussCompra();
     var salida: BussSalida = new BussSalida();
     let res = await ingreso.readIngreso(idIng);
-    console.log(idIng);
     if (res == null) {
       response.status(300).json({ serverResponse: "No existe ingreso" });
       return;
@@ -1290,7 +1305,6 @@ class RoutesController {
           .json({ serverResponse: "Este Ingreso ya fue reguistrado su Egreso en su totalidad"});
         return;
       }
-    console.log("ingreso", res);
     var egresoData = request.body;
     egresoData["articulos"] = res.productos;
     egresoData["concepto"] = res.concepto;
@@ -1308,14 +1322,11 @@ class RoutesController {
       egresoData["numeroSalida"] = num;
       result = await Egreso.addEgreso(egresoData);
     }
-    console.log(res.productos.length);
     for (let i = 0; i < res.productos.length; i++) {
       let data: any = res.productos[i];
-      console.log("listaData", data);
-      let articulo: any = await Articulo.readArticulo(data.idArticulo);
-      let simpleArticulo: any = articulo[0];
-      let stock: Number =
-        simpleArticulo.cantidad - parseInt(data.cantidadCompra);
+      let SimpleArt: any = await Articulo.readArticulo(data.idArticulo._id)
+      let ArticuloSimple: any = SimpleArt[0]
+      let stock: Number = ArticuloSimple.cantidad - parseInt(data.cantidadCompra);
       egresoData.cantidadSalida = data.cantidadCompra;
       egresoData.estadoSalida = "SIN OBS";
       egresoData.catProgra = data.catProgra;
@@ -1324,15 +1335,19 @@ class RoutesController {
       egresoData.cantidad = stock;
       egresoData.estadoCompra = "AGOTADO";
       egresoData.stockCompra = 0;
+      egresoData.cantidad = stock;
       let resultSalida = await salida.addSalida(egresoData);
       let idSalida = resultSalida._id;
       var resultAdd = await Egreso.addSalidas(result._id, idSalida);
-      //let result1 = await Articulo.updateArticulo(simpleArticulo._id, params);
+      var compraAdd = await compra.addSalidas(data._id, idSalida);
+      let result1 = await Articulo.updateArticulo(data.idArticulo._id, egresoData);
       let result2 = await compra.updateCompra(data._id, egresoData);
     }
-    var ingresoData: any = request.body;
-    ingresoData.estado = "EGRESADO";
-    var resul = await ingreso.updateIngreso(idIng, ingresoData);
+    const ENTRADA: ISimpleIngreso = {
+      estado:"EGRESADO",
+    }
+    var egresoAdd = await ingreso.addEgresos(idIng, result._id);
+    var resul = await ingreso.updateIngreso(idIng, ENTRADA);
     response.status(201).json({ serverResponse: result });
   }
   //----------COMPRAS------------//

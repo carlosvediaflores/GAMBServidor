@@ -61,7 +61,7 @@ class BusinessHoja {
     return listSegui;
   }
   public async total({}) {
-    var result = await HojaModel.count();
+    var result = await HojaModel.countDocuments();
     return result;
   }
   public async asodHoja(nuit: string): Promise<IHojaruta>;

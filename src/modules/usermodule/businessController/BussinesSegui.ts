@@ -112,7 +112,7 @@ class BussinesSegui {
     return listSeguiO;
   }
   public async total({}) {
-    var result = await SeguiModel.count();
+    var result = await SeguiModel.countDocuments();
     return result;
   }
   public async readSeguiAs(query?: any): Promise<Array<ISeguimiento>>;

@@ -22,6 +22,7 @@ class BussEgreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idIngreso","numeroEntrada")
         .populate({
           path: "productos",
           model: "alm_salidas",
@@ -46,6 +47,7 @@ class BussEgreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idIngreso","numeroEntrada")
         .populate({
           path: "productos",
           model: "alm_salidas",
@@ -65,6 +67,7 @@ class BussEgreso {
         .populate("idProveedor")
         .populate("idUsuario")
         .populate("idPersona")
+        .populate("idIngreso","numeroEntrada")
         .populate({
           path: "productos",
           model: "alm_salidas",

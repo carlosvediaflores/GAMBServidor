@@ -10,6 +10,7 @@ export interface IEgreso extends Document {
   idProveedor: string;
   idPersona: string;
   idUsuario: string;
+  idIngreso: string;
 }
 const egresoSchema: Schema = new Schema(
   {
@@ -20,7 +21,7 @@ const egresoSchema: Schema = new Schema(
     estadoEgreso: {type: String, default:"REGISTRADO"},
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
     idPersona: { type: Schema.Types.ObjectId, ref: "User" },
-    idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
+    idIngreso: { type: Schema.Types.ObjectId, ref: "alm_ingresos" },
   },
   {
     timestamps: true,

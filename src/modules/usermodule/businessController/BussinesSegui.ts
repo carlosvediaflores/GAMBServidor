@@ -24,10 +24,11 @@ class BussinesSegui {
       let limit = params3 ? params3 : 1;
       let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1)
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
+        .populate("archivofi");
       return listSegui;
     } else {
-      let listSegui: Array<ISeguimiento> = await SeguiModel.find();
+      let listSegui: Array<ISeguimiento> = await SeguiModel.find().populate("archivofi");
       return listSegui;
     }
   }

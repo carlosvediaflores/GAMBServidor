@@ -36,6 +36,8 @@ import { ICompra } from "../models/compras";
 import BussCompra from "../businessController/compras";
 import { ISalida } from "../models/salida";
 import BussSalida from "../businessController/salida";
+import { IVehiculo } from "../models/vehiculo";
+import BussVehiculo from "../businessController/vehiculo";
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   //----------CATEGORIA------------//
@@ -1497,6 +1499,92 @@ class RoutesController {
     var Compra: BussCompra = new BussCompra();
     var searchCompra = request.params.search;
     let res = await Compra.searchCompra(searchCompra);
+    response.status(200).json({ serverResponse: res });
+  }
+  //----------VEHICULOS------------//
+  public async createVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var VehiculoData = request.body;
+    let result = await Vehiculo.addVehiculo(VehiculoData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getVehiculos(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IVehiculo> = await Vehiculo.readVehiculo();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IVehiculo> = await Vehiculo.readVehiculo(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async getVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let repres = await Vehiculo.readVehiculo(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async updateVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Vehiculo.updateVehiculo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let id: string = request.params.id;
+    let result = await Vehiculo.deleteVehiculo(id);
+    response.status(200).json({ serverResponse: "Se elimino Vehiculo" });
+  }
+  public async searchVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var searchVehiculo = request.params.search;
+    let res = await Vehiculo.searchVehiculo(searchVehiculo);
     response.status(200).json({ serverResponse: res });
   }
 }

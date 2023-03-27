@@ -1,25 +1,23 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
 export interface IProveedor extends Document {
-    compania: string;
-    representante: string;
     razon_social: string;
-    nit: number;
-    telefono: number;
+    representante: string;
     direccion: string;
+    nit: string;
+    telefono: string;
     ciudad: string;
     estado: boolean
     ususario: string;
   }
   const proveedorSchema: Schema = new Schema({
-    compania:{ type: String },
-    representante:{type: String},
-    razon_social: {type: String},
-    nit: {type: Number},
-    telefono: {type: Number},
-    direccion: {type: String},
-    ciudad: {type: String},
+    razon_social: {type: String, default:null},
+    representante:{type: String, default:null},
+    direccion: {type: String, default:null},
+    nit: {type: String, default:null},
+    telefono: {type: String, default:null},
+    ciudad: {type: String, default:null},
     estado: {type: Boolean, default:true},
-    ususario: { type: Schema.Types.ObjectId, ref: 'User'}
+    idUsuario: { type: Schema.Types.ObjectId, ref: 'User'}
   },{
     timestamps: true,
     versionKey: false,

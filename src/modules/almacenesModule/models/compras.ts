@@ -8,6 +8,7 @@ export interface ICompra extends Document {
   estadoCompra: string;
   catProgra:string;
   precio:number;
+  motivo:string;
   idProducto:string;
   idArticulo:string;
   idEntrada: string;
@@ -23,6 +24,7 @@ const compraSchema: Schema = new Schema(
     estadoCompra: {type:String, default:"EXISTE"},
     catProgra: { type: String },
     precio: { type: Number, default:0 },
+    motivo:{type:String},
     idProducto:{type: String},
     idArticulo: {type: Schema.Types.ObjectId, ref: "alm_articulos" },
     idEntrada: { type: Schema.Types.ObjectId, ref: "alm_ingresos" },

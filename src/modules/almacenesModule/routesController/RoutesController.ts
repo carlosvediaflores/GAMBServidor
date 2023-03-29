@@ -1085,6 +1085,12 @@ class RoutesController {
     let repres = await Ingreso.readIngreso(request.params.id);
     response.status(200).json(repres);
   }
+  public async queryIngreso(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    var quieryIngreso = request.params.search;
+    let res = await Ingreso.queryIngreso(quieryIngreso);
+    response.status(200).json({ serverResponse: res });
+  }
   public async updateIngreso(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
     let id: string = request.params.id;

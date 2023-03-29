@@ -1,6 +1,7 @@
 import ingresosModel, { IIngreso } from "../models/ingreso";
 import compraModel, { ICompra } from "../models/compras";
 import egresoModel, { IEgreso } from "../models/egreso";
+import proveedores from "../models/proveedores";
 class BussIngreso {
   constructor() {}
   public async readIngreso(): Promise<Array<IIngreso>>;
@@ -104,6 +105,24 @@ class BussIngreso {
         populate: { path: "idArticulo", model: "alm_articulos" },
       });
     return listConvenio;
+  }
+  public async queryIngreso(search:string) {
+    let listIngreso: any  = await ingresosModel
+   
+    .find({
+    })
+    .populate("productos")
+    .sort({ createdAt: -1 })
+    .populate({
+      path: "idProveedor",
+      match:{representante:search} 
+    });
+    
+    console.log(search)
+    let filterProveedores = listIngreso.filter((proveedor:any) => {
+      return proveedor.idProveedor != null;
+    });
+  return filterProveedores;
   }
   public async addIngreso(Ingreso: IIngreso) {
     try {

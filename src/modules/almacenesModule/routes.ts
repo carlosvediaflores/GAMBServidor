@@ -214,6 +214,9 @@ class Routes {
     app
       .route(`${this.routeparent}/searchingreso/:search`)
       .get(this.routesController.searchIngreso);
+    app
+      .route(`${this.routeparent}/queryIngreso/:search`)
+      .get(this.routesController.queryIngreso);
     //-------EGRESOS--//
     app
       .route(`${this.routeparent}/egreso`)

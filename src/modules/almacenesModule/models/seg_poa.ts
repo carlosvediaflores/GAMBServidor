@@ -5,7 +5,7 @@ export interface ISegPoa extends Document {
   proyect_acti: string;
   presupuesto_vigente: string;
   ejecucion_presupuestaria:string;
-  saldo:number;
+  saldo:string ;
   etapa:string
 }
 const SegPoaSchema: Schema = new Schema(
@@ -15,7 +15,7 @@ const SegPoaSchema: Schema = new Schema(
     proyect_acti: { type: String },
     presupuesto_vigente:{type: String},
     ejecucion_presupuestaria:{type: String},
-    saldo:{type: Number},
+    saldo:{type: String},
     etapa:{type:String},
   },
   {

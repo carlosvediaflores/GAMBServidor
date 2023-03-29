@@ -25,7 +25,7 @@ const vehiculoSchema: Schema = new Schema(
     destino:{type: String},
     estado: {type:String},
     color: { type:String},
-    idChofer: { type: Schema.Types.ObjectId, ref: "User" },
+    idChofer: { type: Schema.Types.ObjectId, ref: "User" }
   },
   {
     timestamps: true,

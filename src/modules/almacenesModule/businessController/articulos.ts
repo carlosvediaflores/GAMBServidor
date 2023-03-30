@@ -39,7 +39,7 @@ class BussArticulo {
   ) {
     var filter = {
       $or: [
-       // { codigo: { $regex: search, $options: "i" } },
+        { codigo: { $regex: search, $options: "i" } },
         { nombre: { $regex: search, $options: "i" } },
       /*   { ubicacion: { $regex: search, $options: "i" } },
         { unidadDeMedida: { $regex: search, $options: "i" } }, */

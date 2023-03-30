@@ -93,8 +93,7 @@ class BussEgreso {
     var filter = {
       $or: [
         { numeroFactura: { $regex: search, $options: "i" } },
-        { categoriaProgra: { $regex: search, $options: "i" } },
-        { concepto: { $regex: search, $options: "i" } },
+        { glosaSalida: { $regex: search, $options: "i" } },
         //{ unidadDeMedida: { $regex: search, $options: "i" } },
       ],
     };

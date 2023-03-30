@@ -5,6 +5,7 @@ export interface IEgreso extends Document {
   productos: Array<ISalida>;
   glosaSalida: string;
   entregado:string;
+  cargo:string;
   fecha: number;
   numeroSalida:number;
   estadoEgreso: string;
@@ -18,6 +19,7 @@ const egresoSchema: Schema = new Schema(
     productos: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}],
     glosaSalida: { type: String },
     entregado: { type: String },
+    cargo: { type: String },
     fecha: { type: Date, default:new Date},
     numeroSalida: { type: Number},
     estadoEgreso: {type: String, default:"REGISTRADO"},

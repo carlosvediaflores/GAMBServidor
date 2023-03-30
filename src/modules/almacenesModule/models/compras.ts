@@ -12,7 +12,7 @@ export interface ICompra extends Document {
   idProducto:string;
   idArticulo:string;
   idEntrada: string;
-  idVehiculo:string;
+  vehiculo:string;
   salidas: Array<ISalida>
 }
 const compraSchema: Schema = new Schema(
@@ -28,7 +28,7 @@ const compraSchema: Schema = new Schema(
     idProducto:{type: String},
     idArticulo: {type: Schema.Types.ObjectId, ref: "alm_articulos" },
     idEntrada: { type: Schema.Types.ObjectId, ref: "alm_ingresos" },
-    idVehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
+    vehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
     salidas: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}]
   },
   {

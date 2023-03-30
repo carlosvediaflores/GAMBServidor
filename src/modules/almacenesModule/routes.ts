@@ -245,7 +245,7 @@ class Routes {
       .post(this.routesController.createPartida);
     app
       .route(`${this.routeparent}/egresoya/:id`)
-      .get(this.routesController.egreso);
+      .put(this.routesController.egreso);
     //-------COMPRAS--//
     app
       .route(`${this.routeparent}/compra`)

@@ -25,6 +25,14 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+        })
+        .populate({
+          path: "vehiculo",
+          model: "alm_vehiculos",
+          populate: {
+            path: "idChofer",
+            model: "User",
+          },
         });
       return result;
     } else if (params1) {
@@ -40,6 +48,14 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+        })
+        .populate({
+          path: "vehiculo",
+          model: "alm_vehiculos",
+          populate: {
+            path: "idChofer",
+            model: "User",
+          },
         });
       return listCompra;
     } else {
@@ -50,6 +66,14 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+        })
+        .populate({
+          path: "vehiculo",
+          model: "alm_vehiculos",
+          populate: {
+            path: "idChofer",
+            model: "User",
+          },
         });
       return listCompras;
     }
@@ -90,7 +114,7 @@ class BussCompra {
         path: "idPartida",
         model: "partidas",
       },
-    });;
+    });
     
   return listCompra;
   }

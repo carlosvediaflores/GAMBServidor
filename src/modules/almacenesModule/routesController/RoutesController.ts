@@ -987,6 +987,7 @@ class RoutesController {
     var IngresoData = request.body;
     let result: any;
     const resp: any = await Ingreso.getNumIngreso();
+    console.log(IngresoData)
     if (isEmpty(resp)) {
       IngresoData["numeroEntrada"] = 1;
       result = await Ingreso.addIngreso(IngresoData);
@@ -1371,10 +1372,11 @@ class RoutesController {
       return;
     }
     var egresoData = request.body;
+    if(!egresoData.idPersona){
+        egresoData["idPersona"] = res.idPersona;
+    }
     egresoData["articulos"] = res.productos;
-    egresoData["concepto"] = res.concepto;
-    egresoData["idProveedor"] = res.idProveedor;
-    egresoData["idPersona"] = res.idPersona;
+    egresoData["idProveedor"] = res.idProveedor;  
     egresoData["idUsuario"] = res.idUsuario;
     egresoData["estadoEgreso"] = "DIRECTO";
     egresoData["idIngreso"] = idIng;

@@ -34,6 +34,15 @@ class BussIngreso {
             model: "alm_articulos",
             populate: { path: "idPartida", model: "partidas" },
           },
+        })
+        .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "vehiculo",
+            model: "alm_vehiculos",
+            populate: { path: "idChofer", model: "User" },
+          },
         });
       // .populate("productos");
       return result;
@@ -57,6 +66,15 @@ class BussIngreso {
             model: "alm_articulos",
             populate: { path: "idPartida", model: "partidas" },
           },
+        })
+        .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "vehiculo",
+            model: "alm_vehiculos",
+            populate: { path: "idChofer", model: "User" },
+          },
         });
       return listIngreso;
     } else {
@@ -70,6 +88,15 @@ class BussIngreso {
           path: "productos",
           model: "alm_compras",
           populate: { path: "idArticulo", model: "alm_articulos" },
+        })
+        .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "vehiculo",
+            model: "alm_vehiculos",
+            populate: { path: "idChofer", model: "User" },
+          },
         });
       return listIngresos;
     }
@@ -103,6 +130,15 @@ class BussIngreso {
         path: "productos",
         model: "alm_compras",
         populate: { path: "idArticulo", model: "alm_articulos" },
+      })
+      .populate({
+        path: "productos",
+        model: "alm_compras",
+        populate: {
+          path: "vehiculo",
+          model: "alm_vehiculos",
+          populate: { path: "idChofer", model: "User" },
+        },
       });
     return listConvenio;
   }

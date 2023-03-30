@@ -987,7 +987,6 @@ class RoutesController {
     var IngresoData = request.body;
     let result: any;
     const resp: any = await Ingreso.getNumIngreso();
-    console.log(IngresoData)
     if (isEmpty(resp)) {
       IngresoData["numeroEntrada"] = 1;
       result = await Ingreso.addIngreso(IngresoData);
@@ -1421,6 +1420,7 @@ class RoutesController {
     };
     var egresoAdd = await ingreso.addEgresos(idIng, result._id);
     var resul = await ingreso.updateIngreso(idIng, ENTRADA);
+    console.log(result)
     response.status(201).json({ serverResponse: result });
   }
   //----------COMPRAS------------//

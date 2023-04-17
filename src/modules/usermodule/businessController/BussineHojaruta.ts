@@ -97,7 +97,7 @@ class BusinessHoja {
       ],
     };
     let skip = params2 ? params2 : 0;
-    let limit = params3 ? params3 : 100;
+    let limit = params3 ? params3 : 500;
     let listHoja: Array<IHojaruta> = await HojaModel.find(filter)
       .skip(skip)
       .limit(limit)

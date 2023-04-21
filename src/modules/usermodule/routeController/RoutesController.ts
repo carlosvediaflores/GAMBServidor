@@ -419,8 +419,13 @@ class RoutesController {
   public async createHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     var hojaData = request.body;
+    const resp: any = await hoja.getNuit();
+    let nuit : any = resp[0].nuit.split("-")
+    let simpleNuit: any = nuit[0]
+    let nuitok : number = parseInt(simpleNuit)
     hojaData["fecharesepcion"] = new Date();
     hojaData["estado"] = "REGISTRADO";
+    hojaData["nuit"] = `${nuitok+1}-23`;
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
       response.status(300).json({ serverResponse: "No se registro" });
@@ -496,9 +501,14 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["fecharesepcion"] = aux;
     }
-    let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
+    //let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
+    let totalHR:any = await segui.total({});
+    const resp: any = await segui.getNuit();
+    let nuit : any = resp[0].nuit.split("-")
+    let simpleNuit: any = nuit[0]
+    let nuitok : number = parseInt(simpleNuit)
+    var totalDocs = totalHR;
+    var totalpage = Math.ceil(totalHR / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {
@@ -526,6 +536,7 @@ class RoutesController {
       totalpage,
       skip,
       order,
+      nuitok
     });
     return;
   }

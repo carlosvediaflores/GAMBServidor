@@ -1093,8 +1093,22 @@ class RoutesController {
   }
   public async updateIngreso(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
+    var compra: BussCompra = new BussCompra();
+    var salida: BussSalida = new BussSalida();
     let id: string = request.params.id;
     var params = request.body;
+    let productos: any = params.articulos;
+    for (let i = 0; i < productos.length; i++) {
+      let data: any = productos[i];
+      let SimpleCompra: any = await compra.readCompra(data.idCompra);
+      let CompraSimple: any = SimpleCompra[0];
+      let salidaM:any={}
+      salidaM["cantidadSalida"]=data.cantidadCompra
+      if(SimpleCompra.estadoCompra==="AGOTADO"){
+        let resultEditS = await salida.updateSalida(SimpleCompra.salidas[0]._id,salidaM);
+      }
+      let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
+    }
     var result = await Ingreso.updateIngreso(id, params);
     response.status(200).json(result);
   }

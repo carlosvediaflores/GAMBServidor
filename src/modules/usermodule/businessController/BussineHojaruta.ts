@@ -64,6 +64,13 @@ class BusinessHoja {
     var result = await HojaModel.countDocuments();
     return result;
   }
+  public async getNuit() {
+    var result = await HojaModel
+      .find()
+      .limit(1)
+      .sort({ _id: -1 });
+    return result;
+  }
   public async asodHoja(nuit: string): Promise<IHojaruta>;
   public async asodHoja(
     params1?: string | any,

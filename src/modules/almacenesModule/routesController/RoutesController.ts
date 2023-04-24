@@ -1393,6 +1393,7 @@ class RoutesController {
     egresoData["idUsuario"] = res.idUsuario;
     egresoData["estadoEgreso"] = "DIRECTO";
     egresoData["idIngreso"] = idIng;
+    egresoData["fecha"] = egresoData.fechaSalida;
     let result: any;
     const resp: any = await Egreso.getNumEgreso();
     if (isEmpty(resp)) {
@@ -1434,7 +1435,6 @@ class RoutesController {
     };
     var egresoAdd = await ingreso.addEgresos(idIng, result._id);
     var resul = await ingreso.updateIngreso(idIng, ENTRADA);
-    console.log(result)
     response.status(201).json({ serverResponse: result });
   }
   //----------COMPRAS------------//

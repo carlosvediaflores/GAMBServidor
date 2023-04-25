@@ -64,8 +64,7 @@ class BussPtdi {
     var filter = {
         estado: true ,
       $or: [
-        { titulo: { $regex: search, $options: "i" } },
-        { detalle: { $regex: search, $options: "i" } },
+        { descripcion: { $regex: search, $options: "i" } }
       ],
     };
     let skip = params2 ? params2 : 0;
@@ -88,7 +87,7 @@ class BussPtdi {
     }
   }
   public async updatePtdi(id: string, Ptdi: any) {
-    let result = await ptdiModule.update({ _id: id }, { $set: Ptdi });
+    let result = await ptdiModule.updateOne({ _id: id }, { $set: Ptdi });
     return result;
   }
   public async deletePtdi(id: string) {

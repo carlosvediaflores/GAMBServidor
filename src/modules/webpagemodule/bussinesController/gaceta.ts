@@ -86,7 +86,7 @@ class BussGaceta {
     }
   }
   public async updateGaceta(id: string, Gaceta: any) {
-    let result = await gacetaModule.update({ _id: id }, { $set: Gaceta });
+    let result = await gacetaModule.updateOne({ _id: id }, { $set: Gaceta });
     return result;
   }
   public async deleteGaceta(id: string) {

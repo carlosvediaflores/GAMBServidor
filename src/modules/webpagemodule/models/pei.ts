@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
-export interface IPtdi extends Document {
+export interface IPei extends Document {
   gestion: string;
   titulo: string;
   descripcion: string;
-  ley: string;
+  //ley: string;
   archivo: string;
   fecha:Date;
   estado:boolean;
@@ -11,11 +11,11 @@ export interface IPtdi extends Document {
   path:string;
   usuario:string
   }
-  const ptdiSchema: Schema = new Schema({
+  const peiSchema: Schema = new Schema({
     gestion: { type: String },
     titulo: {type: String},
     descripcion: {type: String},
-    ley:{type: Schema.Types.ObjectId, ref: 'wpgaceta'},
+    //ley:{type: Schema.Types.ObjectId, ref: 'wpgaceta'},
     archivo:{type:String},
     fecha:{type:Date},
     estado:{type:Boolean, default:false},
@@ -27,4 +27,4 @@ export interface IPtdi extends Document {
     timestamps: true,
     versionKey: false,
   });
-  export default mongoose.model<IPtdi>("wpptdi", ptdiSchema);
+  export default mongoose.model<IPei>("wp_pei", peiSchema);

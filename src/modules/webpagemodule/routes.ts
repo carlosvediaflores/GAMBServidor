@@ -143,7 +143,9 @@ class Routes {
     app
       .route(`${this.routeparent}/getptdi/:name`)
       .get(this.routesController.getImgPtdi);
-    app.route(`${this.routeparent}/ptdis`).get(this.routesController.getPtdis);
+    app
+      .route(`${this.routeparent}/ptdis`)
+      .get(this.routesController.getPtdis);
     app
       .route(`${this.routeparent}/ptdi/:id`)
       .put(this.routesController.updatePtdi);
@@ -172,6 +174,52 @@ class Routes {
     app
       .route(`${this.routeparent}/searchrendicion/:search`)
       .get(this.routesController.searchRendicion);
+
+     //*------------Routes PEI--------*//
+     app
+     .route(`${this.routeparent}/pei/:id`)
+     .get(this.routesController.getPei);
+   app
+     .route(`${this.routeparent}/pei/:id`)
+     .delete(this.routesController.removePei);
+   app
+     .route(`${this.routeparent}/uploadPei/:id?`)
+     .post(this.routesController.uploadPei);
+   app
+     .route(`${this.routeparent}/getPei/:name`)
+     .get(this.routesController.getImgPei);
+   app
+     .route(`${this.routeparent}/peis`)
+     .get(this.routesController.getPeis);
+   app
+     .route(`${this.routeparent}/pei/:id`)
+     .put(this.routesController.updatePei);
+   app
+     .route(`${this.routeparent}/searchPei/:search`)
+     .get(this.routesController.searchPei);
+
+    //*------------Routes Reglamentos y manuales--------*//
+    app
+      .route(`${this.routeparent}/reglamento/:id`)
+      .get(this.routesController.getReglamento);
+    app
+      .route(`${this.routeparent}/reglamento/:id`)
+      .delete(this.routesController.removeReglamento);
+    app
+      .route(`${this.routeparent}/uploadReglamento/:id?`)
+      .post(this.routesController.uploadReglamento);
+    app
+      .route(`${this.routeparent}/getReglamento/:name`)
+      .get(this.routesController.getImgReglamento);
+    app
+      .route(`${this.routeparent}/reglamentos`)
+      .get(this.routesController.getReglamentos);
+    app
+      .route(`${this.routeparent}/reglamento/:id`)
+      .put(this.routesController.updateReglamento);
+    app
+      .route(`${this.routeparent}/searchReglamento/:search`)
+      .get(this.routesController.searchReglamento);
 
     //////////COUNTER
     app

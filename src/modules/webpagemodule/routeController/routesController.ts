@@ -26,6 +26,10 @@ import { IArchivoPoa } from "../models/archivo_poa";
 import BussArchivoPoa from "../bussinesController/archivo_poa";
 import { IRendicion } from "../models/rendiciones";
 import BussRendicion from "../bussinesController/rendiciones";
+import { IPei } from "../models/pei";
+import BussPei from "../bussinesController/pei";
+import { IReglamento } from "../models/reglamento";
+import BussReglamento from "../bussinesController/reglamento";
 import BussCounter from "../bussinesController/counter";
 class RoutesController {
   //*--------------Slider------------------- *//
@@ -1294,7 +1298,7 @@ class RoutesController {
     };
     if (!id) {
       var filData = request.body;
-      var sluPtdi = slug(filData.titulo);
+      //var sluPtdi = slug(filData.titulo);
       for (var i = 0; i < key.length; i++) {
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -1308,7 +1312,7 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${sluPtdi}_${filehash}.${extensionArchivo}`;
+        var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
@@ -1322,7 +1326,7 @@ class RoutesController {
       return;
     }
     var filData: any = request.body;
-    var sluPtdi = slug(filData.titulo);
+    //var sluPtdi = slug(filData.titulo);
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -1336,13 +1340,15 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${sluPtdi}_${filehash}.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
       pathViejo = PtdiToUpdate.path;
-      borrarImagen(pathViejo);
       filData.path = totalpath;
+      if(totalpath!=PtdiToUpdate.path){
+        borrarImagen(pathViejo);
+      }
       filData.uri = "getPtdi/" + newname;
       var Result = await Ptdi.updatePtdi(id, filData);
       response.status(200).json({ serverResponse: "Ptdi modificado" });
@@ -1568,8 +1574,10 @@ class RoutesController {
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
       pathViejo = RendicionToUpdate.path;
-      borrarImagen(pathViejo);
       filData.path = totalpath;
+      if(totalpath!=RendicionToUpdate.path){
+        borrarImagen(pathViejo);
+      }
       filData.uri = "getrendicion/" + newname;
       var Result = await Rendicion.updateRendicion(id, filData);
       response.status(200).json({ serverResponse: "Rendicion modificado" });
@@ -1640,6 +1648,481 @@ class RoutesController {
     //let id: string = request.params.id;
     let res = await count.totalVistas();
     response.status(200).json(res);
+  }
+
+  //* ---------------PEI--------------*//
+  public async getPeis(request: Request, response: Response) {
+    var blogs: BussPei = new BussPei();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var status: boolean = true;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.estado != null) {
+      filter["estado"] = status;
+    }
+    /*  if (params.titulo != null) {
+      var expresion = new RegExp(params.titulo);
+      filter["titulo"] = expresion;
+    }
+    if (params.detalle != null) {
+      var expresion = new RegExp(params.detalle);
+      filter["detalle"] = expresion;
+    } */
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["fecha"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { gestion: -1 };
+    }
+    const [res, totalDocs] = await Promise.all([
+      blogs.readPei(filter, skip, limit, order),
+      blogs.total({}),
+    ]);
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: (number = Math.ceil(totalDocs / limit)),
+      skip,
+      order,
+    });
+    return;
+  }
+  public async getPei(request: Request, response: Response) {
+    var Pei: BussPei = new BussPei();
+    //let id: string = request.params.id;
+    let res = await Pei.readPei(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async searchPei(request: Request, response: Response) {
+    var Pei: BussPei = new BussPei();
+    var searchString = request.params.search;
+    let res = await Pei.search(searchString);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async removePei(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Pei: BussPei = new BussPei();
+    let id: string = request.params.id;
+    let res = await Pei.readPei(id);
+    let result = await Pei.deletePei(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Se eliminó la Pei" });
+  }
+  public async uploadPei(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Pei: BussPei = new BussPei();
+    var id: string = request.params.id;
+    var PeiToUpdate: IPei = await Pei.readPei(id);
+    if (!PeiToUpdate) {
+      response.status(300).json({ serverResponse: "Pei no existe!" });
+      return;
+    }
+    if (isEmpty(request.files) && id) {
+      var filData: any = request.body;
+      var Result = await Pei.updatePei(id, filData);
+      response.status(200).json({ serverResponse: "Pei modificado" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/plani`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (!id) {
+      var filData = request.body;
+      //var sluPei = slug(filData.titulo);
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        filData.archivo = newname;
+        filData.uri = "getPei/" + newname;
+        filData.path = totalpath;
+        var sliderResult: IPei = await Pei.addPei(filData);
+      }
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
+      return;
+    }
+    var filData: any = request.body;
+    //var sluPei = slug(filData.titulo);
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      pathViejo = PeiToUpdate.path;
+      filData.path = totalpath;
+      if(totalpath!=PeiToUpdate.path){
+        borrarImagen(pathViejo);
+      }
+      filData.uri = "getPei/" + newname;
+      var Result = await Pei.updatePei(id, filData);
+      response.status(200).json({ serverResponse: "Pei modificado" });
+      return;
+    }
+    /* pathViejo = filData.path;
+    borrarImagen(pathViejo); */
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  public async getImgPei(request: Request, response: Response) {
+    var name: string = request.params.name;
+    if (!name) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Pei: BussPei = new BussPei();
+    var PeiData: IPei = await Pei.readPeiFile(name);
+    if (!PeiData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      //response.status(300).json({ serverResponse: "Error " });
+      return;
+    }
+    if (PeiData.path == null) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      response.status(300).json({ serverResponse: "No existe imagen " });
+      return;
+    }
+    response.sendFile(PeiData.path);
+  }
+  public async updatePei(request: Request, response: Response) {
+    var Pei: BussPei = new BussPei();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Pei.updatePei(id, params);
+    response.status(200).json({ res: "se editó" });
+  }
+   //* ---------------RREGLAMENTOS Y MANUALES--------------*//
+   public async getReglamentos(request: Request, response: Response) {
+    var blogs: BussReglamento = new BussReglamento();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var status: boolean = true;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.estado != null) {
+      filter["estado"] = status;
+    }
+    if (params.titulo != null) {
+      var expresion = new RegExp(params.titulo);
+      filter["titulo"] = expresion;
+    }
+    /* if (params.numero != null) {
+      var expresion = new RegExp(params.numero);
+      filter["numero"] = expresion;
+    }
+    if (params.detalle != null) {
+      var expresion = new RegExp(params.detalle);
+      filter["detalle"] = expresion;
+    } */
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { fecha: -1 };
+    }
+    const [res, totalDocs] = await Promise.all([
+      blogs.readReglamento(filter, skip, limit, order),
+      blogs.total({}),
+    ]);
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: (number = Math.ceil(totalDocs / limit)),
+      skip,
+      order,
+    });
+    return;
+  }
+  public async getReglamento(request: Request, response: Response) {
+    var Reglamento: BussReglamento = new BussReglamento();
+    //let id: string = request.params.id;
+    let res = await Reglamento.readReglamento(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async searchReglamento(request: Request, response: Response) {
+    var Reglamento: BussReglamento = new BussReglamento();
+    var searchString = request.params.search;
+    let res = await Reglamento.search(searchString);
+    response.status(200).json({ serverResponse: res });
+  }
+  public async removeReglamento(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Reglamento: BussReglamento = new BussReglamento();
+    let id: string = request.params.id;
+    let res = await Reglamento.readReglamento(id);
+    let result = await Reglamento.deleteReglamento(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Se eliminó la Reglamento" });
+  }
+  public async uploadReglamento(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Reglamento: BussReglamento = new BussReglamento();
+    var id: string = request.params.id;
+    var ReglamentoToUpdate: IReglamento = await Reglamento.readReglamento(id);
+    if (!ReglamentoToUpdate) {
+      response.status(300).json({ serverResponse: "Reglamento no existe!" });
+      return;
+    }
+    if (isEmpty(request.files) && id) {
+      var filData: any = request.body;
+      var Result = await Reglamento.updateReglamento(id, filData);
+      response.status(200).json({ serverResponse: "Reglamento modificado" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/paginaWeb/Reglamento`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (!id) {
+      var filData = request.body;
+      var sluReglamento = slug(filData.numero);
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${sluReglamento}_${filehash}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        filData.archivo = newname;
+        filData.uri = "getReglamento/" + newname;
+        filData.path = totalpath;
+        var sliderResult: IReglamento = await Reglamento.addReglamento(filData);
+      }
+      response.status(200).json({
+        serverResponse: sliderResult,
+      });
+      return;
+    }
+    var filData: any = request.body;
+    var sluReglamento = slug(filData.numero);
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${sluReglamento}_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      pathViejo = ReglamentoToUpdate.path;
+      borrarImagen(pathViejo);
+      filData.path = totalpath;
+      filData.uri = "getReglamento/" + newname;
+      var Result = await Reglamento.updateReglamento(id, filData);
+      response.status(200).json({ serverResponse: "Reglamento modificado" });
+      return;
+    }
+    /* pathViejo = filData.path;
+    borrarImagen(pathViejo); */
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  public async getImgReglamento(request: Request, response: Response) {
+    var name: string = request.params.name;
+    if (!name) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Reglamento: BussReglamento = new BussReglamento();
+    var ReglamentoData: IReglamento = await Reglamento.readReglamentoFile(name);
+    if (!ReglamentoData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      //response.status(300).json({ serverResponse: "Error " });
+      return;
+    }
+    if (ReglamentoData.path == null) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      response.status(300).json({ serverResponse: "No existe imagen " });
+      return;
+    }
+    response.sendFile(ReglamentoData.path);
+  }
+  public async updateReglamento(request: Request, response: Response) {
+    var Reglamento: BussReglamento = new BussReglamento();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Reglamento.updateReglamento(id, params);
+    response.status(200).json({ res: "se editó" });
   }
 }
 export default RoutesController;

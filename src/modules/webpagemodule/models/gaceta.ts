@@ -10,7 +10,7 @@ export interface IGaceta extends Document {
   path:string;
   usuario:string
   }
-  const blogSchema: Schema = new Schema({
+  const gacetaSchema: Schema = new Schema({
     titulo: {type: String},
     detalle: {type: String},
     numero: {type: String},
@@ -25,4 +25,4 @@ export interface IGaceta extends Document {
     timestamps: true,
     versionKey: false,
   });
-  export default mongoose.model<IGaceta>("wpgaceta", blogSchema);
+  export default mongoose.model<IGaceta>("wpgaceta", gacetaSchema);

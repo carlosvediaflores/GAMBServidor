@@ -63,8 +63,9 @@ class BussinesOrganizacion {
                     }
                     return false;
                 });
-                console.log(checksub)
+                console.log("no hay nada",checksub)
                 if (checksub.length == 0) {
+                    console.log("no es cero")
                     org.subdirecciones.push(sub._id);
                     return await org.save();
                 }
@@ -74,14 +75,31 @@ class BussinesOrganizacion {
         }
         return null;
     }
-    /*public async getListOrg() {
-        let result = await OrganizacionModel.find();
-        return result;
+    public async removeSub(idOr: string, idSub: string) {
+        let org = await OrganizacionModel.findOne({ _id: idOr });
+        console.log("Unidad",org)
+        if (org != null) {
+            var sub = await SubdireccionesModel.findOne({ _id: idSub });
+            if (sub != null) {
+                var checksub: Array<ISubdireciones> = org.subdirecciones.filter((item) => {
+                    if (sub._id.toString() == item._id.toString()) {
+                        return true;
+                    }
+                    return false;
+                });
+                console.log("no hay nada",checksub)
+                console.log("por aqui no paso nada")
+                if (checksub.length == 0) {
+                    console.log("no es cero")
+                    //org.subdirecciones.push(sub._id);
+                    return await org.save();
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
     }
-    public async getListOr(id: string) {
-        let result = await OrganizacionModel.find({_id: id} );
-        return result;
-    }*/
     public async updateOrg(id: string, organizacion: any) {
 
         let result = await OrganizacionModel.update({ _id: id }, { $set: organizacion });

@@ -143,9 +143,7 @@ class Routes {
     app
       .route(`${this.routeparent}/getptdi/:name`)
       .get(this.routesController.getImgPtdi);
-    app
-      .route(`${this.routeparent}/ptdis`)
-      .get(this.routesController.getPtdis);
+    app.route(`${this.routeparent}/ptdis`).get(this.routesController.getPtdis);
     app
       .route(`${this.routeparent}/ptdi/:id`)
       .put(this.routesController.updatePtdi);
@@ -175,28 +173,24 @@ class Routes {
       .route(`${this.routeparent}/searchrendicion/:search`)
       .get(this.routesController.searchRendicion);
 
-     //*------------Routes PEI--------*//
-     app
-     .route(`${this.routeparent}/pei/:id`)
-     .get(this.routesController.getPei);
-   app
-     .route(`${this.routeparent}/pei/:id`)
-     .delete(this.routesController.removePei);
-   app
-     .route(`${this.routeparent}/uploadPei/:id?`)
-     .post(this.routesController.uploadPei);
-   app
-     .route(`${this.routeparent}/getPei/:name`)
-     .get(this.routesController.getImgPei);
-   app
-     .route(`${this.routeparent}/peis`)
-     .get(this.routesController.getPeis);
-   app
-     .route(`${this.routeparent}/pei/:id`)
-     .put(this.routesController.updatePei);
-   app
-     .route(`${this.routeparent}/searchPei/:search`)
-     .get(this.routesController.searchPei);
+    //*------------Routes PEI--------*//
+    app.route(`${this.routeparent}/pei/:id`).get(this.routesController.getPei);
+    app
+      .route(`${this.routeparent}/pei/:id`)
+      .delete(this.routesController.removePei);
+    app
+      .route(`${this.routeparent}/uploadPei/:id?`)
+      .post(this.routesController.uploadPei);
+    app
+      .route(`${this.routeparent}/getPei/:name`)
+      .get(this.routesController.getImgPei);
+    app.route(`${this.routeparent}/peis`).get(this.routesController.getPeis);
+    app
+      .route(`${this.routeparent}/pei/:id`)
+      .put(this.routesController.updatePei);
+    app
+      .route(`${this.routeparent}/searchPei/:search`)
+      .get(this.routesController.searchPei);
 
     //*------------Routes Reglamentos y manuales--------*//
     app
@@ -220,6 +214,29 @@ class Routes {
     app
       .route(`${this.routeparent}/searchReglamento/:search`)
       .get(this.routesController.searchReglamento);
+
+    //*------------Routes Auditoria--------*//
+    app
+      .route(`${this.routeparent}/auditoria/:id`)
+      .get(this.routesController.getAuditoria);
+    app
+      .route(`${this.routeparent}/auditoria/:id`)
+      .delete(this.routesController.removeAuditoria);
+    app
+      .route(`${this.routeparent}/uploadAuditoria/:id?`)
+      .post(this.routesController.uploadAuditoria);
+    app
+      .route(`${this.routeparent}/getAuditoria/:name`)
+      .get(this.routesController.getImgAuditoria);
+    app
+      .route(`${this.routeparent}/auditorias`)
+      .get(this.routesController.getAuditorias);
+    app
+      .route(`${this.routeparent}/auditoria/:id`)
+      .put(this.routesController.updateAuditoria);
+    app
+      .route(`${this.routeparent}/searchAuditoria/:search`)
+      .get(this.routesController.searchAuditoria);
 
     //////////COUNTER
     app

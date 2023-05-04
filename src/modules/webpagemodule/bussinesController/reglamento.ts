@@ -40,7 +40,7 @@ class BussReglamento {
     }
   }
   public async total({}) {
-    var result = await reglamentoModule.count();
+    var result = await reglamentoModule.countDocuments();
     return result;
   }
   public async readReglamentoFile(archivo: string): Promise<IReglamento>;
@@ -62,9 +62,9 @@ class BussReglamento {
   ) {
     var filter = {
         estado: true ,
+        publico: true ,
       $or: [
-        { numero: { $regex: search, $options: "i" } },
-        { detalle: { $regex: search, $options: "i" } },
+        { titulo: { $regex: search, $options: "i" } }
       ],
     };
     let skip = params2 ? params2 : 0;

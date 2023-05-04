@@ -23,6 +23,7 @@ class BussGaceta {
         .populate("usuario");
       return result;
     } else if (params1) {
+      console.log(params1)
       let skip = params2;
       let limit = params3;
       let listGaceta: Array<IGaceta> = await gacetaModule
@@ -40,7 +41,7 @@ class BussGaceta {
     }
   }
   public async total({}) {
-    var result = await gacetaModule.count();
+    var result = await gacetaModule.countDocuments();
     return result;
   }
   public async readGacetaFile(archivo: string): Promise<IGaceta>;

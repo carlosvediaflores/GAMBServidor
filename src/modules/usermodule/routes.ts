@@ -87,6 +87,9 @@ class Routes {
       .route(`${this.routeparent}/addsubdir/:id`)
       .put(this.routesController.addSubdir);
     app
+      .route(`${this.routeparent}/removsubdir/:id`)
+      .put(this.routesController.removSubdir);
+    app
       .route(`${this.routeparent}/subdir`)
       .get(this.routesController.getSubdir);
     app

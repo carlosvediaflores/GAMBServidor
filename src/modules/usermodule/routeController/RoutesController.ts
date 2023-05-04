@@ -291,6 +291,30 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: result });
   }
+  public async removSubdir(request: Request, response: Response) {
+    let idOrg: string = request.params.id;
+    //let idSub = request.body.idSub;
+    if (idOrg == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    //var userResult: IUser = await orgToUpdate.save();
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    var subdirData: any = request.body;
+    //var result1 = await subdir.addSubdir(subdirData);
+    let idSub = subdirData._id;
+    var result = await org.removeSub(idOrg, idSub);
+
+    //var result = subdirData
+    /* if (result == null) {
+      response.status(300).json({ serverResponse: "no se pudo guardar" });
+      return;
+    } */
+    response.status(200).json({ serverResponse: "probando" });
+  }
   public async getOrg(request: Request, response: Response) {
     let org: BussinesOrganizacion = new BussinesOrganizacion();
     let result = await org.readOrgs();
@@ -748,7 +772,7 @@ class RoutesController {
   public async getSeguiAs(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     let nuit: string = request.params.nuit;
-    let res = await segui.readSeguiAs(request.params.nuit);
+    let res = await segui.readSeguiAs(nuit);
     response.status(200).json(res);
   }
   public async getSeguiO(request: Request, response: Response) {

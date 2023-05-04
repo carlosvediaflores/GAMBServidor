@@ -17,7 +17,12 @@ class BusinessHoja {
     params3?: number
   ): Promise<Array<IHojaruta> | IHojaruta> {
     if (params1 && typeof params1 == "string") {
-      var result: IHojaruta = await HojaModel.findOne({ _id: params1 });
+      var result: IHojaruta = await HojaModel.findOne({ _id: params1 })
+      .populate({
+        path: "seguimiento",
+        model: "seguimiento",
+        populate: { path: "archivofi", model: "hrarchivo" },
+      });
       return result;
     } else if (params1) {
       let skip = params3;

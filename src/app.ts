@@ -22,6 +22,7 @@ class App {
     let connectionString: string = `${host}/${database}`;
     mongoose.connect(connectionString, {
       useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
     //Eventos
     mongoose.connection.on("error", (err) => {

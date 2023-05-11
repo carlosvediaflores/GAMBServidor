@@ -70,7 +70,7 @@ class BussProyecto {
     }
   }
   public async updateProyecto(id: string, Proyecto: any) {
-    let result = await proyectoModel.update({ _id: id }, { $set: Proyecto });
+    let result = await proyectoModel.updateOne({ _id: id }, { $set: Proyecto });
     return result;
   }
   public async deleteProyecto(id: string) {

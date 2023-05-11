@@ -39,7 +39,7 @@ class BussEstadoMonto{
         }
     }
     public async updateEstmonto(id: string, estmonto: any) {
-        let result = await EsadoMonto.update({ _id: id }, { $set: estmonto });
+        let result = await EsadoMonto.updateOne({ _id: id }, { $set: estmonto });
         return result;
     }
     public async deleteEstmonto(id: string) {

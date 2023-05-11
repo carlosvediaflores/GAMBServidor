@@ -39,7 +39,7 @@ class BussEntidad{
         }
     }
     public async updateEntidad(id: string, entidad: any) {
-        let result = await EntidadModel.update({ _id: id }, { $set: entidad });
+        let result = await EntidadModel.updateOne({ _id: id }, { $set: entidad });
         return result;
     }
     public async deleteEntidad(id: string) {

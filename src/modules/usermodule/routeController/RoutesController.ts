@@ -11,7 +11,7 @@ import BussinesSubdir from "../businessController/BussinesSubdir";
 import BussinesSegui from "../businessController/BussinesSegui";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
-import Users, {IUser } from "../models/Users";
+import Users, { IUser } from "../models/Users";
 import isEmpty from "is-empty";
 import path from "path";
 import fs from "fs";
@@ -46,6 +46,7 @@ class RoutesController {
     let result: Array<IUser> = await user.loginUsers(credentials, 0, 1);
     if (result.length == 1) {
       var loginUser: IUser = result[0];
+      var cargo:any = loginUser.cargo
       var token: string = jsonwebtoken.sign(
         { id: loginUser._id, email: loginUser.email },
         "secret"
@@ -56,6 +57,7 @@ class RoutesController {
         username: loginUser.username,
         surnames: loginUser.surnames,
         post: loginUser.post,
+        cargo: cargo.nombresubdir,
         roles: loginUser.roles,
         token,
       });
@@ -100,6 +102,20 @@ class RoutesController {
     }
     var result = await user.updateUsers(id, params);
     response.status(200).json(result);
+  }
+  public async removeCargo(request: Request, response: Response) {
+    var user: BusinessUser = new BusinessUser();
+    let idUser: string = request.params.id;
+    let idSub = request.body;
+    if (idUser == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var result = await user.removeCargo(idUser, idSub);
+    let resultUser: any = await user.readUsers(idUser);
+    response.status(200).json({ serverResponse: resultUser });
   }
   public async removeUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
@@ -226,12 +242,6 @@ class RoutesController {
       userToUpdate.pathavatar = totalpath;
       var userResult: IUser = await userToUpdate.save();
     }
-    /* var simpleUser: ISimpleUser = {
-      username: userResult.username,
-      uriavatar: userResult.uriavatar,
-      pathavatar: userResult.pathavatar,
-    };
-    response.status(200).json({ serverResponse: simpleUser }); */
   }
 
   public async getPortrait(request: Request, response: Response) {
@@ -291,9 +301,38 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: result });
   }
+  public async addSubUni(request: Request, response: Response) {
+    let idOrg: string = request.params.id;
+    let idSub = request.body;
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    let orgResult: any = await org.readOrg(idOrg);
+    if (orgResult != null) {
+      var sub = await subdir.readSubUni(idSub.subdirecciones);
+      if (sub != null) {
+        var checksub: any = orgResult.subdirecciones.filter((item: any) => {
+          if (sub._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length == 0) {
+          var result = await org.addSubUni(idOrg, idSub);
+          response
+          .status(200)
+          .json({ serverResponse: sub });
+          return;
+        }
+        response
+          .status(300)
+          .json({ serverResponse: "Ya existe SUB UNIDAD" });
+          return;
+      }
+    }
+  }
   public async removSubdir(request: Request, response: Response) {
     let idOrg: string = request.params.id;
-    //let idSub = request.body.idSub;
+    let idSub = request.body;
     if (idOrg == null) {
       response
         .status(300)
@@ -301,19 +340,9 @@ class RoutesController {
       return;
     }
     var org: BussinesOrganizacion = new BussinesOrganizacion();
-    //var userResult: IUser = await orgToUpdate.save();
-    let subdir: BussinesSubdir = new BussinesSubdir();
-    var subdirData: any = request.body;
-    //var result1 = await subdir.addSubdir(subdirData);
-    let idSub = subdirData._id;
     var result = await org.removeSub(idOrg, idSub);
-
-    //var result = subdirData
-    /* if (result == null) {
-      response.status(300).json({ serverResponse: "no se pudo guardar" });
-      return;
-    } */
-    response.status(200).json({ serverResponse: "probando" });
+    let orgResult: any = await org.readOrg(idOrg);
+    response.status(200).json({ serverResponse: orgResult });
   }
   public async getOrg(request: Request, response: Response) {
     let org: BussinesOrganizacion = new BussinesOrganizacion();
@@ -444,12 +473,12 @@ class RoutesController {
     var hoja: BusinessHoja = new BusinessHoja();
     var hojaData = request.body;
     const resp: any = await hoja.getNuit();
-    let nuit : any = resp[0].nuit.split("-")
-    let simpleNuit: any = nuit[0]
-    let nuitok : number = parseInt(simpleNuit)
+    let nuit: any = resp[0].nuit.split("-");
+    let simpleNuit: any = nuit[0];
+    let nuitok: number = parseInt(simpleNuit);
     hojaData["fecharesepcion"] = new Date();
     hojaData["estado"] = "REGISTRADO";
-    hojaData["nuit"] = `${nuitok+1}-23`;
+    hojaData["nuit"] = `${nuitok + 1}-23`;
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
       response.status(300).json({ serverResponse: "No se registro" });
@@ -526,11 +555,11 @@ class RoutesController {
       filter["fecharesepcion"] = aux;
     }
     //let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
-    let totalHR:any = await segui.total({});
+    let totalHR: any = await segui.total({});
     const resp: any = await segui.getNuit();
-    let nuit : any = resp[0].nuit.split("-")
-    let simpleNuit: any = nuit[0]
-    let nuitok : number = parseInt(simpleNuit)
+    let nuit: any = resp[0].nuit.split("-");
+    let simpleNuit: any = nuit[0];
+    let nuitok: number = parseInt(simpleNuit);
     var totalDocs = totalHR;
     var totalpage = Math.ceil(totalHR / limit);
     if (params.skip) {
@@ -548,7 +577,12 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    let res: Array<IHojaruta> = await segui.readHojaRuta(filter, skip, limit, order);
+    let res: Array<IHojaruta> = await segui.readHojaRuta(
+      filter,
+      skip,
+      limit,
+      order
+    );
     /* const [res, totalDocs] = await Promise.all([
       segui.readHojaRuta(filter, skip, limit, order),
       segui.total({}),
@@ -560,7 +594,7 @@ class RoutesController {
       totalpage,
       skip,
       order,
-      nuitok
+      nuitok,
     });
     return;
   }

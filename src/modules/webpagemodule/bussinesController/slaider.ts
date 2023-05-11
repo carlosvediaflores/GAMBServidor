@@ -35,7 +35,7 @@ class BussSlaider {
     }
   }
   public async total({}) {
-    var result = await SlaiderModule.count();
+    var result = await SlaiderModule.countDocuments();
     return result;
   }
   public async readSlider(img: string): Promise<ISlaider>;
@@ -72,7 +72,7 @@ class BussSlaider {
     }
   }
   public async updateSlaider(id: string, slaider: any) {
-    let result = await SlaiderModule.update({ _id: id }, { $set: slaider });
+    let result = await SlaiderModule.updateOne({ _id: id }, { $set: slaider });
     return result;
   }
   public async deleteSlaider(id: string) {

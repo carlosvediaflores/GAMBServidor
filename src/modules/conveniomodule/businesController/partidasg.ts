@@ -52,7 +52,7 @@ class BussPartida {
     }
   }
   public async updatePartida(id: string, partida: any) {
-    let result = await partidasModel.update({ _id: id }, { $set: partida });
+    let result = await partidasModel.updateOne({ _id: id }, { $set: partida });
     return result;
   }
   public async deletePartida(id: string) {

@@ -70,7 +70,7 @@ class BussSubCategoria {
     }
   }
   public async updateSubCategoria(id: string, subcategoria: any) {
-    let result = await subCategoriaModel.update({ _id: id }, { $set: subcategoria });
+    let result = await subCategoriaModel.updateOne({ _id: id }, { $set: subcategoria });
     return result;
   }
   public async deleteSubCategoria(id: string) {

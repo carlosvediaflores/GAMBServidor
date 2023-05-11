@@ -6,7 +6,7 @@ class BussCounter {
     return result;
   }
   public async updateVisitas(id: string, Counter: any) {
-    let result = await counterModel.update({ _id: id }, { $set: Counter });
+    let result = await counterModel.updateOne({ _id: id }, { $set: Counter });
     return result;
   }
   public async addCounter(Egreso: ICounter) {

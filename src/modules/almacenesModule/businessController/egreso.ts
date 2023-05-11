@@ -123,7 +123,7 @@ class BussEgreso {
     }
   }
   public async updateEgreso(id: string, Egreso: any) {
-    let result = await EgresosModel.update({ _id: id }, { $set: Egreso });
+    let result = await EgresosModel.updateOne({ _id: id }, { $set: Egreso });
     return result;
   }
   public async deleteEgreso(id: string) {

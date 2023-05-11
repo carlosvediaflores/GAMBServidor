@@ -43,7 +43,7 @@ class BussRendicion {
     }
   }
   public async total({}) {
-    var result = await rendicionModule.count();
+    var result = await rendicionModule.countDocuments();
     return result;
   }
   public async readRendicionFile(archivo: string): Promise<IRendicion>;
@@ -88,7 +88,7 @@ class BussRendicion {
     }
   }
   public async updateRendicion(id: string, Rendicion: any) {
-    let result = await rendicionModule.update({ _id: id }, { $set: Rendicion });
+    let result = await rendicionModule.updateOne({ _id: id }, { $set: Rendicion });
     return result;
   }
   public async deleteRendicion(id: string) {

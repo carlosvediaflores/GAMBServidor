@@ -19,6 +19,13 @@ class BussinesSubdir {
 
         }
     }
+    public async readSubUni(id: string): Promise<ISubdireciones>;
+    public async readSubUni(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISubdireciones> | ISubdireciones> {
+        if (params1 && typeof params1 == "string") {
+            var result: ISubdireciones = await SubdireccionesModel.findOne({ _id: params1 });
+            return result;
+        } 
+    }
     public async addSubdir(subdir: ISubdireciones) {
         try {
             let subdirDb = new SubdireccionesModel(subdir);
@@ -34,7 +41,7 @@ class BussinesSubdir {
     }*/
     public async updateSubdi(id: string, subdir: any) {
 
-        let result = await SubdireccionesModel.update({ _id: id }, { $set: subdir });
+        let result = await SubdireccionesModel.updateOne({ _id: id }, { $set: subdir });
         return result;
     }
     public async deleteSubdir(id: String) {

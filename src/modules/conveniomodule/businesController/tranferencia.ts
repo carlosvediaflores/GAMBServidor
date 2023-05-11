@@ -56,7 +56,7 @@ class BussDesem{
         }
     }
     public async updateDesem(id: string, desem: any) {
-        let result = await DesembolsoModel.update({ _id: id }, { $set: desem });
+        let result = await DesembolsoModel.updateOne({ _id: id }, { $set: desem });
         return result;
     }
     public async deleteDesem(id: string) {

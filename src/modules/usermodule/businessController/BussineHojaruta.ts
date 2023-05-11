@@ -215,7 +215,7 @@ class BusinessHoja {
   }
 
   public async updateHojas(id: string, hoja: any) {
-    let result = await HojaModel.update({ _id: id }, { $set: hoja });
+    let result = await HojaModel.updateOne({ _id: id }, { $set: hoja });
     return result;
   }
   public async deleteHojas(id: string) {

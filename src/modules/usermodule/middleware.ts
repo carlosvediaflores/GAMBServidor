@@ -14,14 +14,15 @@ var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunc
             response.status(300).json({ serverResponse: "Token no valido " + err.message });
             return;
         }
-        var id = success.id;
+        var id : string = success.id;
         var user: BusinessUser = new BusinessUser();
-        var userdata: IUser = await user.readUsers(id);
-        if (!userdata) {
-            response.status(300).json({ serverResponse: "No valido " });
+        let userdata : IUser = await user.readUsers(id);
+        if (userdata) {     
+            next();
             return;
         }
-        var roles: Array<IRoles> = userdata.roles;
+        
+       /*  var roles: Array<IRoles> = userdata.roles;
         for (var i = 0; i < roles.length; i++) {
             if (
                 request.url.toLowerCase().includes(roles[i].urn.toLowerCase()) &&
@@ -29,7 +30,7 @@ var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunc
                 next();
                 return;
             }
-        }
+        } */
         response.status(300).json({ serverResponse: "Usted no cuenta con los permisos " });
     });
 }

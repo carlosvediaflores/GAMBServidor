@@ -24,6 +24,7 @@ import { isValidObjectId } from "mongoose";
 interface Icredentials {
   email: string;
   password: string;
+  remember: boolean;
 }
 class RoutesController {
   constructor() {}
@@ -44,12 +45,14 @@ class RoutesController {
     credentials.password = sha1(credentials.password);
     const user: BusinessUser = new BusinessUser();
     let result: Array<IUser> = await user.loginUsers(credentials, 0, 1);
+    //console.log(result)
     if (result.length == 1) {
       var loginUser: IUser = result[0];
+      //console.log(loginUser)
       var cargo:any = loginUser.cargo
       var token: string = jsonwebtoken.sign(
         { id: loginUser._id, email: loginUser.email },
-        "secret"
+        "secret",{expiresIn: '1h'}
       );
       response.status(200).json({
         id: loginUser._id,
@@ -57,7 +60,7 @@ class RoutesController {
         username: loginUser.username,
         surnames: loginUser.surnames,
         post: loginUser.post,
-        cargo: cargo.nombresubdir,
+        //cargo: cargo.nombresubdir,
         roles: loginUser.roles,
         token,
       });

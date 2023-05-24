@@ -7,6 +7,7 @@ import AlmacenesModule from "./modules/almacenesModule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
+import ArchivosModule from "./modules/archivosModule/init";
 //import WebpageModule from "./modules/webpagemodule/init";
 class App { 
   public app: Express = express();
@@ -48,7 +49,8 @@ class App {
     const userModule = new UserModules("/api", this.app);    
     const convenioModule = new ConvenioModule("/api", this.app);
     const slaiderModule = new SlaiderModule("/api", this.app);
-    const almacennes = new AlmacenesModule("/api", this.app)
+    const almacennes = new AlmacenesModule("/api", this.app);
+    const archivos = new ArchivosModule("/api", this.app)
   } 
 }
 export default new App();

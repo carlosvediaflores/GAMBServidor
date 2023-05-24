@@ -27,5 +27,6 @@ const areaSchema: Schema = new Schema(
     timestamps: true,
     versionKey: false,
   }
+  /*  */
 );
 export default mongoose.model<IAreaContabilida>("arch_contabilidades", areaSchema);

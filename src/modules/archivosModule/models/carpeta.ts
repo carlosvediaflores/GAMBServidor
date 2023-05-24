@@ -41,7 +41,7 @@ const carpetaSchema: Schema = new Schema(
     areaRecaudaciones: [{ type: Schema.Types.ObjectId, ref: "arch_recaudaciones"}],
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
   },
-  {
+  {/*  */
     timestamps: true,
     versionKey: false,
   }

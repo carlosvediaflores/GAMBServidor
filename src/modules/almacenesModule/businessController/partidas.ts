@@ -6,7 +6,7 @@ class BussPartida {
     return result;
   }
   public async updatePartida(id: string, Partida: any) {
-    let result = await partidaModel.updateOne({ _id: id }, { $set: Partida });
+    let result = await partidaModel.update({ _id: id }, { $set: Partida });
     return result;
   }
   public async addPartida(Egreso: IPartida) {

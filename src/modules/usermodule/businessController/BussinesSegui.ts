@@ -144,7 +144,7 @@ class BussinesSegui {
   }
 
   public async updateSegui(id: string, segui: ISeguimiento) {
-    let result = await SeguiModel.updateOne({ _id: id }, { $set: segui });
+    let result = await SeguiModel.update({ _id: id }, { $set: segui });
     return result;
   }
   public async updateSeguiAs(nuit: string, segui: ISeguimiento) {

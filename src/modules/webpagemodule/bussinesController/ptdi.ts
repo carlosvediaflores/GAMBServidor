@@ -43,7 +43,7 @@ class BussPtdi {
     }
   }
   public async total({}) {
-    var result = await ptdiModule.countDocuments();
+    var result = await ptdiModule.count();
     return result;
   }
   public async readPtdiFile(archivo: string): Promise<IPtdi>;

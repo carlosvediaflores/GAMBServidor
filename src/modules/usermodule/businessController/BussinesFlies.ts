@@ -35,7 +35,7 @@ class BussinesFile {
     
     public async updateSegui(id: string, segui: IFiles) {
 
-        let result = await FileModel.updateOne({ _id: id }, { $set: segui });
+        let result = await FileModel.update({ _id: id }, { $set: segui });
         return result;
     }
     

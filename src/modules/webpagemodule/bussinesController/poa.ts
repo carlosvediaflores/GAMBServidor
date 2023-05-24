@@ -47,7 +47,7 @@ class BussPoa {
     }
   }
   public async total({}) {
-    var result = await poaModule.countDocuments();
+    var result = await poaModule.count();
     return result;
   }
   /* public async readPoaFile(archivo: string): Promise<IPoa>;
@@ -92,7 +92,7 @@ class BussPoa {
     }
   }
   public async updatePoa(id: string, Poa: any) {
-    let result = await poaModule.updateOne({ _id: id }, { $set: Poa });
+    let result = await poaModule.update({ _id: id }, { $set: Poa });
     return result;
   }
   public async deletePoa(id: string) {

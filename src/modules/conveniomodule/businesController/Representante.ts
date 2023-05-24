@@ -39,7 +39,7 @@ class BussRepres{
         }
     }
     public async updateRepres(id: string, repres: any) {
-        let result = await RepresentanteModel.updateOne({ _id: id }, { $set: repres });
+        let result = await RepresentanteModel.update({ _id: id }, { $set: repres });
         return result;
     }
     public async deleteRepres(id: string) {

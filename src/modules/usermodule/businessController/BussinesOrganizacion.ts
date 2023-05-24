@@ -63,7 +63,9 @@ class BussinesOrganizacion {
                     }
                     return false;
                 });
+                console.log("no hay nada",checksub)
                 if (checksub.length == 0) {
+                    console.log("no es cero")
                     org.subdirecciones.push(sub._id);
                     return await org.save();
                 }
@@ -73,17 +75,34 @@ class BussinesOrganizacion {
         }
         return null;
     }
-    public async addSubUni(idOr: string, organizacion: any) {
-        let result = await OrganizacionModel.updateOne({ _id: idOr }, { $push: organizacion })
-        return result;
-    }
-    public async removeSub(idOr: string, organizacion: any) {
-        let result = await OrganizacionModel.updateOne({ _id: idOr }, { $pull: organizacion })
-        return result;
+    public async removeSub(idOr: string, idSub: string) {
+        let org = await OrganizacionModel.findOne({ _id: idOr });
+        console.log("Unidad",org)
+        if (org != null) {
+            var sub = await SubdireccionesModel.findOne({ _id: idSub });
+            if (sub != null) {
+                var checksub: Array<ISubdireciones> = org.subdirecciones.filter((item) => {
+                    if (sub._id.toString() == item._id.toString()) {
+                        return true;
+                    }
+                    return false;
+                });
+                console.log("no hay nada",checksub)
+                console.log("por aqui no paso nada")
+                if (checksub.length == 0) {
+                    console.log("no es cero")
+                    //org.subdirecciones.push(sub._id);
+                    return await org.save();
+                }
+                return null;
+            }
+            return null;
+        }
+        return null;
     }
     public async updateOrg(id: string, organizacion: any) {
 
-        let result = await OrganizacionModel.updateOne({ _id: id }, { $set: organizacion });
+        let result = await OrganizacionModel.update({ _id: id }, { $set: organizacion });
         return result;
     }
     public async deleteOrg(id: String) {

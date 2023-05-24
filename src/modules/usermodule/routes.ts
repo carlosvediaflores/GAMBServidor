@@ -21,17 +21,14 @@ class Routes {
       .route(`${this.routeparent}/users/:limit?/:page?`)
       .get(this.routesController.getUsers);
     app
-      .route(`${this.routeparent}/user/:id`)
+      .route(`${this.routeparent}/users/:id`)
       .get(this.routesController.getUser);
     app
       .route(`${this.routeparent}/user/:post`)
       .get(this.routesController.getUs);
     app
-      .route(`${this.routeparent}/user/:id`)
+      .route(`${this.routeparent}/users/:id`)
       .put(this.routesController.updateUsers);
-    app
-      .route(`${this.routeparent}/removeCargo/:id`)
-      .put(this.routesController.removeCargo);
     app
       .route(`${this.routeparent}/users/:id`)
       .delete(this.routesController.removeUsers);
@@ -93,9 +90,6 @@ class Routes {
       .route(`${this.routeparent}/removsubdir/:id`)
       .put(this.routesController.removSubdir);
     app
-      .route(`${this.routeparent}/addSubUni/:id`)
-      .put(this.routesController.addSubUni);
-    app
       .route(`${this.routeparent}/subdir`)
       .get(this.routesController.getSubdir);
     app
@@ -107,7 +101,6 @@ class Routes {
     app
       .route(`${this.routeparent}/subdir/:id`)
       .delete(this.routesController.removeSubdir);
-      
 
     /////HOJA DE RUTA--------------------
     app

@@ -40,7 +40,7 @@ class BussAuditoria {
     }
   }
   public async total({}) {
-    var result = await auditoriaModule.countDocuments();
+    var result = await auditoriaModule.count();
     return result;
   }
   public async readAuditoriaFile(archivo: string): Promise<IAuditoria>;

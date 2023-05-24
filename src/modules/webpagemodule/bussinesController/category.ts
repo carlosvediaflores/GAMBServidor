@@ -32,7 +32,7 @@ class BussCategory{
         }
     }
     public async updateCategory(id: string, blog: any) {
-        let result = await CategoryModule.updateOne({ _id: id }, { $set: blog });
+        let result = await CategoryModule.update({ _id: id }, { $set: blog });
         return result;
     }
     public async deleteCategory(id: string) {

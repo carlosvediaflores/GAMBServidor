@@ -1181,7 +1181,6 @@ class RoutesController {
       const resp1: any = resp[0];
       let num = resp1.numeroSalida + 1;
       EgresoData["numeroSalida"] = num;
-      EgresoData["glosaSalida"] = EgresoData.concepto;
       result = await Egreso.addEgreso(EgresoData);
     }
     for (let i = 0; i < EgresoData.articulos.length; i++) {

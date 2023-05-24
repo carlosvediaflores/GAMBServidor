@@ -15,41 +15,33 @@ class BusinessUser {
 
     public async readUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
-            var result: IUser = await UsersModel.findOne({ _id: params1 })
-            .populate('cargo');
+            var result: IUser = await UsersModel.findOne({ _id: params1 });
             return result;
             
         } else if (params1) {
             let skip = params3;
             let limit = params2;
-            let result: Array<IUser> = await UsersModel.find({}).limit(limit).skip(skip)
-            .populate('cargo');
+            let result: Array<IUser> = await UsersModel.find({}).limit(limit).skip(skip);
             return result;
         } else {
-            let listUser: Array<IUser> = await UsersModel.find()
-            .populate('cargo');
+            let listUser: Array<IUser> = await UsersModel.find();
             return listUser;
         }
     }
     public async loginUsers(query?: any, skip?: number, limit?: number): Promise<Array<IUser>>;
     public async loginUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
-            var result: IUser = await UsersModel.findOne({ _id: params1 })
-            .populate('cargo');
+            var result: IUser = await UsersModel.findOne({ _id: params1 });
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 1;
-            let listUser: Array<IUser> = await UsersModel.find(params1)
-            .populate('cargo')
-            .skip(skip).limit(limit);
+            let listUser: Array<IUser> = await UsersModel.find(params1).skip(skip).limit(limit);
             return listUser;
         } else {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 10;
-            let listUser: Array<IUser> = await UsersModel.find()
-            .populate('cargo')
-            .skip(skip).limit(limit);;
+            let listUser: Array<IUser> = await UsersModel.find().skip(skip).limit(limit);;
             return listUser;
         }
     }  
@@ -69,13 +61,10 @@ class BusinessUser {
             return err;
         }
     }
-    public async removeCargo(idUs: string, user: any) {
-        let result = await UsersModel.updateOne({ _id: idUs }, { $unset: user })
-        return result;
-    }
+
     public async updateUsers(id: string, user: any) {
 
-        let result = await UsersModel.updateOne({ _id: id }, { $set: user });
+        let result = await UsersModel.update({ _id: id }, { $set: user });
         return result;
     }
     public async deleteUsers(id: string) {

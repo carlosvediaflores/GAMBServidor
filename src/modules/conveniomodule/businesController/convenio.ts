@@ -64,7 +64,7 @@ class BussConvenio {
     }
   }
   public async total({}) {
-    var result = await ConvenioModule.countDocuments();
+    var result = await ConvenioModule.count();
     return result;
   }
   public async search(query?: any): Promise<Array<IConvenio>>;
@@ -120,7 +120,7 @@ class BussConvenio {
     }
   }
   public async updateConvenio(id: string, convenio: any) {
-    let result = await ConvenioModule.updateOne({ _id: id }, { $set: convenio });
+    let result = await ConvenioModule.update({ _id: id }, { $set: convenio });
     return result;
   }
   public async deleteConvenio(id: string) {

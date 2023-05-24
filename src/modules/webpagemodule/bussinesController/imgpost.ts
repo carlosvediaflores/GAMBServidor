@@ -37,7 +37,7 @@ class BussImgpost {
     }
   }
   public async total({}) {
-    var result = await imgpostModule.countDocuments();
+    var result = await imgpostModule.count();
     return result;
   }
   public async readImgpostFile(archivo: string): Promise<IPost>;
@@ -61,7 +61,7 @@ class BussImgpost {
     }
   }
   public async updateImgpost(id: string, Imgpost: any) {
-    let result = await imgpostModule.updateOne({ _id: id }, { $set: Imgpost });
+    let result = await imgpostModule.update({ _id: id }, { $set: Imgpost });
     return result;
   }
   public async deleteImgpost(id: string) {

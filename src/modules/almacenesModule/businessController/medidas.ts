@@ -67,7 +67,7 @@ class BusMedida {
     }
   }
   public async updateMedida(id: string, Medida: any) {
-    let result = await medidaModule.updateOne({ _id: id }, { $set: Medida });
+    let result = await medidaModule.update({ _id: id }, { $set: Medida });
     return result;
   }
   public async deleteMedida(id: string) {

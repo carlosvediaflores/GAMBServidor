@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import slug from "slugify";
 import sharp from "sharp";
+//import escapeStringRegexp  from "escape-string-RegExp"
 //import csv from "fast-csv";
 import * as csv from "@fast-csv/parse";
 
@@ -799,6 +800,7 @@ class RoutesController {
     let result = await Articulo.addArticulo(ArticuloData);
     response.status(201).json({ serverResponse: result });
   }
+ 
   public async getArticulos(request: Request, response: Response) {
     var Articulo: BussArticulo = new BussArticulo();
     var filter: any = {};
@@ -812,9 +814,11 @@ class RoutesController {
       var expresion = new RegExp(params.codigo);
       filter["codigo"] = expresion;
     }
-    if (params.denominacion != null) {
-      var expresion = new RegExp(params.denominacion);
-      filter["denominacion"] = expresion;
+    if (params.nombre != null) {
+      var expresion = new RegExp(params.nombre,'i');
+      const escaped = new RegExp(params.nombre.replace(/[()\\/]/g, '\\$&'), 'i');
+      filter["nombre"] = escaped;
+      console.log(filter)
     }
     if (params.limit) {
       limit = parseInt(params.limit);

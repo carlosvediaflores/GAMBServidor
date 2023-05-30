@@ -64,7 +64,7 @@ class BusinessUser {
 
     public async updateUsers(id: string, user: any) {
 
-        let result = await UsersModel.update({ _id: id }, { $set: user });
+        let result = await UsersModel.updateOne({ _id: id }, { $set: user });
         return result;
     }
     public async deleteUsers(id: string) {

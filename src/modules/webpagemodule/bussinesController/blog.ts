@@ -24,7 +24,7 @@ class BussBlog{
         }
     }  
     public async total({}) {
-        var result = await BlogModule.count();
+        var result = await BlogModule.countDocuments();
         return result;
       }
     public async readPost(img: string): Promise<IBlog>;
@@ -51,7 +51,7 @@ class BussBlog{
         }
     }
     public async updateBlog(id: string, blog: any) {
-        let result = await BlogModule.update({ _id: id }, { $set: blog });
+        let result = await BlogModule.updateOne({ _id: id }, { $set: blog });
         return result;
     }
     public async deleteBlog(id: string) {

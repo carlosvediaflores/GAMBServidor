@@ -39,7 +39,7 @@ class BussnesArchivo {
     }
   }
   public async updateArch(id: string, arch: any) {
-    let result = await ArchivoModel.update({ _id: id }, { $set: arch });
+    let result = await ArchivoModel.updateOne({ _id: id }, { $set: arch });
     return result;
   }
   public async deleteArch(id: string) {

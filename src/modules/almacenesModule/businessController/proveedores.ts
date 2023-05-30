@@ -70,7 +70,7 @@ class BussProveedor {
     }
   }
   public async updateProveedor(id: string, proveedor: any) {
-    let result = await proveedorModel.update({ _id: id }, { $set: proveedor });
+    let result = await proveedorModel.updateOne({ _id: id }, { $set: proveedor });
     return result;
   }
   public async deleteProveedor(id: string) {

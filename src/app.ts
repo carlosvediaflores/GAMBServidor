@@ -4,11 +4,12 @@ import UserModules from "./modules/usermodule/init";
 import ConvenioModule from "./modules/conveniomodule/init";
 import SlaiderModule from "./modules/webpagemodule/init";
 import AlmacenesModule from "./modules/almacenesModule/init";
+import ArchivosModule from "./modules/archivosModule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
 //import WebpageModule from "./modules/webpagemodule/init";
-class App { 
+class App {
   public app: Express = express();
   public mongooseClient: Mongoose;
   constructor() {
@@ -22,6 +23,8 @@ class App {
     let connectionString: string = `${host}/${database}`;
     mongoose.connect(connectionString, {
       useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
     });
     //Eventos
     mongoose.connection.on("error", (err) => {
@@ -41,10 +44,11 @@ class App {
   public initApp() {
     this.app.use(Cors());
     console.log("LOAD MODULES");
-    const userModule = new UserModules("/api", this.app);    
+    const userModule = new UserModules("/api", this.app);
     const convenioModule = new ConvenioModule("/api", this.app);
     const slaiderModule = new SlaiderModule("/api", this.app);
-    const almacennes = new AlmacenesModule("/api", this.app)
-  } 
+    const almacenes = new AlmacenesModule("/api", this.app);
+    const archivos = new ArchivosModule("/api", this.app);
+  }
 }
 export default new App();

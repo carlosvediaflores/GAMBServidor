@@ -38,7 +38,7 @@ class BussRubro{
         }
     }
     public async updateRubro(id: string, rubro: any) {
-        let result = await rubroModel.update({ _id: id }, { $set: rubro });
+        let result = await rubroModel.updateOne({ _id: id }, { $set: rubro });
         return result;
     }
     public async deleteRubro(id: string) {

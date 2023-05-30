@@ -102,7 +102,7 @@ class BussinesOrganizacion {
     }
     public async updateOrg(id: string, organizacion: any) {
 
-        let result = await OrganizacionModel.update({ _id: id }, { $set: organizacion });
+        let result = await OrganizacionModel.updateOne({ _id: id }, { $set: organizacion });
         return result;
     }
     public async deleteOrg(id: String) {

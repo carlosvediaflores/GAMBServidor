@@ -34,7 +34,7 @@ class BussinesSubdir {
     }*/
     public async updateSubdi(id: string, subdir: any) {
 
-        let result = await SubdireccionesModel.update({ _id: id }, { $set: subdir });
+        let result = await SubdireccionesModel.updateOne({ _id: id }, { $set: subdir });
         return result;
     }
     public async deleteSubdir(id: String) {

@@ -37,7 +37,7 @@ class BusSegPoa {
     }
   }
   public async total({}) {
-    var result = await segPoaModule.count();
+    var result = await segPoaModule.countDocuments();
     return result;
   }
   public async searchSegPoa(query?: any): Promise<Array<ISegPoa>>;
@@ -78,7 +78,7 @@ class BusSegPoa {
     return result
   }
   public async updateSegPoa(id: string, SegPoa: any) {
-    let result = await segPoaModule.update({ _id: id }, { $set: SegPoa });
+    let result = await segPoaModule.updateOne({ _id: id }, { $set: SegPoa });
     return result;
   }
   public async deleteSegPoa(id: string) {

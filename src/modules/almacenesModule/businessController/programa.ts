@@ -69,7 +69,7 @@ class BussPrograma {
     }
   }
   public async updatePrograma(id: string, programa: any) {
-    let result = await programaModel.update({ _id: id }, { $set: programa });
+    let result = await programaModel.updateOne({ _id: id }, { $set: programa });
     return result;
   }
   public async deletePrograma(id: string) {

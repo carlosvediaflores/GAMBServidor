@@ -40,7 +40,7 @@ class BussPei {
     }
   }
   public async total({}) {
-    var result = await peiModule.count();
+    var result = await peiModule.countDocuments();
     return result;
   }
   public async readPeiFile(archivo: string): Promise<IPei>;

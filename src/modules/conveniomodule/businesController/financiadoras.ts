@@ -62,7 +62,7 @@ class BussFinanc{
       }
     }
     public async updateFinanc(id: string, financ: any) {
-      let result = await FinanModule.update({ _id: id }, { $set: financ });
+      let result = await FinanModule.updateOne({ _id: id }, { $set: financ });
       return result;
     }
     public async deleteFinanc(id: string) {

@@ -70,7 +70,7 @@ class BussActividad {
     }
   }
   public async updateActividad(id: string, Actividad: any) {
-    let result = await actividadModel.update({ _id: id }, { $set: Actividad });
+    let result = await actividadModel.updateOne({ _id: id }, { $set: Actividad });
     return result;
   }
   public async deleteActividad(id: string) {

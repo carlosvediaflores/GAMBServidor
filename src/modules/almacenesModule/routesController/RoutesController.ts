@@ -816,9 +816,8 @@ class RoutesController {
     }
     if (params.nombre != null) {
       var expresion = new RegExp(params.nombre,'i');
-      const escaped = new RegExp(params.nombre.replace(/[()\\/]/g, '\\$&'), 'i');
+      const escaped = new RegExp(params.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
       filter["nombre"] = escaped;
-      console.log(filter)
     }
     if (params.limit) {
       limit = parseInt(params.limit);
@@ -870,7 +869,10 @@ class RoutesController {
   public async searchArticulo(request: Request, response: Response) {
     var convenio: BussArticulo = new BussArticulo();
     var searchArticulo = request.params.search;
-    let res = await convenio.searchArticulo(searchArticulo);
+    const searchValue = decodeURIComponent(searchArticulo);
+    const escapedSearchValue = searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escaped = new RegExp(escapedSearchValue, 'i')
+    let res = await convenio.searchArticulo(escaped);
     response.status(200).json({ serverResponse: res });
   }
   public async getArticulo(request: Request, response: Response) {

@@ -41,6 +41,22 @@ class BussArticulo {
     let listArticulo: Array<IArticulo> = await articulosModel.find({nombre:search}).sort({ _id: -1 }).populate("idPartida")
     return listArticulo;
   }
+
+  public async searchArticulos(query?: any): Promise<Array<IArticulo>>;
+  public async searchArticulos(
+    search: string | any,
+  ) {
+    var filter = {
+      $or: [
+        { codigo: { $regex: search, $options: "i" } },
+        { nombre: { $regex: search, $options: "i" } },
+      ],
+    };
+    let listArticulo: Array<IArticulo> = await articulosModel.find(filter)
+      .sort({ _id: -1 })
+      .populate("idPartida");
+    return listArticulo;
+  }
   /* public async searchArticulo(query?: any): Promise<Array<IArticulo>>;
   public async searchArticulo(
     search: string | any,

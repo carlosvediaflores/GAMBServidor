@@ -20,8 +20,6 @@ import { IPrograma } from "../models/programa";
 import BussPrograma from "../businessController/programa";
 import { IProyecto } from "../models/proyecto";
 import BussProyecto from "../businessController/proyecto";
-import { IActividad } from "../models/actividad";
-import BussActividad from "../businessController/actididad";
 import { ISegPoa } from "../models/seg_poa";
 import BussSegPoa from "../businessController/seg_poa";
 import articulos, { IArticulo } from "../models/articulos";
@@ -555,7 +553,7 @@ class RoutesController {
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
   }
   //----------ACTIVIDAD------------//
-  public async createActividad(request: Request, response: Response) {
+  /* public async createActividad(request: Request, response: Response) {
     var Actividad: BussActividad = new BussActividad();
     var Programa: BussPrograma = new BussPrograma();
     var ActividadData = request.body;
@@ -661,7 +659,7 @@ class RoutesController {
     let id: string = request.params.id;
     let result = await Actividad.deleteActividad(id);
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
-  }
+  } */
   //////Seguimiento Poa-------//
   public async uploadCsvPoa(request: Request, response: Response) {
     var segPoa: BussSegPoa = new BussSegPoa();
@@ -800,7 +798,38 @@ class RoutesController {
     let result = await Articulo.addArticulo(ArticuloData);
     response.status(201).json({ serverResponse: result });
   }
- 
+  public async getArticuloNombre(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    var filter: any = {};
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {_id:-1};
+    var params: any = request.query;
+    console.log("params",params);
+    if (params.nombre != null) {
+      console.log("params",params.nombre);
+      var searchArticulo = "Solucion%20glucosa%205%%20500ml";
+      var expresion = new RegExp(params.nombre);
+      console.log("ExpreReg",searchArticulo);
+      const decodedQuery = decodeURIComponent(searchArticulo);
+      //const queryObject = JSON.parse('{"' + params.nombre.replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+      console.log(decodedQuery);
+      filter["nombre"] = expresion;
+    }
+    console.log(filter)
+    let res: Array<IArticulo> = await Articulo.readArticulo(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    console.log(res)
+    response.status(200).json({
+      serverResponse: res,
+    });
+    return;
+  }
   public async getArticulos(request: Request, response: Response) {
     var Articulo: BussArticulo = new BussArticulo();
     var filter: any = {};
@@ -808,7 +837,7 @@ class RoutesController {
     var limit = 0;
     var skip = 0;
     var aux: any = {};
-    var order: any = {};
+    var order: any = {_id:-1};
     var select = "";
     if (params.codigo != null) {
       var expresion = new RegExp(params.codigo);
@@ -873,6 +902,13 @@ class RoutesController {
     const escapedSearchValue = searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const escaped = new RegExp(escapedSearchValue, 'i')
     let res = await convenio.searchArticulo(escaped);
+    console.log(res)
+    response.status(200).json({ serverResponse: res });
+  }
+  public async searchArticulos(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    var searchArticulos = request.params.search;
+    let res = await Articulo.searchArticulos(searchArticulos);
     response.status(200).json({ serverResponse: res });
   }
   public async getArticulo(request: Request, response: Response) {

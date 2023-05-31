@@ -120,7 +120,7 @@ class Routes {
       .route(`${this.routeparent}/searchProy/:search`)
       .get(this.routesController.searchProy);
     //-------ACTIVIDAD--//
-    app
+    /* app
       .route(`${this.routeparent}/actividad`)
       .post(this.routesController.createActividad);
     app
@@ -140,7 +140,7 @@ class Routes {
       .delete(this.routesController.removeActividad);
     app
       .route(`${this.routeparent}/searchActividad/:search`)
-      .get(this.routesController.searchActividad);
+      .get(this.routesController.searchActividad); */
     //--------------CSV--------------//
     app
       .route(`${this.routeparent}/csv`)
@@ -176,6 +176,12 @@ class Routes {
     app
       .route(`${this.routeparent}/searchArticulo/:search`)
       .get(this.routesController.searchArticulo);
+    app
+      .route(`${this.routeparent}/searchArticulos/:search`)
+      .get(this.routesController.searchArticulos);
+    app
+      .route(`${this.routeparent}/articuloNombre`)
+      .get(this.routesController.getArticuloNombre);
     //-------MEDIDAS--//
     app
       .route(`${this.routeparent}/medida`)

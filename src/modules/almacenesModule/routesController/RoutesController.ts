@@ -806,16 +806,10 @@ class RoutesController {
     var aux: any = {};
     var order: any = {_id:-1};
     var params: any = request.query;
-    console.log("params",params);
     if (params.nombre != null) {
-      console.log("params",params.nombre);
-      var searchArticulo = "Solucion%20glucosa%205%%20500ml";
       var expresion = new RegExp(params.nombre);
-      console.log("ExpreReg",searchArticulo);
-      const decodedQuery = decodeURIComponent(searchArticulo);
-      //const queryObject = JSON.parse('{"' + params.nombre.replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-      console.log(decodedQuery);
-      filter["nombre"] = expresion;
+      const decodedQuery = unescape(params.nombre);
+      filter["nombre"] = decodedQuery;
     }
     console.log(filter)
     let res: Array<IArticulo> = await Articulo.readArticulo(
@@ -824,7 +818,6 @@ class RoutesController {
       limit,
       order
     );
-    console.log(res)
     response.status(200).json({
       serverResponse: res,
     });

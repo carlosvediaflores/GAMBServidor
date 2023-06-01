@@ -449,7 +449,7 @@ class RoutesController {
     let nuitok : number = parseInt(simpleNuit)
     hojaData["fecharesepcion"] = new Date();
     hojaData["estado"] = "REGISTRADO";
-    hojaData["nuit"] = `${nuitok+1}-23`;
+    hojaData["nuit"] = nuitok+1;
     let result = await hoja.addHoja(hojaData);
     if (result == null) {
       response.status(300).json({ serverResponse: "No se registro" });

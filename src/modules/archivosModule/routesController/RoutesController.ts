@@ -11,6 +11,8 @@ import * as csv from "@fast-csv/parse";
 
 import { ICarpeta } from "../models/carpeta";
 import BussCarpeta from "../bussinesController/carpeta";
+import { IAreaContabilida } from "../models/contabilidad";
+import BussConta from "../bussinesController/contabilidad";
 class RoutesController {
     //* ---------------RENDICIONEs--------------*//
   public async getCarpetas(request: Request, response: Response) {
@@ -21,9 +23,14 @@ class RoutesController {
     var status: boolean = true;
     var skip = 0;
     var aux: any = {};
-    var order: any = {};
-    if (params.estado != null) {
-      filter["estado"] = status;
+    var order: any = {gestion:-1};
+    if (params.area != null) {
+      var area = new RegExp(params.area,'i');
+      filter["area"] = area;
+    }
+    if (params.gestion != null) {
+      var gestion = new RegExp(params.gestion,'i');
+      filter["gestion"] = gestion;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
@@ -118,9 +125,12 @@ class RoutesController {
       return;
     }
     if (isEmpty(request.files)) {
+      var filData: any = request.body;
+      var carpeta: ICarpeta = await Carpeta.addCarpeta(filData);
+      console.log(carpeta)
       response
         .status(300)
-        .json({ serverResponse: "No existe un archivo adjunto" });
+        .json({ serverResponse:carpeta });
       return;
     }
     var dir = `${__dirname}/../../../../uploads/archivos`;
@@ -240,6 +250,163 @@ class RoutesController {
     var params = request.body;
     var result = await Carpeta.updateCarpeta(id, params);
     response.status(200).json({ res: "se editó" });
+  }
+  public async addArea(request: Request, response: Response) {
+    let idCarpeta: string = request.params.id;
+    var Carpeta: BussCarpeta = new BussCarpeta();
+    let conta: BussConta = new BussConta();
+    if (idCarpeta == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario" });
+      return;
+    }
+    let carpetaResult = await Carpeta.readCarpeta(idCarpeta);
+    let area = carpetaResult.area
+    var contaData: any = request.body;
+    contaData.idCarpeta=idCarpeta
+    console.log("Area",contaData)
+    let result:any = {};
+    let result1:any = {};
+    if(area==="contabilidad"){
+      result1 = await conta.addConta(contaData);
+      let idArea = result1._id;
+      result = await Carpeta.addContaId(idCarpeta, idArea);
+    }
+    if(area==="juridica"){
+      /* result1 = await conta.addConta(contaData);
+      let idArea = result1._id;
+      result = await Carpeta.addContaId(idCarpeta, idArea); */
+    }
+    if (result1 == null) {
+      response.status(300).json({ serverResponse: "no se pudo guardar" });
+      return;
+    }
+    response.status(200).json({ serverResponse: result1 });
+  }
+  public async addAreas(request: Request, response: Response) {
+    let idCarpeta: string = request.params.id;
+    let idArea = request.body;
+    var carpeta: BussCarpeta = new BussCarpeta();
+    let area: BussConta = new BussConta();
+    let carpetaResult: any = await carpeta.readCarpeta(idCarpeta);
+    if (carpetaResult != null) {
+      var resultArea = await area.readConta(idArea.contabilidad);
+      if (resultArea != null) {
+        var checksub: any = carpetaResult.contabilidad.filter((item: any) => {
+          if (resultArea._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length == 0) {
+          var result = await carpeta.addContaId(idCarpeta, idArea);
+          response
+          .status(200)
+          .json({ serverResponse: resultArea });
+          return;
+        }
+        response
+          .status(300)
+          .json({ serverResponse: "Ya existe DETALLE UNIDAD" });
+          return;
+      }
+    }
+  }
+  //----------CONTABILIDAD------------//
+  public async createConta(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    var ContaData = request.body;
+    console.log("Area",ContaData)
+    let result = await Conta.addConta(ContaData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getContas(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.detalle != null) {
+      var detalle = new RegExp(params.detalle,'i');
+      filter["detalle"] = detalle;
+    }
+    if (params.beneficiario != null) {
+      var beneficiario = new RegExp(params.beneficiario,'i');
+      filter["beneficiario"] = beneficiario;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IAreaContabilida> = await Conta.readConta();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IAreaContabilida> = await Conta.readConta(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async getConta(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    let repres = await Conta.readConta(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async updateConta(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Conta.updateConta(id, params);
+    response.status(200).json(result);
+  }
+  public async removeConta(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    let id: string = request.params.id;
+    let result = await Conta.deleteConta(id);
+    response.status(200).json({ serverResponse: "Se elimino la Conta" });
+  }
+  public async searchConta(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    var searchConta = request.params.search;
+    let res = await Conta.searchConta(searchConta);
+    response.status(200).json({ serverResponse: res });
   }
 }
 export default RoutesController;

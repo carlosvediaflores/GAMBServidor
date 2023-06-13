@@ -895,7 +895,6 @@ class RoutesController {
     const escapedSearchValue = searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const escaped = new RegExp(escapedSearchValue, 'i')
     let res = await convenio.searchArticulo(escaped);
-    console.log(res)
     response.status(200).json({ serverResponse: res });
   }
   public async searchArticulos(request: Request, response: Response) {

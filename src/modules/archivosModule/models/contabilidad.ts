@@ -3,7 +3,7 @@ import mongoose, { Schema, Document, Number } from "mongoose";
 import egresopModel, { IEgreso } from "../models/egreso"; */
 
 export interface IAreaContabilida extends Document {
-  numero: number;
+  numero: string;
   detalle: string;
   beneficiario: string;
   fecha: Date;
@@ -14,7 +14,7 @@ export interface IAreaContabilida extends Document {
 }
 const areaSchema: Schema = new Schema(
   {
-    numero: { type: Number },
+    numero: { type: String },
     detalle: { type: String },
     beneficiario: { type: String },
     fecha: { type: Date },
@@ -27,6 +27,5 @@ const areaSchema: Schema = new Schema(
     timestamps: true,
     versionKey: false,
   }
-  /*  */
 );
 export default mongoose.model<IAreaContabilida>("arch_contabilidades", areaSchema);

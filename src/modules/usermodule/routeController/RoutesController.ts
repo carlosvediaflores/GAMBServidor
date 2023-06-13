@@ -834,11 +834,11 @@ class RoutesController {
     }
     if (params.dategt != null) {
       var gt = params.dategt;
-      aux["$gt"] = gt;
+      aux["$gte"] = gt;
     }
     if (params.datelt != null) {
       var lt = params.datelt;
-      aux["$lt"] = lt;
+      aux["$lte"] = lt;
     }
     if (Object.entries(aux).length > 0) {
       filter["fechaderivado"] = aux;
@@ -859,7 +859,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { nuit: -1 };
+      order = { fechaderivado:-1 };
     }
     let res: Array<ISeguimiento> = await segui.readOficina(
       filter,
@@ -867,6 +867,7 @@ class RoutesController {
       limit,
       order
     );
+  //  console.log(filter)
     response.status(200).json({
       serverResponse: res,
       totalDocs,

@@ -19,6 +19,7 @@ export interface IIngreso extends Document {
   plazo:number;
   numeroEntrada:number;
   estado: string;
+  tipo:string;
   idPersona: string;
   idProveedor: string;
   idUsuario: string;
@@ -33,6 +34,7 @@ const ingresoSchema: Schema = new Schema(
     plazo: { type: Number},
     numeroEntrada: { type: Number, default:1},
     estado: {type: String, default:"REGISTRADO"},
+    tipo:{type:String, default:"REGULAR"},
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
     idPersona: { type: Schema.Types.ObjectId, ref: "User" },
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },

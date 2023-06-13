@@ -143,22 +143,21 @@ class BussIngreso {
     return listConvenio;
   }
   public async queryIngreso(search:string) {
+    let expresion = new RegExp(search,'i');
     let listIngreso: any  = await ingresosModel
-   
-    .find({
+    .find({})
+    .populate({
+      path: "idProveedor",
+      match: { representante: expresion },
     })
     .populate("productos")
     .sort({ createdAt: -1 })
-    .populate({
-      path: "idProveedor",
-      match:{representante:search} 
-    });
-    
-    console.log(search)
-    let filterProveedores = listIngreso.filter((proveedor:any) => {
+    .exec();
+    console.log(expresion)
+    /* let filterProveedores = listIngreso.filter((proveedor:any) => {
       return proveedor.idProveedor != null;
-    });
-  return filterProveedores;
+    }); */
+  return listIngreso;
   }
   public async addIngreso(Ingreso: IIngreso) {
     try {

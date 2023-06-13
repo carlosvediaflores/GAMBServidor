@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
-/* import compraModel, { ICompra } from "../models/compras";
-import egresopModel, { IEgreso } from "../models/egreso"; */
+import compraModel, { IAreaContabilida } from "../models/contabilidad";
+//import egresopModel, { IEgreso } from "../models/egreso";
 
 export interface ICarpeta extends Document {
   gestion: string;
@@ -15,14 +15,14 @@ export interface ICarpeta extends Document {
   archivo: string;
   uri: string;
   path: string;
-  arearea: string;
+  area: string;
   idArchivoArea: [];
   idUsuario: string;
 }
 const carpetaSchema: Schema = new Schema(
   {
-    gestion: { type: Number },
-    objetivo: { type: String },
+    gestion: { type: String },
+    objeto: { type: String },
     concepto: { type: String },
     tomo: { type: String },
     fecha: { type: String },
@@ -34,14 +34,13 @@ const carpetaSchema: Schema = new Schema(
     uri: { type: String },
     path: { type: String },
     area:{type:Object},
-    //idArea: { type: Schema.Types.ObjectId, ref: "Subdirecciones" },
-    areaContabilidad: [{ type: Schema.Types.ObjectId, ref: "arch_contabilidades"}],
-    areaContrataciones: [{ type: Schema.Types.ObjectId, ref: "arch_contrataciones"}],
-    areaJuridica: [{ type: Schema.Types.ObjectId, ref: "arch_juridicas"}],
-    areaRecaudaciones: [{ type: Schema.Types.ObjectId, ref: "arch_recaudaciones"}],
+    areaContabilidad: [{ type: Schema.Types.ObjectId, ref: compraModel}],
+    areaContrataciones: [{ type: Schema.Types.ObjectId, ref: 'arch_contrataciones'}],
+    areaJuridica: [{ type: Schema.Types.ObjectId, ref: 'arch_juridicas'}],
+    areaRecaudaciones: [{ type: Schema.Types.ObjectId, ref: 'arch_recaudaciones'}],
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
   },
-  {/*  */
+  {
     timestamps: true,
     versionKey: false,
   }

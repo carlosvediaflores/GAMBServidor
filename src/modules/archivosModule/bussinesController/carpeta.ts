@@ -85,6 +85,14 @@ class BussCarpeta {
       return err;
     }
   }
+  public async addContaId(idCarpeta: string, idArea: any) {
+    let result = await carpetaModel.updateOne({ _id: idCarpeta }, { $push: {areaContabilidad:idArea }})
+    return result;
+}
+/* public async removeSub(idOr: string, organizacion: any) {
+    let result = await OrganizacionModel.updateOne({ _id: idOr }, { $pull: organizacion })
+    return result;
+} */
   public async updateCarpeta(id: string, Carpeta: any) {
     let result = await carpetaModel.updateOne({ _id: id }, { $set: Carpeta });
     return result;

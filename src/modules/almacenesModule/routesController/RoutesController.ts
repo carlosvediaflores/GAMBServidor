@@ -804,14 +804,14 @@ class RoutesController {
     var limit = 0;
     var skip = 0;
     var aux: any = {};
-    var order: any = {_id:-1};
+    var order: any = { _id: -1 };
     var params: any = request.query;
     if (params.nombre != null) {
       var expresion = new RegExp(params.nombre);
       const decodedQuery = unescape(params.nombre);
       filter["nombre"] = decodedQuery;
     }
-    console.log(filter)
+    console.log(filter);
     let res: Array<IArticulo> = await Articulo.readArticulo(
       filter,
       skip,
@@ -830,15 +830,18 @@ class RoutesController {
     var limit = 0;
     var skip = 0;
     var aux: any = {};
-    var order: any = {_id:-1};
+    var order: any = { _id: -1 };
     var select = "";
     if (params.codigo != null) {
       var expresion = new RegExp(params.codigo);
       filter["codigo"] = expresion;
     }
     if (params.nombre != null) {
-      var expresion = new RegExp(params.nombre,'i');
-      const escaped = new RegExp(params.nombre.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      var expresion = new RegExp(params.nombre, "i");
+      const escaped = new RegExp(
+        params.nombre.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "i"
+      );
       filter["nombre"] = escaped;
     }
     if (params.limit) {
@@ -892,8 +895,11 @@ class RoutesController {
     var convenio: BussArticulo = new BussArticulo();
     var searchArticulo = request.params.search;
     const searchValue = decodeURIComponent(searchArticulo);
-    const escapedSearchValue = searchValue.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const escaped = new RegExp(escapedSearchValue, 'i')
+    const escapedSearchValue = searchValue.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
+    const escaped = new RegExp(escapedSearchValue, "i");
     let res = await convenio.searchArticulo(escaped);
     response.status(200).json({ serverResponse: res });
   }
@@ -1119,29 +1125,76 @@ class RoutesController {
     let repres = await Ingreso.readIngreso(request.params.id);
     response.status(200).json(repres);
   }
-  public async queryIngreso(request: Request, response: Response) {
+  public async queryIngresoPersona(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
     var quieryIngreso = request.params.search;
-    let res = await Ingreso.queryIngreso(quieryIngreso);
-    response.status(200).json({ serverResponse: res });
+    let res = await Ingreso.queryIngresoPersona(quieryIngreso);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  }
+  public async queryIngresoProveedor(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    var quieryIngreso = request.params.search;
+    let res = await Ingreso.queryIngresoProveedor(quieryIngreso);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  }
+  public async queryIngresoCompra(request: Request, response: Response) {
+    var Ingreso: BussIngreso = new BussIngreso();
+    var quieryIngreso = request.params.search;
+    let res = await Ingreso.queryIngresoCompra(quieryIngreso);
+    response.status(200).json({ serverResponse: res, total: res.length });
   }
   public async updateIngreso(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
     var compra: BussCompra = new BussCompra();
     var salida: BussSalida = new BussSalida();
+    var Articulo: BussArticulo = new BussArticulo();
+    var Egreso: BussEgreso = new BussEgreso();
     let id: string = request.params.id;
     var params = request.body;
+    let res = await Ingreso.readIngreso(id);
     let productos: any = params.articulos;
     for (let i = 0; i < productos.length; i++) {
       let data: any = productos[i];
-      let SimpleCompra: any = await compra.readCompra(data.idCompra);
-      let CompraSimple: any = SimpleCompra[0];
-      let salidaM:any={}
-      salidaM["cantidadSalida"]=data.cantidadCompra
-      if(SimpleCompra.estadoCompra==="AGOTADO"){
-        let resultEditS = await salida.updateSalida(SimpleCompra.salidas[0]._id,salidaM);
+      let articulo = await Articulo.readArticulo(data.idArticulo);
+      let stock: Number = articulo.cantidad + parseInt(data.cantidadCompra);
+      let articuloModif: any = {};
+      let compraModif: any = {};
+      let salidaM: any = {};
+      articuloModif["cantidad"] = stock;
+      console.log("idcompra", data.idCompra);
+      if (data.idCompra) {
+        let SimpleCompra = await compra.readCompra(data.idCompra);
+        salidaM["cantidadSalida"] = data.cantidadCompra;
+        if (SimpleCompra.estadoCompra === "AGOTADO") {
+          let resultEditS = await salida.updateSalida(
+            SimpleCompra.salidas[0]._id,
+            salidaM
+          );
+        }
+        let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
+      } else {
+        let resultCompra = await compra.addCompra(data);
+        let idCompra = resultCompra._id;
+        var resultAdd = await Ingreso.addCompras(id, idCompra);      
+        if (res.estado == "EGRESADO") {
+          salidaM["cantidadSalida"] = data.cantidadCompra;
+          salidaM["estadoSalida"] = "SIN OBS";
+          salidaM["catProgra"] = data.catProgra;
+          salidaM["idCompra"] = idCompra;
+          salidaM["idEgreso"] = res.idEgreso[0]._id;
+          compraModif["stockCompra"] = 0;
+          compraModif["estadoCompra"] = "AGOTADO";
+          let resultSalida = await salida.addSalida(salidaM);
+          let idSalida = resultSalida._id;
+          var resultAddSal = await Egreso.addSalidas(res.idEgreso[0]._id, idSalida);
+          var compraAdd = await compra.addSalidas(idCompra, idSalida);
+          let result2 = await compra.updateCompra(data._id, compraModif);
+        }
+        if(res.estado=="REGISTRADO"){
+          let result1 = await Articulo.updateArticulo(articulo.id, articuloModif);
+          //console.log("SE MODIFICO ARTICULO");
+        }
       }
-      let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
     }
     var result = await Ingreso.updateIngreso(id, params);
     response.status(200).json(result);
@@ -1215,7 +1268,7 @@ class RoutesController {
       const resp1: any = resp[0];
       let num = resp1.numeroSalida + 1;
       EgresoData["numeroSalida"] = num;
-      EgresoData["glosaSalida"] = EgresoData.concepto
+      EgresoData["glosaSalida"] = EgresoData.concepto;
       result = await Egreso.addEgreso(EgresoData);
     }
     for (let i = 0; i < EgresoData.articulos.length; i++) {
@@ -1340,14 +1393,12 @@ class RoutesController {
       return;
     }
     if (listEgreso.estadoEgreso === "DIRECTO") {
-      response
-        .status(300)
-        .json({
-          serverResponse:
-            "Este salida debe eliminar desde el ingreso N°" +
-            " " +
-            listEgreso.idIngreso.numeroEntrada,
-        });
+      response.status(300).json({
+        serverResponse:
+          "Este salida debe eliminar desde el ingreso N°" +
+          " " +
+          listEgreso.idIngreso.numeroEntrada,
+      });
       return;
     }
     for (let i = 0; i < listProductos.length; i++) {
@@ -1411,20 +1462,18 @@ class RoutesController {
       return;
     }
     if (res.estado == "EGRESADO") {
-      response
-        .status(300)
-        .json({
-          serverResponse:
-            "Este Ingreso ya fue reguistrado su Egreso en su totalidad",
-        });
+      response.status(300).json({
+        serverResponse:
+          "Este Ingreso ya fue reguistrado su Egreso en su totalidad",
+      });
       return;
     }
     var egresoData = request.body;
-    if(!egresoData.idPersona){
-        egresoData["idPersona"] = res.idPersona;
+    if (!egresoData.idPersona) {
+      egresoData["idPersona"] = res.idPersona;
     }
     egresoData["articulos"] = res.productos;
-    egresoData["idProveedor"] = res.idProveedor;  
+    egresoData["idProveedor"] = res.idProveedor;
     egresoData["idUsuario"] = res.idUsuario;
     egresoData["estadoEgreso"] = "DIRECTO";
     egresoData["idIngreso"] = idIng;
@@ -1557,6 +1606,18 @@ class RoutesController {
     var searchCompra = request.params.search;
     let res = await Compra.searchCompra(searchCompra);
     response.status(200).json({ serverResponse: res });
+  }
+  public async queryCompraCatPro(request: Request, response: Response) {
+    var Compra: BussCompra = new BussCompra();
+    var quieryIngreso = request.params.search;
+    let res = await Compra.queryCompraCatPro(quieryIngreso);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  }
+  public async searchCompraAll(request: Request, response: Response) {
+    var Compra: BussCompra = new BussCompra();
+    var queryCompra = request.params.search;
+    let res = await Compra.searchCompraAll(queryCompra);
+    response.status(200).json({ serverResponse: res, total: res.length });
   }
   //----------VEHICULOS------------//
   public async createVehiculo(request: Request, response: Response) {

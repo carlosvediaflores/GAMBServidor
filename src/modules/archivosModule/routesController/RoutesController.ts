@@ -14,7 +14,7 @@ import BussCarpeta from "../bussinesController/carpeta";
 import { IAreaContabilida } from "../models/contabilidad";
 import BussConta from "../bussinesController/contabilidad";
 class RoutesController {
-    //* ---------------RENDICIONEs--------------*//
+    //* ---------------CARPETAS--------------*//
   public async getCarpetas(request: Request, response: Response) {
     var blogs: BussCarpeta = new BussCarpeta();
     var filter: any = {};
@@ -28,9 +28,17 @@ class RoutesController {
       var area = new RegExp(params.area,'i');
       filter["area"] = area;
     }
+    if (params.tipo != null) {
+      var tipo = new RegExp(params.tipo,'i');
+      filter["tipo"] = tipo;
+    }
     if (params.gestion != null) {
       var gestion = new RegExp(params.gestion,'i');
       filter["gestion"] = gestion;
+    }
+    if (params.objeto != null) {
+      var objeto = new RegExp(params.objeto,'i');
+      filter["objeto"] = objeto;
     }
     if (params.limit) {
       limit = parseInt(params.limit);

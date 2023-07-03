@@ -82,24 +82,30 @@ class BussCompra {
     var result = await compraModel.find().limit(1).sort({ _id: -1 });
     return result;
   }
-  /* public async searchCompra(query?: any): Promise<Array<ICompra>>;
-  public async searchCompra(search: string | any) {
+  public async searchCompraAll(query?: any): Promise<Array<ICompra>>;
+  public async searchCompraAll(search: string | any) {
     var filter = {
       $or: [
-        { 'idArticulo._id': { $regex: search, $options: "i" } },
-        /* { catProgra: { $regex: search, $options: "i" } },
+        { catProgra: { $regex: search, $options: "i" } },
         { factura: { $regex: search, $options: "i" } },
         { estadoCompra: { $regex: search, $options: "i" } }, 
       ],
     };
     console.log(filter.$or)
     let listCompra: Array<ICompra> = await compraModel
-      .find({ 'idArticulo.codigo': search })
+      .find(filter)
       .sort({ createdAt: -1 })
-      .populate("idArticulo")
-      .populate("idEntrada");
+      .populate("idEntrada")
+      .populate({
+        path: "idArticulo",
+        model: "alm_articulos",
+        populate: {
+          path: "idPartida",
+          model: "partidas",
+        },
+      });
     return listCompra;
-  } */
+  }
 
   public async searchCompra(search:string) {
     let listCompra: any  = await compraModel
@@ -118,7 +124,26 @@ class BussCompra {
     
   return listCompra;
   }
-  
+  public async queryCompraCatPro(search: string) {
+    let listCompra: any = await compraModel
+      .find()
+      .populate({
+        path: "productos",
+        match: {
+          $or: [
+            { catProgra: { $regex: search, $options: "i" } },
+          ],
+        },
+      })
+      .populate("idProveedor")
+      .populate("idPersona")
+      .sort({ createdAt: -1 })
+      .exec();
+    const filterProveedores = listCompra.filter((proveedor: any) => {
+      return proveedor.idProveedor != null;
+    });
+    return filterProveedores;
+  }
 
   public async addCompra(Compra: ICompra) {
     try {

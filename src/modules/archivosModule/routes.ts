@@ -34,25 +34,25 @@ class Routes {
     app
       .route(`${this.routeparent}/addArea/:id`)
       .put(this.routesController.addArea);
-       //-------AREA CONTABILIDAD--//
+    //-------AREA CONTABILIDAD--//
     app
-    .route(`${this.routeparent}/contabilidad`)
-    .post(this.routesController.createConta);
-  app
-    .route(`${this.routeparent}/contabilidades`)
-    .get(this.routesController.getContas);
-  app
-    .route(`${this.routeparent}/contabilidad/:id`)
-    .get(this.routesController.getContas);
-  app
-    .route(`${this.routeparent}/contabilidad/:id`)
-    .put(this.routesController.updateConta);
-  app
-    .route(`${this.routeparent}/contabilidad/:id`)
-    .delete(this.routesController.removeConta);
-  app
-    .route(`${this.routeparent}/searchConta/:search`)
-    .get(this.routesController.searchConta);
+      .route(`${this.routeparent}/contabilidad`)
+      .post(this.routesController.createConta);
+    app
+      .route(`${this.routeparent}/contabilidades`)
+      .get(this.routesController.getContas);
+    app
+      .route(`${this.routeparent}/contabilidad/:id`)
+      .get(this.routesController.getContas);
+    app
+      .route(`${this.routeparent}/contabilidad/:id`)
+      .put(this.routesController.updateConta);
+    app
+      .route(`${this.routeparent}/contabilidad/:id`)
+      .delete(this.routesController.removeConta);
+    app
+      .route(`${this.routeparent}/searchConta/:search`)
+      .get(this.routesController.searchConta);
   }
 }
 export default Routes;

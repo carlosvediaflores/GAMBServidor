@@ -118,7 +118,7 @@ class BussIngreso {
         //{ unidadDeMedida: { $regex: search, $options: "i" } },
       ],
     };
-    console.log(filter)
+    console.log(filter);
     let listConvenio: Array<IIngreso> = await ingresosModel
       .find(filter)
       .sort({ _id: -1 })
@@ -142,22 +142,64 @@ class BussIngreso {
       });
     return listConvenio;
   }
-  public async queryIngreso(search:string) {
-    let expresion = new RegExp(search,'i');
-    let listIngreso: any  = await ingresosModel
-    .find({})
-    .populate({
-      path: "idProveedor",
-      match: { representante: expresion },
-    })
-    .populate("productos")
-    .sort({ createdAt: -1 })
-    .exec();
-    console.log(expresion)
-    /* let filterProveedores = listIngreso.filter((proveedor:any) => {
+  public async queryIngresoPersona(search: string) {
+    let listIngreso: any = await ingresosModel
+      .find()
+      .populate({
+        path: "idPersona",
+        match: {
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { post: { $regex: search, $options: "i" } },
+          ],
+        },
+      })
+      .populate("productos")
+      .populate("idProveedor")
+      .sort({ createdAt: -1 })
+      .exec();
+    const filterProveedores = listIngreso.filter((persona: any) => {
+      return persona.idPersona != null;
+    });
+    return filterProveedores;
+  }
+  public async queryIngresoProveedor(search: string) {
+    let listIngreso: any = await ingresosModel
+      .find()
+      .populate({
+        path: "idProveedor",
+        match: {
+          $or: [
+            { razon_social: { $regex: search, $options: "i" } },
+            { representante: { $regex: search, $options: "i" } },
+            { nit: { $regex: search, $options: "i" } },
+          ],
+        },
+      })
+      .populate("productos")
+      .populate("idPersona")
+      .sort({ createdAt: -1 })
+      .exec();
+    const filterProveedores = listIngreso.filter((proveedor: any) => {
       return proveedor.idProveedor != null;
-    }); */
-  return listIngreso;
+    });
+    return filterProveedores;
+  }
+  public async queryIngresoCompra(search: string) {
+    let listIngreso: any = await ingresosModel
+      .find()
+      .populate({
+        path: "productos",
+        match: {'numeroEntrada': { $eq: search } }
+      })
+      .populate("idProveedor")
+      .populate("idPersona")
+      .sort({ createdAt: -1 })
+      .exec();
+    const filterProveedores = listIngreso.filter((proveedor: any) => {
+      return proveedor.productos != null;
+    });
+    return filterProveedores;
   }
   public async addIngreso(Ingreso: IIngreso) {
     try {

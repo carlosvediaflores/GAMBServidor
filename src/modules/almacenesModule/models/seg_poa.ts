@@ -7,6 +7,7 @@ export interface ISegPoa extends Document {
   ejecucion_presupuestaria:string;
   saldo:string ;
   etapa:string
+  responsable:string
 }
 const SegPoaSchema: Schema = new Schema(
   {
@@ -17,6 +18,7 @@ const SegPoaSchema: Schema = new Schema(
     ejecucion_presupuestaria:{type: String},
     saldo:{type: String},
     etapa:{type:String},
+    responsable:{type:String}
   },
   {
     timestamps: true,

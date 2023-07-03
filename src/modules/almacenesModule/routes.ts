@@ -221,8 +221,14 @@ class Routes {
       .route(`${this.routeparent}/searchingreso/:search`)
       .get(this.routesController.searchIngreso);
     app
-      .route(`${this.routeparent}/queryIngreso/:search`)
-      .get(this.routesController.queryIngreso);
+      .route(`${this.routeparent}/queryIngresoPersona/:search`)
+      .get(this.routesController.queryIngresoPersona);
+    app
+      .route(`${this.routeparent}/queryIngresoProveedor/:search`)
+      .get(this.routesController.queryIngresoProveedor);
+    app
+      .route(`${this.routeparent}/queryIngresoCompra/:search`)
+      .get(this.routesController.queryIngresoCompra);
     //-------EGRESOS--//
     app
       .route(`${this.routeparent}/egreso`)
@@ -271,6 +277,12 @@ class Routes {
     app
       .route(`${this.routeparent}/searchCompra/:search?`)
       .get(this.routesController.searchCompra);
+    app
+      .route(`${this.routeparent}/queryCompraCatPro/:search`)
+      .get(this.routesController.queryCompraCatPro);
+      app
+      .route(`${this.routeparent}/searchCompraAll/:search`)
+      .get(this.routesController.searchCompraAll);
     //-------VEHICULOS--//
     app
       .route(`${this.routeparent}/vehiculo`)

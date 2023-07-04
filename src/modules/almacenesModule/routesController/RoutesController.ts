@@ -1081,9 +1081,9 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
-    let respost: Array<IIngreso> = await Ingreso.readIngreso();
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
+    let respost: any = await Ingreso.total({});
+    var totalDocs = respost;
+    var totalpage = Math.ceil(respost / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {
@@ -1326,9 +1326,9 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
-    let respost: Array<IEgreso> = await Egreso.readEgreso();
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
+    let respost: any = await Egreso.total({});
+    var totalDocs = respost;
+    var totalpage = Math.ceil(respost / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {

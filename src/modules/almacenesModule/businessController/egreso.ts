@@ -88,6 +88,10 @@ class BussEgreso {
     var result = await EgresosModel.find().limit(1).sort({ numeroSalida: -1 });
     return result;
   }
+  public async total({}) {
+    var result = await EgresosModel.countDocuments();
+    return result;
+  }
   public async searchEgreso(query?: any): Promise<Array<IEgreso>>;
   public async searchEgreso(search: string | any) {
     var filter = {

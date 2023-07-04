@@ -108,6 +108,10 @@ class BussIngreso {
       .sort({ numeroEntrada: -1 });
     return result;
   }
+  public async total({}) {
+    var result = await ingresosModel.countDocuments();
+    return result;
+  }
   public async searchIngreso(query?: any): Promise<Array<IIngreso>>;
   public async searchIngreso(search: string | any) {
     var filter = {

@@ -11,6 +11,9 @@ class Routes {
   private configureRoutes(app: Express) {
     //*------------Routes carpetas--------*//
     app
+      .route(`${this.routeparent}/carpeta`)
+      .post(this.routesController.createCarpeta);
+    app
       .route(`${this.routeparent}/carpeta/:id`)
       .get(this.routesController.getCarpeta);
     app
@@ -32,7 +35,7 @@ class Routes {
       .route(`${this.routeparent}/searchCarpeta/:search`)
       .get(this.routesController.searchCarpeta);
     app
-      .route(`${this.routeparent}/addArea/:id`)
+      .route(`${this.routeparent}/addAreaArch/:id`)
       .put(this.routesController.addArea);
     //-------AREA CONTABILIDAD--//
     app

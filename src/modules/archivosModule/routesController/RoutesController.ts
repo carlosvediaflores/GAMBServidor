@@ -14,30 +14,37 @@ import BussCarpeta from "../bussinesController/carpeta";
 import { IAreaContabilida } from "../models/contabilidad";
 import BussConta from "../bussinesController/contabilidad";
 class RoutesController {
-    //* ---------------CARPETAS--------------*//
+  //* ---------------CARPETAS--------------*//
+  public async createCarpeta(request: Request, response: Response) {
+    var carpeta: BussCarpeta = new BussCarpeta();
+    var CarpetaData = request.body;
+    //console.log("Area", ContaData);
+    let result = await carpeta.addCarpeta(CarpetaData);
+    response.status(201).json({ serverResponse: result });
+  }
   public async getCarpetas(request: Request, response: Response) {
-    var blogs: BussCarpeta = new BussCarpeta();
+    var carpeta: BussCarpeta = new BussCarpeta();
     var filter: any = {};
     var params: any = request.query;
     var limit = 0;
     var status: boolean = true;
     var skip = 0;
     var aux: any = {};
-    var order: any = {gestion:-1};
+    var order: any = { gestion: -1 };
     if (params.area != null) {
-      var area = new RegExp(params.area,'i');
+      var area = new RegExp(params.area, "i");
       filter["area"] = area;
     }
     if (params.tipo != null) {
-      var tipo = new RegExp(params.tipo,'i');
+      var tipo = new RegExp(params.tipo, "i");
       filter["tipo"] = tipo;
     }
     if (params.gestion != null) {
-      var gestion = new RegExp(params.gestion,'i');
+      var gestion = new RegExp(params.gestion, "i");
       filter["gestion"] = gestion;
     }
     if (params.objeto != null) {
-      var objeto = new RegExp(params.objeto,'i');
+      var objeto = new RegExp(params.objeto, "i");
       filter["objeto"] = objeto;
     }
     if (params.limit) {
@@ -70,8 +77,8 @@ class RoutesController {
       order = { gestion: -1 };
     }
     const [res, totalDocs] = await Promise.all([
-      blogs.readCarpeta(filter, skip, limit, order),
-      blogs.total({}),
+      carpeta.readCarpeta(filter, skip, limit, order),
+      carpeta.total({}),
     ]);
     response.status(200).json({
       serverResponse: res,
@@ -96,29 +103,29 @@ class RoutesController {
     response.status(200).json({ serverResponse: res });
   }
   public async removeCarpeta(request: Request, response: Response) {
-    const borrarImagen: any = (path: any) => {
+    /* const borrarImagen: any = (path: any) => {
       if (fs.existsSync(path)) {
         // borrar la imagen anterior
         fs.unlinkSync(path);
       }
     };
-    let pathViejo = "";
+    let pathViejo = ""; */
     var Carpeta: BussCarpeta = new BussCarpeta();
     let id: string = request.params.id;
     let res = await Carpeta.readCarpeta(id);
     let result = await Carpeta.deleteCarpeta(id);
-    pathViejo = res.path;
-    borrarImagen(pathViejo);
+    /*  pathViejo = res.path;
+    borrarImagen(pathViejo); */
     response.status(200).json({ serverResponse: "Se eliminó la Carpeta" });
   }
   public async uploadCarpeta(request: Request, response: Response) {
-    const borrarImagen: any = (path: any) => {
+    /* const borrarImagen: any = (path: any) => {
       if (fs.existsSync(path)) {
         // borrar la imagen anterior
         fs.unlinkSync(path);
       }
     };
-    let pathViejo = "";
+    let pathViejo = ""; */
     var Carpeta: BussCarpeta = new BussCarpeta();
     var id: string = request.params.id;
     var CarpetaToUpdate: ICarpeta = await Carpeta.readCarpeta(id);
@@ -135,10 +142,8 @@ class RoutesController {
     if (isEmpty(request.files)) {
       var filData: any = request.body;
       var carpeta: ICarpeta = await Carpeta.addCarpeta(filData);
-      console.log(carpeta)
-      response
-        .status(300)
-        .json({ serverResponse:carpeta });
+      console.log(carpeta);
+      response.status(300).json({ serverResponse: carpeta });
       return;
     }
     var dir = `${__dirname}/../../../../uploads/archivos`;
@@ -207,11 +212,11 @@ class RoutesController {
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
-      pathViejo = CarpetaToUpdate.path;
+      /* pathViejo = CarpetaToUpdate.path;
       filData.path = totalpath;
       if(totalpath!=CarpetaToUpdate.path){
         borrarImagen(pathViejo);
-      }
+      } */
       filData.uri = "getCarpeta/" + newname;
       var Result = await Carpeta.updateCarpeta(id, filData);
       response.status(200).json({ serverResponse: "Carpeta modificado" });
@@ -241,7 +246,7 @@ class RoutesController {
       //response.status(300).json({ serverResponse: "Error " });
       return;
     }
-    if (CarpetaData.path == null) {
+    /* if (CarpetaData.path == null) {
       const pathImg = path.join(
         __dirname,
         `/../../../../uploads/no-hay-archivo.png`
@@ -250,7 +255,7 @@ class RoutesController {
       response.status(300).json({ serverResponse: "No existe imagen " });
       return;
     }
-    response.sendFile(CarpetaData.path);
+    response.sendFile(CarpetaData.path); */
   }
   public async updateCarpeta(request: Request, response: Response) {
     var Carpeta: BussCarpeta = new BussCarpeta();
@@ -260,37 +265,92 @@ class RoutesController {
     response.status(200).json({ res: "se editó" });
   }
   public async addArea(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     let idCarpeta: string = request.params.id;
     var Carpeta: BussCarpeta = new BussCarpeta();
     let conta: BussConta = new BussConta();
     if (idCarpeta == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "El id es necesario" });
+      response.status(300).json({ serverResponse: "El id es necesario" });
       return;
     }
     let carpetaResult = await Carpeta.readCarpeta(idCarpeta);
-    let area = carpetaResult.area
+    let area = carpetaResult.area;
     var contaData: any = request.body;
-    contaData.idCarpeta=idCarpeta
-    console.log("Area",contaData)
-    let result:any = {};
-    let result1:any = {};
-    if(area==="contabilidad"){
-      result1 = await conta.addConta(contaData);
-      let idArea = result1._id;
+    contaData.idCarpeta = idCarpeta;
+    console.log("Area", contaData);
+    let result: any = {};
+    let result1: any = {};
+    if (isEmpty(request.files)) {
+      if(area === "contabilidad"){
+        var resultArea: IAreaContabilida = await conta.addConta(contaData);
+        console.log("paso x aqui");
+        response.status(200).json({ serverResponse: resultArea });
+        let idArea = resultArea._id;
+        result = await Carpeta.addContaId(idCarpeta, idArea);
+        return;
+      }
+    }
+    //SUBIR Archivo
+    var dir = `${__dirname}/../../../../uploads/archivos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (area === "contabilidad") {
+      for (var i = 0; i < key.length; i++) {
+        console.log("no paso x aqui");
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${area}_${carpetaResult.tipo}_${"N°"}${
+          contaData.numero
+        }_${carpetaResult.gestion}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        contaData.archivo = newname;
+        contaData.uri = "getCarpeta/" + newname;
+        contaData.path = totalpath;
+        var resultArea: IAreaContabilida = await conta.addConta(contaData);
+      }
+      let idArea = resultArea._id;
       result = await Carpeta.addContaId(idCarpeta, idArea);
     }
-    if(area==="juridica"){
+    if (area === "juridica") {
       /* result1 = await conta.addConta(contaData);
       let idArea = result1._id;
       result = await Carpeta.addContaId(idCarpeta, idArea); */
     }
-    if (result1 == null) {
+    if (resultArea == null) {
       response.status(300).json({ serverResponse: "no se pudo guardar" });
       return;
     }
-    response.status(200).json({ serverResponse: result1 });
+    response.status(200).json({ serverResponse: resultArea });
   }
   public async addAreas(request: Request, response: Response) {
     let idCarpeta: string = request.params.id;
@@ -309,15 +369,13 @@ class RoutesController {
         });
         if (checksub.length == 0) {
           var result = await carpeta.addContaId(idCarpeta, idArea);
-          response
-          .status(200)
-          .json({ serverResponse: resultArea });
+          response.status(200).json({ serverResponse: resultArea });
           return;
         }
         response
           .status(300)
           .json({ serverResponse: "Ya existe DETALLE UNIDAD" });
-          return;
+        return;
       }
     }
   }
@@ -325,7 +383,7 @@ class RoutesController {
   public async createConta(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
     var ContaData = request.body;
-    console.log("Area",ContaData)
+    console.log("Area", ContaData);
     let result = await Conta.addConta(ContaData);
     response.status(201).json({ serverResponse: result });
   }
@@ -338,11 +396,11 @@ class RoutesController {
     var aux: any = {};
     var order: any = {};
     if (params.detalle != null) {
-      var detalle = new RegExp(params.detalle,'i');
+      var detalle = new RegExp(params.detalle, "i");
       filter["detalle"] = detalle;
     }
     if (params.beneficiario != null) {
-      var beneficiario = new RegExp(params.beneficiario,'i');
+      var beneficiario = new RegExp(params.beneficiario, "i");
       filter["beneficiario"] = beneficiario;
     }
     if (params.limit) {

@@ -28,7 +28,9 @@ class BussinesSegui {
         .populate("archivofi");
       return listSegui;
     } else {
-      let listSegui: Array<ISeguimiento> = await SeguiModel.find().populate("archivofi");
+      let listSegui: Array<ISeguimiento> = await SeguiModel.find().populate(
+        "archivofi"
+      );
       return listSegui;
     }
   }
@@ -54,6 +56,17 @@ class BussinesSegui {
       .limit(limit)
       .sort(order)
       .populate("archivofi");
+    return listSegui;
+  }
+  
+  public async total(
+    query: any,
+  ): Promise<any>;
+
+  public async total(
+    params1?: string | any,
+  ) {
+    let listSegui = await SeguiModel.countDocuments(params1)
     return listSegui;
   }
   public async readSeguis(): Promise<Array<ISeguimiento>>;
@@ -112,7 +125,7 @@ class BussinesSegui {
       .sort({ nuit: -1 });
     return listSeguiO;
   }
-  public async total({}) {
+  public async cont({}) {
     var result = await SeguiModel.countDocuments();
     return result;
   }

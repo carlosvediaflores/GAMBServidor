@@ -65,9 +65,21 @@ class BusinessHoja {
       });
     return listSegui;
   }
-  public async total({}) {
+  /* public async total({}) {
     var result = await HojaModel.countDocuments();
     return result;
+  } */
+  public async total(
+    query: any,
+  ): Promise<any>;
+
+  public async total(
+    params1?: string | any,
+  ) {
+    let listSegui = await HojaModel.countDocuments(params1)
+    console.log(params1);
+    
+    return listSegui;
   }
   public async getNuit() {
     var result = await HojaModel

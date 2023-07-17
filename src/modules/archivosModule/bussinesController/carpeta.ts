@@ -63,19 +63,6 @@ class BussCarpeta {
     let listCarpeta: Array<ICarpeta> = await carpetaModel.find(filter).sort({ _id: -1 }).populate("areaContabilidad")
     return listCarpeta;
   }
-  public async readCarpetaCod(codigo: string | any): Promise<ICarpeta>;
-  public async readCarpetaCod(
-    params1?: string | any,
-    params2?: number,
-    params3?: number
-  ): Promise<Array<ICarpeta> | ICarpeta> {
-    if (params1 && typeof params1 == "string") {
-      var result: ICarpeta = await carpetaModel.findOne({
-        codigo: params1,
-      });
-      return result;
-    }
-  }
   public async addCarpeta(Carpeta: ICarpeta) {
     try {
       let CarpetaDb = new carpetaModel(Carpeta);

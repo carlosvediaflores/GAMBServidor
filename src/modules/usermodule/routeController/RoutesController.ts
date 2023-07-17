@@ -526,7 +526,7 @@ class RoutesController {
       filter["fecharesepcion"] = aux;
     }
     //let respost: Array<IHojaruta> = await segui.readHojaRuta(filter);
-    let totalHR:any = await segui.total({});
+    let totalHR:any = await segui.total(filter);
     const resp: any = await segui.getNuit();
     let nuit : any = resp[0].nuit.split("-")
     let simpleNuit: any = nuit[0]
@@ -563,6 +563,42 @@ class RoutesController {
       nuitok
     });
     return;
+  }
+  public async contHRuta(request: Request, response: Response){
+    var ruta: BusinessHoja = new BusinessHoja();
+    var filter: any = {};
+    var filter1: any = {};
+    var filter2: any = {};
+    var filter3: any = {};
+    var params: any = request.query;
+    var aux: any = {};
+    filter1["estado"] = "ENVIADO";
+    filter2["estado"] = "REGISTRADO";
+    filter3["estado"] = "RECIBIDO";
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gte"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lte"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["fecharesepcion"] = aux;
+      filter1["fecharesepcion"] = aux;
+      filter2["fecharesepcion"] = aux;
+      filter3["fecharesepcion"] = aux;
+    }
+    const [ total, enviado, registrado, recibido ] = await Promise.all([ 
+      ruta.total(filter),
+      ruta.total(filter1),
+      ruta.total(filter2),
+      ruta.total(filter3),
+  ]);
+  response.status(200).json({
+    total,enviado,registrado,recibido
+  });
+  return;
   }
   public async getHoja(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
@@ -775,35 +811,6 @@ class RoutesController {
     let res = await segui.readSeguiAs(nuit);
     response.status(200).json(res);
   }
-  public async getSeguiO(request: Request, response: Response) {
-    var segui: BussinesSegui = new BussinesSegui();
-    var destino = request.params.destino;
-    var limit = parseInt(request.params.limit, 10) || 3000;
-    var page = parseInt(request.params.page, 10) || 0;
-    var skip = 0;
-    var totalDocs = 0;
-    var totalpage = 0;
-    if (page == 1 || !page || page == undefined) {
-      skip = 0;
-    } else {
-      if (page <= totalDocs) {
-        skip = limit * (page - 1);
-        skip = skip + 1;
-      } else {
-        skip = 0;
-      }
-    }
-    let res = await segui.readSeguiO(destino, limit, skip);
-    response.status(200).json({
-      serverResponse: res,
-      totalDocs,
-      limit,
-      totalpage,
-      page,
-      skip,
-    });
-    return;
-  }
   public async getOficina(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     var filter: any = {};
@@ -843,9 +850,10 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["fechaderivado"] = aux;
     }
-    let respost: Array<ISeguimiento> = await segui.readOficina(filter);
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
+    let respost = await segui.total(filter);
+    console.log("fitro",filter)
+    var totalDocs = respost;
+    var totalpage = Math.ceil(respost / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {
@@ -876,6 +884,60 @@ class RoutesController {
       skip,
     });
     return;
+  }
+  public async contOficina(request: Request, response: Response){
+    var segui: BussinesSegui = new BussinesSegui();
+    var filter: any = {};
+    var filter1: any = {};
+    var filter2: any = {};
+    var filter3: any = {};
+    var filter4: any = {};
+    var filter5: any = {};
+    var params: any = request.query;
+    var aux: any = {};
+    filter1["estado"] = "ENVIADO";
+    filter2["estado"] = "DERIVADO";
+    filter3["estado"] = "RECIBIDO";
+    filter4["estado"] = "MALETIN";
+    filter5["estado"] = "FILE OFICINA";
+    if (params.destino != null) {
+      var expresion = new RegExp(params.destino);
+      filter["destino"] = expresion;
+      filter1["destino"] = expresion;
+      filter2["destino"] = expresion;
+      filter3["destino"] = expresion;
+      filter4["destino"] = expresion;
+      filter5["destino"] = expresion;
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gte"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lte"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["fechaderivado"] = aux;
+      filter1["fechaderivado"] = aux;
+      filter2["fechaderivado"] = aux;
+      filter3["fechaderivado"] = aux;
+      filter4["fechaderivado"] = aux;
+      filter5["fechaderivado"] = aux;
+    }
+    const [ total, enviado, derivado, recibido, maletin, fileOficina ] = await Promise.all([
+      
+      segui.total(filter),
+      segui.total(filter1),
+      segui.total(filter2),
+      segui.total(filter3),
+      segui.total(filter4),
+      segui.total(filter5),
+  ]);
+  response.status(200).json({
+    total,enviado,derivado,recibido,maletin,fileOficina
+  });
+  return;
   }
   public async updateSegui(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();

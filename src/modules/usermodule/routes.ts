@@ -12,8 +12,7 @@ class Routes {
   }
   private configureRoutes(app: Express) {
     //**--USER ROUTES--------------------------------------------------------------------------------------- */
-    app.route(`${this.routeparent}/login`)
-      .post(this.routesController.login);
+    app.route(`${this.routeparent}/login`).post(this.routesController.login);
     app
       .route(`${this.routeparent}/users`)
       .post(this.routesController.createUsers);
@@ -54,17 +53,11 @@ class Routes {
     app
       .route(`${this.routeparent}/roles/:id`)
       .delete(this.routesController.removeRol);
-    app
-      .route(`${this.routeparent}/roles/`)
-      .get(this.routesController.getRoles);
+    app.route(`${this.routeparent}/roles/`).get(this.routesController.getRoles);
 
     ////////-------------ORGANIZACION ROUTES-------------------------
-    app
-      .route(`${this.routeparent}/org`)
-      .post(this.routesController.createOrg);
-    app
-      .route(`${this.routeparent}/org`)
-      .get(this.routesController.getOrg);
+    app.route(`${this.routeparent}/org`).post(this.routesController.createOrg);
+    app.route(`${this.routeparent}/org`).get(this.routesController.getOrg);
     app
       .route(`${this.routeparent}/org/:id`)
       .put(this.routesController.updateOr);
@@ -136,6 +129,9 @@ class Routes {
     app
       .route(`${this.routeparent}/asociar/:nuit`)
       .get(this.routesController.asociarHojas);
+      app
+      .route(`${this.routeparent}/totales`)
+      .get(this.routesController.contHRuta);
 
     ///////////-----------SEGUIMIENTO ROUTES--------------
 
@@ -149,14 +145,12 @@ class Routes {
       .route(`${this.routeparent}/segui/:id`)
       .get(this.routesController.getSegui);
     app
-      .route(`${this.routeparent}/seguiO/:destino/:limit?/:skip?`)
-      .get(this.routesController.getSeguiO);
+      .route(`${this.routeparent}/seguiTotales`)
+      .get(this.routesController.contOficina);
     app
       .route(`${this.routeparent}/oficina`)
       .get(this.routesController.getOficina);
-    app
-      .route(`${this.routeparent}/segui`)
-      .get(this.routesController.getSeguis);
+    app.route(`${this.routeparent}/segui`).get(this.routesController.getSeguis);
     app
       .route(`${this.routeparent}/seguis/:id`)
       .put(this.routesController.updateSegui);
@@ -174,9 +168,7 @@ class Routes {
     app
       .route(`${this.routeparent}/file`)
       .post(this.routesController.createFile);
-    app
-      .route(`${this.routeparent}/org`)
-      .get(this.routesController.getOrg);
+    app.route(`${this.routeparent}/org`).get(this.routesController.getOrg);
 
     app
       .route(`${this.routeparent}/org/:id`)
@@ -191,10 +183,8 @@ class Routes {
       .route(`${this.routeparent}/orgs/:id`)
       .get(this.routesController.getOrId);
 
-      //-----Archivos---//
-    app
-      .route(`${this.routeparent}/arch`)
-      .get(this.routesController.getArc);
+    //-----Archivos---//
+    app.route(`${this.routeparent}/arch`).get(this.routesController.getArc);
     app
       .route(`${this.routeparent}/arch`)
       .post(this.routesController.createArch);

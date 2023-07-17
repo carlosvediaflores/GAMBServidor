@@ -13,6 +13,8 @@ import { ICarpeta } from "../models/carpeta";
 import BussCarpeta from "../bussinesController/carpeta";
 import { IAreaContabilida } from "../models/contabilidad";
 import BussConta from "../bussinesController/contabilidad";
+import { IArea } from "../models/area";
+import BussArea from "../bussinesController/area";
 class RoutesController {
   //* ---------------CARPETAS--------------*//
   public async createCarpeta(request: Request, response: Response) {
@@ -379,6 +381,7 @@ class RoutesController {
       }
     }
   }
+
   //----------CONTABILIDAD------------//
   public async createConta(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
@@ -456,10 +459,73 @@ class RoutesController {
     response.status(200).json(repres);
   }
   public async updateConta(request: Request, response: Response) {
+     const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var Conta: BussConta = new BussConta();
     let id: string = request.params.id;
     var params = request.body;
-    var result = await Conta.updateConta(id, params);
+    var result:any = await Conta.readConta(id);
+    if (!result) {
+      response.status(300).json({ serverResponse: "area no existe!" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      var Result = await Conta.updateConta(id, params);
+      console.log(params);
+      response.status(300).json({ serverResponse: "se modifico" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/archivos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      console.log(result.idCarpeta)
+      var newname: string = `${"GAMB"}_${result.idCarpeta.area}_${result.idCarpeta.tipo}_${"N°"}${result.numero}_${
+        result.idCarpeta.gestion
+      }.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      params.archivo = newname;
+      pathViejo = result.path;
+      params.path = totalpath;
+      if(totalpath!=result.path){
+        borrarImagen(pathViejo);
+      }
+      params.uri = "getArchivo/" + newname;
+      var Result = await Conta.updateConta(id, params);
+      response.status(200).json({ serverResponse: "Conta modificado" });
+      return;
+    }
     response.status(200).json(result);
   }
   public async removeConta(request: Request, response: Response) {
@@ -472,6 +538,111 @@ class RoutesController {
     var Conta: BussConta = new BussConta();
     var searchConta = request.params.search;
     let res = await Conta.searchConta(searchConta);
+    response.status(200).json({ serverResponse: res });
+  }
+  //----------AREA------------//
+  public async createArea(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    var AreaData = request.body;
+    console.log("Area", AreaData);
+    let result = await Area.addArea(AreaData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getAreas(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.detalle != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter["nombre"] = nombre;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let resp: number = await Area.total({});
+    var totalDocs = resp;
+    var totalpage = Math.ceil(resp / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IArea> = await Area.readArea(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async getArea(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    let result = await Area.readArea(request.params.id);
+    response.status(200).json(result);
+  }
+  public async updateArea(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Area.updateArea(id, params);
+    response.status(200).json(result);
+  }
+  public async addTipo(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Area.addTipo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeTipo(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Area.removeTipo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeArea(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    let id: string = request.params.id;
+    let result = await Area.deleteArea(id);
+    response.status(200).json({ serverResponse: "Se elimino Area" });
+  }
+  public async searchArea(request: Request, response: Response) {
+    var Area: BussArea = new BussArea();
+    var searchArea = request.params.search;
+    let res = await Area.searchArea(searchArea);
     response.status(200).json({ serverResponse: res });
   }
 }

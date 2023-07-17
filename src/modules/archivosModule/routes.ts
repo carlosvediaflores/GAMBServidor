@@ -39,7 +39,7 @@ class Routes {
       .put(this.routesController.addArea);
     //-------AREA CONTABILIDAD--//
     app
-      .route(`${this.routeparent}/contabilidad`)
+      .route(`${this.routeparent}/Contabilidad`)
       .post(this.routesController.createConta);
     app
       .route(`${this.routeparent}/contabilidades`)
@@ -56,6 +56,30 @@ class Routes {
     app
       .route(`${this.routeparent}/searchConta/:search`)
       .get(this.routesController.searchConta);
-  }
+
+    //-------AREA--//
+    app
+      .route(`${this.routeparent}/area`)
+      .post(this.routesController.createArea);
+    app.route(`${this.routeparent}/areas`).get(this.routesController.getAreas);
+    app
+      .route(`${this.routeparent}/area/:id`)
+      .get(this.routesController.getAreas);
+    app
+      .route(`${this.routeparent}/area/:id`)
+      .put(this.routesController.updateArea);
+    app
+      .route(`${this.routeparent}/addTipo/:id`)
+      .put(this.routesController.addTipo);
+    app
+      .route(`${this.routeparent}/removeTipo/:id`)
+      .put(this.routesController.removeTipo);
+    app
+      .route(`${this.routeparent}/area/:id`)
+      .delete(this.routesController.removeArea);
+    app
+      .route(`${this.routeparent}/searchArea/:search`)
+      .get(this.routesController.searchArea);
+  } 
 }
 export default Routes;

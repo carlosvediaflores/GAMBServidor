@@ -76,9 +76,7 @@ class BusinessHoja {
   public async total(
     params1?: string | any,
   ) {
-    let listSegui = await HojaModel.countDocuments(params1)
-    console.log(params1);
-    
+    let listSegui = await HojaModel.countDocuments(params1)    
     return listSegui;
   }
   public async getNuit() {

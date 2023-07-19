@@ -282,6 +282,7 @@ class RoutesController {
       return;
     }
     let carpetaResult = await Carpeta.readCarpeta(idCarpeta);
+    console.log("CARPETA",carpetaResult);
     let area = carpetaResult.area;
     var contaData: any = request.body;
     contaData.idCarpeta = idCarpeta;
@@ -289,9 +290,8 @@ class RoutesController {
     let result: any = {};
     let result1: any = {};
     if (isEmpty(request.files)) {
-      if(area === "contabilidad"){
+      if(area === "Contabilidad"){
         var resultArea: IAreaContabilida = await conta.addConta(contaData);
-        console.log("paso x aqui");
         response.status(200).json({ serverResponse: resultArea });
         let idArea = resultArea._id;
         result = await Carpeta.addContaId(idCarpeta, idArea);
@@ -315,7 +315,7 @@ class RoutesController {
         });
       });
     };
-    if (area === "contabilidad") {
+    if (area === "Contabilidad") {
       for (var i = 0; i < key.length; i++) {
         console.log("no paso x aqui");
         var file: any = files[key[i]];
@@ -343,7 +343,7 @@ class RoutesController {
       let idArea = resultArea._id;
       result = await Carpeta.addContaId(idCarpeta, idArea);
     }
-    if (area === "juridica") {
+    if (area === "Juridica") {
       /* result1 = await conta.addConta(contaData);
       let idArea = result1._id;
       result = await Carpeta.addContaId(idCarpeta, idArea); */

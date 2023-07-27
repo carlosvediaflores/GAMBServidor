@@ -65,7 +65,22 @@ class BussConta {
     return result;
   }
   public async deleteConta(id: string) {
-    let result = await contaModel.remove({ _id: id });
+    let result = await contaModel.deleteOne({ _id: id });
+    return result;
+  }
+  public async readContaFiles(archivo: string): Promise<IAreaContabilida>;
+  public async readContaFiles(
+    params1?: string | any,
+  ): Promise<Array<IAreaContabilida> | IAreaContabilida> {
+    if (params1 && typeof params1 == "string") {
+      var result: IAreaContabilida = await contaModel.findOne({ archivo: params1 });
+      return result;
+    }
+  }
+  public async readContaFile(uri: string) {
+    console.log(uri);
+    
+    let result = await contaModel.findOne({nameFile:uri});
     return result;
   }
 }

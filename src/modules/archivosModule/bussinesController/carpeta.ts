@@ -76,6 +76,10 @@ class BussCarpeta {
     let result = await carpetaModel.updateOne({ _id: idCarpeta }, { $push: {areaContabilidad:idArea }})
     return result;
 }
+public async removeContaId(idCarpeta: string, idArea: any) {
+  let result = await carpetaModel.updateOne({ _id: idCarpeta }, { $pull: {areaContabilidad:idArea }})
+  return result;
+}
 /* public async removeSub(idOr: string, organizacion: any) {
     let result = await OrganizacionModel.updateOne({ _id: idOr }, { $pull: organizacion })
     return result;
@@ -85,7 +89,7 @@ class BussCarpeta {
     return result;
   }
   public async deleteCarpeta(id: string) {
-    let result = await carpetaModel.remove({ _id: id });
+    let result = await carpetaModel.deleteOne({ _id: id });
     return result;
   }
 }

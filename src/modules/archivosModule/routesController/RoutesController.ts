@@ -105,19 +105,25 @@ class RoutesController {
     response.status(200).json({ serverResponse: res });
   }
   public async removeCarpeta(request: Request, response: Response) {
-    /* const borrarImagen: any = (path: any) => {
+    const borrarImagen: any = (path: any) => {
       if (fs.existsSync(path)) {
         // borrar la imagen anterior
         fs.unlinkSync(path);
       }
     };
-    let pathViejo = ""; */
+    let pathViejo = "";
     var Carpeta: BussCarpeta = new BussCarpeta();
+    var Conta: BussConta = new BussConta();
     let id: string = request.params.id;
-    let res = await Carpeta.readCarpeta(id);
+    let res: any = await Carpeta.readCarpeta(id);
+    let archivo: any = res.areaContabilidad;
+    for (let i = 0; i < archivo.length; i++) {
+      let data: any = archivo[i];
+      pathViejo = data.path;
+      borrarImagen(pathViejo);
+      let removeArchivo = await Conta.deleteConta(data._id);
+    }
     let result = await Carpeta.deleteCarpeta(id);
-    /*  pathViejo = res.path;
-    borrarImagen(pathViejo); */
     response.status(200).json({ serverResponse: "Se eliminó la Carpeta" });
   }
   public async uploadCarpeta(request: Request, response: Response) {
@@ -185,7 +191,7 @@ class RoutesController {
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
-        filData.uri = "getCarpeta/" + newname;
+        filData.uri = "getArchivo/" + newname;
         filData.path = totalpath;
         var sliderResult: ICarpeta = await Carpeta.addCarpeta(filData);
       }
@@ -219,7 +225,7 @@ class RoutesController {
       if(totalpath!=CarpetaToUpdate.path){
         borrarImagen(pathViejo);
       } */
-      filData.uri = "getCarpeta/" + newname;
+      filData.uri = "getArchivo/" + newname;
       var Result = await Carpeta.updateCarpeta(id, filData);
       response.status(200).json({ serverResponse: "Carpeta modificado" });
       return;
@@ -229,35 +235,28 @@ class RoutesController {
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
-  public async getFileCarpeta(request: Request, response: Response) {
-    var name: string = request.params.name;
-    if (!name) {
+  public async getFileArchivo(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    console.log(uri);  
+    if (!uri) {
       response
         .status(300)
         .json({ serverResponse: "Identificador no encontrado" });
       return;
     }
-    var Carpeta: BussCarpeta = new BussCarpeta();
-    var CarpetaData: ICarpeta = await Carpeta.readCarpetaFile(name);
-    if (!CarpetaData) {
+    var Conta: BussConta = new BussConta();
+    var ArchivoData: IAreaContabilida = await Conta.readContaFile(uri);
+    console.log(ArchivoData);
+    
+    if (!ArchivoData) {
       const pathImg = path.join(
         __dirname,
         `/../../../../uploads/no-hay-archivo.png`
       );
       response.sendFile(pathImg);
-      //response.status(300).json({ serverResponse: "Error " });
       return;
     }
-    /* if (CarpetaData.path == null) {
-      const pathImg = path.join(
-        __dirname,
-        `/../../../../uploads/no-hay-archivo.png`
-      );
-      response.sendFile(pathImg);
-      response.status(300).json({ serverResponse: "No existe imagen " });
-      return;
-    }
-    response.sendFile(CarpetaData.path); */
+    response.sendFile(ArchivoData.path); 
   }
   public async updateCarpeta(request: Request, response: Response) {
     var Carpeta: BussCarpeta = new BussCarpeta();
@@ -317,7 +316,6 @@ class RoutesController {
     };
     if (area === "Contabilidad") {
       for (var i = 0; i < key.length; i++) {
-        console.log("no paso x aqui");
         var file: any = files[key[i]];
         var filehash: string = sha1(new Date().toString()).substr(0, 5);
         var nombreCortado = file.name.split(".");
@@ -330,13 +328,13 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${area}_${carpetaResult.tipo}_${"N°"}${
+        var newname: string = `${"GAMB"}_${area}_${carpetaResult.tipo}_${"Nro"}${
           contaData.numero
         }_${carpetaResult.gestion}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
-        contaData.archivo = newname;
-        contaData.uri = "getCarpeta/" + newname;
+        contaData.nameFile = newname;
+        contaData.uri = "getArchivos/" + newname;
         contaData.path = totalpath;
         var resultArea: IAreaContabilida = await conta.addConta(contaData);
       }
@@ -354,39 +352,78 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: resultArea });
   }
-  public async addAreas(request: Request, response: Response) {
+  public async addArchivo(request: Request, response: Response) {
     let idCarpeta: string = request.params.id;
-    let idArea = request.body;
     var carpeta: BussCarpeta = new BussCarpeta();
-    let area: BussConta = new BussConta();
+    let Conta: BussConta = new BussConta();
+    let idArchivo = request.body.idArchivo;
     let carpetaResult: any = await carpeta.readCarpeta(idCarpeta);
-    if (carpetaResult != null) {
-      var resultArea = await area.readConta(idArea.contabilidad);
+    if (!carpetaResult) {
+      response.status(300).json({ serverResponse: "Carpeta no existe!" });
+      return;
+    }
+    let area = carpetaResult.area;
+    if(area==="Contabilidad"){
+      var resultArea = await Conta.readConta(idArchivo);
       if (resultArea != null) {
-        var checksub: any = carpetaResult.contabilidad.filter((item: any) => {
+        var checksub: any = carpetaResult.areaContabilidad.filter((item: any) => {
           if (resultArea._id.toString() == item._id.toString()) {
             return true;
           }
           return false;
         });
         if (checksub.length == 0) {
-          var result = await carpeta.addContaId(idCarpeta, idArea);
+          let datos:any={idCarpeta:idCarpeta};
+          var editCarpeta=await Conta.updateConta(idArchivo, datos)
+          var result = await carpeta.addContaId(idCarpeta, idArchivo);
           response.status(200).json({ serverResponse: resultArea });
           return;
         }
         response
           .status(300)
-          .json({ serverResponse: "Ya existe DETALLE UNIDAD" });
+          .json({ serverResponse: "Ya existe el ARCHIVO en esta CARPETA" });
         return;
       }
-    }
+    }  
   }
-
+  public async removeArchivo(request: Request, response: Response) {
+    let idCarpeta: string = request.params.id;
+    var carpeta: BussCarpeta = new BussCarpeta();
+    let Conta: BussConta = new BussConta();
+    let idArchivo = request.body.idArchivo;
+    let carpetaResult: any = await carpeta.readCarpeta(idCarpeta);
+    if (!carpetaResult) {
+      response.status(300).json({ serverResponse: "Carpeta no existe!" });
+      return;
+    }
+    let area = carpetaResult.area;
+    if(area==="Contabilidad"){
+      var resultArea = await Conta.readConta(idArchivo);
+      if (resultArea != null) {
+        var checksub: any = carpetaResult.areaContabilidad.filter((item: any) => {
+          if (resultArea._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length != 0) {
+          let datos:any={idCarpeta:null};
+          var editCarpeta=await Conta.updateConta(idArchivo, datos)
+          var result = await carpeta.removeContaId(idCarpeta, idArchivo);
+          response.status(200).json({ serverResponse: "Se movió el archivo" });
+          return;
+        }
+        response
+          .status(300)
+          .json({ serverResponse: "Ya no existe el ARCHIVO en esta CARPETA" });
+        return;
+      }
+    }                                    
+  }
   //----------CONTABILIDAD------------//
   public async createConta(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
     var ContaData = request.body;
-    console.log("Area", ContaData);
     let result = await Conta.addConta(ContaData);
     response.status(201).json({ serverResponse: result });
   }
@@ -476,8 +513,7 @@ class RoutesController {
     }
     if (isEmpty(request.files)) {
       var Result = await Conta.updateConta(id, params);
-      console.log(params);
-      response.status(300).json({ serverResponse: "se modifico" });
+      response.status(200).json({ serverResponse: "se modifico" });
       return;
     }
     var dir = `${__dirname}/../../../../uploads/archivos`;
@@ -509,19 +545,18 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      console.log(result.idCarpeta)
-      var newname: string = `${"GAMB"}_${result.idCarpeta.area}_${result.idCarpeta.tipo}_${"N°"}${result.numero}_${
+      var newname: string = `${"GAMB"}_${result.idCarpeta.area}_${result.idCarpeta.tipo}_${"Nro"}${result.numero}_${
         result.idCarpeta.gestion
       }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
-      params.archivo = newname;
+      params.nameFile = newname;
       pathViejo = result.path;
       params.path = totalpath;
       if(totalpath!=result.path){
         borrarImagen(pathViejo);
       }
-      params.uri = "getArchivo/" + newname;
+      params.uri = "getArchivos/" + newname;
       var Result = await Conta.updateConta(id, params);
       response.status(200).json({ serverResponse: "Conta modificado" });
       return;
@@ -529,9 +564,22 @@ class RoutesController {
     response.status(200).json(result);
   }
   public async removeConta(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var carpeta: BussCarpeta = new BussCarpeta();
     var Conta: BussConta = new BussConta();
     let id: string = request.params.id;
+    let res = await Conta.readConta(id);
+
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
     let result = await Conta.deleteConta(id);
+    var resultCarpeta = await carpeta.removeContaId(res.idCarpeta, id);
     response.status(200).json({ serverResponse: "Se elimino la Conta" });
   }
   public async searchConta(request: Request, response: Response) {
@@ -544,7 +592,6 @@ class RoutesController {
   public async createArea(request: Request, response: Response) {
     var Area: BussArea = new BussArea();
     var AreaData = request.body;
-    console.log("Area", AreaData);
     let result = await Area.addArea(AreaData);
     response.status(201).json({ serverResponse: result });
   }

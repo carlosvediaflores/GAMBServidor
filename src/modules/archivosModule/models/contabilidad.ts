@@ -13,6 +13,7 @@ export interface IAreaContabilida extends Document {
   observacion: string;
   uri: string;
   path: string;
+  nameFile:string;
   idCarpeta: string;
 }
 const areaSchema: Schema = new Schema(
@@ -27,6 +28,7 @@ const areaSchema: Schema = new Schema(
     observacion: { type: String },
     uri: { type: String },
     path: { type: String },
+    nameFile:{type:String},
     idCarpeta: { type: Schema.Types.ObjectId, ref: "arch_carpetas" },
   },
   {

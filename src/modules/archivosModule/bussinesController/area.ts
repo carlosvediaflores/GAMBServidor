@@ -63,7 +63,6 @@ class BussArea {
     return result;
 }
 public async removeTipo(idArea: string, tipo: any) {
-  console.log("params",tipo);
     let result = await areaModel.updateOne({ _id: idArea }, { $pull: tipo })
     return result;
 }

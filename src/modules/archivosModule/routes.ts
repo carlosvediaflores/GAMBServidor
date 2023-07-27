@@ -23,9 +23,6 @@ class Routes {
       .route(`${this.routeparent}/uploadCarpeta/:id?`)
       .post(this.routesController.uploadCarpeta);
     app
-      .route(`${this.routeparent}/getCarpeta/:name`)
-      .get(this.routesController.getFileCarpeta);
-    app
       .route(`${this.routeparent}/carpetas`)
       .get(this.routesController.getCarpetas);
     app
@@ -37,6 +34,12 @@ class Routes {
     app
       .route(`${this.routeparent}/addAreaArch/:id`)
       .put(this.routesController.addArea);
+      app
+      .route(`${this.routeparent}/addArchivo/:id`)
+      .put(this.routesController.addArchivo);
+      app
+      .route(`${this.routeparent}/removeArchivo/:id`)
+      .put(this.routesController.removeArchivo);
     //-------AREA CONTABILIDAD--//
     app
       .route(`${this.routeparent}/Contabilidad`)
@@ -44,9 +47,12 @@ class Routes {
     app
       .route(`${this.routeparent}/contabilidades`)
       .get(this.routesController.getContas);
+      app
+      .route(`${this.routeparent}/getArchivos/:name`)
+      .get(this.routesController.getFileArchivo);
     app
       .route(`${this.routeparent}/contabilidad/:id`)
-      .get(this.routesController.getContas);
+      .get(this.routesController.getConta);
     app
       .route(`${this.routeparent}/contabilidad/:id`)
       .put(this.routesController.updateConta);

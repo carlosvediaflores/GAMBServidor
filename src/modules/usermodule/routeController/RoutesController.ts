@@ -851,7 +851,6 @@ class RoutesController {
       filter["fechaderivado"] = aux;
     }
     let respost = await segui.total(filter);
-    console.log("fitro",filter)
     var totalDocs = respost;
     var totalpage = Math.ceil(respost / limit);
     if (params.skip) {

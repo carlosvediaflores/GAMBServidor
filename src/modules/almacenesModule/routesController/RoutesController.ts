@@ -1161,7 +1161,6 @@ class RoutesController {
       let compraModif: any = {};
       let salidaM: any = {};
       articuloModif["cantidad"] = stock;
-      console.log("idcompra", data.idCompra);
       if (data.idCompra) {
         let SimpleCompra = await compra.readCompra(data.idCompra);
         salidaM["cantidadSalida"] = data.cantidadCompra;
@@ -1173,6 +1172,9 @@ class RoutesController {
         }
         let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
       } else {
+        data.idEntrada=id
+        data.idProducto=data.idArticulo
+   
         let resultCompra = await compra.addCompra(data);
         let idCompra = resultCompra._id;
         var resultAdd = await Ingreso.addCompras(id, idCompra);      

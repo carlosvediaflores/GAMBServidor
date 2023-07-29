@@ -37,6 +37,10 @@ class BussConta {
     var result = await contaModel.countDocuments();
     return result;
   }
+  public async getContaSin({}) {
+    var result = await contaModel.find({idCarpeta:null});
+    return result;
+  }
   public async searchConta(query?: any): Promise<Array<IAreaContabilida>>;
   public async searchConta(
     search: string | any,

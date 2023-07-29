@@ -34,10 +34,10 @@ class Routes {
     app
       .route(`${this.routeparent}/addAreaArch/:id`)
       .put(this.routesController.addArea);
-      app
+    app
       .route(`${this.routeparent}/addArchivo/:id`)
       .put(this.routesController.addArchivo);
-      app
+    app
       .route(`${this.routeparent}/removeArchivo/:id`)
       .put(this.routesController.removeArchivo);
     //-------AREA CONTABILIDAD--//
@@ -47,9 +47,12 @@ class Routes {
     app
       .route(`${this.routeparent}/contabilidades`)
       .get(this.routesController.getContas);
-      app
+    app
       .route(`${this.routeparent}/getArchivos/:name`)
       .get(this.routesController.getFileArchivo);
+    app
+      .route(`${this.routeparent}/getArchivosSin`)
+      .get(this.routesController.getContaSin);
     app
       .route(`${this.routeparent}/contabilidad/:id`)
       .get(this.routesController.getConta);
@@ -86,6 +89,6 @@ class Routes {
     app
       .route(`${this.routeparent}/searchArea/:search`)
       .get(this.routesController.searchArea);
-  } 
+  }
 }
 export default Routes;

@@ -76,7 +76,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { gestion: -1 };
+      order = { gestion: -1, numCarpeta:1};
     }
     const [res, totalDocs] = await Promise.all([
       carpeta.readCarpeta(filter, skip, limit, order),
@@ -493,6 +493,12 @@ class RoutesController {
   public async getConta(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
     let repres = await Conta.readConta(request.params.id);
+    response.status(200).json(repres);
+  }
+  //Archivos de conta si asociar a una carpeta
+  public async getContaSin(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    let repres = await Conta.getContaSin({});
     response.status(200).json(repres);
   }
   public async updateConta(request: Request, response: Response) {

@@ -14,7 +14,8 @@ services:
       DATABASE: "GAMB_BD"
   
   mongo:
-    image: mongo
+    image: mongo:4.4.6
+    ports:
       - "27017:27017"
     volumes:
       - mongodata:/data/db

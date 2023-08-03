@@ -41,6 +41,10 @@ class RoutesController {
       var tipo = new RegExp(params.tipo, "i");
       filter["tipo"] = tipo;
     }
+    if (params.subTipo != null) {
+      var subTipo = new RegExp(params.subTipo, "i");
+      filter["subTipo"] = subTipo;
+    }
     if (params.gestion != null) {
       var gestion = new RegExp(params.gestion, "i");
       filter["gestion"] = gestion;

@@ -6,6 +6,7 @@ export interface ICarpeta extends Document {
   gestion: string;
   area: string;
   tipo: string;
+  subTipo:string;
   numCarpeta: number;
   nameCarpeta: string;
   lugar: string;
@@ -19,6 +20,7 @@ const carpetaSchema: Schema = new Schema(
     gestion: { type: String },
     area:{type:Object},
     tipo: { type: String },
+    subTipo:{type:String},
     numCarpeta: { type: Number },
     nameCarpeta: { type: String },
     lugar: { type: String },

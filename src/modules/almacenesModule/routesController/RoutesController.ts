@@ -1552,12 +1552,9 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
-    let respost: Array<ICompra> = await Compra.readCompra();
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
-      if (skip <= totalpage && skip >= 2) {
+      if (skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -1570,17 +1567,15 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    let res: Array<ICompra> = await Compra.readCompra(
-      filter,
-      skip,
-      limit,
-      order
-    );
+    const [res, totalDocs] = await Promise.all([
+      Compra.readCompra(filter, skip, limit, order),
+      Compra.total({}),
+    ]);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage,
+      totalpage:(number = Math.ceil(totalDocs / limit)),
       skip,
     });
     return;
@@ -1619,6 +1614,12 @@ class RoutesController {
     var Compra: BussCompra = new BussCompra();
     var queryCompra = request.params.search;
     let res = await Compra.searchCompraAll(queryCompra);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  }
+  public async queryCompraSaldo(request: Request, response: Response) {
+    var Compra: BussCompra = new BussCompra();
+    var quieryIngreso = request.params.search;
+    let res = await Compra.queryCompraSaldo(quieryIngreso);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
   //----------VEHICULOS------------//

@@ -82,6 +82,10 @@ class BussCompra {
     var result = await compraModel.find().limit(1).sort({ _id: -1 });
     return result;
   }
+  public async total({}) {
+    var result = await compraModel.countDocuments();
+    return result;
+  }
   public async searchCompraAll(query?: any): Promise<Array<ICompra>>;
   public async searchCompraAll(search: string | any) {
     var filter = {
@@ -143,6 +147,30 @@ class BussCompra {
       return proveedor.idProveedor != null;
     });
     return filterProveedores;
+  }
+  public async queryCompraSaldo(search: string) {
+    console.log(search);
+    
+    let listCompra: any = await compraModel
+      .find()
+      .populate({
+        path: "idEntrada",
+        match: {
+          lean: true, 
+         tipo:search,
+         concepto:"Saldo Inicial 2023",
+        },
+        //select: 'tipo concepto'
+      })
+      .populate("idProveedor")
+      .populate("idPersona")
+      .sort({ createdAt: -1 })
+      .exec();
+      return listCompra;
+      /* const filterSaldo = listCompra.filter((saldo: any) => {
+        return saldo.idEntrada != null;
+      });
+      return filterSaldo; */
   }
 
   public async addCompra(Compra: ICompra) {

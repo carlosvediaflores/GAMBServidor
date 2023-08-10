@@ -67,9 +67,12 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
+    let totalCarpeta:any = await carpeta.total(filter);
+    var totalDocs = totalCarpeta;
+    var totalpage = Math.ceil(totalCarpeta / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
-      if (skip >= 2) {
+      if (skip <= totalpage && skip >= 2) {
         skip = limit * (skip - 1);
       } else {
         skip = 0;
@@ -82,15 +85,12 @@ class RoutesController {
     } else {
       order = { gestion: -1, numCarpeta:1};
     }
-    const [res, totalDocs] = await Promise.all([
-      carpeta.readCarpeta(filter, skip, limit, order),
-      carpeta.total({}),
-    ]);
+    let res: Array<ICarpeta> = await carpeta.readCarpeta(filter, skip, limit, order);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage: (number = Math.ceil(totalDocs / limit)),
+      totalpage,
       skip,
       order,
     });
@@ -285,16 +285,14 @@ class RoutesController {
       return;
     }
     let carpetaResult = await Carpeta.readCarpeta(idCarpeta);
-    console.log("CARPETA",carpetaResult);
     let area = carpetaResult.area;
     var contaData: any = request.body;
     contaData.idCarpeta = idCarpeta;
-    console.log("Area", contaData);
     let result: any = {};
     let result1: any = {};
     if (isEmpty(request.files)) {
       if(area === "Contabilidad"){
-        var resultArea: IAreaContabilida = await conta.addConta(contaData);
+        var resultArea: any = await conta.addConta(contaData);
         response.status(200).json({ serverResponse: resultArea });
         let idArea = resultArea._id;
         result = await Carpeta.addContaId(idCarpeta, idArea);
@@ -340,7 +338,7 @@ class RoutesController {
         contaData.nameFile = newname;
         contaData.uri = "getArchivos/" + newname;
         contaData.path = totalpath;
-        var resultArea: IAreaContabilida = await conta.addConta(contaData);
+        var resultArea = await conta.addConta(contaData);
       }
       let idArea = resultArea._id;
       result = await Carpeta.addContaId(idCarpeta, idArea);

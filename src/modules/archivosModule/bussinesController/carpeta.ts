@@ -33,8 +33,21 @@ class BussCarpeta {
       return listCarpetas;
     }
   }
-  public async total({}) {
+ /*  public async total({}) {
     var result = await carpetaModel.countDocuments();
+    return result;
+  } */
+  public async total(
+    params1?: string | any,
+  ) {
+    let listSegui = await carpetaModel.countDocuments(params1)    
+    return listSegui;
+  }
+  public async getNuit() {
+    var result = await carpetaModel
+      .find()
+      .limit(1)
+      .sort({ _id: -1 });
     return result;
   }
   public async readCarpetaFile(archivo: string): Promise<ICarpeta>;

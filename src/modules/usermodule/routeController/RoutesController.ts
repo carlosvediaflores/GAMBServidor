@@ -821,8 +821,8 @@ class RoutesController {
     var order: any = {};
     var select = "";
     if (params.destino != null) {
-      var expresion = new RegExp(params.destino);
-      filter["destino"] = expresion;
+      //var expresion = new RegExp(params.destino);
+      filter["destino"] = params.destino;
     }
     if (params.estado != null) {
       var expresion = new RegExp(params.estado);

@@ -358,7 +358,7 @@ class RoutesController {
     let idCarpeta: string = request.params.id;
     var carpeta: BussCarpeta = new BussCarpeta();
     let Conta: BussConta = new BussConta();
-    let idArchivo = request.body.idArchivo;
+    let idArchivo = request.body.archivo;
     let carpetaResult: any = await carpeta.readCarpeta(idCarpeta);
     if (!carpetaResult) {
       response.status(300).json({ serverResponse: "Carpeta no existe!" });
@@ -422,6 +422,46 @@ class RoutesController {
       }
     }                                    
   }
+  public async queryContaAll(request: Request, response: Response) {
+    var Conta: BussConta = new BussConta();
+    var filter1: any = {};
+    var filter2: any = {};
+    var params: any = request.query;
+    if (params.area != null) {
+      var area = new RegExp(params.area, "i");
+      filter1["area"] = area;
+    }
+    if (params.tipo != null) {
+      var tipo = new RegExp(params.tipo, "i");
+      filter1["tipo"] = tipo;
+    }
+    if (params.subTipo != null) {
+      var subTipo = new RegExp(params.subTipo, "i");
+      filter1["subTipo"] = subTipo;
+    }
+    if (params.gestion != null) {
+      var gestion = new RegExp(params.gestion, "i");
+      filter1["gestion"] = gestion;
+    }
+    if (params.glosa != null) {
+      var glosa = new RegExp(params.glosa, "i");
+      filter2["glosa"] = glosa;
+    }
+    if (params.beneficiario != null) {
+      var beneficiario = new RegExp(params.beneficiario, "i");
+      filter2["beneficiario"] = beneficiario;
+    }
+    if (params.numero != null) {
+      var numero = new RegExp(params.numero, "i");
+      filter2["numero"] = numero;
+    }
+    if (params.ci != null) {
+      var ci = new RegExp(params.ci, "i");
+      filter2["ci"] = ci;
+    }
+    let res = await Conta.queryContaAll(filter1,filter2);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  }
   //----------CONTABILIDAD------------//
   public async createConta(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
@@ -437,13 +477,25 @@ class RoutesController {
     var skip = 0;
     var aux: any = {};
     var order: any = {};
-    if (params.detalle != null) {
-      var detalle = new RegExp(params.detalle, "i");
-      filter["detalle"] = detalle;
+    if (params.glosa != null) {
+      var glosa = new RegExp(params.glosa, "i");
+      filter["glosa"] = glosa;
     }
     if (params.beneficiario != null) {
       var beneficiario = new RegExp(params.beneficiario, "i");
       filter["beneficiario"] = beneficiario;
+    }
+    if (params.numero != null) {
+      var numero = new RegExp(params.numero, "i");
+      filter["numero"] = numero;
+    }
+    if (params.fojas != null) {
+      var fojas = new RegExp(params.fojas, "i");
+      filter["fojas"] = fojas;
+    }
+    if (params.ci != null) {
+      var ci = new RegExp(params.ci, "i");
+      filter["ci"] = ci;
     }
     if (params.limit) {
       limit = parseInt(params.limit);

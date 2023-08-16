@@ -87,5 +87,22 @@ class BussConta {
     let result = await contaModel.findOne({nameFile:uri});
     return result;
   }
+  public async queryContaAll(query1?: any, query2?: any,): Promise<Array<IAreaContabilida>>;
+  public async queryContaAll(search1: string | any, search2: string | any ) {
+    console.log(search1,search2);
+    
+    let listCarpetas: Array<IAreaContabilida> = await contaModel
+      .find(search2)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "idCarpeta",
+        match: search1,          
+      })
+    //return listCarpetas;
+    const filterCarpeta = listCarpetas.filter((carpeta: any) => {
+      return carpeta.idCarpeta != null;
+    });
+    return filterCarpeta;
+  }
 }
 export default BussConta;

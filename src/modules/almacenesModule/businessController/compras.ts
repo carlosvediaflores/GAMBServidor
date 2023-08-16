@@ -148,16 +148,40 @@ class BussCompra {
     });
     return filterProveedores;
   }
-  public async queryCompraSaldo(search: string) {
-    console.log(search);
+  public async queryCompraSaldo(query1?: any, query2?: any,): Promise<Array<ICompra>>;
+  public async queryCompraSaldo(search1: string | any, search2: string | any ) {
+    console.log(search1,search2);
+    
+    let listCompra: Array<ICompra> = await compraModel
+      .find(search1)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "idEntrada",
+        match: search2,          
+      })
+      .populate({
+        path: "idArticulo",
+        model: "alm_articulos",
+        populate: {
+          path: "idPartida",
+          model: "partidas",
+        },
+      });
+   // return listCompra;
+    const filterSaldo = listCompra.filter((saldo: any) => {
+      return saldo.idEntrada != null;
+    });
+    return filterSaldo;
+  }
+  /* public async queryCompraSaldo(search1: string , search2?: string ) {
+    console.log(search1);
     
     let listCompra: any = await compraModel
-      .find()
+      .find({catProgra:search2})
       .populate({
         path: "idEntrada",
         match: {
-          lean: true, 
-         tipo:search,
+         tipo:search1,
          concepto:"Saldo Inicial 2023",
         },
         //select: 'tipo concepto'
@@ -166,12 +190,12 @@ class BussCompra {
       .populate("idPersona")
       .sort({ createdAt: -1 })
       .exec();
-      return listCompra;
-      /* const filterSaldo = listCompra.filter((saldo: any) => {
+     // return listCompra;
+      const filterSaldo = listCompra.filter((saldo: any) => {
         return saldo.idEntrada != null;
       });
-      return filterSaldo; */
-  }
+      return filterSaldo;
+  } */
 
   public async addCompra(Compra: ICompra) {
     try {

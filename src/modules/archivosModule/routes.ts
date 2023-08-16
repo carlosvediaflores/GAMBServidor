@@ -40,6 +40,9 @@ class Routes {
     app
       .route(`${this.routeparent}/removeArchivo/:id`)
       .put(this.routesController.removeArchivo);
+      app
+      .route(`${this.routeparent}/searchContaAll`)
+      .get(this.routesController.queryContaAll);
     //-------AREA CONTABILIDAD--//
     app
       .route(`${this.routeparent}/Contabilidad`)

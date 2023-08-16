@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
-import compraModel, { IAreaContabilida } from "../models/contabilidad";
+import contaModel, { IAreaContabilida } from "../models/contabilidad";
+import recaudacionesModel, { IAreaRecaudaciones } from "../models/recaudaciones";
 //import egresopModel, { IEgreso } from "../models/egreso";
 
 export interface ICarpeta extends Document {
@@ -26,8 +27,8 @@ const carpetaSchema: Schema = new Schema(
     lugar: { type: String },
     estante: { type: String },
     fila: { type: String },
-    areaContabilidad: [{ type: Schema.Types.ObjectId, ref: compraModel}],
-    areaContrataciones: [{ type: Schema.Types.ObjectId, ref: 'arch_contrataciones'}],
+    areaContabilidad: [{ type: Schema.Types.ObjectId, ref: "arch_contabilidades"}],
+    areaContrataciones: [{ type: Schema.Types.ObjectId, ref: recaudacionesModel}],
     areaJuridica: [{ type: Schema.Types.ObjectId, ref: 'arch_juridicas'}],
     areaRecaudaciones: [{ type: Schema.Types.ObjectId, ref: 'arch_recaudaciones'}],
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },

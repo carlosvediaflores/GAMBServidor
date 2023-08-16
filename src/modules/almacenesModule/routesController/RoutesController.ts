@@ -1618,8 +1618,28 @@ class RoutesController {
   }
   public async queryCompraSaldo(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
-    var quieryIngreso = request.params.search;
-    let res = await Compra.queryCompraSaldo(quieryIngreso);
+    var filter1: any = {};
+    var filter2: any = {};
+    var params: any = request.query;
+    if (params.catProgra != null) {
+      var expresion = new RegExp(params.catProgra);
+      filter1["catProgra"] = expresion;
+    }
+    if (params.idArticulo != null) {
+      var expresion = new RegExp(params.idArticulo);
+      filter1["idArticulo"] = expresion;
+    }
+    if (params.tipo != null) {
+      var expresion = new RegExp(params.tipo);
+      filter2["tipo"] = expresion;
+    }
+    if (params.estado != null) {
+      var expresion = new RegExp(params.estado);
+      filter2["estado"] = expresion;
+    }
+    
+    console.log(filter1,filter2); 
+    let res = await Compra.queryCompraSaldo(filter1,filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
   //----------VEHICULOS------------//

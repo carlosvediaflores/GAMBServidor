@@ -1061,29 +1061,67 @@ class RoutesController {
   }
   public async getIngresos(request: Request, response: Response) {
     var Ingreso: BussIngreso = new BussIngreso();
-    var filter: any = {};
+    var filter1: any = {};
+    var filter2: any = {};
     var params: any = request.query;
     var limit = 0;
     var skip = 0;
     var aux: any = {};
     var order: any = {};
-    if (params.limit) {
-      limit = parseInt(params.limit);
+    if (params.concepto != null) {
+      var concepto = new RegExp(params.concepto, "i");
+      filter1["concepto"] = concepto;
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
+    if (params.numeroEntrada != null) {
+      var numeroEntrada:number = parseInt(params.numeroEntrada);
+      if(Number.isNaN(numeroEntrada)){
+        filter1["numeroEntrada"] 
+      }else{
+        filter1["numeroEntrada"] = numeroEntrada
+      }
+    }
+    if (params.estado != null) {
+      var estado = new RegExp(params.estado, "i");
+      filter1["estado"] = estado;
+    }
+    if (params.tipo != null) {
+      var tipo = new RegExp(params.tipo, "i");
+      filter1["tipo"] = tipo;
+    }
+    if (params.del != null) {
+      var gt = params.del;
       aux["$gt"] = gt;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
+    if (params.al != null) {
+      var lt = params.al;
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
-      filter["createdAt"] = aux;
+      filter1["fecha"] = aux;
     }
-    let respost: any = await Ingreso.total({});
-    var totalDocs = respost;
-    var totalpage = Math.ceil(respost / limit);
+    if (params.razon_social != null) {
+      var razon_social = new RegExp(params.razon_social, "i");
+      filter2["razon_social"] = razon_social;
+    }
+    if (params.nit != null) {
+      var nit = new RegExp(params.nit, "i");
+      filter2["nit"] = nit;
+    }
+    if (params.idProve != null) {
+      var idProve = params.idProve;
+        filter2["_id"] = idProve;
+
+    }
+    if (params.representante != null) {
+      var representante = new RegExp(params.representante, "i");
+      filter2["representante"] = representante;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    let respost: any = await Ingreso.totales(filter1,filter2);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(totalDocs / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {
@@ -1099,8 +1137,9 @@ class RoutesController {
     } else {
       order = { numeroEntrada: -1 };
     }
-    let res: Array<IIngreso> = await Ingreso.readIngreso(
-      filter,
+    let res = await Ingreso.readIngresos(
+      filter1,
+      filter2,
       skip,
       limit,
       order
@@ -1172,12 +1211,12 @@ class RoutesController {
         }
         let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
       } else {
-        data.idEntrada=id
-        data.idProducto=data.idArticulo
-   
+        data.idEntrada = id;
+        data.idProducto = data.idArticulo;
+
         let resultCompra = await compra.addCompra(data);
         let idCompra = resultCompra._id;
-        var resultAdd = await Ingreso.addCompras(id, idCompra);      
+        var resultAdd = await Ingreso.addCompras(id, idCompra);
         if (res.estado == "EGRESADO") {
           salidaM["cantidadSalida"] = data.cantidadCompra;
           salidaM["estadoSalida"] = "SIN OBS";
@@ -1188,12 +1227,18 @@ class RoutesController {
           compraModif["estadoCompra"] = "AGOTADO";
           let resultSalida = await salida.addSalida(salidaM);
           let idSalida = resultSalida._id;
-          var resultAddSal = await Egreso.addSalidas(res.idEgreso[0]._id, idSalida);
+          var resultAddSal = await Egreso.addSalidas(
+            res.idEgreso[0]._id,
+            idSalida
+          );
           var compraAdd = await compra.addSalidas(idCompra, idSalida);
           let result2 = await compra.updateCompra(data._id, compraModif);
         }
-        if(res.estado=="REGISTRADO"){
-          let result1 = await Articulo.updateArticulo(articulo.id, articuloModif);
+        if (res.estado == "REGISTRADO") {
+          let result1 = await Articulo.updateArticulo(
+            articulo.id,
+            articuloModif
+          );
           //console.log("SE MODIFICO ARTICULO");
         }
       }
@@ -1575,7 +1620,7 @@ class RoutesController {
       serverResponse: res,
       totalDocs,
       limit,
-      totalpage:(number = Math.ceil(totalDocs / limit)),
+      totalpage: (number = Math.ceil(totalDocs / limit)),
       skip,
     });
     return;
@@ -1610,10 +1655,55 @@ class RoutesController {
     let res = await Compra.queryCompraCatPro(quieryIngreso);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
-  public async searchCompraAll(request: Request, response: Response) {
+  /* public async searchCompraAll(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     var queryCompra = request.params.search;
     let res = await Compra.searchCompraAll(queryCompra);
+    response.status(200).json({ serverResponse: res, total: res.length });
+  } */
+  public async searchCompraAll(request: Request, response: Response) {
+    var Compra: BussCompra = new BussCompra();
+    var filter1: any = {};
+    var filter2: any = {};
+    var params: any = request.query;
+    if (params.catProgra != null) {
+      var catProgra = new RegExp(params.catProgra, "i");
+      filter1["catProgra"] = catProgra;
+    }
+    if (params.estadoCompra != null) {
+      var estadoCompra = new RegExp(params.estadoCompra, "i");
+      filter1["estadoCompra"] = estadoCompra;
+    }
+    if (params.cantidadCompra != null) {
+      var cantidadCompra = new RegExp(params.cantidadCompra, "i");
+      filter1["cantidadCompra"] = cantidadCompra;
+    }
+    if (params.stockCompra != null) {
+      var stockCompra = new RegExp(params.stockCompra, "i");
+      filter1["stockCompra"] = stockCompra;
+    }
+    if (params.codigo != null) {
+      var codigo = new RegExp(params.codigo, "i");
+      filter2["codigo"] = codigo;
+    }
+    if (params.nombre != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter2["nombre"] = nombre;
+    }
+    if (params.unidadDeMedida != null) {
+      var unidadDeMedida = new RegExp(params.unidadDeMedida, "i");
+      filter2["unidadDeMedida"] = unidadDeMedida;
+    }
+    if (params.cantidad != null) {
+      var cantidad = new RegExp(params.cantidad, "i");
+      filter2["cantidad"] = cantidad;
+    }
+    if (params.estado != null) {
+      var expresion = new RegExp(params.estado);
+      filter2["estado"] = expresion;
+    }
+    console.log(filter1, filter2);
+    let res = await Compra.searchCompraAll(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
   public async queryCompraSaldo(request: Request, response: Response) {
@@ -1637,9 +1727,9 @@ class RoutesController {
       var expresion = new RegExp(params.estado);
       filter2["estado"] = expresion;
     }
-    
-    console.log(filter1,filter2); 
-    let res = await Compra.queryCompraSaldo(filter1,filter2);
+
+    console.log(filter1, filter2);
+    let res = await Compra.queryCompraSaldo(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
   //----------VEHICULOS------------//

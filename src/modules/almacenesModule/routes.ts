@@ -281,7 +281,7 @@ class Routes {
       .route(`${this.routeparent}/queryCompraCatPro/:search`)
       .get(this.routesController.queryCompraCatPro);
       app
-      .route(`${this.routeparent}/searchCompraAll/:search`)
+      .route(`${this.routeparent}/searchCompraAll`)
       .get(this.routesController.searchCompraAll);
       app
       .route(`${this.routeparent}/searchCompraSaldo`)

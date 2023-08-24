@@ -86,7 +86,32 @@ class BussCompra {
     var result = await compraModel.countDocuments();
     return result;
   }
-  public async searchCompraAll(query?: any): Promise<Array<ICompra>>;
+  public async searchCompraAll(query1?: any, query2?: any,): Promise<Array<ICompra>>;
+  public async searchCompraAll(search1: string | any, search2: string | any ) {
+    console.log(search1,search2);
+    
+    let listCompra: Array<ICompra> = await compraModel
+      .find(search1)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "idArticulo",
+        match: search2,          
+      })
+      .populate({
+        path: "idEntrada",
+        model: "alm_ingresos",
+        populate: {
+          path: "idProveedor",
+          model: "alm_proveedores",
+        },
+      });
+   // return listCompra;
+    const filterCompra = listCompra.filter((compra: any) => {
+      return compra.idArticulo != null;
+    });
+    return filterCompra;
+  }
+  /* public async searchCompraAll(query?: any): Promise<Array<ICompra>>;
   public async searchCompraAll(search: string | any) {
     var filter = {
       $or: [
@@ -109,7 +134,7 @@ class BussCompra {
         },
       });
     return listCompra;
-  }
+  } */
 
   public async searchCompra(search:string) {
     let listCompra: any  = await compraModel

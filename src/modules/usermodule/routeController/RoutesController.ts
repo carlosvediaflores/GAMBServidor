@@ -892,7 +892,6 @@ class RoutesController {
       limit,
       order
     );
-    //  console.log(filter)
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -965,6 +964,8 @@ class RoutesController {
     var segui: BussinesSegui = new BussinesSegui();
     let id: string = request.params.id;
     var params = request.body;
+    console.log("params",params);
+    
     var result = await segui.updateSegui(id, params);
     response.status(200).json(result);
   }

@@ -101,6 +101,7 @@ class BussIngreso {
       return listIngresos;
     }
   }
+  
   public async getNumIngreso() {
     var result = await ingresosModel
       .find()
@@ -264,5 +265,86 @@ class BussIngreso {
     }
     return null;
   }
+
+  public async readIngresos(
+    query1?: any,
+    query2?: any,
+    skip?: number,
+    limit?: number,
+    order?: any
+  ): Promise<Array<IIngreso>>;
+
+  public async readIngresos(
+    search1?: string | any,
+    search2?: string | any,
+    params2?: number,
+    params3?: number,
+    order?: any
+  ){
+      let skip = params2;
+      let limit = params3;
+      let listIngreso: Array<IIngreso> = await ingresosModel
+        .find(search1)
+        .skip(skip)
+        .limit(limit)
+        .sort(order)
+        .populate({
+          path: "idProveedor",
+          match: search2,          
+        })
+        .populate("idUsuario")
+        .populate("idPersona")
+        .populate("idEgreso")
+        .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "idArticulo",
+            model: "alm_articulos",
+            populate: { path: "idPartida", model: "partidas" },
+          },
+        })
+      //return listIngreso;
+      const filterIngreso = listIngreso.filter((ingreso: any) => {
+        return ingreso.idProveedor != null;
+      });
+      return filterIngreso;
+  } 
+  public async totales(
+    query1?: any,
+    query2?: any,
+    skip?: number,
+    limit?: number,
+    order?: any
+  ): Promise<Array<IIngreso>>;
+
+  public async totales(
+    search1?: string | any,
+    search2?: string | any,
+  ){
+      let listIngreso: Array<IIngreso> = await ingresosModel
+        .find(search1)
+        .populate({
+          path: "idProveedor",
+          match: search2,          
+        })
+        .populate("idUsuario")
+        .populate("idPersona")
+        .populate("idEgreso")
+        .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "idArticulo",
+            model: "alm_articulos",
+            populate: { path: "idPartida", model: "partidas" },
+          },
+        })
+      //return listIngreso;
+      const filterIngreso = listIngreso.filter((ingreso: any) => {
+        return ingreso.idProveedor != null;
+      });
+      return filterIngreso;
+  } 
 }
 export default BussIngreso;

@@ -105,9 +105,7 @@ class BussArticulo {
     return result;
   }
   public async searchArticuloAll(query1?: any, query2?: any,): Promise<Array<IArticulo>>;
-  public async searchArticuloAll(search1: string | any, search2: string | any ) {
-    console.log(search1,search2);
-    
+  public async searchArticuloAll(search1: string | any, search2: string | any ) {    
     let listArticulo: Array<IArticulo> = await articulosModel
       .find(search1)
       .sort({ createdAt: -1 })

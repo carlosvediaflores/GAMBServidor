@@ -1883,8 +1883,10 @@ class RoutesController {
     }
     if (params.unidadDeMedida != null) {
       let unidadDeMedida=params.unidadDeMedida
-      if(unidadDeMedida!="null"){
+      if(unidadDeMedida!="null" && unidadDeMedida!=""){
         filter1["unidadDeMedida"] = unidadDeMedida;
+      }else{
+        delete filter1.unidadDeMedida;
       }
     }
     if (params.nombre != null) {

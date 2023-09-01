@@ -51,6 +51,10 @@ class BussSalida {
       return listSalidas;
     }
   }
+  public async totalCount(params1?: string | any) {
+    let listSegui = await salidaModel.countDocuments(params1);
+    return listSegui;
+  }
   public async getNumSalida() {
     var result = await salidaModel.find().limit(1).sort({ _id: -1 });
     return result;

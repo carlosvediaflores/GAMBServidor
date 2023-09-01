@@ -33,6 +33,10 @@ class BussProveedor {
       return listProveedor;
     }
   }
+  public async total({}) {
+    var result = await proveedorModel.countDocuments();
+    return result;
+  }
   public async readProveedorCod(codigo: string | any): Promise<IProveedor>;
   public async readProveedorCod(
     params1?: string | any,

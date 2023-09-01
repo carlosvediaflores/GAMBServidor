@@ -36,6 +36,10 @@ class BusMedida {
       return listMedida;
     }
   }
+  public async total({}) {
+    var result = await medidaModule.countDocuments();
+    return result;
+  }
   public async searchMedida(query?: any): Promise<Array<IMedida>>;
   public async searchMedida(
     search: string | any | boolean,

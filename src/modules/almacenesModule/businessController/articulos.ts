@@ -57,6 +57,10 @@ class BussArticulo {
       .populate("idPartida");
     return listArticulo;
   }
+  public async total({}) {
+    var result = await articulosModel.countDocuments();
+    return result;
+  }
   /* public async searchArticulo(query?: any): Promise<Array<IArticulo>>;
   public async searchArticulo(
     search: string | any,
@@ -99,6 +103,23 @@ class BussArticulo {
   public async deleteArticulo(id: string) {
     let result = await articulosModel.remove({ _id: id });
     return result;
+  }
+  public async searchArticuloAll(query1?: any, query2?: any,): Promise<Array<IArticulo>>;
+  public async searchArticuloAll(search1: string | any, search2: string | any ) {
+    console.log(search1,search2);
+    
+    let listArticulo: Array<IArticulo> = await articulosModel
+      .find(search1)
+      .sort({ createdAt: -1 })
+      .populate({
+        path: "idPartida",
+        match: search2,          
+      })
+   // return listCompra;
+    const filterArticulo = listArticulo.filter((compra: any) => {
+      return compra.idPartida != null;
+    });
+    return filterArticulo;
   }
 }
 export default BussArticulo;

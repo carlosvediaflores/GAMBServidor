@@ -92,6 +92,10 @@ class BussEgreso {
     var result = await EgresosModel.countDocuments();
     return result;
   }
+  public async totalCount(params1?: string | any) {
+    let listSegui = await EgresosModel.countDocuments(params1);
+    return listSegui;
+  }
   public async searchEgreso(query?: any): Promise<Array<IEgreso>>;
   public async searchEgreso(search: string | any) {
     var filter = {

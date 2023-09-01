@@ -86,6 +86,10 @@ class BussCompra {
     var result = await compraModel.countDocuments();
     return result;
   }
+  public async totalCount(params1?: string | any) {
+    let listSegui = await compraModel.countDocuments(params1);
+    return listSegui;
+  }
   public async searchCompraAll(query1?: any, query2?: any,): Promise<Array<ICompra>>;
   public async searchCompraAll(search1: string | any, search2: string | any ) {
     console.log(search1,search2);

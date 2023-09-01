@@ -182,6 +182,9 @@ class Routes {
     app
       .route(`${this.routeparent}/articuloNombre`)
       .get(this.routesController.getArticuloNombre);
+      app
+      .route(`${this.routeparent}/searchArticulosAll`)
+      .get(this.routesController.searchArticulosAll);
     //-------MEDIDAS--//
     app
       .route(`${this.routeparent}/medida`)
@@ -280,10 +283,10 @@ class Routes {
     app
       .route(`${this.routeparent}/queryCompraCatPro/:search`)
       .get(this.routesController.queryCompraCatPro);
-      app
+    app
       .route(`${this.routeparent}/searchCompraAll`)
       .get(this.routesController.searchCompraAll);
-      app
+    app
       .route(`${this.routeparent}/searchCompraSaldo`)
       .get(this.routesController.queryCompraSaldo);
     //-------VEHICULOS--//
@@ -305,6 +308,10 @@ class Routes {
     app
       .route(`${this.routeparent}/searchVehiculo/:search?`)
       .get(this.routesController.searchVehiculo);
+    //------------CONUNT--------------
+    app
+      .route(`${this.routeparent}/countAlmacenes`)
+      .get(this.routesController.contAlmacenes);
   }
 }
 export default Routes;

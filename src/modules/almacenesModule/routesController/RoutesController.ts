@@ -9,6 +9,8 @@ import sharp from "sharp";
 //import escapeStringRegexp  from "escape-string-RegExp"
 //import csv from "fast-csv";
 import * as csv from "@fast-csv/parse";
+//const ObjectId = require("mongoose").Types.ObjectId;
+import { isValidObjectId } from "mongoose";
 
 import { ICategoria } from "../models/categorias";
 import BussCategoria from "../businessController/categorias";
@@ -1073,11 +1075,11 @@ class RoutesController {
       filter1["concepto"] = concepto;
     }
     if (params.numeroEntrada != null) {
-      var numeroEntrada:number = parseInt(params.numeroEntrada);
-      if(Number.isNaN(numeroEntrada)){
-        filter1["numeroEntrada"] 
-      }else{
-        filter1["numeroEntrada"] = numeroEntrada
+      var numeroEntrada: number = parseInt(params.numeroEntrada);
+      if (Number.isNaN(numeroEntrada)) {
+        filter1["numeroEntrada"];
+      } else {
+        filter1["numeroEntrada"] = numeroEntrada;
       }
     }
     if (params.estado != null) {
@@ -1108,9 +1110,12 @@ class RoutesController {
       filter2["nit"] = nit;
     }
     if (params.idProve != null) {
-      var idProve = params.idProve;
+      let idProve=params.idProve
+      if(!ObjectId.isValid(idProve)){   
+        filter2["_id"] = ""
+      }else {
         filter2["_id"] = idProve;
-
+      }
     }
     if (params.representante != null) {
       var representante = new RegExp(params.representante, "i");
@@ -1119,7 +1124,7 @@ class RoutesController {
     if (params.limit) {
       limit = parseInt(params.limit);
     }
-    let respost: any = await Ingreso.totales(filter1,filter2);
+    let respost: any = await Ingreso.totales(filter1, filter2);
     var totalDocs = respost.length;
     var totalpage = Math.ceil(totalDocs / limit);
     if (params.skip) {
@@ -1137,13 +1142,7 @@ class RoutesController {
     } else {
       order = { numeroEntrada: -1 };
     }
-    let res = await Ingreso.readIngresos(
-      filter1,
-      filter2,
-      skip,
-      limit,
-      order
-    );
+    let res = await Ingreso.readIngresos(filter1, filter2, skip, limit, order);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -1817,6 +1816,112 @@ class RoutesController {
     var searchVehiculo = request.params.search;
     let res = await Vehiculo.searchVehiculo(searchVehiculo);
     response.status(200).json({ serverResponse: res });
+  }
+  public async contAlmacenes(request: Request, response: Response) {
+    var Proveedores: BussProveedores = new BussProveedores();
+    var segPoa: BussSegPoa = new BussSegPoa();
+    var Articulo: BussArticulo = new BussArticulo();
+    var Medida: BussMedida = new BussMedida();
+    var Ingreso: BussIngreso = new BussIngreso();
+    var compra: BussCompra = new BussCompra();
+    var Egreso: BussEgreso = new BussEgreso();
+    var salida: BussSalida = new BussSalida();
+    var filter: any = {};
+    var params: any = request.query;
+    var aux: any = {};
+    if (params.del != null) {
+      var del = params.del;
+      aux["$gte"] = del;
+    }
+    if (params.al != null) {
+      var al = params.al;
+      aux["$lte"] = al;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    const [
+      totalProveedores,
+      totalSegPoa,
+      totalArticulos,
+      totalMedidas,
+      totalIngreso,
+      totalCompra,
+      totalEgreso,
+      totalSalida,
+    ] = await Promise.all([
+      Proveedores.total({}),
+      segPoa.total({}),
+      Articulo.total({}),
+      Medida.total({}),
+      Ingreso.totalCount(filter),
+      compra.totalCount(filter),
+      Egreso.totalCount(filter),
+      salida.totalCount(filter),
+    ]);
+    response.status(200).json({
+      totalProveedores,
+      totalSegPoa,
+      totalArticulos,
+      totalMedidas,
+      totalIngreso,
+      totalCompra,
+      totalEgreso,
+      totalSalida,
+    });
+    return;
+  }
+  public async searchArticulosAll(request: Request, response: Response) {
+    var Articulo: BussArticulo = new BussArticulo();
+    var filter1: any = {};
+    var filter2: any = {};
+    var aux: any = {};
+    var params: any = request.query;
+    if (params.codigo != null) {
+      var codigo = new RegExp(params.codigo, "i");
+      filter1["codigo"] = codigo;
+    }
+    if (params.unidadDeMedida != null) {
+      let unidadDeMedida=params.unidadDeMedida
+      if(unidadDeMedida!="null"){
+        filter1["unidadDeMedida"] = unidadDeMedida;
+      }
+    }
+    if (params.nombre != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter1["nombre"] = nombre;
+    }
+    if (params.cantidad != null) {
+      var cantidad: number = parseInt(params.cantidad);
+      if (Number.isNaN(cantidad)) {
+        filter1["cantidad"];
+      } else {
+        filter1["cantidad"] = cantidad;
+      }
+    }
+    if (params.idPartida != null) {
+      let idPartida=params.idPartida
+      if(!ObjectId.isValid(idPartida)){   
+        filter2["_id"] = ""
+      }else {
+        filter2["_id"] = idPartida;
+      }
+    }
+    if (params.stock != null) {
+      var stock: number = parseInt(params.stock);
+      if (stock===1) {
+        aux["$lt"] = stock;
+      } else if(stock===0) {
+        aux["$gt"] = stock;
+      }else{
+        aux[""]
+      }
+    }
+    if (Object.entries(aux).length > 0) {
+      filter1["cantidad"] = aux;
+    }
+    let res = await Articulo.searchArticuloAll(filter1, filter2);
+    response.status(200).json({ serverResponse: res, total: res.length });
   }
 }
 export default RoutesController;

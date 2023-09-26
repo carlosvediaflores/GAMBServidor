@@ -29,7 +29,7 @@ const areaSchema: Schema = new Schema(
     uri: { type: String },
     path: { type: String },
     nameFile:{type:String},
-    idCarpeta: { type: Schema.Types.ObjectId, ref: "arch_carpetas" },
+    idCarpeta: [{ type: Schema.Types.ObjectId, ref: "arch_carpetas" }],
   },
   {
     timestamps: true,

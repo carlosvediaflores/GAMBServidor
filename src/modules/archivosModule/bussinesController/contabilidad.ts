@@ -64,8 +64,13 @@ class BussConta {
       return err;
     }
   }
-  public async updateConta(id: string, Conta: any) {
-    let result = await contaModel.updateOne({ _id: id }, { $set: Conta });
+  public async updatePushConta(id: string, Conta: any) {
+    let result = await contaModel.updateOne({ _id: id }, { $push: Conta });
+    return result;
+  }
+  public async updateConta(idArchivo: string, Conta: any) {
+    console.log(idArchivo, Conta)
+    let result = await contaModel.updateOne({ _id: idArchivo }, { $pull: Conta });
     return result;
   }
   public async deleteConta(id: string) {
@@ -89,7 +94,7 @@ class BussConta {
   }
   public async queryContaAll(query1?: any, query2?: any,): Promise<Array<IAreaContabilida>>;
   public async queryContaAll(search1: string | any, search2: string | any ) {
-    console.log(search1,search2);
+    console.log("filer 1 y 2",search1,search2);
     
     let listCarpetas: Array<IAreaContabilida> = await contaModel
       .find(search2)
@@ -100,7 +105,7 @@ class BussConta {
       })
     //return listCarpetas;
     const filterCarpeta = listCarpetas.filter((carpeta: any) => {
-      return carpeta.idCarpeta != null;
+      return carpeta.idCarpeta.length != 0;
     });
     return filterCarpeta;
   }

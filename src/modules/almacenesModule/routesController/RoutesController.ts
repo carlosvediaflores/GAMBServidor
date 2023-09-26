@@ -727,6 +727,12 @@ class RoutesController {
     });
     return;
   }
+  public async createSegPoa(request: Request, response: Response) {
+    var segPoa: BussSegPoa = new BussSegPoa();
+    var segPoaData = request.body;
+    let result = await segPoa.addsegPoa(segPoaData);
+    response.status(201).json({ serverResponse: result });
+  }
   public async readSegPoa(request: Request, response: Response) {
     var segPoa: BussSegPoa = new BussSegPoa();
     var filter: any = {};

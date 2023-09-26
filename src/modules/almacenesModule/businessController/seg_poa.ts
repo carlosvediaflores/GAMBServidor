@@ -26,6 +26,7 @@ class BusSegPoa {
       let limit = params3;
       let listSegPoa: Array<ISegPoa> = await segPoaModule
         .find(params1)
+        .populate("responsable")
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -68,6 +69,15 @@ class BusSegPoa {
     try {
       let SegPoaDb = new segPoaModule(SegPoa);
       let result = await SegPoaDb.save();
+      return result;
+    } catch (err) {
+      return err;
+    }
+  }
+  public async addsegPoa(segPoa: ISegPoa) {
+    try {
+      let segPoaDb = new segPoaModule(segPoa);
+      let result = await segPoaDb.save();
       return result;
     } catch (err) {
       return err;

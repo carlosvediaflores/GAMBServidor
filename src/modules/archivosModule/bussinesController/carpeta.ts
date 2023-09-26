@@ -19,22 +19,43 @@ class BussCarpeta {
     if (params1 && typeof params1 == "string") {
       var result: ICarpeta = await carpetaModel
         .findOne({ _id: params1 })
-        .populate("areaContabilidad");
+        .populate({
+          path: "areaContabilidad",
+          model: "arch_contabilidades",
+          populate: {
+            path: "idCarpeta",
+            model: "arch_carpetas",
+          },
+        })
       return result;
     } else if (params1) {
       let skip = params2;
       let limit = params3;
       let listCarpeta: Array<ICarpeta> = await carpetaModel
         .find(params1)
+        .populate({
+          path: "areaContabilidad",
+          model: "arch_contabilidades",
+          populate: {
+            path: "idCarpeta",
+            model: "arch_carpetas",
+          },
+        })
         .skip(skip)
         .limit(limit)
         .sort(order)
-        .populate("areaContabilidad");
       return listCarpeta;
     } else {
       let listCarpetas: Array<ICarpeta> = await carpetaModel
         .find()
-        .populate("areaContabilidad");
+        .populate({
+          path: "areaContabilidad",
+          model: "arch_contabilidades",
+          populate: {
+            path: "idCarpeta",
+            model: "arch_carpetas",
+          },
+        })
       return listCarpetas;
     }
   }

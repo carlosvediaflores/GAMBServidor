@@ -146,6 +146,9 @@ class Routes {
       .route(`${this.routeparent}/csv`)
       .post(this.routesController.uploadCsvPoa);
     app
+      .route(`${this.routeparent}/segPoa`)
+      .post(this.routesController.createSegPoa);
+    app
       .route(`${this.routeparent}/segPoas`)
       .get(this.routesController.readSegPoa);
     app

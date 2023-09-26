@@ -515,8 +515,11 @@ class RoutesController {
     }
     if (params.gestion != null) {
       var gestion: number = parseInt(params.gestion);
+      if (Number.isNaN(gestion)) {
+        filter1["gestion"];
+      } else {
         filter1["gestion"] = gestion;
-      
+      }      
     }
     if (params.glosa != null) {
       var glosa = new RegExp(params.glosa, "i");
@@ -627,7 +630,8 @@ class RoutesController {
   //Archivos de conta si asociar a una carpeta
   public async getContaSin(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
-    let repres = await Conta.getContaSin({});
+    let data:any = { idCarpeta: { $size: 0 } }
+    let repres = await Conta.getContaSin(data);
     response.status(200).json(repres);
   }
   public async updateConta(request: Request, response: Response) {

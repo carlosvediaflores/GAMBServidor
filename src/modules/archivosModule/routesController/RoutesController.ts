@@ -448,7 +448,7 @@ class RoutesController {
         );
         if (checksub.length == 0) {
           let datos: any = { idCarpeta: idCarpeta };
-          var editCarpeta = await Conta.updateConta(idArchivo, datos);
+          var editCarpeta = await Conta.updateContaId(idArchivo, datos);
           var result = await carpeta.addContaId(idCarpeta, idArchivo);
           response.status(200).json({ serverResponse: resultArea });
           return;
@@ -484,7 +484,7 @@ class RoutesController {
         );
         if (checksub.length != 0) {
           let datos: any = { idCarpeta: idCarpeta };
-          var editCarpeta = await Conta.updateConta(idArchivo, datos);
+          var editCarpeta = await Conta.updateContaId(idArchivo, datos);
           var result = await carpeta.removeContaId(idCarpeta, idArchivo);
           response.status(200).json({ serverResponse: "Se movió el archivo" });
           return;
@@ -646,7 +646,6 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result: any = await Conta.readConta(id);
-    console.log("result", result)
     if (!result) {
       response.status(300).json({ serverResponse: "area no existe!" });
       return;
@@ -686,7 +685,6 @@ class RoutesController {
         });
       }
       let carpeta = result.idCarpeta[0]
-      console.log("carpeta", carpeta)
 
       var newname: string = `${"GAMB"}_${carpeta.area}_${
         carpeta.tipo
@@ -702,7 +700,6 @@ class RoutesController {
         borrarImagen(pathViejo);
       }
       params.uri = "getArchivos/" + newname;
-      console.log(params);
       
       var Result = await Conta.updateConta(id, params);
       response.status(200).json({ serverResponse: "Conta modificado" });

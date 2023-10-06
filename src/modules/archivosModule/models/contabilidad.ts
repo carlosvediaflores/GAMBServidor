@@ -14,7 +14,7 @@ export interface IAreaContabilida extends Document {
   uri: string;
   path: string;
   nameFile:string;
-  idCarpeta: string;
+  idCarpeta:[];
 }
 const areaSchema: Schema = new Schema(
   {

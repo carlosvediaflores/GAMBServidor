@@ -68,9 +68,17 @@ class BussConta {
     let result = await contaModel.updateOne({ _id: id }, { $push: Conta });
     return result;
   }
-  public async updateConta(idArchivo: string, Conta: any) {
+  public async updateContaId(idArchivo: string, Conta: any) {
     console.log(idArchivo, Conta)
     let result = await contaModel.updateOne({ _id: idArchivo }, { $pull: Conta });
+    return result;
+  }
+  //Editar
+  public async updateConta(id: string, Document: any) {
+    let result = await contaModel.updateOne(
+      { _id: id },
+      { $set: Document }
+    );
     return result;
   }
   public async deleteConta(id: string) {

@@ -63,9 +63,29 @@ class RoutesController {
       var gestion = new RegExp(params.gestion, "i");
       filter["gestion"] = gestion;
     }
-    if (params.objeto != null) {
-      var objeto = new RegExp(params.objeto, "i");
-      filter["objeto"] = objeto;
+    if (params.numCarpeta != null) {
+      var numCarpeta: number = parseInt(params.numCarpeta);
+      if (Number.isNaN(numCarpeta)) {
+        filter["numCarpeta"];
+      } else {
+        filter["numCarpeta"] = numCarpeta;
+      }
+    }
+    if (params.nameCarpeta != null) {
+      var nameCarpeta = new RegExp(params.nameCarpeta, "i");
+      filter["nameCarpeta"] = nameCarpeta;
+    }
+    if (params.estante != null) {
+      var estante: number = parseInt(params.estante);
+      if (Number.isNaN(estante)) {
+        filter["estante"];
+      } else {
+        filter["estante"] = estante;
+      }
+    }
+    if (params.lugar != null) {
+      var lugar = new RegExp(params.lugar, "i");
+      filter["lugar"] = lugar;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
@@ -126,7 +146,7 @@ class RoutesController {
     var Carpeta: BussCarpeta = new BussCarpeta();
     var searchString = request.params.search;
     let res = await Carpeta.searchCarpeta(searchString);
-    response.status(200).json({ serverResponse: res });
+    response.status(200).json({ serverResponse: res, total:res.length});
   }
   public async removeCarpeta(request: Request, response: Response) {
     const borrarImagen: any = (path: any) => {
@@ -306,8 +326,11 @@ class RoutesController {
     }
     let carpetaResult = await Carpeta.readCarpeta(idCarpeta);
     let area = carpetaResult.area;
-    var contaData: any = request.body;
+    var contaData: any = request.body; 
     //contaData.idCarpeta = idCarpeta;
+    if(contaData.fojas==''){
+      contaData.fojas = 0;
+    }
     let result: any = {};
     let result1: any = {};
     if (isEmpty(request.files)) {
@@ -320,7 +343,6 @@ class RoutesController {
           for (let i = 0; i < cantCarp; i++) {
             let idArch = partes[i];
             let datos: any = { idCarpeta: idArch };
-            console.log(datos)
             var editCarpeta = await conta.updatePushConta(idArea, datos);
             result = await Carpeta.addContaId(idArch, idArea);
           }
@@ -448,7 +470,7 @@ class RoutesController {
         );
         if (checksub.length == 0) {
           let datos: any = { idCarpeta: idCarpeta };
-          var editCarpeta = await Conta.updateContaId(idArchivo, datos);
+          var editCarpeta = await Conta.updatePushConta(idArchivo, datos);
           var result = await carpeta.addContaId(idCarpeta, idArchivo);
           response.status(200).json({ serverResponse: resultArea });
           return;
@@ -627,7 +649,7 @@ class RoutesController {
     let repres = await Conta.readConta(request.params.id);
     response.status(200).json(repres);
   }
-  //Archivos de conta si asociar a una carpeta
+  //Archivos de conta sin asociar a una carpeta
   public async getContaSin(request: Request, response: Response) {
     var Conta: BussConta = new BussConta();
     let data:any = { idCarpeta: { $size: 0 } }

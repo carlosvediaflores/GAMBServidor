@@ -83,19 +83,25 @@ class BussCarpeta {
   public async searchCarpeta(query?: any): Promise<Array<ICarpeta>>;
   public async searchCarpeta(search: string | any) {
     var filter = {
+      area: "Contabilidad" ,
       $or: [
-        { objetivo: { $regex: search, $options: "i" } },
-        { tomo: { $regex: search, $options: "i" } },
+        { nameCarpeta: { $regex: search, $options: "i" } },
+        { gestion: { $regex: search, $options: "i" } },
         { tipo: { $regex: search, $options: "i" } },
         { lugar: { $regex: search, $options: "i" } },
-        { ubicacion: { $regex: search, $options: "i" } },
-        { area: { $regex: search, $options: "i" } },
       ],
     };
     let listCarpeta: Array<ICarpeta> = await carpetaModel
       .find(filter)
       .sort({ _id: -1 })
-      .populate("areaContabilidad");
+      .populate({
+        path: "areaContabilidad",
+        model: "arch_contabilidades",
+        populate: {
+          path: "idCarpeta",
+          model: "arch_carpetas",
+        },
+      });
     return listCarpeta;
   }
   public async addCarpeta(Carpeta: ICarpeta) {

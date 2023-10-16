@@ -69,7 +69,6 @@ class BussConta {
     return result;
   }
   public async updateContaId(idArchivo: string, Conta: any) {
-    console.log(idArchivo, Conta)
     let result = await contaModel.updateOne({ _id: idArchivo }, { $pull: Conta });
     return result;
   }

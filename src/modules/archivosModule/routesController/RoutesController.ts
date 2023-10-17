@@ -194,7 +194,6 @@ class RoutesController {
     if (isEmpty(request.files)) {
       var filData: any = request.body;
       var carpeta: ICarpeta = await Carpeta.addCarpeta(filData);
-      console.log(carpeta);
       response.status(300).json({ serverResponse: carpeta });
       return;
     }
@@ -281,7 +280,6 @@ class RoutesController {
   }
   public async getFileArchivo(request: Request, response: Response) {
     var uri: string = request.params.name;
-    console.log(uri);
     if (!uri) {
       response
         .status(300)
@@ -290,8 +288,6 @@ class RoutesController {
     }
     var Conta: BussConta = new BussConta();
     var ArchivoData: IAreaContabilida = await Conta.readContaFile(uri);
-    console.log(ArchivoData);
-
     if (!ArchivoData) {
       const pathImg = path.join(
         __dirname,

@@ -93,16 +93,12 @@ class BussConta {
       return result;
     }
   }
-  public async readContaFile(uri: string) {
-    console.log(uri);
-    
+  public async readContaFile(uri: string) {   
     let result = await contaModel.findOne({nameFile:uri});
     return result;
   }
   public async queryContaAll(query1?: any, query2?: any,): Promise<Array<IAreaContabilida>>;
-  public async queryContaAll(search1: string | any, search2: string | any ) {
-    console.log("filer 1 y 2",search1,search2);
-    
+  public async queryContaAll(search1: string | any, search2: string | any ) {   
     let listCarpetas: Array<IAreaContabilida> = await contaModel
       .find(search2)
       .sort({ createdAt: -1 })

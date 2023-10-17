@@ -1340,14 +1340,18 @@ class RoutesController {
       let stockCompra: Number =
         listCompra.stockCompra - EgresoData.cantidadSalida;
       EgresoData.stockCompra = stockCompra;
-      EgresoData.cantidad = stock;
+      EgresoData.cantidad = stock;      
       if (stockCompra === 0) {
         EgresoData.estadoCompra = "AGOTADO";
+      }else{
+        EgresoData.estadoCompra = "EXISTE";
       }
       let result1 = await articulo.updateArticulo(
         Simplearticulo._id,
         EgresoData
       );
+      console.log("Data",EgresoData);
+      
       let resultCompra = await compra.updateCompra(data.idCompra, EgresoData);
       const ENTRADA: ISimpleIngreso = {
         estado: "SALIDA",

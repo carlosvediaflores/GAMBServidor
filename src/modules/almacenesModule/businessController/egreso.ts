@@ -159,5 +159,70 @@ class BussEgreso {
     }
     return null;
   }
+  public async readEgresos(
+    query1?: any,
+    skip?: number,
+    limit?: number,
+    order?: any
+  ): Promise<Array<IEgreso>>;
+
+  public async readEgresos(
+    search1?: string | any,
+    params2?: number,
+    params3?: number,
+    order?: any
+  ){
+      let skip = params2;
+      let limit = params3;
+      let listEgreso: Array<IEgreso> = await EgresosModel
+        .find(search1)
+        .skip(skip)
+        .limit(limit)
+        .sort(order)
+        .populate("idUsuario")
+        .populate({
+          path: "productos",
+          model: "alm_salidas",
+          populate: {
+            path: "idArticulo",
+            model: "alm_articulos",
+            populate: { path: "idPartida", model: "partidas" },
+          },
+        })
+      return listEgreso;
+      /* const filterIngreso = listIngreso.filter((ingreso: any) => {
+        return ingreso.idProveedor != null;
+      });
+      return filterIngreso; */
+  } 
+
+  public async totales(
+    query1?: any,
+    skip?: number,
+    limit?: number,
+    order?: any
+  ): Promise<Array<IEgreso>>;
+
+  public async totales(
+    search1?: string | any,
+  ){
+      let listEgreso: Array<IEgreso> = await EgresosModel
+        .find(search1)
+        .populate("idPersona")
+        /* .populate({
+          path: "productos",
+          model: "alm_compras",
+          populate: {
+            path: "idArticulo",
+            model: "alm_articulos",
+            populate: { path: "idPartida", model: "partidas" },
+          },
+        }) */
+      return listEgreso;
+      /* const filterIngreso = listIngreso.filter((ingreso: any) => {
+        return ingreso.idProveedor != null;
+      });
+      return filterIngreso; */
+  } 
 }
 export default BussEgreso;

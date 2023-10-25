@@ -1107,14 +1107,6 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter1["fecha"] = aux;
     }
-    if (params.razon_social != null) {
-      var razon_social = new RegExp(params.razon_social, "i");
-      filter2["razon_social"] = razon_social;
-    }
-    if (params.nit != null) {
-      var nit = new RegExp(params.nit, "i");
-      filter2["nit"] = nit;
-    }
     if (params.idProve != null) {
       let idProve=params.idProve
       if(!ObjectId.isValid(idProve)){   
@@ -1122,10 +1114,6 @@ class RoutesController {
       }else {
         filter2["_id"] = idProve;
       }
-    }
-    if (params.representante != null) {
-      var representante = new RegExp(params.representante, "i");
-      filter2["representante"] = representante;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
@@ -1363,28 +1351,49 @@ class RoutesController {
   public async getEgresos(request: Request, response: Response) {
     var Egreso: BussEgreso = new BussEgreso();
     var filter: any = {};
+    var filter2: any = {};
     var params: any = request.query;
     var limit = 0;
     var skip = 0;
     var aux: any = {};
     var order: any = {};
-    if (params.limit) {
-      limit = parseInt(params.limit);
+    if (params.glosaSalida != null) {
+      var glosaSalida = new RegExp(params.glosaSalida, "i");
+      filter["glosaSalida"] = glosaSalida;
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
+    if (params.numeroSalida != null) {
+      var numeroSalida: number = parseInt(params.numeroSalida);
+      if (Number.isNaN(numeroSalida)) {
+        filter["numeroSalida"];
+      } else {
+        filter["numeroSalida"] = numeroSalida;
+      }
+    }
+    if (params.entregado != null) {
+      var entregado = new RegExp(params.entregado, "i");
+      filter["entregado"] = entregado;
+    }
+    if (params.cargo != null) {
+      var cargo = new RegExp(params.cargo, "i");
+      filter["cargo"] = cargo;
+    }
+    if (params.del != null) {
+      var gt = params.del;
       aux["$gt"] = gt;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
+    if (params.al != null) {
+      var lt = params.al;
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
-      filter["createdAt"] = aux;
+      filter["fecha"] = aux;
     }
-    let respost: any = await Egreso.total({});
-    var totalDocs = respost;
-    var totalpage = Math.ceil(respost / limit);
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    let respost: any = await Egreso.totales(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(totalDocs / limit);
     if (params.skip) {
       skip = parseInt(params.skip);
       if (skip <= totalpage && skip >= 2) {
@@ -1400,7 +1409,7 @@ class RoutesController {
     } else {
       order = { numeroSalida: -1 };
     }
-    let res: Array<IEgreso> = await Egreso.readEgreso(
+    let res: Array<IEgreso> = await Egreso.readEgresos(
       filter,
       skip,
       limit,
@@ -1724,19 +1733,14 @@ class RoutesController {
       var expresion = new RegExp(params.catProgra);
       filter1["catProgra"] = expresion;
     }
+    if (params.estadoCompra != null) {
+      var expresion = new RegExp(params.estadoCompra);
+      filter1["estadoCompra"] = expresion;
+    }
     if (params.idArticulo != null) {
       var expresion = new RegExp(params.idArticulo);
       filter1["idArticulo"] = expresion;
     }
-    if (params.tipo != null) {
-      var expresion = new RegExp(params.tipo);
-      filter2["tipo"] = expresion;
-    }
-    if (params.estado != null) {
-      var expresion = new RegExp(params.estado);
-      filter2["estado"] = expresion;
-    }
-
     console.log(filter1, filter2);
     let res = await Compra.queryCompraSaldo(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });

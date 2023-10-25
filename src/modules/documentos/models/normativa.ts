@@ -1,0 +1,34 @@
+import mongoose, { Schema, Document, Number } from "mongoose";
+
+export interface INormativa extends Document {
+  titulo: string;
+  fecha: Date;
+  vigente:boolean;
+  estado:boolean;
+  uri: string;
+  path: string;
+  nameFile: string;
+  tipo_normativa:string;
+  idUsuario: string;
+}
+const normativaSchema: Schema = new Schema(
+  {
+    titulo: { type: String },
+    fecha: { type: Date },
+    vigente: { type: Boolean, default:true },
+    estado: { type: Boolean, default:true },
+    uri: { type: String },
+    path: { type: String },
+    nameFile: { type: String },
+    tipo_normativa: { type: Schema.Types.ObjectId, ref: "doc_tipoNormativas" },
+    idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
+export default mongoose.model<INormativa>(
+  "doc_normativas",
+  normativaSchema
+);

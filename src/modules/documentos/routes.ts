@@ -31,20 +31,64 @@ class Routes {
     app
       .route(`${this.routeparent}/uploadDocument/:id?`)
       .post(this.routesController.uploadDocument);
-      // Buscar, Filtrar
+    // Buscar, Filtrar
     app
       .route(`${this.routeparent}/documentos`)
       .get(this.routesController.getDocuments);
-      //Buscar por Id
+    //Buscar por Id
     app
       .route(`${this.routeparent}/documento/:id`)
       .get(this.routesController.getDocument);
-      ////Ver Arhivo
+    ////Ver Arhivo
     app
       .route(`${this.routeparent}/getDocument/:name`)
       .get(this.routesController.getFileDocument);
-      //Eliminar Document
-      app
+    //Eliminar Document
+    app
+      .route(`${this.routeparent}/document/:id`)
+      .delete(this.routesController.removeDocument);
+
+    ///////////TipoNormativas////////////////
+    //Crear
+    app
+      .route(`${this.routeparent}/tipoNormativa`)
+      .post(this.routesController.createTipoNormativa);
+    // Listar
+    app
+      .route(`${this.routeparent}/tipoNormativas`)
+      .get(this.routesController.getTipoNormativas);
+    //Buscar por Id
+    app
+      .route(`${this.routeparent}/tipoNormativa/:id`)
+      .get(this.routesController.getTipoNormativa);
+    ////Editar TipoNormativa
+    app
+      .route(`${this.routeparent}/tipoNormativa/:id`)
+      .put(this.routesController.updateTipoNormativa);
+    //Eliminar TipoNormativa
+    app
+      .route(`${this.routeparent}/tipoNormativa/:id`)
+      .delete(this.routesController.removeTipoNormativa);
+
+    ///////////NORMATIVAS//////////
+    //Crear, Editar Documento
+    app
+      .route(`${this.routeparent}/uploadDocument/:id?`)
+      .post(this.routesController.uploadDocument);
+    // Buscar, Filtrar
+    app
+      .route(`${this.routeparent}/documentos`)
+      .get(this.routesController.getDocuments);
+    //Buscar por Id
+    app
+      .route(`${this.routeparent}/documento/:id`)
+      .get(this.routesController.getDocument);
+    ////Ver Arhivo
+    app
+      .route(`${this.routeparent}/getDocument/:name`)
+      .get(this.routesController.getFileDocument);
+    //Eliminar Document
+    app
       .route(`${this.routeparent}/document/:id`)
       .delete(this.routesController.removeDocument);
   }

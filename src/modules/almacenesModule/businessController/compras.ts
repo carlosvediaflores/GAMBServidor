@@ -92,8 +92,6 @@ class BussCompra {
   }
   public async searchCompraAll(query1?: any, query2?: any,): Promise<Array<ICompra>>;
   public async searchCompraAll(search1: string | any, search2: string | any ) {
-    console.log(search1,search2);
-    
     let listCompra: Array<ICompra> = await compraModel
       .find(search1)
       .sort({ createdAt: -1 })

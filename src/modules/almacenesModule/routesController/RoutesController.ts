@@ -1705,8 +1705,8 @@ class RoutesController {
       filter1["stockCompra"] = stockCompra;
     }
     if (params.codigo != null) {
-      var codigo = new RegExp(params.codigo, "i");
-      filter2["codigo"] = codigo;
+      var codigo = new RegExp(params.codigo);
+      filter2["codigo"] = params.codigo;
     }
     if (params.nombre != null) {
       var nombre = new RegExp(params.nombre, "i");
@@ -1724,7 +1724,6 @@ class RoutesController {
       var expresion = new RegExp(params.estado);
       filter2["estado"] = expresion;
     }
-    console.log(filter1, filter2);
     let res = await Compra.searchCompraAll(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }

@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Number } from "mongoose";
 export interface INormativa extends Document {
   titulo: string;
   fecha: Date;
+  fechaFin: Date;
   vigente:boolean;
   estado:boolean;
   uri: string;
@@ -14,7 +15,8 @@ export interface INormativa extends Document {
 const normativaSchema: Schema = new Schema(
   {
     titulo: { type: String },
-    fecha: { type: Date },
+    fecha: { type: Date, default:new Date},
+    fechaFin: { type: Date },
     vigente: { type: Boolean, default:true },
     estado: { type: Boolean, default:true },
     uri: { type: String },

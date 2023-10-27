@@ -7,7 +7,7 @@ export interface ITipoNormativa extends Document {
 const tipoNormativaSchema: Schema = new Schema(
   {
     tipo: { type: String },
-    normativa: [{ type: Schema.Types.ObjectId, ref: "model_documents" }],
+    normativa: [{ type: Schema.Types.ObjectId, ref: "doc_normativas" }],
   },
   {
     timestamps: true,

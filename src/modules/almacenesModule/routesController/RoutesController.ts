@@ -1692,6 +1692,10 @@ class RoutesController {
       var estadoCompra = new RegExp(params.estadoCompra, "i");
       filter1["estadoCompra"] = estadoCompra;
     }
+    if (params.idProducto != null) {
+      var expresion = new RegExp(params.idProducto);
+      filter1["idProducto"] = expresion;
+    }
     if (params.cantidadCompra != null) {
       var cantidadCompra = new RegExp(params.cantidadCompra, "i");
       filter1["cantidadCompra"] = cantidadCompra;
@@ -1737,9 +1741,9 @@ class RoutesController {
       var expresion = new RegExp(params.estadoCompra);
       filter1["estadoCompra"] = expresion;
     }
-    if (params.idArticulo != null) {
-      var expresion = new RegExp(params.idArticulo);
-      filter1["idArticulo"] = expresion;
+    if (params.idProducto != null) {
+      var expresion = new RegExp(params.idProducto);
+      filter1["idProducto"] = expresion;
     }
     console.log(filter1, filter2);
     let res = await Compra.queryCompraSaldo(filter1, filter2);

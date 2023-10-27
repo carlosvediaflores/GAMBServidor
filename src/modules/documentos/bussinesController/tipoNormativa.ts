@@ -62,14 +62,14 @@ class BussTipoNormativa {
   }
   //Agregar idNormativa a TipoNormativa
   public async updatePushNormativa(idTipo: string, idNorma: any) {
-    let result = await modelTipoNormativa.updateOne({ _id: idTipo }, { $push: {documentos:idNorma  } });
+    let result = await modelTipoNormativa.updateOne({ _id: idTipo }, { $push: {normativa:idNorma  } });
     return result;
   }
   //Remover IdNormativa de TipoNormativa
   public async removeNormativaId(idTipo: string, idNorma: any) {
     let result = await modelTipoNormativa.updateOne(
       { _id: idTipo },
-      { $pull: { documentos: idNorma } }
+      { $pull: { normativa: idNorma } }
     );
     return result;
   }

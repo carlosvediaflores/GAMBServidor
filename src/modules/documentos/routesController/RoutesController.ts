@@ -153,8 +153,6 @@ class RoutesController {
     var id: string = request.params.id;
     var DocumentToUpdate: IDocumento = await Document.readDocument(id);
     var filData: any = request.body;
-    console.log(filData);
-
     if (!DocumentToUpdate) {
       response.status(300).json({ serverResponse: "Document no existe!" });
       return;
@@ -311,7 +309,7 @@ class RoutesController {
     borrarImagen(pathViejo);
     let result = await Document.deleteDocument(id);
     var result1 = await Modelo.removeDocId(res.modelo_tipo, id); 
-    response.status(200).json({ serverResponse: "Se elimino la Conta" });
+    response.status(200).json({ serverResponse: "Se elimino la Plantilla" });
   }
 
   //----------TIPOS NORMATIVAS------------//
@@ -386,15 +384,19 @@ class RoutesController {
       var vigente = params.vigente;
       filter["vigente"] = vigente;
     }
+    if (params.estado != null) {
+      var estado = params.estado;
+      filter["estado"] = estado;
+    }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
+    if (params.del != null) {
+      var gt = params.del;
       aux["$gt"] = gt;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
+    if (params.al != null) {
+      var lt = params.al;
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
@@ -454,18 +456,19 @@ class RoutesController {
     var id: string = request.params.id;
     var NormativaToUpdate: INormativa = await Normativa.readNormativa(id);
     var filData: any = request.body;
-    console.log(filData);
-
     if (!NormativaToUpdate) {
       response.status(300).json({ serverResponse: "Normativa no existe!" });
       return;
     }
     if (isEmpty(request.files) && id) {     
       //si tipoNormativa no se ha cambiado
-      if(NormativaToUpdate.tipo_normativa==filData.tipo_normativa){
+      if(NormativaToUpdate.tipo_normativa==filData.tipo_normativa ){
         var Result = await Normativa.updateNormativa(id, filData);
 
-      }else{
+      }else if(filData.tipo_normativa == null){
+        var Result = await Normativa.updateNormativa(id, filData);
+      }     
+      else{
         var Result = await Normativa.updateNormativa(id, filData);
         let idTipo = filData.tipo_normativa;
         let idTipoAnterior = NormativaToUpdate.tipo_normativa;
@@ -518,21 +521,19 @@ class RoutesController {
         }_${filehash}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
-        filData.archivo = newname;
         filData.uri = "getNormativa/" + newname;
         filData.path = totalpath;
         filData.nameFile = newname;
-        var Normativao: INormativa = await Normativa.addNormativa(filData);
-        let idModel = filData.modelo_tipo;
-        let idDoc = Normativao._id;
-        let pushDoc = await tipoNormativa.updatePushNormativa(idModel, idDoc);
+        var normativa: INormativa = await Normativa.addNormativa(filData);
+        let idTipo = filData.tipo_normativa;
+        let idDoc = normativa._id;
+        let pushDoc = await tipoNormativa.updatePushNormativa(idTipo, idDoc);
       }
       response.status(200).json({
-        serverResponse: Normativao,
+        serverResponse: normativa,
       });
       return;
     }
-    var filData: any = request.body;
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
@@ -563,10 +564,10 @@ class RoutesController {
         var Result = await Normativa.updateNormativa(id, filData);
       }else{
         var Result = await Normativa.updateNormativa(id, filData);
-        let idModel = filData.tipo_normativa;
-        let idModelAnterior = NormativaToUpdate.tipo_normativa;
-        let pushDoc = await tipoNormativa.updatePushNormativa(idModel, id);
-        var result = await tipoNormativa.removeNormativaId(idModelAnterior, id);        
+        let idTipo = filData.tipo_normativa;
+        let idTipoAnterior = NormativaToUpdate.tipo_normativa;
+        let pushDoc = await tipoNormativa.updatePushNormativa(idTipo, id);
+        var result = await tipoNormativa.removeNormativaId(idTipoAnterior, id);        
       }
       response.status(200).json({ serverResponse: "Normativa modificado" });
       return;
@@ -607,14 +608,14 @@ class RoutesController {
     };
     let pathViejo = "";
     var Normativa: BussNormativa = new BussNormativa();
-    var Modelo: BussModelo = new BussModelo();
+    var tipoNormativa: BussTipoNormativa = new BussTipoNormativa();
     let id: string = request.params.id;
     let res:INormativa = await Normativa.readNormativa(id);
     pathViejo = res.path;
     borrarImagen(pathViejo);
     let result = await Normativa.deleteNormativa(id);
-    var result1 = await Modelo.removeDocId(res.tipo_normativa, id); 
-    response.status(200).json({ serverResponse: "Se elimino la Conta" });
+    var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id); 
+    response.status(200).json({ serverResponse: "Se elimino la Normativa" });
   }
 }
 export default RoutesController;

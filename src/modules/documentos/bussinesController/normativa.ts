@@ -29,7 +29,7 @@ class BussNormativa {
           path: "normativa",
           model: "doc_normativas",
         },
-      })
+      });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -37,13 +37,13 @@ class BussNormativa {
       let listNormativa: Array<INormativa> = await normativaModel
         .find(params1)
         .populate({
-            path: "tipo_normativa",
-            model: "doc_tipoNormativas",
-            populate: {
-              path: "normativa",
-              model: "doc_normativas",
-            },
-          })
+          path: "tipo_normativa",
+          model: "doc_tipoNormativas",
+          populate: {
+            path: "normativa",
+            model: "doc_normativas",
+          },
+        })
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -52,13 +52,13 @@ class BussNormativa {
       let listNormativas: Array<INormativa> = await normativaModel
         .find()
         .populate({
-            path: "tipo_normativa",
-            model: "doc_tipoNormativas",
-            populate: {
-              path: "normativa",
-              model: "doc_normativas",
-            },
-          });
+          path: "tipo_normativa",
+          model: "doc_tipoNormativas",
+          populate: {
+            path: "normativa",
+            model: "doc_normativas",
+          },
+        });
       return listNormativas;
     }
   }
@@ -83,7 +83,7 @@ class BussNormativa {
   }
   //Ver Archivo
   public async readNormativaFile(uri: string) {
-    let result = await normativaModel.findOne({nameFile:uri});
+    let result = await normativaModel.findOne({ nameFile: uri });
     return result;
   }
   //eliminar
@@ -91,7 +91,6 @@ class BussNormativa {
     let result = await normativaModel.deleteOne({ _id: id });
     return result;
   }
-  
 }
 
 export default BussNormativa;

@@ -71,26 +71,26 @@ class Routes {
       .delete(this.routesController.removeTipoNormativa);
 
     ///////////NORMATIVAS//////////
-    //Crear, Editar Documento
+    //Crear, Editar Normativa
     app
-      .route(`${this.routeparent}/uploadDocument/:id?`)
-      .post(this.routesController.uploadDocument);
+      .route(`${this.routeparent}/uploadNormativa/:id?`)
+      .post(this.routesController.uploadNormativa);
     // Buscar, Filtrar
     app
-      .route(`${this.routeparent}/documentos`)
-      .get(this.routesController.getDocuments);
+      .route(`${this.routeparent}/normativas`)
+      .get(this.routesController.getNormativas);
     //Buscar por Id
     app
-      .route(`${this.routeparent}/documento/:id`)
-      .get(this.routesController.getDocument);
-    ////Ver Arhivo
+      .route(`${this.routeparent}/normativa/:id`)
+      .get(this.routesController.getNormativa);
+    ////Ver Arhivo de Normativa
     app
-      .route(`${this.routeparent}/getDocument/:name`)
-      .get(this.routesController.getFileDocument);
-    //Eliminar Document
+      .route(`${this.routeparent}/getNormativa/:name`)
+      .get(this.routesController.getFileNormativa);
+    //Eliminar Normativa
     app
-      .route(`${this.routeparent}/document/:id`)
-      .delete(this.routesController.removeDocument);
+      .route(`${this.routeparent}/normativa/:id`)
+      .delete(this.routesController.removeNormativa);
   }
 }
 export default Routes;

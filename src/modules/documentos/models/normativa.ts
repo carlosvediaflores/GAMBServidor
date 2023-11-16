@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
 
 export interface INormativa extends Document {
+  numero:string;
   titulo: string;
   fecha: Date;
   fechaFin: Date;
@@ -14,6 +15,7 @@ export interface INormativa extends Document {
 }
 const normativaSchema: Schema = new Schema(
   {
+    numero: { type: Number, default:0 },
     titulo: { type: String },
     fecha: { type: Date, default:new Date},
     fechaFin: { type: Date },

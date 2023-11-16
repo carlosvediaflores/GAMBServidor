@@ -25,6 +25,7 @@ class BussNormativa {
       ).populate({
         path: "tipo_normativa",
         model: "doc_tipoNormativas",
+        options: { sort: { tipo: 1 } },
         populate: {
           path: "normativa",
           model: "doc_normativas",
@@ -39,6 +40,7 @@ class BussNormativa {
         .populate({
           path: "tipo_normativa",
           model: "doc_tipoNormativas",
+          options: { sort: { tipo: 1 } },
           populate: {
             path: "normativa",
             model: "doc_normativas",
@@ -54,6 +56,7 @@ class BussNormativa {
         .populate({
           path: "tipo_normativa",
           model: "doc_tipoNormativas",
+          options: { sort: { tipo: 1 } },
           populate: {
             path: "normativa",
             model: "doc_normativas",

@@ -12,6 +12,10 @@ import { INormativa } from "../models/normativa";
 import BussNormativa from "../bussinesController/normativa";
 import BussTipoNormativa from "../bussinesController/tipoNormativa";
 import { ITipoNormativa } from "../models/tipoNormativa";
+import BussPrestamo from "../bussinesController/prestamos";
+import { IPrestamos } from "../models/prestamos";
+import BussFilePrestamo from "../bussinesController/filePrestamo";
+import { IFilePrestamos } from "../models/filePrestamo";
 
 class RoutesController {
   //----------MODELOS------------//
@@ -157,15 +161,15 @@ class RoutesController {
       response.status(300).json({ serverResponse: "Document no existe!" });
       return;
     }
-    if (isEmpty(request.files) && id) {     
-      if(DocumentToUpdate.modelo_tipo==filData.modelo_tipo){
+    if (isEmpty(request.files) && id) {
+      if (DocumentToUpdate.modelo_tipo == filData.modelo_tipo) {
         var Result = await Document.updateDocument(id, filData);
-      }else{
+      } else {
         var Result = await Document.updateDocument(id, filData);
         let idModel = filData.modelo_tipo;
         let idModelAnterior = DocumentToUpdate.modelo_tipo;
         let pushDoc = await Modelo.updatePushDoc(idModel, id);
-        var result = await Modelo.removeDocId(idModelAnterior, id);        
+        var result = await Modelo.removeDocId(idModelAnterior, id);
       }
       response.status(200).json({ serverResponse: "Document modificado" });
       return;
@@ -201,7 +205,15 @@ class RoutesController {
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension
-        var extensionesValidas = ["pdf", "docx", "xlsx", "xlsm", "pptx","xls", "rar"];
+        var extensionesValidas = [
+          "pdf",
+          "docx",
+          "xlsx",
+          "xlsm",
+          "pptx",
+          "xls",
+          "rar",
+        ];
         if (!extensionesValidas.includes(extensionArchivo)) {
           return response.status(400).json({
             ok: false,
@@ -234,7 +246,15 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf", "docx", "xlsx", "xlsm","pptx", "xls", "rar"];
+      var extensionesValidas = [
+        "pdf",
+        "docx",
+        "xlsx",
+        "xlsm",
+        "pptx",
+        "xls",
+        "rar",
+      ];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
@@ -254,14 +274,14 @@ class RoutesController {
       }
       filData.uri = "getDocument/" + newname;
       filData.nameFile = newname;
-      if(DocumentToUpdate.modelo_tipo==filData.modelo_tipo){
+      if (DocumentToUpdate.modelo_tipo == filData.modelo_tipo) {
         var Result = await Document.updateDocument(id, filData);
-      }else{
+      } else {
         var Result = await Document.updateDocument(id, filData);
         let idModel = filData.modelo_tipo;
         let idModelAnterior = DocumentToUpdate.modelo_tipo;
         let pushDoc = await Modelo.updatePushDoc(idModel, id);
-        var result = await Modelo.removeDocId(idModelAnterior, id);        
+        var result = await Modelo.removeDocId(idModelAnterior, id);
       }
       response.status(200).json({ serverResponse: "Document modificado" });
       return;
@@ -304,17 +324,17 @@ class RoutesController {
     var Document: BussDocument = new BussDocument();
     var Modelo: BussModelo = new BussModelo();
     let id: string = request.params.id;
-    let res:IDocumento = await Document.readDocument(id);
+    let res: IDocumento = await Document.readDocument(id);
     pathViejo = res.path;
     borrarImagen(pathViejo);
     let result = await Document.deleteDocument(id);
-    var result1 = await Modelo.removeDocId(res.modelo_tipo, id); 
+    var result1 = await Modelo.removeDocId(res.modelo_tipo, id);
     response.status(200).json({ serverResponse: "Se elimino la Plantilla" });
   }
 
   //----------TIPOS NORMATIVAS------------//
 
-  //Crear 
+  //Crear
   public async createTipoNormativa(request: Request, response: Response) {
     var TipoNormativa: BussTipoNormativa = new BussTipoNormativa();
     var TipoNormativaData = request.body;
@@ -418,7 +438,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { tipo_normativa: -1, numero:1 };
     }
     let res: Array<INormativa> = await Normativa.readNormativa(
       filter,
@@ -460,20 +480,18 @@ class RoutesController {
       response.status(300).json({ serverResponse: "Normativa no existe!" });
       return;
     }
-    if (isEmpty(request.files) && id) {     
+    if (isEmpty(request.files) && id) {
       //si tipoNormativa no se ha cambiado
-      if(NormativaToUpdate.tipo_normativa==filData.tipo_normativa ){
+      if (NormativaToUpdate.tipo_normativa == filData.tipo_normativa) {
         var Result = await Normativa.updateNormativa(id, filData);
-
-      }else if(filData.tipo_normativa == null){
+      } else if (filData.tipo_normativa == null) {
         var Result = await Normativa.updateNormativa(id, filData);
-      }     
-      else{
+      } else {
         var Result = await Normativa.updateNormativa(id, filData);
         let idTipo = filData.tipo_normativa;
         let idTipoAnterior = NormativaToUpdate.tipo_normativa;
         let pushDoc = await tipoNormativa.updatePushNormativa(idTipo, id);
-        var result = await tipoNormativa.removeNormativaId(idTipoAnterior, id);        
+        var result = await tipoNormativa.removeNormativaId(idTipoAnterior, id);
       }
       response.status(200).json({ serverResponse: "Normativa modificado" });
       return;
@@ -509,7 +527,15 @@ class RoutesController {
         var nombreCortado = file.name.split(".");
         var extensionArchivo = nombreCortado[nombreCortado.length - 1];
         // Validar extension
-        var extensionesValidas = ["pdf", "docx", "xlsx", "xlsm", "pptx","xls", "rar"];
+        var extensionesValidas = [
+          "pdf",
+          "docx",
+          "xlsx",
+          "xlsm",
+          "pptx",
+          "xls",
+          "rar",
+        ];
         if (!extensionesValidas.includes(extensionArchivo)) {
           return response.status(400).json({
             ok: false,
@@ -540,7 +566,15 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf", "docx", "xlsx", "xlsm","pptx", "xls", "rar"];
+      var extensionesValidas = [
+        "pdf",
+        "docx",
+        "xlsx",
+        "xlsm",
+        "pptx",
+        "xls",
+        "rar",
+      ];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
@@ -560,14 +594,14 @@ class RoutesController {
       }
       filData.uri = "getNormativa/" + newname;
       filData.nameFile = newname;
-      if(NormativaToUpdate.tipo_normativa==filData.tipo_normativa){
+      if (NormativaToUpdate.tipo_normativa == filData.tipo_normativa) {
         var Result = await Normativa.updateNormativa(id, filData);
-      }else{
+      } else {
         var Result = await Normativa.updateNormativa(id, filData);
         let idTipo = filData.tipo_normativa;
         let idTipoAnterior = NormativaToUpdate.tipo_normativa;
         let pushDoc = await tipoNormativa.updatePushNormativa(idTipo, id);
-        var result = await tipoNormativa.removeNormativaId(idTipoAnterior, id);        
+        var result = await tipoNormativa.removeNormativaId(idTipoAnterior, id);
       }
       response.status(200).json({ serverResponse: "Normativa modificado" });
       return;
@@ -610,12 +644,222 @@ class RoutesController {
     var Normativa: BussNormativa = new BussNormativa();
     var tipoNormativa: BussTipoNormativa = new BussTipoNormativa();
     let id: string = request.params.id;
-    let res:INormativa = await Normativa.readNormativa(id);
+    let res: INormativa = await Normativa.readNormativa(id);
     pathViejo = res.path;
     borrarImagen(pathViejo);
     let result = await Normativa.deleteNormativa(id);
-    var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id); 
+    var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
     response.status(200).json({ serverResponse: "Se elimino la Normativa" });
+  }
+
+  ///////////PRESTAMOS///////////
+  //Crear Prestamo
+  public async createPrestamo(request: Request, response: Response) {
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    var PrestamoData = request.body;
+    let result = await Prestamo.addPrestamo(PrestamoData);
+    response.status(201).json({ serverResponse: result });
+  }
+  //listar buscar filtrar
+  public async getPrestamos(request: Request, response: Response) {
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.nombre != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter["nombre"] = nombre;
+    }
+    if (params.tipo != null) {
+      var tipo = params.tipo;
+      filter["tipo"] = tipo;
+    }
+    if (params.estado != null) {
+      var estado = params.estado;
+      filter["estado"] = estado;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.del != null) {
+      var gt = params.del;
+      aux["$gt"] = gt;
+    }
+    if (params.al != null) {
+      var lt = params.al;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IPrestamos> = await Prestamo.readPrestamo();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IPrestamos> = await Prestamo.readPrestamo(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  //buscar por Id a Prestamo
+  public async getPrestamo(request: Request, response: Response) {
+    var prestamo: BussPrestamo = new BussPrestamo();
+    //let id: string = request.params.id;
+    let res = await prestamo.readPrestamo(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  //editar Prestamo
+  public async updatePrestamo(request: Request, response: Response) {
+    var prestamo: BussPrestamo = new BussPrestamo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await prestamo.updatePrestamo(id, params);
+    response.status(200).json(result);
+  }
+  //eliminar Prestamo
+  public async removePrestamo(request: Request, response: Response) {
+    var prestamo: BussPrestamo = new BussPrestamo();
+    let id: string = request.params.id;
+    let result = await prestamo.deletePrestamo(id);
+    response.status(200).json({ serverResponse: "Se elimino prestamo" });
+  }
+  //agregar Archivo a Prestamo
+  public async addArchivo(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    let idPrestamo: string = request.params.id;
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    let filePrestamo: BussFilePrestamo = new BussFilePrestamo();
+    if (!idPrestamo) {
+      response.status(300).json({ serverResponse: "El id es necesario" });
+      return;
+    }
+    let prestamoResult = await Prestamo.readPrestamo(idPrestamo);
+    var prestaData: any = request.body; 
+    let result: any = {};
+    let result1: any = {};
+    if (isEmpty(request.files)) {
+        response.status(300).json({ serverResponse: "no existe archivo adjunto" });
+        return;
+    }
+    //SUBIR Archivo
+    var dir = `${__dirname}/../../../../uploads/documentos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    //para area de contabilidad con file 
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = ["pdf"];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${prestaData.documento}_${
+          prestamoResult.tipo
+        }_${"Nro"}${prestamoResult.numero}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        prestaData.nameFile = newname;
+        prestaData.uri = "getFilePrestamo/" + newname;
+        prestaData.path = totalpath;
+        var resultFilePresta = await filePrestamo.addFilePrestamo(prestaData);
+        let idArchivo = resultFilePresta._id;
+        var addFile = await Prestamo.updatePushPrestamo(idPrestamo, idArchivo);
+        response.status(201).json({ serverResponse: resultFilePresta });
+        return;
+      }
+    //response.status(200).json({ serverResponse: resultPresta });
+  }
+  //Ver Archivo
+  public async getFilePrestamo(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    if (!uri) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Document: BussFilePrestamo = new BussFilePrestamo();
+    var DocumentoData: IFilePrestamos = await Document.readFilePrestamo(uri);
+    if (!DocumentoData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      return;
+    }
+    response.sendFile(DocumentoData.path);
+  }
+  //Elinimar FilePrestamo
+  public async removeFilePrestamo(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    let filePrestamo: BussFilePrestamo = new BussFilePrestamo();
+    let id: string = request.params.id;
+    let res: IFilePrestamos = await filePrestamo.readFilPrestamo(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    let result = await filePrestamo.deleteFilePrestamo(id);
+    //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
+    response.status(200).json({ serverResponse: "Se elimino el documento" });
   }
 }
 export default RoutesController;

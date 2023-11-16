@@ -91,6 +91,40 @@ class Routes {
     app
       .route(`${this.routeparent}/normativa/:id`)
       .delete(this.routesController.removeNormativa);
+
+    ///////////PRESTAMOS//////////
+    //Crear,Prestamo
+    app
+      .route(`${this.routeparent}/prestamo`)
+      .post(this.routesController.createPrestamo);
+    // Buscar, Filtrar
+    app
+      .route(`${this.routeparent}/prestamos`)
+      .get(this.routesController.getPrestamos);
+    //Buscar por Id
+    app
+      .route(`${this.routeparent}/prestamo/:id`)
+      .get(this.routesController.getPrestamo);
+    ////Editar Prestamo
+    app
+      .route(`${this.routeparent}/prestamo/:id`)
+      .put(this.routesController.updatePrestamo);
+    //Eliminar Prestamo
+    app
+      .route(`${this.routeparent}/prestamo/:id`)
+      .delete(this.routesController.removePrestamo);
+      ////agregar archivo a Prestamo
+    app
+    .route(`${this.routeparent}/addFilePrestamo/:id`)
+    .put(this.routesController.addArchivo);
+    ////Ver Arhivo de prestamo
+    app
+      .route(`${this.routeparent}/getFilePrestamo/:name`)
+      .get(this.routesController.getFilePrestamo);
+      //Eliminar filePrestamo
+    app
+    .route(`${this.routeparent}/filePrestamo/:id`)
+    .delete(this.routesController.removeFilePrestamo);
   }
 }
 export default Routes;

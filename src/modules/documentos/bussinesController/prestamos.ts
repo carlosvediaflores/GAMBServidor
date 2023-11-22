@@ -22,7 +22,7 @@ class BussPrestamo {
     if (params1 && typeof params1 == "string") {
       var result: IPrestamos = (await prestamoModel.findOne({ _id: params1 }))
         .populate("archivos")
-        //.populate("amortizacion");
+        .populate("amortizacion");
       return result;
     } else if (params1) {
       let skip = params2;
@@ -30,7 +30,7 @@ class BussPrestamo {
       let listPrestamo: Array<IPrestamos> = await prestamoModel
         .find(params1)
         .populate("archivos")
-        //.populate("amortizacion")
+        .populate("amortizacion")
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -39,7 +39,7 @@ class BussPrestamo {
       let listPrestamos: Array<IPrestamos> = await prestamoModel
         .find()
         .populate("archivos")
-        //.populate("amortizacion")
+        .populate("amortizacion")
       return listPrestamos;
     }
   }
@@ -77,6 +77,22 @@ class BussPrestamo {
     let result = await prestamoModel.updateOne(
       { _id: idPrest },
       { $pull: { archivos: idArchivo } }
+    );
+    return result;
+  }
+  //Agregar idArchivo a Prestamo
+  public async updatePushAmortizacion(idPrest: string, idArchivoA: any) {
+    let result = await prestamoModel.updateOne(
+      { _id: idPrest },
+      { $push: { amortizacion: idArchivoA } }
+    );
+    return result;
+  }
+  //Remover IdArchivo de Prestamo
+  public async removeAmortizacionId(idPrest: string, idArchivo: any) {
+    let result = await prestamoModel.updateOne(
+      { _id: idPrest },
+      { $pull: { amortizacion: idArchivo } }
     );
     return result;
   }

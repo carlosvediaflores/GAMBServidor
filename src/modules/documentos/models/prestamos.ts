@@ -25,7 +25,7 @@ const prestamoSchema: Schema = new Schema(
     fechaFirma: { type: Date, default: new Date() },
     fechaFin: { type: Date },
     estado: { type: Boolean, default: true },
-    amortizacion:[{ type: Schema.Types.ObjectId, ref: "doc_amortizacion" }],
+    amortizacion:[{ type: Schema.Types.ObjectId, ref: "doc_amortizacions" }],
     archivos:[{ type: Schema.Types.ObjectId, ref: "doc_fileprestamos" }],
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
   },

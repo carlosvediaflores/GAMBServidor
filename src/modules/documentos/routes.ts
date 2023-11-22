@@ -125,6 +125,23 @@ class Routes {
     app
     .route(`${this.routeparent}/filePrestamo/:id`)
     .delete(this.routesController.removeFilePrestamo);
+    ///////Amortizacion///////
+    // Buscar
+    app
+      .route(`${this.routeparent}/amortizacions`)
+      .get(this.routesController.getAmortizacions);
+       //Crear,Amortizacion
+    app
+    .route(`${this.routeparent}/uploadAmortizacion/:id`)
+    .put(this.routesController.uploadAmortizacion);
+    //Eliminar filePrestamo
+    app
+    .route(`${this.routeparent}/amortizacion/:id`)
+    .delete(this.routesController.removeAmortizacion);
+     ////Ver Arhivo de prestamo
+     app
+     .route(`${this.routeparent}/getFileAmortizacion/:name`)
+     .get(this.routesController.getFileAmortizacion);
   }
 }
 export default Routes;

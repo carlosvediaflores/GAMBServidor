@@ -16,6 +16,8 @@ import BussPrestamo from "../bussinesController/prestamos";
 import { IPrestamos } from "../models/prestamos";
 import BussFilePrestamo from "../bussinesController/filePrestamo";
 import { IFilePrestamos } from "../models/filePrestamo";
+import BussAmortizacion from "../bussinesController/amortizacion";
+import { IAmortizacion } from "../models/amortizacion";
 
 class RoutesController {
   //----------MODELOS------------//
@@ -155,19 +157,19 @@ class RoutesController {
     var Document: BussDocument = new BussDocument();
     var Modelo: BussModelo = new BussModelo();
     var id: string = request.params.id;
-    var DocumentToUpdate: IDocumento = await Document.readDocument(id);
+    var resultPrestamo: IDocumento = await Document.readDocument(id);
     var filData: any = request.body;
-    if (!DocumentToUpdate) {
+    if (!resultPrestamo) {
       response.status(300).json({ serverResponse: "Document no existe!" });
       return;
     }
     if (isEmpty(request.files) && id) {
-      if (DocumentToUpdate.modelo_tipo == filData.modelo_tipo) {
+      if (resultPrestamo.modelo_tipo == filData.modelo_tipo) {
         var Result = await Document.updateDocument(id, filData);
       } else {
         var Result = await Document.updateDocument(id, filData);
         let idModel = filData.modelo_tipo;
-        let idModelAnterior = DocumentToUpdate.modelo_tipo;
+        let idModelAnterior = resultPrestamo.modelo_tipo;
         let pushDoc = await Modelo.updatePushDoc(idModel, id);
         var result = await Modelo.removeDocId(idModelAnterior, id);
       }
@@ -267,19 +269,19 @@ class RoutesController {
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;
-      pathViejo = DocumentToUpdate.path;
+      pathViejo = resultPrestamo.path;
       filData.path = totalpath;
-      if (totalpath != DocumentToUpdate.path) {
+      if (totalpath != resultPrestamo.path) {
         borrarImagen(pathViejo);
       }
       filData.uri = "getDocument/" + newname;
       filData.nameFile = newname;
-      if (DocumentToUpdate.modelo_tipo == filData.modelo_tipo) {
+      if (resultPrestamo.modelo_tipo == filData.modelo_tipo) {
         var Result = await Document.updateDocument(id, filData);
       } else {
         var Result = await Document.updateDocument(id, filData);
         let idModel = filData.modelo_tipo;
-        let idModelAnterior = DocumentToUpdate.modelo_tipo;
+        let idModelAnterior = resultPrestamo.modelo_tipo;
         let pushDoc = await Modelo.updatePushDoc(idModel, id);
         var result = await Modelo.removeDocId(idModelAnterior, id);
       }
@@ -438,7 +440,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { tipo_normativa: -1, numero:1 };
+      order = { tipo_normativa: -1, numero: 1 };
     }
     let res: Array<INormativa> = await Normativa.readNormativa(
       filter,
@@ -657,6 +659,7 @@ class RoutesController {
   public async createPrestamo(request: Request, response: Response) {
     var Prestamo: BussPrestamo = new BussPrestamo();
     var PrestamoData = request.body;
+    PrestamoData.saldoA=PrestamoData.monto;
     let result = await Prestamo.addPrestamo(PrestamoData);
     response.status(201).json({ serverResponse: result });
   }
@@ -767,12 +770,14 @@ class RoutesController {
       return;
     }
     let prestamoResult = await Prestamo.readPrestamo(idPrestamo);
-    var prestaData: any = request.body; 
+    var prestaData: any = request.body;
     let result: any = {};
     let result1: any = {};
     if (isEmpty(request.files)) {
-        response.status(300).json({ serverResponse: "no existe archivo adjunto" });
-        return;
+      response
+        .status(300)
+        .json({ serverResponse: "no existe archivo adjunto" });
+      return;
     }
     //SUBIR Archivo
     var dir = `${__dirname}/../../../../uploads/documentos`;
@@ -791,34 +796,34 @@ class RoutesController {
         });
       });
     };
-    //para area de contabilidad con file 
-      for (var i = 0; i < key.length; i++) {
-        var file: any = files[key[i]];
-        var filehash: string = sha1(new Date().toString()).substr(0, 5);
-        var nombreCortado = file.name.split(".");
-        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-        // Validar extension
-        var extensionesValidas = ["pdf"];
-        if (!extensionesValidas.includes(extensionArchivo)) {
-          return response.status(400).json({
-            ok: false,
-            msg: "No es una extensión permitida",
-          });
-        }
-        var newname: string = `${"GAMB"}_${prestaData.documento}_${
-          prestamoResult.tipo
-        }_${"Nro"}${prestamoResult.numero}.${extensionArchivo}`;
-        var totalpath = `${absolutepath}/${newname}`;
-        await copyDirectory(totalpath, file);
-        prestaData.nameFile = newname;
-        prestaData.uri = "getFilePrestamo/" + newname;
-        prestaData.path = totalpath;
-        var resultFilePresta = await filePrestamo.addFilePrestamo(prestaData);
-        let idArchivo = resultFilePresta._id;
-        var addFile = await Prestamo.updatePushPrestamo(idPrestamo, idArchivo);
-        response.status(201).json({ serverResponse: resultFilePresta });
-        return;
+    //para area de contabilidad con file
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
       }
+      var newname: string = `${"GAMB"}_${prestaData.documento}_${
+        prestamoResult.tipo
+      }_${"Nro"}${prestamoResult.numero}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      prestaData.nameFile = newname;
+      prestaData.uri = "getFilePrestamo/" + newname;
+      prestaData.path = totalpath;
+      var resultFilePresta = await filePrestamo.addFilePrestamo(prestaData);
+      let idArchivo = resultFilePresta._id;
+      var addFile = await Prestamo.updatePushPrestamo(idPrestamo, idArchivo);
+      response.status(201).json({ serverResponse: resultFilePresta });
+      return;
+    }
     //response.status(200).json({ serverResponse: resultPresta });
   }
   //Ver Archivo
@@ -860,6 +865,144 @@ class RoutesController {
     let result = await filePrestamo.deleteFilePrestamo(id);
     //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
     response.status(200).json({ serverResponse: "Se elimino el documento" });
+  }
+  /////////Amortizacion///////
+  //Listar
+  public async getAmortizacions(request: Request, response: Response) {
+    var Modelo: BussAmortizacion = new BussAmortizacion();
+    let res: Array<IAmortizacion> = await Modelo.readAmortizacion();
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs: res.length,
+    });
+    return;
+  }
+  //Crear Subir Modificar Amortizacion
+  public async uploadAmortizacion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var amortizacion: BussAmortizacion = new BussAmortizacion();
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    var id: string = request.params.id;
+    var resultPrestamo: IPrestamos = await Prestamo.readPrestamo(id);
+    var filData: any = request.body;
+    if (!resultPrestamo) {
+      response.status(300).json({ serverResponse: "Prestamo no existe!" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "no existe archivo adjunto" });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/documentos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    var filData: any = request.body;
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = [
+        "pdf",
+        "jpg",
+        "jpeg",
+      ];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${filehash}_${
+        resultPrestamo.tipo
+      }_${"Nro"}${resultPrestamo.numero}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      let resultSaldoPres = resultPrestamo.saldoA-filData.monto;
+      const filDataPre:any = {saldoA:resultSaldoPres};
+      filData.nameFile = newname;
+      filData.uri = "getFileAmortizacion/" + newname;
+      filData.path = totalpath;
+      var resultFilePresta = await amortizacion.addAmortizacion(filData);
+      let idArchivo = resultFilePresta._id;
+      var updatePres = await Prestamo.updatePrestamo(id, filDataPre);
+      var addFile = await Prestamo.updatePushAmortizacion(id, idArchivo);
+      var addFile = await amortizacion.updatePusPrestamo(idArchivo, id );
+      response.status(201).json({ serverResponse: resultFilePresta });
+      return;
+    }
+  }
+   //Elinimar FilePrestamo
+   public async removeAmortizacion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var amortizacion: BussAmortizacion = new BussAmortizacion();
+    var Prestamo: BussPrestamo = new BussPrestamo();
+    let id: string = request.params.id;
+    let res: IAmortizacion = await amortizacion.readAmortizacion(id);
+    if (!res) {
+      response.status(300).json({ serverResponse: "Amortizacion no existe!" });
+      return;
+    }
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    let idPres:any=res.prestamo
+    var resultPrestamo: any = await Prestamo.readPrestamo(idPres[0]);
+    let saldoPres:{}=resultPrestamo;
+    let resultSaldoPres = res.monto+resultPrestamo[0].saldoA;
+    const filDataPre = {saldoA:resultSaldoPres};
+    let result = await amortizacion.deleteAmortizacion(id);
+    var updatePres = await Prestamo.updatePrestamo(idPres[0], filDataPre);
+    var result1 = await Prestamo.removeAmortizacionId(idPres[0], id);
+    response.status(200).json({ serverResponse: "Se elimino el documento" });
+  }
+  //Ver Archivo Amortizacion
+  public async getFileAmortizacion(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    if (!uri) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var amortizacion: BussAmortizacion = new BussAmortizacion();
+    let res: IAmortizacion = await amortizacion.readAmortizacionFile(uri);
+    if (!res) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      return;
+    }
+    response.sendFile(res.path);
   }
 }
 export default RoutesController;

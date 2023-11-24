@@ -659,7 +659,7 @@ class RoutesController {
   public async createPrestamo(request: Request, response: Response) {
     var Prestamo: BussPrestamo = new BussPrestamo();
     var PrestamoData = request.body;
-    PrestamoData.saldoA=PrestamoData.monto;
+    PrestamoData.saldoA = PrestamoData.monto;
     let result = await Prestamo.addPrestamo(PrestamoData);
     response.status(201).json({ serverResponse: result });
   }
@@ -743,15 +743,53 @@ class RoutesController {
     var prestamo: BussPrestamo = new BussPrestamo();
     let id: string = request.params.id;
     var params = request.body;
-    var result = await prestamo.updatePrestamo(id, params);
-    response.status(200).json(result);
+    let res = await prestamo.readPrestamo(request.params.id);
+    if (params.monto == res.monto) {
+      var result = await prestamo.updatePrestamo(id, params);
+      response
+        .status(200)
+        .json({
+          serverResponse: "Préstamo actualizado",
+        });
+      return;
+    } else {
+      let saldoAct = 0;
+      if (params.monto < res.monto) {
+        saldoAct = res.monto - params.monto;
+        params.saldoA = res.saldoA-saldoAct;
+        var result = await prestamo.updatePrestamo(id, params);
+        response
+          .status(200)
+          .json({
+            serverResponse: "Préstamo actualizado",
+          });
+        return;
+      } else {
+        saldoAct = params.monto - res.monto;
+        params.saldoA = res.saldoA+saldoAct;
+        var result = await prestamo.updatePrestamo(id, params);
+        response
+          .status(200)
+          .json({
+            serverResponse: "Préstamo actualizado",
+          });
+        return;
+      }
+    }
   }
   //eliminar Prestamo
   public async removePrestamo(request: Request, response: Response) {
     var prestamo: BussPrestamo = new BussPrestamo();
     let id: string = request.params.id;
-    let result = await prestamo.deletePrestamo(id);
-    response.status(200).json({ serverResponse: "Se elimino prestamo" });
+    let res = await prestamo.readPrestamo(request.params.id);
+    if (res.archivos.length > 0 || res.amortizacion.length > 0) {
+      response.status(300).json({ serverResponse: "Ya existe registrado archivo o amortización" });
+      return;
+   } else {
+ 
+      let result = await prestamo.deletePrestamo(id);
+      response.status(200).json({ serverResponse: "Se elimino prestamo" });
+    }
   }
   //agregar Archivo a Prestamo
   public async addArchivo(request: Request, response: Response) {
@@ -924,11 +962,7 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = [
-        "pdf",
-        "jpg",
-        "jpeg",
-      ];
+      var extensionesValidas = ["pdf", "jpg", "jpeg"];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
@@ -940,22 +974,29 @@ class RoutesController {
       }_${"Nro"}${resultPrestamo.numero}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
-      let resultSaldoPres = resultPrestamo.saldoA-filData.monto;
-      const filDataPre:any = {saldoA:resultSaldoPres};
-      filData.nameFile = newname;
-      filData.uri = "getFileAmortizacion/" + newname;
-      filData.path = totalpath;
-      var resultFilePresta = await amortizacion.addAmortizacion(filData);
-      let idArchivo = resultFilePresta._id;
-      var updatePres = await Prestamo.updatePrestamo(id, filDataPre);
-      var addFile = await Prestamo.updatePushAmortizacion(id, idArchivo);
-      var addFile = await amortizacion.updatePusPrestamo(idArchivo, id );
-      response.status(201).json({ serverResponse: resultFilePresta });
-      return;
+      let resultSaldoPres = resultPrestamo.saldoA - filData.monto;
+      if (filData.monto > resultPrestamo.saldoA) {
+        response
+          .status(300)
+          .json({ serverResponse: "El monto no debe superar el Saldo" });
+        return;
+      } else {
+        const filDataPre: any = { saldoA: resultSaldoPres };
+        filData.nameFile = newname;
+        filData.uri = "getFileAmortizacion/" + newname;
+        filData.path = totalpath;
+        var resultFilePresta = await amortizacion.addAmortizacion(filData);
+        let idArchivo = resultFilePresta._id;
+        var updatePres = await Prestamo.updatePrestamo(id, filDataPre);
+        var addFile = await Prestamo.updatePushAmortizacion(id, idArchivo);
+        var addFile = await amortizacion.updatePusPrestamo(idArchivo, id);
+        response.status(201).json({ serverResponse: resultFilePresta });
+        return;
+      }
     }
   }
-   //Elinimar FilePrestamo
-   public async removeAmortizacion(request: Request, response: Response) {
+  //Elinimar FilePrestamo
+  public async removeAmortizacion(request: Request, response: Response) {
     const borrarImagen: any = (path: any) => {
       if (fs.existsSync(path)) {
         // borrar la imagen anterior
@@ -973,11 +1014,11 @@ class RoutesController {
     }
     pathViejo = res.path;
     borrarImagen(pathViejo);
-    let idPres:any=res.prestamo
+    let idPres: any = res.prestamo;
     var resultPrestamo: any = await Prestamo.readPrestamo(idPres[0]);
-    let saldoPres:{}=resultPrestamo;
-    let resultSaldoPres = res.monto+resultPrestamo[0].saldoA;
-    const filDataPre = {saldoA:resultSaldoPres};
+    let saldoPres: {} = resultPrestamo;
+    let resultSaldoPres = res.monto + resultPrestamo[0].saldoA;
+    const filDataPre = { saldoA: resultSaldoPres };
     let result = await amortizacion.deleteAmortizacion(id);
     var updatePres = await Prestamo.updatePrestamo(idPres[0], filDataPre);
     var result1 = await Prestamo.removeAmortizacionId(idPres[0], id);

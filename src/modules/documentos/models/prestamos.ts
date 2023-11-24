@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
 
 export interface IPrestamos extends Document {
-  numero: number;
+  numero: string;
   monto: number;
   interes: number;
   saldoA:number;
@@ -16,7 +16,7 @@ export interface IPrestamos extends Document {
 }
 const prestamoSchema: Schema = new Schema(
   {
-    numero: { type: Number, unique: true },
+    numero: { type: String, unique: true },
     monto: { type: Number, default:0 },
     interes: { type: Number, default:0  },
     saldoA:{type: Number, default:0 },

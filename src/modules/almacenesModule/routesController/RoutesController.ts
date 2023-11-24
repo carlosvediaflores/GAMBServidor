@@ -1337,9 +1337,7 @@ class RoutesController {
       let result1 = await articulo.updateArticulo(
         Simplearticulo._id,
         EgresoData
-      );
-      console.log("Data",EgresoData);
-      
+      );      
       let resultCompra = await compra.updateCompra(data.idCompra, EgresoData);
       const ENTRADA: ISimpleIngreso = {
         estado: "SALIDA",

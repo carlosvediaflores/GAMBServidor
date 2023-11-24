@@ -91,7 +91,7 @@ class BussPtdi {
     return result;
   }
   public async deletePtdi(id: string) {
-    let result = await ptdiModule.remove({ _id: id });
+    let result = await ptdiModule.deleteOne({ _id: id });
     return result;
   }
 }

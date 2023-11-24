@@ -7,6 +7,7 @@ export interface IPtdi extends Document {
   archivo: string;
   fecha:Date;
   estado:boolean;
+  publico:boolean;
   uri:string;
   path:string;
   usuario:string
@@ -19,6 +20,7 @@ export interface IPtdi extends Document {
     archivo:{type:String},
     fecha:{type:Date},
     estado:{type:Boolean, default:false},
+    publico:{type:Boolean, default:false},
     uri:{type: String},
     path:{type: String},
     usuario: {type: Schema.Types.ObjectId, ref: 'User'}    

@@ -1245,7 +1245,7 @@ class RoutesController {
     let result = await Ptdi.deletePtdi(id);
     pathViejo = res.path;
     borrarImagen(pathViejo);
-    response.status(200).json({ serverResponse: "Se eliminó la Ptdi" });
+    response.status(200).json({ serverResponse: "Se eliminó Ptdi" });
   }
   public async uploadPtdi(request: Request, response: Response) {
     const borrarImagen: any = (path: any) => {
@@ -1306,7 +1306,7 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
+        var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
         var totalpath = `${absolutepath}/${newname}`;
         await copyDirectory(totalpath, file);
         filData.archivo = newname;
@@ -1334,7 +1334,7 @@ class RoutesController {
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${filData.descripcion}.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filData.descripcion}_${filData.gestion}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       filData.archivo = newname;

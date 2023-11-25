@@ -113,35 +113,68 @@ class Routes {
     app
       .route(`${this.routeparent}/prestamo/:id`)
       .delete(this.routesController.removePrestamo);
-      ////agregar archivo a Prestamo
+    ////agregar archivo a Prestamo
     app
-    .route(`${this.routeparent}/addFilePrestamo/:id`)
-    .put(this.routesController.addArchivo);
+      .route(`${this.routeparent}/addFilePrestamo/:id`)
+      .put(this.routesController.addArchivo);
     ////Ver Arhivo de prestamo
     app
       .route(`${this.routeparent}/getFilePrestamo/:name`)
       .get(this.routesController.getFilePrestamo);
-      //Eliminar filePrestamo
+    //Eliminar filePrestamo
     app
-    .route(`${this.routeparent}/filePrestamo/:id`)
-    .delete(this.routesController.removeFilePrestamo);
+      .route(`${this.routeparent}/filePrestamo/:id`)
+      .delete(this.routesController.removeFilePrestamo);
     ///////Amortizacion///////
     // Buscar
     app
       .route(`${this.routeparent}/amortizacions`)
       .get(this.routesController.getAmortizacions);
-       //Crear,Amortizacion
+    //Crear,Amortizacion
     app
-    .route(`${this.routeparent}/uploadAmortizacion/:id`)
-    .put(this.routesController.uploadAmortizacion);
+      .route(`${this.routeparent}/uploadAmortizacion/:id`)
+      .put(this.routesController.uploadAmortizacion);
     //Eliminar filePrestamo
     app
-    .route(`${this.routeparent}/amortizacion/:id`)
-    .delete(this.routesController.removeAmortizacion);
-     ////Ver Arhivo de prestamo
-     app
-     .route(`${this.routeparent}/getFileAmortizacion/:name`)
-     .get(this.routesController.getFileAmortizacion);
+      .route(`${this.routeparent}/amortizacion/:id`)
+      .delete(this.routesController.removeAmortizacion);
+    ////Ver Arhivo de prestamo
+    app
+      .route(`${this.routeparent}/getFileAmortizacion/:name`)
+      .get(this.routesController.getFileAmortizacion);
+    ///////////EJECUCION//////////
+    //Crear,Ejecucion
+    app
+      .route(`${this.routeparent}/ejecucion`)
+      .post(this.routesController.createEjecucion);
+    // Buscar, Filtrar
+    app
+      .route(`${this.routeparent}/ejecucions`)
+      .get(this.routesController.getEjecucions);
+    //Buscar por Id
+    app
+      .route(`${this.routeparent}/ejecucion/:id`)
+      .get(this.routesController.getEjecucion);
+    ////Editar Ejecucion
+    app
+      .route(`${this.routeparent}/ejecucion/:id`)
+      .put(this.routesController.updateEjecucion);
+    //Eliminar Ejecucion
+    app
+      .route(`${this.routeparent}/ejecucion/:id`)
+      .delete(this.routesController.removeEjecucion);
+    ////agregar archivo a Ejecucion
+    app
+      .route(`${this.routeparent}/addEjecucionFile/:id`)
+      .put(this.routesController.addArchivoEjecucion);
+    ////Ver Arhivo de Ejecucion
+    app
+      .route(`${this.routeparent}/getEjecucionFile/:name`)
+      .get(this.routesController.getFileEjecucion);
+    //Eliminar fileEjecucion
+    app
+      .route(`${this.routeparent}/ejecucionFile/:id`)
+      .delete(this.routesController.removeFileEjecucion);
   }
 }
 export default Routes;

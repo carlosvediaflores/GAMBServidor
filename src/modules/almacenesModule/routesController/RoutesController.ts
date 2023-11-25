@@ -1435,8 +1435,34 @@ class RoutesController {
   }
   public async updateEgreso(request: Request, response: Response) {
     var Egreso: BussEgreso = new BussEgreso();
+    var compra: BussCompra = new BussCompra();
+    var salida: BussSalida = new BussSalida();
+    var articulo: BussArticulo = new BussArticulo();
     let id: string = request.params.id;
     var params = request.body;
+    for (let i = 0; i < params.articulos.length; i++) {
+      let data = params.articulos[i];
+      let listCompra = await compra.readCompra(data.idCompra);
+      let listSalida = await salida.readSalida(data.idSalida);
+      let listArticulo = await articulo.readArticulo(data.idArticulo);
+      let sumStock = listSalida.cantidadSalida + listCompra.stockCompra;
+      let sumCantidad = listArticulo.cantidad + listSalida.cantidadSalida;
+      if(sumStock >= data.cantidadCompra){
+        data.cantidadSalida=data.cantidadCompra;
+        data.stockCompra = sumStock - data.cantidadCompra;
+        data.cantidad = sumCantidad - data.cantidadCompra;
+        if(data.stockCompra<=0){
+          data.estadoCompra="AGOTADO"
+        }
+        else{
+          data.estadoCompra="EXISTE"
+        }
+      }
+      delete data.cantidadCompra;
+      let result1 = await articulo.updateArticulo(data.idArticulo, data);  
+      let resultCompra = await compra.updateCompra(data.idCompra, data);
+      let resultSalida = await salida.updateSalida(data.idSalida, data);
+    }
     var result = await Egreso.updateEgreso(id, params);
     response.status(200).json(result);
   }
@@ -1446,7 +1472,6 @@ class RoutesController {
     var salida: BussSalida = new BussSalida();
     var compra: BussCompra = new BussCompra();
     let idEgreso: string = request.params.id;
-    console.log("id Egreso", idEgreso);
     let listEgreso: any = await Egreso.readEgreso(request.params.id);
     let listProductos: any = listEgreso.productos;
     var updateData = request.body;

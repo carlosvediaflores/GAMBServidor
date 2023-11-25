@@ -18,6 +18,10 @@ import BussFilePrestamo from "../bussinesController/filePrestamo";
 import { IFilePrestamos } from "../models/filePrestamo";
 import BussAmortizacion from "../bussinesController/amortizacion";
 import { IAmortizacion } from "../models/amortizacion";
+import BussEjecucion from "../bussinesController/ejecucionPres";
+import { IEjecucion } from "../models/ejecucionPres";
+import BussEjecucionFile from "../bussinesController/ejecucionFile";
+import { IEjecucionFile } from "../models/ejecucionFile";
 
 class RoutesController {
   //----------MODELOS------------//
@@ -746,33 +750,27 @@ class RoutesController {
     let res = await prestamo.readPrestamo(request.params.id);
     if (params.monto == res.monto) {
       var result = await prestamo.updatePrestamo(id, params);
-      response
-        .status(200)
-        .json({
-          serverResponse: "Préstamo actualizado",
-        });
+      response.status(200).json({
+        serverResponse: "Préstamo actualizado",
+      });
       return;
     } else {
       let saldoAct = 0;
       if (params.monto < res.monto) {
         saldoAct = res.monto - params.monto;
-        params.saldoA = res.saldoA-saldoAct;
+        params.saldoA = res.saldoA - saldoAct;
         var result = await prestamo.updatePrestamo(id, params);
-        response
-          .status(200)
-          .json({
-            serverResponse: "Préstamo actualizado",
-          });
+        response.status(200).json({
+          serverResponse: "Préstamo actualizado",
+        });
         return;
       } else {
         saldoAct = params.monto - res.monto;
-        params.saldoA = res.saldoA+saldoAct;
+        params.saldoA = res.saldoA + saldoAct;
         var result = await prestamo.updatePrestamo(id, params);
-        response
-          .status(200)
-          .json({
-            serverResponse: "Préstamo actualizado",
-          });
+        response.status(200).json({
+          serverResponse: "Préstamo actualizado",
+        });
         return;
       }
     }
@@ -783,10 +781,11 @@ class RoutesController {
     let id: string = request.params.id;
     let res = await prestamo.readPrestamo(request.params.id);
     if (res.archivos.length > 0 || res.amortizacion.length > 0) {
-      response.status(300).json({ serverResponse: "Ya existe registrado archivo o amortización" });
+      response.status(300).json({
+        serverResponse: "Ya existe registrado archivo o amortización",
+      });
       return;
-   } else {
- 
+    } else {
       let result = await prestamo.deletePrestamo(id);
       response.status(200).json({ serverResponse: "Se elimino prestamo" });
     }
@@ -1044,6 +1043,216 @@ class RoutesController {
       return;
     }
     response.sendFile(res.path);
+  }
+  ///////////EJECUCION///////////
+  //Crear Ejecucion
+  public async createEjecucion(request: Request, response: Response) {
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    var EjecucionData = request.body;
+    let result = await Ejecucion.addEjecucion(EjecucionData);
+    response.status(201).json({ serverResponse: result });
+  }
+  //listar buscar filtrar
+  public async getEjecucions(request: Request, response: Response) {
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.nombre != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter["nombre"] = nombre;
+    }
+    if (params.tipo != null) {
+      var tipo = params.tipo;
+      filter["tipo"] = tipo;
+    }
+    if (params.estado != null) {
+      var estado = params.estado;
+      filter["estado"] = estado;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.del != null) {
+      var gt = params.del;
+      aux["$gt"] = gt;
+    }
+    if (params.al != null) {
+      var lt = params.al;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IEjecucion> = await Ejecucion.readEjecucion();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IEjecucion> = await Ejecucion.readEjecucion(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  //buscar por Id a Ejecucion
+  public async getEjecucion(request: Request, response: Response) {
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    //let id: string = request.params.id;
+    let res = await Ejecucion.readEjecucion(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  //editar Ejecucion
+  public async updateEjecucion(request: Request, response: Response) {
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Ejecucion.updateEjecucion(id, params);
+    response.status(200).json({ serverResponse: "Préstamo actualizado" });
+  }
+  //eliminar Ejecucion
+  public async removeEjecucion(request: Request, response: Response) {
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    let id: string = request.params.id;
+    let res = await Ejecucion.readEjecucion(request.params.id);
+    let result = await Ejecucion.deleteEjecucion(id);
+    response.status(200).json({ serverResponse: "Se elimino Ejecucion" });
+  }
+  //agregar Archivo a Ejecucion
+  public async addArchivoEjecucion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    let idEjecucion: string = request.params.id;
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    let fileEjecucion: BussEjecucionFile = new BussEjecucionFile();
+    if (!idEjecucion) {
+      response.status(300).json({ serverResponse: "El id es necesario" });
+      return;
+    }
+    let EjecucionResult = await Ejecucion.readEjecucion(idEjecucion);
+    var ejecucionData: any = request.body;
+    let result: any = {};
+    let result1: any = {};
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "no existe archivo adjunto" });
+      return;
+    }
+    //SUBIR Archivo
+    var dir = `${__dirname}/../../../../uploads/documentos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    //para area de contabilidad con file
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf", "jpg", "jpeg","png"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${ejecucionData.documento}_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      ejecucionData.nameFile = newname;
+      ejecucionData.uri = "getEjecucionFile/" + newname;
+      ejecucionData.path = totalpath;
+      var resultFilePresta = await fileEjecucion.addEjecucionFile(ejecucionData);
+      let idArchivo = resultFilePresta._id;
+      var addFile = await Ejecucion.updatePushEjecucion(idEjecucion, idArchivo);
+      response.status(201).json({ serverResponse: resultFilePresta });
+      return;
+    }
+    //response.status(200).json({ serverResponse: resultPresta });
+  }
+  //Ver Archivo
+  public async getFileEjecucion(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    if (!uri) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Document: BussEjecucionFile = new BussEjecucionFile();
+    var DocumentoData: IEjecucionFile = await Document.readEjecucionFil(uri);
+    if (!DocumentoData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      return;
+    }
+    response.sendFile(DocumentoData.path);
+  }
+  //Elinimar FileEjecucion
+  public async removeFileEjecucion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Ejecucion: BussEjecucion = new BussEjecucion();
+    let fileEjecucion: BussEjecucionFile = new BussEjecucionFile();
+    let id: string = request.params.id;
+    let res: IEjecucionFile = await fileEjecucion.readEjecucionFile(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    let result = await fileEjecucion.deleteEjecucionFile(id);
+    //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
+    response.status(200).json({ serverResponse: "Se elimino el documento" });
   }
 }
 export default RoutesController;

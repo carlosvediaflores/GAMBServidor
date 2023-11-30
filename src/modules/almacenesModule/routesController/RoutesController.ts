@@ -1668,8 +1668,8 @@ class RoutesController {
   }
   public async getCompra(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
-    let repres = await Compra.readCompra(request.params.id);
-    response.status(200).json(repres);
+    let res = await Compra.readCompra(request.params.id);
+    response.status(200).json({ serverResponse: res });
   }
   public async updateCompra(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();

@@ -175,6 +175,39 @@ class Routes {
     app
       .route(`${this.routeparent}/ejecucionFile/:id`)
       .delete(this.routesController.removeFileEjecucion);
+       ///////////EVALUACION//////////
+    //Crear,Evaluacion
+    app
+    .route(`${this.routeparent}/evaluacion`)
+    .post(this.routesController.createEvaluacion);
+  // Buscar, Filtrar
+  app
+    .route(`${this.routeparent}/evaluacions`)
+    .get(this.routesController.getEvaluacions);
+  //Buscar por Id
+  app
+    .route(`${this.routeparent}/evaluacion/:id`)
+    .get(this.routesController.getEvaluacion);
+  ////Editar Evaluacion
+  app
+    .route(`${this.routeparent}/evaluacion/:id`)
+    .put(this.routesController.updateEvaluacion);
+  //Eliminar Evaluacion
+  app
+    .route(`${this.routeparent}/evaluacion/:id`)
+    .delete(this.routesController.removeEvaluacion);
+  ////agregar archivo a Evaluacion
+  app
+    .route(`${this.routeparent}/addEvaluacionFile/:id`)
+    .put(this.routesController.addArchivoEvaluacion);
+  ////Ver Arhivo de Evaluacion
+  app
+    .route(`${this.routeparent}/getEvaluacionFile/:name`)
+    .get(this.routesController.getFileEvaluacion);
+  //Eliminar fileEvaluacion
+  app
+    .route(`${this.routeparent}/evaluacionFile/:id`)
+    .delete(this.routesController.removeFileEvaluacion);
   }
 }
 export default Routes;

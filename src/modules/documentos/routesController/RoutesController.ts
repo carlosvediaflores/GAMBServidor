@@ -22,6 +22,10 @@ import BussEjecucion from "../bussinesController/ejecucionPres";
 import { IEjecucion } from "../models/ejecucionPres";
 import BussEjecucionFile from "../bussinesController/ejecucionFile";
 import { IEjecucionFile } from "../models/ejecucionFile";
+import BussEvaluacion from "../bussinesController/evaluacion";
+import { IEvaluacion } from "../models/evaluacion";
+import BussEvaluacionFile from "../bussinesController/fileEvaluacion";
+import { IFileEvaluacion } from "../models/fileEvaluacion";
 
 class RoutesController {
   //----------MODELOS------------//
@@ -1193,7 +1197,12 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf", "jpg", "jpeg","png"];
+      var extensionesValidas = ["pdf", "jpg", "jpeg","png","docx",
+      "xlsx",
+      "xlsm",
+      "pptx",
+      "xls",
+      "rar",];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
@@ -1251,6 +1260,220 @@ class RoutesController {
     pathViejo = res.path;
     borrarImagen(pathViejo);
     let result = await fileEjecucion.deleteEjecucionFile(id);
+    //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
+    response.status(200).json({ serverResponse: "Se elimino el documento" });
+  }
+  ///////////EVALUACION///////////
+  //Crear Ejecucion
+  public async createEvaluacion(request: Request, response: Response) {
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    var EvaluacionData = request.body;
+    let result = await Evaluacion.addEvaluacion(EvaluacionData);
+    response.status(201).json({ serverResponse: result });
+  }
+  //listar buscar filtrar
+  public async getEvaluacions(request: Request, response: Response) {
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.nombre != null) {
+      var nombre = new RegExp(params.nombre, "i");
+      filter["nombre"] = nombre;
+    }
+    if (params.tipo != null) {
+      var tipo = params.tipo;
+      filter["tipo"] = tipo;
+    }
+    if (params.estado != null) {
+      var estado = params.estado;
+      filter["estado"] = estado;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.del != null) {
+      var gt = params.del;
+      aux["$gt"] = gt;
+    }
+    if (params.al != null) {
+      var lt = params.al;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IEvaluacion> = await Evaluacion.readEvaluacion();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IEvaluacion> = await Evaluacion.readEvaluacion(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  //buscar por Id a Evaluacion
+  public async getEvaluacion(request: Request, response: Response) {
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    //let id: string = request.params.id;
+    let res = await Evaluacion.readEvaluacion(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  //editar Evaluacion
+  public async updateEvaluacion(request: Request, response: Response) {
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Evaluacion.updateEvaluacion(id, params);
+    response.status(200).json({ serverResponse: "Evaluacion actualizado" });
+  }
+  //eliminar Evaluacion
+  public async removeEvaluacion(request: Request, response: Response) {
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    let id: string = request.params.id;
+    let result = await Evaluacion.deleteEvaluacion(id);
+    response.status(200).json({ serverResponse: "Se elimino Evaluacion" });
+  }
+  //agregar Archivo a Evaluacion
+  public async addArchivoEvaluacion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    let idEvaluacion: string = request.params.id;
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    let fileEvaluacion: BussEvaluacionFile = new BussEvaluacionFile();
+    if (!idEvaluacion) {
+      response.status(300).json({ serverResponse: "El id es necesario" });
+      return;
+    }
+    let EvaluacionResult = await Evaluacion.readEvaluacion(idEvaluacion);
+    var EvaluacionData: any = request.body;
+    let result: any = {};
+    let result1: any = {};
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "no existe archivo adjunto" });
+      return;
+    }
+    //SUBIR Archivo
+    var dir = `${__dirname}/../../../../uploads/documentos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    //para area de contabilidad con file
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["pdf", "jpg", "jpeg","png","docx",
+      "xlsx",
+      "xlsm",
+      "pptx",
+      "xls",
+      "rar",];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${EvaluacionData.documento}_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      EvaluacionData.nameFile = newname;
+      EvaluacionData.uri = "getEvaluacionFile/" + newname;
+      EvaluacionData.path = totalpath;
+      var resultFilePresta = await fileEvaluacion.addEvaluacionFile(EvaluacionData);
+      let idArchivo = resultFilePresta._id;
+      var addFile = await Evaluacion.updatePushEvaluacion(idEvaluacion, idArchivo);
+      response.status(201).json({ serverResponse: resultFilePresta });
+      return;
+    }
+    //response.status(200).json({ serverResponse: resultPresta });
+  }
+  //Ver Archivo
+  public async getFileEvaluacion(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    if (!uri) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Document: BussEvaluacionFile = new BussEvaluacionFile();
+    var DocumentoData: IFileEvaluacion = await Document.readEvaluacionFil(uri);
+    if (!DocumentoData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      return;
+    }
+    response.sendFile(DocumentoData.path);
+  }
+  //Elinimar FileEvaluacion
+  public async removeFileEvaluacion(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Evaluacion: BussEvaluacion = new BussEvaluacion();
+    let fileEvaluacion: BussEvaluacionFile = new BussEvaluacionFile();
+    let id: string = request.params.id;
+    let res: IFileEvaluacion = await fileEvaluacion.readEvaluacionFile(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    let result = await fileEvaluacion.deleteEvaluacionFile(id);
     //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
     response.status(200).json({ serverResponse: "Se elimino el documento" });
   }

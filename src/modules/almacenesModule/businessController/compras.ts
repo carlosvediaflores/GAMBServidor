@@ -25,6 +25,10 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+          populate:{
+            path:"idEgreso",
+            model:"alm_egresos"
+          }
         })
         .populate({
           path: "vehiculo",
@@ -48,6 +52,10 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+          populate:{
+            path:"idEgreso",
+            model:"alm_egresos"
+          }
         })
         .populate({
           path: "vehiculo",
@@ -66,6 +74,10 @@ class BussCompra {
         .populate({
           path: "salidas",
           model: "alm_salidas",
+          populate:{
+            path:"idEgreso",
+            model:"alm_egresos"
+          }
         })
         .populate({
           path: "vehiculo",

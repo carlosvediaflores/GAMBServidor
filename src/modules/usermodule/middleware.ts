@@ -26,7 +26,7 @@ var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunc
             response.status(300).json({ serverResponse: "No valido " });
             return;
         }
-        if(userdata.roles=="SUPER_ADMIN" || userdata.roles=="ADMIN" || userdata.roles=="SUPER_USER"){
+        if(userdata.roles=="SUPER_ADMIN" || userdata.roles=="ADMIN" || userdata.roles=="SUPER_USER" || userdata.roles=="SECRETARIA"){
 
             next();
             return;

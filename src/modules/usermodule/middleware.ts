@@ -3,8 +3,13 @@ import { Request, Response, NextFunction } from "express";
 import BusinessUser from "./businessController/BusinessUser";
 import { IUser } from "./models/Users";
 import { IRoles } from "./models/Roles";
+
+
 var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunction) => {
+
     var token: string = request.headers["authorization"];
+    //console.log(request.headers);
+    
     if (!token) {
         response.status(300).json({ serverResponse: "No tiene acceso a este endpoint" });
         return;
@@ -16,21 +21,26 @@ var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunc
         }
         var id = success.id;
         var user: BusinessUser = new BusinessUser();
-        var userdata: IUser = await user.readUsers(id);
+        let userdata:any = await user.readUsers(id);
         if (!userdata) {
             response.status(300).json({ serverResponse: "No valido " });
             return;
         }
-        var roles: Array<IRoles> = userdata.roles;
+        if(userdata.roles=="SUPER_ADMIN" || userdata.roles=="ADMIN" || userdata.roles=="SUPER_USER"){
+
+            next();
+            return;
+        }
+        /*  var roles: Array<IRoles> = userdata.roles;
         for (var i = 0; i < roles.length; i++) {
             if (
                 request.url.toLowerCase().includes(roles[i].urn.toLowerCase()) &&
                 request.method.toLowerCase().includes(roles[i].method.toLowerCase())) {
-                next();
-                return;
-            }
-        }
+                    return;
+                }
+            } */
         response.status(300).json({ serverResponse: "Usted no cuenta con los permisos " });
     });
+    
 }
 export default jsonwebtokenSecurity;

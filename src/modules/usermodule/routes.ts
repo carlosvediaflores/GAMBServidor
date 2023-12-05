@@ -15,22 +15,22 @@ class Routes {
     app.route(`${this.routeparent}/login`).post(this.routesController.login);
     app
       .route(`${this.routeparent}/users`)
-      .post(this.routesController.createUsers);
+      .post(jsonwebtokenSecurity, this.routesController.createUsers);
     app
       .route(`${this.routeparent}/users/:limit?/:page?`)
-      .get(this.routesController.getUsers);
+      .get(jsonwebtokenSecurity, this.routesController.getUsers);
     app
-      .route(`${this.routeparent}/users/:id`)
+      .route(`${this.routeparent}/user/:id`)
       .get(this.routesController.getUser);
     app
-      .route(`${this.routeparent}/user/:post`)
+      .route(`${this.routeparent}/userPost/:post`)
       .get(this.routesController.getUs);
     app
-      .route(`${this.routeparent}/users/:id`)
-      .put(this.routesController.updateUsers);
+      .route(`${this.routeparent}/user/:id`)
+      .put(jsonwebtokenSecurity, this.routesController.updateUser);
     app
       .route(`${this.routeparent}/users/:id`)
-      .delete(this.routesController.removeUsers);
+      .delete(jsonwebtokenSecurity, this.routesController.removeUsers);
     app
       .route(`${this.routeparent}/uploadportrait/:id`)
       .post(this.routesController.uploadPortrait);
@@ -104,7 +104,7 @@ class Routes {
       .get(this.routesController.getHojas);
     app
       .route(`${this.routeparent}/hojaRuta`)
-      .get(this.routesController.getHojaRutas);
+      .get(jsonwebtokenSecurity, this.routesController.getHojaRutas);
     app
       .route(`${this.routeparent}/hoja/:id`)
       .get(this.routesController.getHoja);
@@ -129,7 +129,7 @@ class Routes {
     app
       .route(`${this.routeparent}/asociar/:nuit`)
       .get(this.routesController.asociarHojas);
-      app
+    app
       .route(`${this.routeparent}/totales`)
       .get(this.routesController.contHRuta);
 
@@ -149,7 +149,7 @@ class Routes {
       .get(this.routesController.contOficina);
     app
       .route(`${this.routeparent}/oficina`)
-      .get(this.routesController.getOficina);
+      .get(jsonwebtokenSecurity, this.routesController.getOficina);
     app.route(`${this.routeparent}/segui`).get(this.routesController.getSeguis);
     app
       .route(`${this.routeparent}/seguis/:id`)

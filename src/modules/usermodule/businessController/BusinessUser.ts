@@ -24,7 +24,7 @@ class BusinessUser {
             let result: Array<IUser> = await UsersModel.find({}).limit(limit).skip(skip);
             return result;
         } else {
-            let listUser: Array<IUser> = await UsersModel.find();
+            let listUser: Array<IUser> = await UsersModel.find({},{ password:0});
             return listUser;
         }
     }
@@ -62,7 +62,7 @@ class BusinessUser {
         }
     }
 
-    public async updateUsers(id: string, user: any) {
+    public async updateUser(id: string, user: any) {
 
         let result = await UsersModel.updateOne({ _id: id }, { $set: user });
         return result;

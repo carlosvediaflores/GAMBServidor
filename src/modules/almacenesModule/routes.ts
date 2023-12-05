@@ -1,5 +1,6 @@
 import { Express } from "express";
 import RoutesController from "./routesController/RoutesController";
+import jsonwebtokenSecurity from "../usermodule/middleware"
 class Routes {
   private routesController: RoutesController;
   private routeparent: string;

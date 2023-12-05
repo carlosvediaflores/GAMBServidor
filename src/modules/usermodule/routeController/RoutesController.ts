@@ -83,6 +83,7 @@ class RoutesController {
   public async getUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     const result: Array<IUser> = await user.readUsers();
+
     response.status(200).json({ serverResponse: result });
   }
   public async getUser(request: Request, response: Response) {
@@ -91,16 +92,28 @@ class RoutesController {
     let res = await user.readUsers(request.params.id);
     response.status(200).json(res);
   }
-  public async updateUsers(request: Request, response: Response) {
+  public async updateUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let id: string = request.params.id;
     var params = request.body;
     if (params["password"] != null) {
       params["password"] = sha1(params["password"]);
     }
-    var result = await user.updateUsers(id, params);
+    var result = await user.updateUser(id, params);
     response.status(200).json(result);
   }
+
+  /* public async updateUsers(request: Request, response: Response) {
+    var user: BusinessUser = new BusinessUser();
+    let id: string = request.params.id;
+    let res = await user.readUsers(request.params.id);
+    const dataBody = request.body;
+    console.log(res);
+    console.log(dataBody);
+    var result = await user.updateUsers(id, dataBody);
+    console.log(result);
+    response.status(200).json(result);
+  } */
   public async removeUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let id: string = request.params.id;

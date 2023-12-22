@@ -280,6 +280,7 @@ class RoutesController {
     }
     response.status(201).json({ serverResponse: result });
   }
+  
   public async addSubdir(request: Request, response: Response) {
     let idOrg: string = request.params.id;
     //let idSub = request.body.idSub;
@@ -661,6 +662,112 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: "ok" });
   }
+  public async asociarHR(request: Request, response: Response) {
+    const hojaRuta: BusinessHoja = new BusinessHoja();
+    const segui: BussinesSegui = new BussinesSegui();
+    let nuitA: string = request.params.nuit;
+    let nuitB: string = request.body.nuit;
+    let resA = await hojaRuta.asodHoja(nuitA);
+    let resB = await hojaRuta.asodHoja(nuitB);
+    if (resA == null || resB == null) {
+      response.status(300).json({
+        serverResponse: `No se encontró Nº ${nuitA} o Nº ${nuitB}`,
+      });
+      return;
+    }
+    let segResA = resA.seguimiento[resA.seguimiento.length-1]
+    let segResB = resB.seguimiento[resB.seguimiento.length-1]
+    if(segResA.estado!= 'RECIBIDO' || segResA.destino != request.body.cargo){
+      response.status(300).json({
+        serverResponse: `El Nº ${nuitA} debe estar en estado RECIBIDO y en su OFICINA`,
+      });
+      return;
+    }    
+    if(segResB.estado!= 'RECIBIDO' || segResB.destino != request.body.cargo){
+      response.status(300).json({
+        serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
+      });
+      return;
+    }    
+    if(+nuitA<=+nuitB){
+      response.status(300).json({
+        serverResponse: `El Nº menor se debe asociar al Nº mayor: ${nuitA} a ${nuitB}`,
+      });
+      return;
+    }
+    var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
+      if (resB._id.toString() == item._id.toString()) {        
+        return true;
+      }
+      return false;
+    });
+    if (checksub.length == 0) {
+           await hojaRuta.addIdHR(resA._id, resB._id);
+           await hojaRuta.addIdHR( resB._id, resA._id);
+           let data: any = {estado:`Asocoado al Nº ${nuitA}`}
+           await segui.updateSegui(segResB._id, data);
+           console.log(segResA,segResB);
+           
+          response
+          .status(200)
+          .json({ serverResponse: resA, resB});
+          return;
+        }
+        response
+        .status(300)
+        .json({ serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº " });
+        return;
+  }
+  
+  //PROBAR CON Q EXISTE
+
+
+  public async addSubUni(request: Request, response: Response) {
+    let idOrg: string = request.params.id;
+    let idSub = request.body;
+    var org: BussinesOrganizacion = new BussinesOrganizacion();
+    let subdir: BussinesSubdir = new BussinesSubdir();
+    let orgResult: any = await org.readOrg(idOrg);
+    if (orgResult != null) {
+      var sub = await subdir.readSub(idSub);
+      if (sub != null) {
+        var checksub: any = orgResult.subdirecciones.filter((item: any) => {
+          if (sub._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length == 0) {
+          var result = await org.addSubUni(idOrg, idSub);
+          response
+          .status(200)
+          .json({ serverResponse: sub });
+          return;
+        }
+        response
+          .status(300)
+          .json({ serverResponse: "Ya existe SUB UNIDAD" });
+          return;
+      }
+    }
+  }
+
+  /* public async removeCargo(request: Request, response: Response) {
+    var user: BusinessUser = new BusinessUser();
+    let idUser: string = request.params.id;
+    let idSub = request.body;
+    if (idUser == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para crear subdir" });
+      return;
+    }
+    var result = await user.removeCargo(idUser, idSub);
+    let resultUser: any = await user.readUsers(idUser);
+    response.status(200).json({ serverResponse: resultUser });
+  } */
+
+  
   public async uploadHoja(request: Request, response: Response) {
     var id: string = request.params.id;
     if (!id) {

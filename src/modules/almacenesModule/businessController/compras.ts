@@ -21,13 +21,19 @@ class BussCompra {
       var result: ICompra = await compraModel
         .findOne({ _id: params1 })
         .populate("idArticulo")
-        .populate("idEntrada")
+        .populate({
+          path: "idEntrada",
+          model: "alm_ingresos",
+          select: 'fecha numeroEntrada estado tipo'
+        })
         .populate({
           path: "salidas",
           model: "alm_salidas",
+          select: 'cantidadSalida catProgra',
           populate:{
             path:"idEgreso",
-            model:"alm_egresos"
+            model:"alm_egresos",
+            select: 'fecha estadoEgreso entregado cargo numeroSalida',
           }
         })
         .populate({
@@ -48,13 +54,19 @@ class BussCompra {
         .limit(limit)
         .sort(order)
         .populate("idArticulo")
-        .populate("idEntrada")
+        .populate({
+          path: "idEntrada",
+          model: "alm_ingresos",
+          select: 'fecha numeroEntrada estado tipo'
+        })
         .populate({
           path: "salidas",
           model: "alm_salidas",
+          select: 'cantidadSalida catProgra',
           populate:{
             path:"idEgreso",
-            model:"alm_egresos"
+            model:"alm_egresos",
+            select: 'fecha estadoEgreso entregado cargo numeroSalida',
           }
         })
         .populate({
@@ -70,14 +82,15 @@ class BussCompra {
       let listCompras: Array<ICompra> = await compraModel
         .find()
         .populate("idArticulo")
-        .populate("idEntrada")
+        .populate({
+          path: "idEntrada",
+          model: "alm_ingresos",
+          select: 'fecha numeroEntrada estado tipo'
+          
+        })
         .populate({
           path: "salidas",
           model: "alm_salidas",
-          populate:{
-            path:"idEgreso",
-            model:"alm_egresos"
-          }
         })
         .populate({
           path: "vehiculo",
@@ -188,9 +201,7 @@ class BussCompra {
     return filterProveedores;
   }
   public async queryCompraSaldo(query1?: any, query2?: any,): Promise<Array<ICompra>>;
-  public async queryCompraSaldo(search1: string | any, search2: string | any ) {
-    console.log(search1,search2);
-    
+  public async queryCompraSaldo(search1: string | any, search2: string | any ) {    
     let listCompra: Array<ICompra> = await compraModel
       .find(search1)
       .sort({ createdAt: -1 })

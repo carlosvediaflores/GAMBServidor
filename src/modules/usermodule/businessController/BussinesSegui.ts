@@ -17,7 +17,18 @@ class BussinesSegui {
     if (params1 && typeof params1 == "string") {
       var result: ISeguimiento = await SeguiModel.findOne({
         _id: params1,
-      }).populate("archivofi");
+      }).populate("archivofi")
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" }
+      })
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "asociados", model: "Hojaruta" },
+        
+      });
       return result;
     } else if (params1) {
       let skip = params2 ? params2 : 0;
@@ -25,12 +36,35 @@ class BussinesSegui {
       let listSegui: Array<ISeguimiento> = await SeguiModel.find(params1)
         .skip(skip)
         .limit(limit)
-        .populate("archivofi");
+        .populate("archivofi")
+        .populate({
+          path: "idhj",  
+          model: "Hojaruta",
+          populate: { path: "seguimiento", model: "seguimiento" },
+          
+        })
+        .populate({
+          path: "idhj",  
+          model: "Hojaruta",
+          populate: { path: "asociados", model: "Hojaruta" },
+          
+        });
       return listSegui;
     } else {
       let listSegui: Array<ISeguimiento> = await SeguiModel.find().populate(
         "archivofi"
-      );
+      )
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" }
+      })
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "asociados", model: "Hojaruta" },
+        
+      });
       return listSegui;
     }
   }
@@ -55,18 +89,25 @@ class BussinesSegui {
       .skip(skip)
       .limit(limit)
       .sort(order)
-      .populate("archivofi");
+      .populate("archivofi")
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" }
+      })
+      .populate({
+        path: "idhj",  
+        model: "Hojaruta",
+        populate: { path: "asociados", model: "Hojaruta" },
+        
+      });
     return listSegui;
   }
-  
-  public async total(
-    query: any,
-  ): Promise<any>;
 
-  public async total(
-    params1?: string | any,
-  ) {
-    let listSegui = await SeguiModel.countDocuments(params1)
+  public async total(query: any): Promise<any>;
+
+  public async total(params1?: string | any) {
+    let listSegui = await SeguiModel.countDocuments(params1);
     return listSegui;
   }
   public async readSeguis(): Promise<Array<ISeguimiento>>;
@@ -190,5 +231,19 @@ class BussinesSegui {
     }
     return null;
   }
+  /* public async addIdHR(idHRA: string, idHRB: any) {
+    let result = await SeguiModel.updateOne(
+      { _id: idHRA },
+      { $push: { asociados: idHRB } }
+    );
+    return result;
+  }
+  public async removeIdHR(idOr: string, organizacion: any) {
+    let result = await SeguiModel.updateOne(
+      { _id: idOr },
+      { $pull: organizacion }
+    );
+    return result;
+  } */
 }
 export default BussinesSegui;

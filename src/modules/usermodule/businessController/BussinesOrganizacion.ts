@@ -111,6 +111,15 @@ class BussinesOrganizacion {
         return result;
     }
 
+    public async addSubUni(idOr: string, organizacion: any) {
+        let result = await OrganizacionModel.updateOne({ _id: idOr }, { $push: organizacion })
+        return result;
+    }
+    public async removeSubUni(idOr: string, organizacion: any) {
+        let result = await OrganizacionModel.updateOne({ _id: idOr }, { $pull: organizacion })
+        return result;
+    }
+
 }
 
 

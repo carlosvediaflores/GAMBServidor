@@ -126,6 +126,9 @@ class Routes {
     app
       .route(`${this.routeparent}/asociar/:nuit`)
       .put(this.routesController.asociarHoja);
+      app
+      .route(`${this.routeparent}/asociarHR/:nuit`)
+      .put(this.routesController.asociarHR);
     app
       .route(`${this.routeparent}/asociar/:nuit`)
       .get(this.routesController.asociarHojas);

@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import sha1 from "sha1";
 import jsonwebtoken from "jsonwebtoken";
 import isEmpty from "is-empty";
@@ -1187,26 +1187,40 @@ class RoutesController {
     let productos: any = params.articulos;
     for (let i = 0; i < productos.length; i++) {
       let data: any = productos[i];
+      //console.log("params",data)
       let articulo = await Articulo.readArticulo(data.idArticulo);
-      let stock: Number = articulo.cantidad + parseInt(data.cantidadCompra);
       let articuloModif: any = {};
       let compraModif: any = {};
       let salidaM: any = {};
-      articuloModif["cantidad"] = stock;
       if (data.idCompra) {
-        let SimpleCompra = await compra.readCompra(data.idCompra);
-        salidaM["cantidadSalida"] = data.cantidadCompra;
-        if (SimpleCompra.estadoCompra === "AGOTADO") {
-          let resultEditS = await salida.updateSalida(
-            SimpleCompra.salidas[0]._id,
-            salidaM
-          );
+        let listCompra: ICompra= await compra.readCompra(data.idCompra);
+        let sumStock = parseInt(data.cantidadCompra) + listCompra.stockCompra;
+        let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;
+        if(listCompra.cantidadCompra <= sumStock){
+          let stockAct = sumStock - listCompra.cantidadCompra 
+          let stock: Number = sumArticulo - listCompra.cantidadCompra ;
+          articuloModif["cantidad"] = stock;
+          data.stockCompra=stockAct
+          if(stockAct > 0){
+            data.estadoCompra="EXISTE"
+          }
+          else{
+            data.estadoCompra="AGOTADO"
+          }
+        }else{
+          response.status(300).json({ serverResponse: "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad" });
+           return;
         }
-        let resultEdit = await compra.updateCompra(SimpleCompra._id, data);
+        let listIngreso:any = listCompra.idEntrada
+        if (listIngreso.estado =="EGRESADO") {
+          data.cantidadSalida=data.cantidadCompra
+          let resultEditS = await salida.updateSalida(listCompra.salidas[0]._id, data);
+        } 
+        await Articulo.updateArticulo(articulo.id, articuloModif);
+        let resultEdit = await compra.updateCompra(listCompra._id, data);
       } else {
         data.idEntrada = id;
         data.idProducto = data.idArticulo;
-
         let resultCompra = await compra.addCompra(data);
         let idCompra = resultCompra._id;
         var resultAdd = await Ingreso.addCompras(id, idCompra);
@@ -1220,20 +1234,17 @@ class RoutesController {
           compraModif["estadoCompra"] = "AGOTADO";
           let resultSalida = await salida.addSalida(salidaM);
           let idSalida = resultSalida._id;
-          var resultAddSal = await Egreso.addSalidas(
+          await Egreso.addSalidas(
             res.idEgreso[0]._id,
             idSalida
           );
           var compraAdd = await compra.addSalidas(idCompra, idSalida);
           let result2 = await compra.updateCompra(data._id, compraModif);
-        }
-        if (res.estado == "REGISTRADO") {
-          let result1 = await Articulo.updateArticulo(
-            articulo.id,
-            articuloModif
-          );
-          //console.log("SE MODIFICO ARTICULO");
-        }
+        } else{
+          let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;
+          articuloModif["cantidad"] = sumArticulo; 
+          await Articulo.updateArticulo(articulo.id, articuloModif);
+        }   
       }
     }
     var result = await Ingreso.updateIngreso(id, params);
@@ -1635,6 +1646,10 @@ class RoutesController {
       var lt = params.datelt;
       aux["$lt"] = lt;
     }
+    if (params.estadoCompra != null) {
+      var estadoCompra = new RegExp(params.estadoCompra, "i");
+      filter["estadoCompra"] =  estadoCompra;
+    }
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
@@ -1747,7 +1762,6 @@ class RoutesController {
       var expresion = new RegExp(params.estado);
       filter2["estado"] = expresion;
     }
-    console.log(filter1, filter2);
     let res = await Compra.searchCompraAll(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
@@ -1768,7 +1782,6 @@ class RoutesController {
       var expresion = new RegExp(params.idProducto);
       filter1["idProducto"] = expresion;
     }
-    console.log(filter1, filter2);
     let res = await Compra.queryCompraSaldo(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }

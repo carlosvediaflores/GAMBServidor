@@ -22,6 +22,11 @@ class BusinessHoja {
         path: "seguimiento",
         model: "seguimiento",
         populate: { path: "archivofi", model: "hrarchivo" },
+      })
+      .populate({
+        path: "asociados",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" },
       });
       return result;
     } else if (params1) {
@@ -62,6 +67,10 @@ class BusinessHoja {
         path: "seguimiento",
         model: "seguimiento",
         populate: { path: "archivofi", model: "hrarchivo" },
+      }).populate({
+        path: "asociados",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" },
       });
     return listSegui;
   }
@@ -93,7 +102,16 @@ class BusinessHoja {
     params3?: number
   ): Promise<Array<IHojaruta> | IHojaruta> {
     if (params1 && typeof params1 == "string") {
-      var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
+      var result: IHojaruta = await HojaModel.findOne({ nuit: params1 })
+      .populate({
+        path: "seguimiento",
+        model: "seguimiento",
+        populate: { path: "archivofi", model: "hrarchivo" },
+      }).populate({
+        path: "asociados",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" },
+      });
       return result;
     } else if (params1 && typeof params1 == "string") {
       var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
@@ -157,6 +175,28 @@ class BusinessHoja {
     return null;
   }
   public async asociarHoja(NH: string, NA: string) {
+    let hoja = await HojaModel.findOne({ nuit: NH });
+    if (hoja != null) {
+      var aso = await HojaModel.findOne({ nuit: NA });
+      if (aso != null) {
+        var checkrol: Array<IHojaruta> = hoja.asociado.filter((item) => {
+          if (aso.nuit.toString() == item.nuit.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checkrol.length == 0) {
+          hoja.asociado.push(aso);
+          return await aso.save();
+        }
+        return null;
+      }
+      return null;
+    }
+    return null;
+  }
+
+  public async asociarHR(NH: string, NA: string) {
     let hoja = await HojaModel.findOne({ nuit: NH });
     if (hoja != null) {
       var aso = await HojaModel.findOne({ nuit: NA });
@@ -253,26 +293,13 @@ class BusinessHoja {
     }
     return null;
   }
-  /*
-    public async removeRol(idUs: string, idRol: string) {
-        let user = await ModelHoja.findOne({ _id: idUs });
-        var rol = await RolesModel.findOne({ _id: idRol });
-        if (user != null && rol != null) {
-            let newroles: Array<IRoles> = user.roles.filter((item: IRoles) => {
-                if (item.name == rol.name) {
-                    return false;
-                }
-                return true;
-            });
-            user.roles = newroles;
-            try {
-                return await user.save();
-            } catch (err) {
-                return err;
-            };
-
-        }
-        return null
-    }*/
+  public async addIdHR(idHRA: string, idHRB: any) {
+    let result = await HojaModel.updateOne({ _id: idHRA }, { $push: {asociados:idHRB} })
+    return result;
+}
+public async removeIdHR(idOr: string, organizacion: any) {
+    let result = await HojaModel.updateOne({ _id: idOr }, { $pull: organizacion })
+    return result;
+}
 }
 export default BusinessHoja;

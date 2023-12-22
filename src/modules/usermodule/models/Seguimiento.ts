@@ -40,7 +40,8 @@ export interface ISeguimiento extends Document {
     archivofi:Array<IArchivo>;//20
 }
 const SeguiSchema = new Schema({
-    idhj: { type: Schema.Types.ObjectId, ref: "Hojaruta"},
+    //idhj: { type: Schema.Types.ObjectId, ref: "Hojaruta"},
+    idhj: { type: String},
     nuit: { type: String},
     destino: { type: String},
     origen: { type: String },

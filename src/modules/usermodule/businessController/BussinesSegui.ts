@@ -23,12 +23,12 @@ class BussinesSegui {
         model: "Hojaruta",
         populate: { path: "seguimiento", model: "seguimiento" }
       })
-      .populate({
+      /* .populate({
         path: "idhj",  
         model: "Hojaruta",
         populate: { path: "asociados", model: "Hojaruta" },
         
-      });
+      }) */;
       return result;
     } else if (params1) {
       let skip = params2 ? params2 : 0;
@@ -42,12 +42,6 @@ class BussinesSegui {
           model: "Hojaruta",
           populate: { path: "seguimiento", model: "seguimiento" },
           
-        })
-        .populate({
-          path: "idhj",  
-          model: "Hojaruta",
-          populate: { path: "asociados", model: "Hojaruta" },
-          
         });
       return listSegui;
     } else {
@@ -58,12 +52,6 @@ class BussinesSegui {
         path: "idhj",  
         model: "Hojaruta",
         populate: { path: "seguimiento", model: "seguimiento" }
-      })
-      .populate({
-        path: "idhj",  
-        model: "Hojaruta",
-        populate: { path: "asociados", model: "Hojaruta" },
-        
       });
       return listSegui;
     }
@@ -94,12 +82,6 @@ class BussinesSegui {
         path: "idhj",  
         model: "Hojaruta",
         populate: { path: "seguimiento", model: "seguimiento" }
-      })
-      .populate({
-        path: "idhj",  
-        model: "Hojaruta",
-        populate: { path: "asociados", model: "Hojaruta" },
-        
       });
     return listSegui;
   }

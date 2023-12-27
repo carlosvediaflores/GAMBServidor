@@ -1195,27 +1195,29 @@ class RoutesController {
       if (data.idCompra) {
         let listCompra: ICompra= await compra.readCompra(data.idCompra);
         let sumStock = parseInt(data.cantidadCompra) + listCompra.stockCompra;
-        let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;
-        if(listCompra.cantidadCompra <= sumStock){
-          let stockAct = sumStock - listCompra.cantidadCompra 
-          let stock: Number = sumArticulo - listCompra.cantidadCompra ;
-          articuloModif["cantidad"] = stock;
-          data.stockCompra=stockAct
-          if(stockAct > 0){
-            data.estadoCompra="EXISTE"
-          }
-          else{
-            data.estadoCompra="AGOTADO"
-          }
-        }else{
-          response.status(300).json({ serverResponse: "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad" });
-           return;
-        }
+        let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;        
         let listIngreso:any = listCompra.idEntrada
         if (listIngreso.estado =="EGRESADO") {
           data.cantidadSalida=data.cantidadCompra
           let resultEditS = await salida.updateSalida(listCompra.salidas[0]._id, data);
-        } 
+        } else{
+          
+          if(listCompra.cantidadCompra <= sumStock){
+            let stockAct = sumStock - listCompra.cantidadCompra 
+            let stock: Number = sumArticulo - listCompra.cantidadCompra ;
+            articuloModif["cantidad"] = stock;
+            data.stockCompra=stockAct
+            if(stockAct > 0){
+              data.estadoCompra="EXISTE"
+            }
+            else{
+              data.estadoCompra="AGOTADO"
+            }
+          }else{
+            response.status(300).json({ serverResponse: "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad" });
+             return;
+          }
+        }
         await Articulo.updateArticulo(articulo.id, articuloModif);
         let resultEdit = await compra.updateCompra(listCompra._id, data);
       } else {
@@ -1468,6 +1470,9 @@ class RoutesController {
         else{
           data.estadoCompra="EXISTE"
         }
+      }else{
+      response.status(300).json({ serverResponse: `La Cantidad de este artículo ya no existe en Stock, Stock: ${listCompra.stockCompra}` });
+       return;
       }
       delete data.cantidadCompra;
       let result1 = await articulo.updateArticulo(data.idArticulo, data);  
@@ -1521,7 +1526,10 @@ class RoutesController {
         data.idCompra._id,
         updateData
       );
-      let removeSalida = await salida.deleteSalida(data._id);
+      let removeSalida= await compra.removeIdSalida(
+        data.idCompra._id, data._id
+      );
+      let deleteSalida = await salida.deleteSalida(data._id);
     }
     let result = await Egreso.deleteEgreso(idEgreso);
     response.status(200).json({ productos: listEgreso.productos });

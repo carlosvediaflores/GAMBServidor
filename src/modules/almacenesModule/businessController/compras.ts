@@ -285,5 +285,12 @@ class BussCompra {
     }
     return null;
   }
+  public async removeIdSalida(idCompra: string, idSalida: any) {
+    let result = await compraModel.updateOne(
+      { _id: idCompra },
+      { $pull: {salidas:idSalida} }
+    );
+    return result;
+  }
 }
 export default BussCompra;

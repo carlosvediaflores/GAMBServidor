@@ -667,16 +667,20 @@ class RoutesController {
     const segui: BussinesSegui = new BussinesSegui();
     let nuitA: string = request.params.nuit;
     let nuitB: string = request.body.nuit;
-    let resA = await hojaRuta.asodHoja(nuitA);
-    let resB = await hojaRuta.asodHoja(nuitB);
+    let resA = await hojaRuta.getNuitOne(nuitA);
+    let resB = await hojaRuta.getNuitOne(nuitB);
     if (resA == null || resB == null) {
       response.status(300).json({
         serverResponse: `No se encontró Nº ${nuitA} o Nº ${nuitB}`,
       });
       return;
     }
+    console.log(resA);
+    console.log(resB);
     let segResA = resA.seguimiento[resA.seguimiento.length-1]
     let segResB = resB.seguimiento[resB.seguimiento.length-1]
+    console.log(segResA);
+    console.log(segResB);
     if(segResA.estado!= 'RECIBIDO' || segResA.destino != request.body.cargo){
       response.status(300).json({
         serverResponse: `El Nº ${nuitA} debe estar en estado RECIBIDO y en su OFICINA`,
@@ -688,7 +692,8 @@ class RoutesController {
         serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
       });
       return;
-    }    
+    } 
+    
     if(+nuitA<=+nuitB){
       response.status(300).json({
         serverResponse: `El Nº menor se debe asociar al Nº mayor: ${nuitA} a ${nuitB}`,

@@ -32,6 +32,7 @@ export interface IHojaruta extends Document {
   archivo:Array<IFiles>;
   asociado:Array<IHojaruta>;
   asociados:Array<IHojaruta>;
+  numCite: string;
 }
 const hojarutaSchema: Schema = new Schema({
   nuit: { type: String, required: true, unique: true },
@@ -47,7 +48,8 @@ const hojarutaSchema: Schema = new Schema({
   pathhoja: {type: String},
   archivo:  {type:Array},
   asociado: {type:Array},
-  asociados:[{ type: Schema.Types.ObjectId, ref: "Hojaruta"}]
+  asociados:[{ type: Schema.Types.ObjectId, ref: "Hojaruta"}],
+  numCite: {type: String},
 },{
   timestamps: true,
   versionKey: false,

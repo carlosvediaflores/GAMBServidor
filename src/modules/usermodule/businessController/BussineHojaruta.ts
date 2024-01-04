@@ -95,6 +95,20 @@ class BusinessHoja {
       .sort({ _id: -1 });
     return result;
   }
+  public async getNuitOne(nuit: string) {
+    var result = await HojaModel
+      .findOne({nuit:nuit})
+      .populate({
+        path: "seguimiento",
+        model: "seguimiento",
+        populate: { path: "archivofi", model: "hrarchivo" },
+      }).populate({
+        path: "asociados",  
+        model: "Hojaruta",
+        populate: { path: "seguimiento", model: "seguimiento" },
+      });
+    return result;
+  }
   public async asodHoja(nuit: string): Promise<IHojaruta>;
   public async asodHoja(
     params1?: string | any,

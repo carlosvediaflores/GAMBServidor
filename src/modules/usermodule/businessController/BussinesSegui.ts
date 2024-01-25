@@ -188,9 +188,13 @@ class BussinesSegui {
     let result = await SeguiModel.updateMany({ nuit: nuit }, { $set: segui });
     return result;
   }
+  public async updateSeguiOfi(destino: string, segui: ISeguimiento) {
+    let result = await SeguiModel.updateMany({ destino: "ARQUITECTO OMOT", estado:"RECIBIDO" }, { $set: segui });
+    return result;
+  }
 
   public async deleteSegui(id: String) {
-    let result = await SeguiModel.remove({ _id: id });
+    let result = await SeguiModel.remove({ _id: id }); 
     return result;
   }
   public async addArchivo(idSegui: string, idArch: string) {

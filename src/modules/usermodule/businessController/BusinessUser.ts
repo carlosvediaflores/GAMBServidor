@@ -15,7 +15,15 @@ class BusinessUser {
 
     public async readUsers(params1?: string | any, params2?: number, params3?: number): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
-            var result: IUser = await UsersModel.findOne({ _id: params1 });
+            var result: IUser = await UsersModel.findOne({ _id: params1 })
+            .populate({
+                path: "cargo",
+                model: "Subdirecciones",
+                populate: {
+                  path: "unidad",
+                  model: "Organizacion",
+                },
+              });
             return result;
             
         } else if (params1) {
@@ -41,7 +49,7 @@ class BusinessUser {
         } else {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 10;
-            let listUser: Array<IUser> = await UsersModel.find().skip(skip).limit(limit);;
+            let listUser: Array<IUser> = await UsersModel.find().skip(skip).limit(limit);
             return listUser;
         }
     }  
@@ -68,50 +76,12 @@ class BusinessUser {
         return result;
     }
     public async deleteUsers(id: string) {
-        let result = await UsersModel.remove({ _id: id });
+        let result = await UsersModel.deleteOne({ _id: id });
         return result;
     }
-    /*public async addRol(idUs: string, idRol: string) {
-        let user = await UsersModel.findOne({ _id: idUs });
-        if (user != null) {
-            var rol = await RolesModel.findOne({ _id: idRol });
-            if (rol != null) {
-                var checkrol: Array<IRoles> = user.roles.filter((item) => {
-                    if (rol._id.toString() == item._id.toString()) {
-                        return true;
-                    }
-                    return false;
-                });
-                console.log(checkrol)
-                if (checkrol.length == 0) {
-                    user.roles.push(rol);
-                    return await user.save();
-                }
-                return null;
-            }
-            return null;
-        }
-        return null;
-    }
-    public async removeRol(idUs: string, idRol: string) {
-        let user = await UsersModel.findOne({ _id: idUs });
-        var rol = await RolesModel.findOne({ _id: idRol });
-        if (user != null && rol != null) {
-            let newroles: Array<IRoles> = user.roles.filter((item: IRoles) => {
-                if (item.name == rol.name) {
-                    return false;
-                }
-                return true;
-            });
-            user.roles = newroles;
-            try {
-                return await user.save();
-            } catch (err) {
-                return err;
-            };
-
-        }
-        return null
-    }*/
 }
 export default BusinessUser;
+
+function populate(arg0: { path: string; model: string; populate: { path: string; model: string; populate: { path: string; model: string; populate: { path: string; model: string; }; }; }; }) {
+    throw new Error('Function not implemented.');
+}

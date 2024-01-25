@@ -12,6 +12,8 @@ export interface IUser extends Document {
   password: string;
   cargo: Array<ISubdireciones>
   post: string;
+  beneficiarioPago: string;
+  isActive:boolean;
   roles: string;
   uriavatar: string;
   pathavatar: string;
@@ -27,6 +29,8 @@ const userSchema: Schema = new Schema({
   password: { type: String, required: true },
   cargo: {type: Schema.Types.ObjectId, ref: 'Subdirecciones'},
   post: { type: String },
+  beneficiarioPago: { type: String },
+  isActive:{type:Boolean},
   roles: { type: String, default: "SUPER_USER" },
   uriavatar: { type: String },
   pathavatar: { type: String },

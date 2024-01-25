@@ -88,6 +88,9 @@ class Routes {
     app
       .route(`${this.routeparent}/subdir/:nombredir`)
       .get(this.routesController.getSubUni);
+    app
+      .route(`${this.routeparent}/subUnidad/:id`)
+      .get(this.routesController.getSubUnidad);
     //app
     //.route(`${this.routeparent}/subdir/:id`)
     //.put(this.routesController.updateSubdir);
@@ -160,6 +163,9 @@ class Routes {
     app
       .route(`${this.routeparent}/seguiaso/:nuit`)
       .put(this.routesController.updateSeguiAs);
+    app
+      .route(`${this.routeparent}/seguiOfi/:id`)
+      .put(this.routesController.updateSeguiOfi);
     app
       .route(`${this.routeparent}/segui/:id`)
       .delete(this.routesController.removeSegui);

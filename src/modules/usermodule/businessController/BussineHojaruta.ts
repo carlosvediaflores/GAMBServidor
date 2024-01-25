@@ -18,16 +18,16 @@ class BusinessHoja {
   ): Promise<Array<IHojaruta> | IHojaruta> {
     if (params1 && typeof params1 == "string") {
       var result: IHojaruta = await HojaModel.findOne({ _id: params1 })
-      .populate({
-        path: "seguimiento",
-        model: "seguimiento",
-        populate: { path: "archivofi", model: "hrarchivo" },
-      })
-      .populate({
-        path: "asociados",  
-        model: "Hojaruta",
-        populate: { path: "seguimiento", model: "seguimiento" },
-      });
+        .populate({
+          path: "seguimiento",
+          model: "seguimiento",
+          populate: { path: "archivofi", model: "hrarchivo" },
+        })
+        .populate({
+          path: "asociados",
+          model: "Hojaruta",
+          populate: { path: "seguimiento", model: "seguimiento" },
+        });
       return result;
     } else if (params1) {
       let skip = params3;
@@ -67,8 +67,9 @@ class BusinessHoja {
         path: "seguimiento",
         model: "seguimiento",
         populate: { path: "archivofi", model: "hrarchivo" },
-      }).populate({
-        path: "asociados",  
+      })
+      .populate({
+        path: "asociados",
         model: "Hojaruta",
         populate: { path: "seguimiento", model: "seguimiento" },
       });
@@ -78,32 +79,25 @@ class BusinessHoja {
     var result = await HojaModel.countDocuments();
     return result;
   } */
-  public async total(
-    query: any,
-  ): Promise<any>;
+  public async total(query: any): Promise<any>;
 
-  public async total(
-    params1?: string | any,
-  ) {
-    let listSegui = await HojaModel.countDocuments(params1)    
+  public async total(params1?: string | any) {
+    let listSegui = await HojaModel.countDocuments(params1);
     return listSegui;
   }
   public async getNuit() {
-    var result = await HojaModel
-      .find()
-      .limit(1)
-      .sort({ _id: -1 });
+    var result = await HojaModel.find().limit(1).sort({ _id: -1 });
     return result;
   }
   public async getNuitOne(nuit: string) {
-    var result = await HojaModel
-      .findOne({nuit:nuit})
+    var result = await HojaModel.findOne({ nuit: nuit })
       .populate({
         path: "seguimiento",
         model: "seguimiento",
         populate: { path: "archivofi", model: "hrarchivo" },
-      }).populate({
-        path: "asociados",  
+      })
+      .populate({
+        path: "asociados",
         model: "Hojaruta",
         populate: { path: "seguimiento", model: "seguimiento" },
       });
@@ -117,15 +111,16 @@ class BusinessHoja {
   ): Promise<Array<IHojaruta> | IHojaruta> {
     if (params1 && typeof params1 == "string") {
       var result: IHojaruta = await HojaModel.findOne({ nuit: params1 })
-      .populate({
-        path: "seguimiento",
-        model: "seguimiento",
-        populate: { path: "archivofi", model: "hrarchivo" },
-      }).populate({
-        path: "asociados",  
-        model: "Hojaruta",
-        populate: { path: "seguimiento", model: "seguimiento" },
-      });
+        .populate({
+          path: "seguimiento",
+          model: "seguimiento",
+          populate: { path: "archivofi", model: "hrarchivo" },
+        })
+        .populate({
+          path: "asociados",
+          model: "Hojaruta",
+          populate: { path: "seguimiento", model: "seguimiento" },
+        });
       return result;
     } else if (params1 && typeof params1 == "string") {
       var result: IHojaruta = await HojaModel.findOne({ nuit: params1 });
@@ -308,12 +303,18 @@ class BusinessHoja {
     return null;
   }
   public async addIdHR(idHRA: string, idHRB: any) {
-    let result = await HojaModel.updateOne({ _id: idHRA }, { $push: {asociados:idHRB} })
+    let result = await HojaModel.updateOne(
+      { _id: idHRA },
+      { $push: { asociados: idHRB } }
+    );
     return result;
-}
-public async removeIdHR(idOr: string, organizacion: any) {
-    let result = await HojaModel.updateOne({ _id: idOr }, { $pull: organizacion })
+  }
+  public async removeIdHR(idOr: string, organizacion: any) {
+    let result = await HojaModel.updateOne(
+      { _id: idOr },
+      { $pull: organizacion }
+    );
     return result;
-}
+  }
 }
 export default BusinessHoja;

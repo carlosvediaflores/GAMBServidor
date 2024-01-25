@@ -94,26 +94,21 @@ class RoutesController {
   }
   public async updateUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
+    let subdir: BussinesSubdir = new BussinesSubdir();
     let id: string = request.params.id;
     var params = request.body;
     if (params["password"] != null) {
       params["password"] = sha1(params["password"]);
     }
+    if(params.cargo){
+      var sub:any = await subdir.readSubId(params.cargo);
+      params.post=sub.nombresubdir
+      params.user=id
+      await subdir.updateSubdi(sub._id, params);
+    }
     var result = await user.updateUser(id, params);
     response.status(200).json(result);
   }
-
-  /* public async updateUsers(request: Request, response: Response) {
-    var user: BusinessUser = new BusinessUser();
-    let id: string = request.params.id;
-    let res = await user.readUsers(request.params.id);
-    const dataBody = request.body;
-    console.log(res);
-    console.log(dataBody);
-    var result = await user.updateUsers(id, dataBody);
-    console.log(result);
-    response.status(200).json(result);
-  } */
   public async removeUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let id: string = request.params.id;
@@ -126,25 +121,6 @@ class RoutesController {
     let res = await Us.readUser(request.params.post);
     response.status(200).json({ serverResponse: res });
   }
-  /*public async addRol(request: Request, response: Response) {
-    let idUs: string = request.params.id;
-    let idRol = request.body.idRol;
-    if (idUs == null && idRol == null) {
-      response.status(300).json({
-        serverResponse: "No se definio id de usuario ni el id del rol",
-      });
-      return;
-    }
-    var user: BusinessUser = new BusinessUser();
-    var result = await user.addRol(idUs, idRol);
-    if (result == null) {
-      response
-        .status(300)
-        .json({ serverResponse: "El rol o usuario no existen, o esta asignando dolble rol" });
-      return;
-    }
-    response.status(200).json({ serverResponse: result });
-  }*/
   public async createRol(request: Request, response: Response) {
     let roles: BussinessRoles = new BussinessRoles();
     var rolesData: any = request.body;
@@ -280,7 +256,7 @@ class RoutesController {
     }
     response.status(201).json({ serverResponse: result });
   }
-  
+
   public async addSubdir(request: Request, response: Response) {
     let idOrg: string = request.params.id;
     //let idSub = request.body.idSub;
@@ -383,6 +359,12 @@ class RoutesController {
     var subUni: BussinesSubdir = new BussinesSubdir();
     //let id: string = request.params.id;
     let res = await subUni.readSub(request.params.nombredir);
+    response.status(200).json(res);
+  }
+  public async getSubUnidad(request: Request, response: Response) {
+    var subUni: BussinesSubdir = new BussinesSubdir();
+    //let id: string = request.params.id;
+    let res = await subUni.readSubId(request.params.id);
     response.status(200).json(res);
   }
   public async updateSubdir(request: Request, response: Response) {
@@ -662,6 +644,7 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: "ok" });
   }
+
   public async asociarHR(request: Request, response: Response) {
     const hojaRuta: BusinessHoja = new BusinessHoja();
     const segui: BussinesSegui = new BussinesSegui();
@@ -675,57 +658,107 @@ class RoutesController {
       });
       return;
     }
-    console.log(resA);
-    console.log(resB);
-    let segResA = resA.seguimiento[resA.seguimiento.length-1]
-    let segResB = resB.seguimiento[resB.seguimiento.length-1]
-    console.log(segResA);
-    console.log(segResB);
-    if(segResA.estado!= 'RECIBIDO' || segResA.destino != request.body.cargo){
+    let segResA = resA.seguimiento[resA.seguimiento.length - 1];
+    let segResB = resB.seguimiento[resB.seguimiento.length - 1];
+    if (segResA == null || segResB == null) {
+      response.status(300).json({
+        serverResponse: `No se encontró seguimiento de Nº ${nuitA} o Nº ${nuitB}`,
+      });
+      return;
+    }
+    if (segResA.estado != "RECIBIDO" || segResA.destino != request.body.cargo) {
       response.status(300).json({
         serverResponse: `El Nº ${nuitA} debe estar en estado RECIBIDO y en su OFICINA`,
       });
       return;
-    }    
-    if(segResB.estado!= 'RECIBIDO' || segResB.destino != request.body.cargo){
+    }
+    if (segResB.estado != "RECIBIDO" || segResB.destino != request.body.cargo) {
       response.status(300).json({
         serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
       });
       return;
-    } 
+    }
+    if(+nuitA === +nuitB){
+      response.status(300).json({
+        serverResponse: `No se puede asociar a la misma Hoja de Ruta`,
+      });
+      return;
+    }
+/*     if (+nuitA <= +nuitB) {
+      if (resA.tipodoc == "pago") {
+        var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
+          if (resB._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length == 0) {
+          await hojaRuta.addIdHR(resA._id, resB._id);
+          await hojaRuta.addIdHR(resB._id, resA._id);
+          let data: any = { estado: `Asociado al Nº ${nuitA}` };
+          await segui.updateSegui(segResB._id, data);
+          if(resB.asociados.length!=0){
+            let resAso:any = resB.asociados
+            for(let i = 0; i < resAso.length; i++){
+              let dataAso = resAso[i];
+              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+              await hojaRuta.addIdHR(resA._id, dataAso._id);
+              await hojaRuta.addIdHR(dataAso._id,resA._id);
+              await segui.updateSegui(segResData._id, data);
+            }
     
-    if(+nuitA<=+nuitB){
+          }
+          response.status(200).json({ serverResponse: resA, resB });
+          return;
+        }
+        response
+          .status(300)
+          .json({
+            serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº ",
+          });
+        return;
+      }
       response.status(300).json({
         serverResponse: `El Nº menor se debe asociar al Nº mayor: ${nuitA} a ${nuitB}`,
       });
       return;
-    }
+    } */
     var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
-      if (resB._id.toString() == item._id.toString()) {        
+      if (resB._id.toString() == item._id.toString()) {
         return true;
       }
       return false;
     });
     if (checksub.length == 0) {
-           await hojaRuta.addIdHR(resA._id, resB._id);
-           await hojaRuta.addIdHR( resB._id, resA._id);
-           let data: any = {estado:`Asocoado al Nº ${nuitA}`}
-           await segui.updateSegui(segResB._id, data);
-           console.log(segResA,segResB);
-           
-          response
-          .status(200)
-          .json({ serverResponse: resA, resB});
-          return;
+      await hojaRuta.addIdHR(resA._id, resB._id);
+      await hojaRuta.addIdHR(resB._id, resA._id);
+      let data: any = { estado: `Asociado al Nº ${nuitA}` };
+      await segui.updateSegui(segResB._id, data);
+      if(resB.asociados.length!=0){
+        let resAso:any = resB.asociados
+        for(let i = 0; i < resAso.length; i++){
+          let dataAso = resAso[i];
+          let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+          await hojaRuta.addIdHR(resA._id, dataAso._id);
+          await hojaRuta.addIdHR(dataAso._id,resA._id);
+          await segui.updateSegui(segResData._id, data);
         }
-        response
-        .status(300)
-        .json({ serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº " });
-        return;
-  }
-  
-  //PROBAR CON Q EXISTE
 
+      }
+      // console.log(segResA,segResB);
+
+      response.status(200).json({ serverResponse: resA, resB });
+      return;
+    }
+    response
+      .status(300)
+      .json({
+        serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº ",
+      });
+    return;
+  }
+
+  //PROBAR CON Q EXISTE
 
   public async addSubUni(request: Request, response: Response) {
     let idOrg: string = request.params.id;
@@ -744,19 +777,15 @@ class RoutesController {
         });
         if (checksub.length == 0) {
           var result = await org.addSubUni(idOrg, idSub);
-          response
-          .status(200)
-          .json({ serverResponse: sub });
+          response.status(200).json({ serverResponse: sub });
           return;
         }
-        response
-          .status(300)
-          .json({ serverResponse: "Ya existe SUB UNIDAD" });
-          return;
+        response.status(300).json({ serverResponse: "Ya existe SUB UNIDAD" });
+        return;
       }
     }
   }
-
+  
   /* public async removeCargo(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let idUser: string = request.params.id;
@@ -772,7 +801,6 @@ class RoutesController {
     response.status(200).json({ serverResponse: resultUser });
   } */
 
-  
   public async uploadHoja(request: Request, response: Response) {
     var id: string = request.params.id;
     if (!id) {
@@ -1089,8 +1117,8 @@ class RoutesController {
     var segui: BussinesSegui = new BussinesSegui();
     let id: string = request.params.id;
     var params = request.body;
-    console.log("params",params);
-    
+    console.log("params", params);
+
     var result = await segui.updateSegui(id, params);
     response.status(200).json(result);
   }
@@ -1099,6 +1127,13 @@ class RoutesController {
     let nuit: string = request.params.nuit;
     var params = request.body;
     var result = await segui.updateSeguiAs(nuit, params);
+    response.status(200).json(result);
+  }
+  public async updateSeguiOfi(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let oficina: string = request.params.oficina;
+    var params = request.body;
+    var result = await segui.updateSeguiOfi(oficina, params);
     response.status(200).json(result);
   }
   public async removeSegui(request: Request, response: Response) {

@@ -19,6 +19,17 @@ class BussinesSubdir {
 
         }
     }
+    
+    public async readSubId(id: string): Promise<ISubdireciones>;
+    public async readSubId(params1?: string | any): Promise<Array<ISubdireciones> | ISubdireciones> {
+        if (params1 && typeof params1 == "string") {
+            var result: ISubdireciones = await SubdireccionesModel.findOne({ _id: params1 })
+            .populate("user")
+            .populate("unidad");
+            return result;
+        } 
+    }
+
     public async addSubdir(subdir: ISubdireciones) {
         try {
             let subdirDb = new SubdireccionesModel(subdir);

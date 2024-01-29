@@ -652,14 +652,14 @@ class RoutesController {
     let params = request.body;
     let res = await hojaRuta.readHoja(idHR);
     let segRes = res.seguimiento[res.seguimiento.length - 1];
-    if(res.seguimiento.length===1){
+    if(segRes.estado==="ENVIADO" ){
       await segui.deleteSegui(segRes._id);
       params.estado="RECIBIDO"
       await hojaRuta.updateHojas(idHR, params);
       await hojaRuta.removeIdHR(idHR, segRes._id);
       response.status(200).json({ serverResponse: "Se eliminó el envio" });
     }else{
-      response.status(300).json({ serverResponse: "Esta Hoja de Ruta ya tiene varios seguimientos" });
+      response.status(300).json({ serverResponse: "Esta Hoja de Ruta ya tiene varios seguimientos ó ya fue Recibido" });
       return;
     }
   }

@@ -645,6 +645,25 @@ class RoutesController {
     response.status(200).json({ serverResponse: "ok" });
   }
 
+  public async eliminarEnvio(request: Request, response: Response) {
+    const hojaRuta: BusinessHoja = new BusinessHoja();
+    const segui: BussinesSegui = new BussinesSegui();
+    let idHR = request.params.id
+    let params = request.body;
+    let res = await hojaRuta.readHoja(idHR);
+    let segRes = res.seguimiento[res.seguimiento.length - 1];
+    if(res.seguimiento.length===1){
+      await segui.deleteSegui(segRes._id);
+      params.estado="RECIBIDO"
+      await hojaRuta.updateHojas(idHR, params);
+      await hojaRuta.removeIdHR(idHR, segRes._id);
+      response.status(200).json({ serverResponse: "Se eliminó el envio" });
+    }else{
+      response.status(300).json({ serverResponse: "Esta Hoja de Ruta ya tiene varios seguimientos" });
+      return;
+    }
+  }
+
   public async asociarHR(request: Request, response: Response) {
     const hojaRuta: BusinessHoja = new BusinessHoja();
     const segui: BussinesSegui = new BussinesSegui();
@@ -732,10 +751,11 @@ class RoutesController {
     if (checksub.length == 0) {
       await hojaRuta.addIdHR(resA._id, resB._id);
       await hojaRuta.addIdHR(resB._id, resA._id);
-      let data: any = { estado: `Asociado al Nº ${nuitA}` };
+      let data: any = { estado: `Asociado al Nº ${nuitA}`};
       await segui.updateSegui(segResB._id, data);
       if(resB.asociados.length!=0){
-        let resAso:any = resB.asociados
+        console.log("existe,B",resB.nuit);   
+        let resAso:any = resB.asociados;
         for(let i = 0; i < resAso.length; i++){
           let dataAso = resAso[i];
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
@@ -743,10 +763,20 @@ class RoutesController {
           await hojaRuta.addIdHR(dataAso._id,resA._id);
           await segui.updateSegui(segResData._id, data);
         }
-
       }
+      if(resA.asociados.length!=0){
+        console.log("existe,A",resA.nuit);   
+        let resAso:any = resA.asociados;
+        for(let i = 0; i < resAso.length; i++){
+          let dataAso = resAso[i];
+          let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+          await hojaRuta.addIdHR(resB._id, dataAso._id);
+          await hojaRuta.addIdHR(dataAso._id,resB._id);
+          await segui.updateSegui(segResData._id, data);
+        }
+      }
+      
       // console.log(segResA,segResB);
-
       response.status(200).json({ serverResponse: resA, resB });
       return;
     }

@@ -167,6 +167,9 @@ class Routes {
       .route(`${this.routeparent}/seguiOfi/:id`)
       .put(this.routesController.updateSeguiOfi);
     app
+      .route(`${this.routeparent}/eliminarEnvio/:id`)
+      .get(this.routesController.eliminarEnvio);
+    app
       .route(`${this.routeparent}/segui/:id`)
       .delete(this.routesController.removeSegui);
     app

@@ -309,10 +309,10 @@ class BusinessHoja {
     );
     return result;
   }
-  public async removeIdHR(idOr: string, organizacion: any) {
+  public async removeIdHR(idOr: string, idSeg: any) {
     let result = await HojaModel.updateOne(
       { _id: idOr },
-      { $pull: organizacion }
+      { $pull: {seguimiento:idSeg} }
     );
     return result;
   }

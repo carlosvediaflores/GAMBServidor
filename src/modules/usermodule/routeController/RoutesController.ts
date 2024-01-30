@@ -679,6 +679,90 @@ class RoutesController {
     }
     let segResA = resA.seguimiento[resA.seguimiento.length - 1];
     let segResB = resB.seguimiento[resB.seguimiento.length - 1];
+    if(request.body.cargo==="SECRETARIA DE DESPACHO"){
+      if (segResB == null) {
+        response.status(300).json({
+          serverResponse: `No se encontró seguimiento de Nº ${nuitB}`,
+        });
+        return;
+      }
+      if (segResB.estado != "RECIBIDO" || segResB.destino != request.body.cargo) {
+        if (resB.estado==="ENVIADO" ) {
+        var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
+          if (resB._id.toString() == item._id.toString()) {
+            return true;
+          }
+          return false;
+        });
+        if (checksub.length == 0) {    
+          await hojaRuta.addIdHR(resA._id, resB._id);
+          await hojaRuta.addIdHR(resB._id, resA._id);
+          let data: any = { estado: `Asociado al Nº ${nuitA}`};
+          await segui.updateSegui(segResB._id, data);
+          if(resB.asociados.length!=0){ 
+            let resAso:any = resB.asociados;
+            for(let i = 0; i < resAso.length; i++){
+              let dataAso = resAso[i];
+              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+              await hojaRuta.addIdHR(resA._id, dataAso._id);
+              await hojaRuta.addIdHR(dataAso._id,resA._id);
+              await segui.updateSegui(segResData._id, data);
+            }
+          }
+          if(resA.asociados.length!=0){ 
+            let resAso:any = resA.asociados;
+            for(let i = 0; i < resAso.length; i++){
+              let dataAso = resAso[i];
+              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+              await hojaRuta.addIdHR(resB._id, dataAso._id);
+              await hojaRuta.addIdHR(dataAso._id,resB._id);
+              await segui.updateSegui(segResData._id, data);
+            }
+          }         
+        }
+        response.status(200).json({ serverResponse: resA, resB });
+        return;
+      }
+        response.status(300).json({
+          serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
+        });
+        return;
+      }
+      var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
+        if (resB._id.toString() == item._id.toString()) {
+          return true;
+        }
+        return false;
+      });
+      if (checksub.length == 0) {   
+        await hojaRuta.addIdHR(resA._id, resB._id);
+        await hojaRuta.addIdHR(resB._id, resA._id);
+        let data: any = { estado: `Asociado al Nº ${nuitA}`};
+        await segui.updateSegui(segResB._id, data);
+        if(resB.asociados.length!=0){  
+          let resAso:any = resB.asociados;
+          for(let i = 0; i < resAso.length; i++){
+            let dataAso = resAso[i];
+            let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+            await hojaRuta.addIdHR(resA._id, dataAso._id);
+            await hojaRuta.addIdHR(dataAso._id,resA._id);
+            await segui.updateSegui(segResData._id, data);
+          }
+        }
+        if(resA.asociados.length!=0){ 
+          let resAso:any = resA.asociados;
+          for(let i = 0; i < resAso.length; i++){
+            let dataAso = resAso[i];
+            let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+            await hojaRuta.addIdHR(resB._id, dataAso._id);
+            await hojaRuta.addIdHR(dataAso._id,resB._id);
+            await segui.updateSegui(segResData._id, data);
+          }
+        }
+        response.status(200).json({ serverResponse: resA, resB });
+        return;
+      }
+    }
     if (segResA == null || segResB == null) {
       response.status(300).json({
         serverResponse: `No se encontró seguimiento de Nº ${nuitA} o Nº ${nuitB}`,
@@ -703,45 +787,6 @@ class RoutesController {
       });
       return;
     }
-/*     if (+nuitA <= +nuitB) {
-      if (resA.tipodoc == "pago") {
-        var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
-          if (resB._id.toString() == item._id.toString()) {
-            return true;
-          }
-          return false;
-        });
-        if (checksub.length == 0) {
-          await hojaRuta.addIdHR(resA._id, resB._id);
-          await hojaRuta.addIdHR(resB._id, resA._id);
-          let data: any = { estado: `Asociado al Nº ${nuitA}` };
-          await segui.updateSegui(segResB._id, data);
-          if(resB.asociados.length!=0){
-            let resAso:any = resB.asociados
-            for(let i = 0; i < resAso.length; i++){
-              let dataAso = resAso[i];
-              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
-              await hojaRuta.addIdHR(resA._id, dataAso._id);
-              await hojaRuta.addIdHR(dataAso._id,resA._id);
-              await segui.updateSegui(segResData._id, data);
-            }
-    
-          }
-          response.status(200).json({ serverResponse: resA, resB });
-          return;
-        }
-        response
-          .status(300)
-          .json({
-            serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº ",
-          });
-        return;
-      }
-      response.status(300).json({
-        serverResponse: `El Nº menor se debe asociar al Nº mayor: ${nuitA} a ${nuitB}`,
-      });
-      return;
-    } */
     var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
       if (resB._id.toString() == item._id.toString()) {
         return true;
@@ -753,8 +798,7 @@ class RoutesController {
       await hojaRuta.addIdHR(resB._id, resA._id);
       let data: any = { estado: `Asociado al Nº ${nuitA}`};
       await segui.updateSegui(segResB._id, data);
-      if(resB.asociados.length!=0){
-        console.log("existe,B",resB.nuit);   
+      if(resB.asociados.length!=0){  
         let resAso:any = resB.asociados;
         for(let i = 0; i < resAso.length; i++){
           let dataAso = resAso[i];
@@ -764,8 +808,7 @@ class RoutesController {
           await segui.updateSegui(segResData._id, data);
         }
       }
-      if(resA.asociados.length!=0){
-        console.log("existe,A",resA.nuit);   
+      if(resA.asociados.length!=0){  
         let resAso:any = resA.asociados;
         for(let i = 0; i < resAso.length; i++){
           let dataAso = resAso[i];

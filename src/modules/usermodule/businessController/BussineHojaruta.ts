@@ -141,6 +141,8 @@ class BusinessHoja {
         { nuit: { $regex: search, $options: "i" } },
         { origen: { $regex: search, $options: "i" } },
         { referencia: { $regex: search, $options: "i" } },
+        { beneficiarioPago: { $regex: search, $options: "i" } },
+        { numCite: { $regex: search, $options: "i" } },
 
         //Si el searchString esta contenido dentro de title o content entonces devuelve los articulos que coincidan
       ],

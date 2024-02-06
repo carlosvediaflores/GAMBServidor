@@ -124,7 +124,7 @@ class BussConvenio {
     return result;
   }
   public async deleteConvenio(id: string) {
-    let result = await ConvenioModule.remove({ _id: id });
+    let result = await ConvenioModule.deleteOne({ _id: id });
     return result;
   }
   public async addEntidad(idConve: string, idEnti: any) {

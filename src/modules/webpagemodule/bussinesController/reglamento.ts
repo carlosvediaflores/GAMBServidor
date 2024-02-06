@@ -90,7 +90,7 @@ class BussReglamento {
     return result;
   }
   public async deleteReglamento(id: string) {
-    let result = await reglamentoModule.remove({ _id: id });
+    let result = await reglamentoModule.deleteOne({ _id: id });
     return result;
   }
 }

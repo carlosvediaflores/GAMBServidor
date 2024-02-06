@@ -73,7 +73,7 @@ class BussCategoria {
     return result;
   }
   public async deleteCategoria(id: string) {
-    let result = await categoriaModel.remove({ _id: id });
+    let result = await categoriaModel.deleteOne({ _id: id });
     return result;
   }
 }

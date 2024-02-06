@@ -92,7 +92,7 @@ class BusSegPoa {
     return result;
   }
   public async deleteSegPoa(id: string) {
-    let result = await segPoaModule.remove({ _id: id });
+    let result = await segPoaModule.deleteOne({ _id: id });
     return result;
   }
 }

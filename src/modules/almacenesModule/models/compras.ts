@@ -14,6 +14,7 @@ export interface ICompra extends Document {
   idEntrada: string;
   vehiculo:string;
   salidas: Array<ISalida>
+  createat:Date;
 }
 const compraSchema: Schema = new Schema(
   {
@@ -29,11 +30,12 @@ const compraSchema: Schema = new Schema(
     idArticulo: {type: Schema.Types.ObjectId, ref: "alm_articulos" },
     idEntrada: { type: Schema.Types.ObjectId, ref: "alm_ingresos" },
     //vehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
-    salidas: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}]
+    salidas: [{ type: Schema.Types.ObjectId, ref: "alm_salidas"}],
+    createdAt:{ type: Date, default:new Date},
   },
-  {
+/*   {
     timestamps: true,
     versionKey: false,
-  }
+  } */
 );
 export default mongoose.model<ICompra>("alm_compras", compraSchema);

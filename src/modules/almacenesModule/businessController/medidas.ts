@@ -75,7 +75,7 @@ class BusMedida {
     return result;
   }
   public async deleteMedida(id: string) {
-    let result = await medidaModule.remove({ _id: id });
+    let result = await medidaModule.deleteOne({ _id: id });
     return result;
   }
 }

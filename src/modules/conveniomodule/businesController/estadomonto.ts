@@ -43,7 +43,7 @@ class BussEstadoMonto{
         return result;
     }
     public async deleteEstmonto(id: string) {
-        let result = await EsadoMonto.remove({ _id: id });
+        let result = await EsadoMonto.deleteOne({ _id: id });
         return result;
     }
 }

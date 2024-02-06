@@ -43,7 +43,7 @@ class BussRepres{
         return result;
     }
     public async deleteRepres(id: string) {
-        let result = await RepresentanteModel.remove({ _id: id });
+        let result = await RepresentanteModel.deleteOne({ _id: id });
         return result;
     }
 }

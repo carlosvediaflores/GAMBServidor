@@ -148,7 +148,7 @@ class BusinessHoja {
       ],
     };
     let skip = params2 ? params2 : 0;
-    let limit = params3 ? params3 : 500;
+    let limit = params3 ? params3 : 800;
     let listHoja: Array<IHojaruta> = await HojaModel.find(filter)
       .skip(skip)
       .limit(limit)
@@ -280,7 +280,7 @@ class BusinessHoja {
     return result;
   }
   public async deleteHojas(id: string) {
-    let result = await HojaModel.remove({ _id: id });
+    let result = await HojaModel.deleteOne({ _id: id });
     return result;
   }
   public async addFiles(idruta: string, idFile: string) {

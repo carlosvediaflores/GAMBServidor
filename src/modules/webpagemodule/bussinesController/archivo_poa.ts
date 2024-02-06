@@ -65,7 +65,7 @@ class BussArchivoPoa {
     return result;
   }
   public async deleteArchivoPoa(id: string) {
-    let result = await archivoPoaModule.remove({ _id: id });
+    let result = await archivoPoaModule.deleteOne({ _id: id });
     return result;
   }
 }

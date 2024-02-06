@@ -66,7 +66,7 @@ class BussFinanc{
       return result;
     }
     public async deleteFinanc(id: string) {
-      let result = await FinanModule.remove({ _id: id });
+      let result = await FinanModule.deleteOne({ _id: id });
       return result;
     }
     

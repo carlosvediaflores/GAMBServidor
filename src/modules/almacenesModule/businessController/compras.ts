@@ -260,6 +260,12 @@ class BussCompra {
     let result = await compraModel.updateOne({ _id: id }, { $set: Compra });
     return result;
   }
+  public async updateCompraAll(filter: any, Compra: any) {
+    console.log(filter, Compra);
+    
+    let result = await compraModel.updateMany(filter, { $set: Compra });
+    return result;
+  }
   public async deleteCompra(id: string) {
     let result = await compraModel.remove({ _id: id });
     return result;

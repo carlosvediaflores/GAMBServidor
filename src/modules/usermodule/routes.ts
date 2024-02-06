@@ -20,6 +20,9 @@ class Routes {
       .route(`${this.routeparent}/users/:limit?/:page?`)
       .get(jsonwebtokenSecurity, this.routesController.getUsers);
     app
+      .route(`${this.routeparent}/listUsers`)
+      .get(this.routesController.lisUsers);
+    app
       .route(`${this.routeparent}/user/:id`)
       .get(this.routesController.getUser);
     app

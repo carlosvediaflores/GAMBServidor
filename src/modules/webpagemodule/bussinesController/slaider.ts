@@ -76,7 +76,7 @@ class BussSlaider {
     return result;
   }
   public async deleteSlaider(id: string) {
-    let result = await SlaiderModule.remove({ _id: id });
+    let result = await SlaiderModule.deleteOne({ _id: id });
     return result;
   }
 }

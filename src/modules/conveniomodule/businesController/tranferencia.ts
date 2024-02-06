@@ -60,7 +60,7 @@ class BussDesem{
         return result;
     }
     public async deleteDesem(id: string) {
-        let result = await DesembolsoModel.remove({ _id: id });
+        let result = await DesembolsoModel.deleteOne({ _id: id });
         return result;
     }
 }

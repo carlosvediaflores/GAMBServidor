@@ -86,6 +86,80 @@ class RoutesController {
 
     response.status(200).json({ serverResponse: result });
   }
+  public async lisUsers(request: Request, response: Response) {
+    const user: BusinessUser = new BusinessUser();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.cargo != null) {
+      var expresion = new RegExp(params.cargo);
+      filter["cargo"] = expresion;
+    }
+    if (params.post != null) {
+      var expresion = new RegExp(params.post);
+      filter["post"] = expresion;
+    }
+    if (params.isActive != null) {
+      var expres:boolean = params.isActive;
+      filter["isActive"] = expres;
+    }
+    if (params.roles != null) {
+      let expresion = params.roles;
+      filter["roles"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gte"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost = await user.total(filter);
+    var totalDocs = respost;
+    var totalpage = Math.ceil(respost / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    const result: Array<IUser> = await user.readUsers(
+      filter,
+      limit,
+      skip,
+      order
+    );
+   
+    response.status(200).json({
+      serverResponse: result,
+      limit,
+      totalDocs,
+      totalpage,
+      skip,
+      order
+    });
+    return;
+  }
   public async getUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     //let id: string = request.params.id;

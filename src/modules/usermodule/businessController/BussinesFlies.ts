@@ -40,7 +40,7 @@ class BussinesFile {
     }
     
     public async deleteSegui(id: String) {
-        let result = await FileModel.remove({ _id: id });
+        let result = await FileModel.deleteOne({ _id: id });
         ////----------////
         return result;
     }

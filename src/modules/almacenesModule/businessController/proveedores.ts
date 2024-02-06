@@ -78,7 +78,7 @@ class BussProveedor {
     return result;
   }
   public async deleteProveedor(id: string) {
-    let result = await proveedorModel.remove({ _id: id });
+    let result = await proveedorModel.deleteOne({ _id: id });
     return result;
   }
 }

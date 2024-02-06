@@ -71,7 +71,7 @@ public async removeTipo(idArea: string, tipo: any) {
     return result;
   }
   public async deleteArea(id: string) {
-    let result = await areaModel.remove({ _id: id });
+    let result = await areaModel.deleteOne({ _id: id });
     return result;
   }
 }

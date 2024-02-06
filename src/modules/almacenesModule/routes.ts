@@ -278,6 +278,9 @@ class Routes {
     app
       .route(`${this.routeparent}/compra/:id`)
       .put(this.routesController.updateCompra);
+    /* app
+      .route(`${this.routeparent}/compra`)
+      .put(this.routesController.updateCompraAll); */
     app
       .route(`${this.routeparent}/compra/:id`)
       .delete(this.routesController.removeCompra);
@@ -316,6 +319,11 @@ class Routes {
     app
       .route(`${this.routeparent}/countAlmacenes`)
       .get(this.routesController.contAlmacenes);
+
+    //------OTROS-------------//
+    app
+      .route(`${this.routeparent}/cierreGestion`)
+      .get(this.routesController.cierreGestion);
   }
 }
 export default Routes;

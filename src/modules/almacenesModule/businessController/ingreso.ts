@@ -106,7 +106,7 @@ class BussIngreso {
     var result = await ingresosModel
       .find()
       .limit(1)
-      .sort({ numeroEntrada: -1 });
+      .sort({ _id: -1 });
     return result;
   }
   public async total({}) {

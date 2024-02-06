@@ -106,7 +106,7 @@ class BussinesOrganizacion {
         return result;
     }
     public async deleteOrg(id: String) {
-        let result = await OrganizacionModel.remove({ _id: id });
+        let result = await OrganizacionModel.deleteOne({ _id: id });
         ////----------////
         return result;
     }

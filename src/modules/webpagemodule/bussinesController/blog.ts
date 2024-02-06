@@ -55,7 +55,7 @@ class BussBlog{
         return result;
     }
     public async deleteBlog(id: string) {
-        let result = await BlogModule.remove({ _id: id });
+        let result = await BlogModule.deleteOne({ _id: id });
         return result;
     }
     public async addImgs(idcv: string, idFile: string) {

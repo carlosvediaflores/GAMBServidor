@@ -74,7 +74,7 @@ class BussActividad {
     return result;
   }
   public async deleteActividad(id: string) {
-    let result = await actividadModel.remove({ _id: id });
+    let result = await actividadModel.deleteOne({ _id: id });
     return result;
   }
 }

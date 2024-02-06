@@ -74,7 +74,7 @@ class BussProyecto {
     return result;
   }
   public async deleteProyecto(id: string) {
-    let result = await proyectoModel.remove({ _id: id });
+    let result = await proyectoModel.deleteOne({ _id: id });
     return result;
   }
 }

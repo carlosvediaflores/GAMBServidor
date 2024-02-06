@@ -87,7 +87,7 @@ class BussPei {
     return result;
   }
   public async deletePei(id: string) {
-    let result = await peiModule.remove({ _id: id });
+    let result = await peiModule.deleteOne({ _id: id });
     return result;
   }
 }

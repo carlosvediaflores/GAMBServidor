@@ -49,7 +49,7 @@ class BussinesSubdir {
         return result;
     }
     public async deleteSubdir(id: String) {
-        let result = await SubdireccionesModel.remove({ _id: id });
+        let result = await SubdireccionesModel.deleteOne({ _id: id });
         ////----------////
         return result;
     }

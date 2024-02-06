@@ -91,7 +91,7 @@ class BussGaceta {
     return result;
   }
   public async deleteGaceta(id: string) {
-    let result = await gacetaModule.remove({ _id: id });
+    let result = await gacetaModule.deleteOne({ _id: id });
     return result;
   }
 }

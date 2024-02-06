@@ -194,7 +194,7 @@ class BussinesSegui {
   }
 
   public async deleteSegui(id: String) {
-    let result = await SeguiModel.remove({ _id: id }); 
+    let result = await SeguiModel.deleteOne({ _id: id }); 
     return result;
   }
   public async addArchivo(idSegui: string, idArch: string) {

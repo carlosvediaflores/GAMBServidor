@@ -1102,7 +1102,7 @@ class RoutesController {
     }
     if (params.al != null) {
       var lt = params.al;
-      aux["$lt"] = lt;
+      aux["$lte"] = lt;
     }
     if (Object.entries(aux).length > 0) {
       filter1["fecha"] = aux;
@@ -1134,8 +1134,9 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { numeroEntrada: -1 };
+      order = { _id: -1 };
     }
+    console.log(filter1);
     let res = await Ingreso.readIngresos(filter1, filter2, skip, limit, order);
     response.status(200).json({
       serverResponse: res,
@@ -1643,16 +1644,25 @@ class RoutesController {
     var skip = 0;
     var aux: any = {};
     var order: any = {};
+    let year = new Date();
+    let gestion = year.getFullYear();
+    params.concepto=`Saldo Inicial ${gestion}`;
     if (params.limit) {
       limit = parseInt(params.limit);
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
+    if (params.del != null) {
+      var gt = params.del;
       aux["$gt"] = gt;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
+    else{
+      aux["$gt"] = `${gestion}-01-01T04:00:00.000Z`;
+    }
+    if (params.al != null) {
+      var lt = params.al;
       aux["$lt"] = lt;
+    }
+    else{
+      aux["$lt"] = `${gestion}-12-31T04:00:00.000Z`;
     }
     if (params.estadoCompra != null) {
       var estadoCompra = new RegExp(params.estadoCompra, "i");
@@ -1676,6 +1686,8 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
+    console.log(filter);
+    
     const [res, totalDocs] = await Promise.all([
       Compra.readCompra(filter, skip, limit, order),
       Compra.total({}),
@@ -1701,6 +1713,20 @@ class RoutesController {
     var result = await Compra.updateCompra(id, params);
     response.status(200).json(result);
   }
+ /*  public async updateCompraAll(request: Request, response: Response) {
+    var compra: BussCompra = new BussCompra();
+    let id: string = request.params.id;
+    var params = request.body;
+    let year = new Date();
+    let gestion = year.getFullYear();
+    let date = `${gestion-1}-12-31`
+    console.log(date);
+    params["createdAt"]= new Date(date)
+    var filter: any = {createdAt:{$gt:`${gestion}-01-01`},estadoCompra:"AGOTADO"};
+    let resStokCompra:any = await compra.readCompra(filter)
+    var result = await compra.updateCompraAll(filter, params);
+    response.status(200).json({serverResponse:result, total: resStokCompra.length});
+  } */
   public async removeCompra(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     let id: string = request.params.id;
@@ -1986,6 +2012,53 @@ class RoutesController {
     }
     let res = await Articulo.searchArticuloAll(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
+  }
+  public async cierreGestion(request: Request, response: Response) {
+    var ingreso: BussIngreso = new BussIngreso();
+    var compra: BussCompra = new BussCompra();
+    const params = request.body;
+    var filter: any = {stockCompra:{$gt:0}};
+    let resStokCompra:any = await compra.readCompra(filter)
+    let year = new Date();
+    let gestion = year.getFullYear();
+    let date = `${gestion-1}-12-31`
+    params.concepto=`Saldo Inicial ${gestion}`;
+    params.fecha=year;
+    params.numeroEntrada=1
+    params.estado="REGISTRADO"
+    params.tipo="SALDO_2024";
+    params.idPersona="6253bf6900ae6f0014f7bc23";//cambiar
+    params.idUsuario="6253bf6900ae6f0014f7bc23";//cambiar
+    params.idProveedor="64219a3166020bdc8726f508"//cambiar a proveedor gamb
+    let result = await ingreso.addIngreso(params);
+    console.log(params);
+    for (let i = 0; i < resStokCompra.length; i++) {
+      let data = resStokCompra[i];
+      
+      let saldoData: any = {};
+      let compraData: any = {};
+      saldoData["idEntrada"] = result._id;
+      saldoData["idArticulo"] = data.idArticulo._id;
+      saldoData["idProducto"] = data.idArticulo._id;
+      saldoData["catProgra"] = data.catProgra;
+      saldoData["cantidadCompra"] = data.stockCompra;
+      saldoData["stockCompra"] = data.stockCompra;
+      saldoData["ubicacion"] = data.ubicacion;
+      saldoData["precio"] = data.precio;
+      compraData.stockCompra=0;
+      compraData.estadoCompra="AGOTADO"
+      let resultCompra = await compra.addCompra(saldoData);
+      let idCompra = resultCompra._id;
+      await ingreso.addCompras(result._id, idCompra);
+      await compra.updateCompra(data._id, compraData);
+    }
+    let paramsDate: any = {};
+    paramsDate["createdAt"]= new Date(date)
+    var filter: any = {createdAt:{$gt:`${gestion}-01-01`},estadoCompra:"AGOTADO"};
+    let resCompra:any = await compra.readCompra(filter)
+    compra.updateCompraAll(filter, paramsDate);
+    response.status(200).json({ serverResponse: result, total: resStokCompra.length})
+
   }
 }
 export default RoutesController;

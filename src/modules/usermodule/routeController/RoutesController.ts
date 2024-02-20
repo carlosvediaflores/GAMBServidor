@@ -780,7 +780,7 @@ class RoutesController {
               let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
               await hojaRuta.addIdHR(resA._id, dataAso._id);
               await hojaRuta.addIdHR(dataAso._id,resA._id);
-              await segui.updateSegui(segResData._id, data);
+              //await segui.updateSegui(segResData._id, data);
             }
           }
           if(resA.asociados.length!=0){ 
@@ -790,7 +790,7 @@ class RoutesController {
               let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
               await hojaRuta.addIdHR(resB._id, dataAso._id);
               await hojaRuta.addIdHR(dataAso._id,resB._id);
-              await segui.updateSegui(segResData._id, data);
+              //await segui.updateSegui(segResData._id, data);
             }
           }         
         }
@@ -820,7 +820,7 @@ class RoutesController {
             let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
             await hojaRuta.addIdHR(resA._id, dataAso._id);
             await hojaRuta.addIdHR(dataAso._id,resA._id);
-            await segui.updateSegui(segResData._id, data);
+            //await segui.updateSegui(segResData._id, data);
           }
         }
         if(resA.asociados.length!=0){ 
@@ -830,7 +830,7 @@ class RoutesController {
             let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
             await hojaRuta.addIdHR(resB._id, dataAso._id);
             await hojaRuta.addIdHR(dataAso._id,resB._id);
-            await segui.updateSegui(segResData._id, data);
+            //await segui.updateSegui(segResData._id, data);
           }
         }
         response.status(200).json({ serverResponse: resA, resB });
@@ -879,7 +879,7 @@ class RoutesController {
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
           await hojaRuta.addIdHR(resA._id, dataAso._id);
           await hojaRuta.addIdHR(dataAso._id,resA._id);
-          await segui.updateSegui(segResData._id, data);
+          //await segui.updateSegui(segResData._id, data);
         }
       }
       if(resA.asociados.length!=0){  
@@ -889,7 +889,7 @@ class RoutesController {
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
           await hojaRuta.addIdHR(resB._id, dataAso._id);
           await hojaRuta.addIdHR(dataAso._id,resB._id);
-          await segui.updateSegui(segResData._id, data);
+          //await segui.updateSegui(segResData._id, data);
         }
       }
       
@@ -1072,7 +1072,7 @@ class RoutesController {
     var seguiData: any = request.body;
     seguiData["fechaderivado"] = new Date();
     seguiData["idhj"] = idRuta;
-    seguiData["fecharecepcion"] = "SIN RESEPCIONAR";
+    seguiData["fecharecepcion"] = "SIN RECEPCIONAR";
     seguiData["estado"] = "ENVIADO";
     var result1 = await segui.addSegui(seguiData);
     let idSegui = result1._id;

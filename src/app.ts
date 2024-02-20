@@ -4,11 +4,13 @@ import UserModules from "./modules/usermodule/init";
 import ConvenioModule from "./modules/conveniomodule/init";
 import SlaiderModule from "./modules/webpagemodule/init";
 import AlmacenesModule from "./modules/almacenesModule/init";
+import ActivosModule from "./modules/activosModule/init";
 import ArchivosModule from "./modules/archivosModule/init";
 import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
 import DocumentosModule from "./modules/documentos/init";
+
 //import WebpageModule from "./modules/webpagemodule/init";
 class App {
   public app: Express = express();
@@ -49,6 +51,7 @@ class App {
     const convenioModule = new ConvenioModule("/api", this.app);
     const slaiderModule = new SlaiderModule("/api", this.app);
     const almacenes = new AlmacenesModule("/api", this.app);
+    const activos = new ActivosModule("/api", this.app);
     const archivos = new ArchivosModule("/api", this.app);
     const documentos = new DocumentosModule("/api", this.app);
   }

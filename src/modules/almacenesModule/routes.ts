@@ -296,25 +296,6 @@ class Routes {
     app
       .route(`${this.routeparent}/searchCompraSaldo`)
       .get(this.routesController.queryCompraSaldo);
-    //-------VEHICULOS--//
-    app
-      .route(`${this.routeparent}/vehiculo`)
-      .post(this.routesController.createVehiculo);
-    app
-      .route(`${this.routeparent}/vehiculos`)
-      .get(this.routesController.getVehiculos);
-    app
-      .route(`${this.routeparent}/vehiculo/:id`)
-      .get(this.routesController.getVehiculo);
-    app
-      .route(`${this.routeparent}/vehiculo/:id`)
-      .put(this.routesController.updateVehiculo);
-    app
-      .route(`${this.routeparent}/vehiculo/:id`)
-      .delete(this.routesController.removeVehiculo);
-    app
-      .route(`${this.routeparent}/searchVehiculo/:search?`)
-      .get(this.routesController.searchVehiculo);
     //------------CONUNT--------------
     app
       .route(`${this.routeparent}/countAlmacenes`)

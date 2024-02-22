@@ -1650,17 +1650,20 @@ class RoutesController {
     }
     if (params.del != null) {
       var gt = params.del;
-      aux["$gt"] = gt;
+      aux["$gte"] = gt;
     }
     else{
-      aux["$gt"] = `${gestion}-01-01T04:00:00.000Z`;
+      aux["$gte"] = `${gestion}-01-01T04:00:00.000Z`;
     }
     if (params.al != null) {
       var lt = params.al;
-      aux["$lt"] = lt;
+      let date = new Date(lt)
+      date.setDate(date.getDate() + 1);
+
+      aux["$lte"] = date;
     }
     else{
-      aux["$lt"] = `${gestion}-12-31T04:00:00.000Z`;
+      aux["$lte"] = `${gestion}-12-31T04:00:00.000Z`;
     }
     if (params.estadoCompra != null) {
       var estadoCompra = new RegExp(params.estadoCompra, "i");
@@ -1692,7 +1695,7 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    console.log(filter);
+    console.log("filter",filter);
     
     const [res, totalDocs] = await Promise.all([
       Compra.readCompra(filter, skip, limit, order),
@@ -1719,20 +1722,7 @@ class RoutesController {
     var result = await Compra.updateCompra(id, params);
     response.status(200).json(result);
   }
- /*  public async updateCompraAll(request: Request, response: Response) {
-    var compra: BussCompra = new BussCompra();
-    let id: string = request.params.id;
-    var params = request.body;
-    let year = new Date();
-    let gestion = year.getFullYear();
-    let date = `${gestion-1}-12-31`
-    console.log(date);
-    params["createdAt"]= new Date(date)
-    var filter: any = {createdAt:{$gt:`${gestion}-01-01`},estadoCompra:"AGOTADO"};
-    let resStokCompra:any = await compra.readCompra(filter)
-    var result = await compra.updateCompraAll(filter, params);
-    response.status(200).json({serverResponse:result, total: resStokCompra.length});
-  } */
+
   public async removeCompra(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     let id: string = request.params.id;
@@ -1751,12 +1741,7 @@ class RoutesController {
     let res = await Compra.queryCompraCatPro(quieryIngreso);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
-  /* public async searchCompraAll(request: Request, response: Response) {
-    var Compra: BussCompra = new BussCompra();
-    var queryCompra = request.params.search;
-    let res = await Compra.searchCompraAll(queryCompra);
-    response.status(200).json({ serverResponse: res, total: res.length });
-  } */
+  
   public async searchCompraAll(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     var filter1: any = {};
@@ -1946,7 +1931,7 @@ class RoutesController {
     params.fecha=year;
     params.numeroEntrada=1
     params.estado="REGISTRADO"
-    params.tipo="SALDO_2024";
+    params.tipo="SALDO_INICIAL";
     params.idPersona="6253bf6900ae6f0014f7bc23";//cambiar
     params.idUsuario="6253bf6900ae6f0014f7bc23";//cambiar
     params.idProveedor="65c63b0580c97d003f229223"//cambiar a proveedor gamb

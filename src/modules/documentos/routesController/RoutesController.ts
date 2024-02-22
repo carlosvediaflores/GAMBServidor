@@ -642,6 +642,7 @@ class RoutesController {
     }
     response.sendFile(NormativaoData.path);
   }
+  
   //Elinimar
   public async removeNormativa(request: Request, response: Response) {
     const borrarImagen: any = (path: any) => {
@@ -660,6 +661,34 @@ class RoutesController {
     let result = await Normativa.deleteNormativa(id);
     var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
     response.status(200).json({ serverResponse: "Se elimino la Normativa" });
+  }
+  public async updateNormativaAll(request: Request, response: Response) {
+    var Normativa: BussNormativa = new BussNormativa();
+    var params = request.body;
+    var result = await Normativa.updateNormativaAll(params);
+    response.status(200).json(result);
+  }
+  public async updateNormativaSum(request: Request, response: Response) {
+    var Normativa: BussNormativa = new BussNormativa();
+    let id: string = request.params.id;
+    var params = request.body;
+    let res: INormativa = await Normativa.readNormativa(id);
+    let num:any =res.numero;
+    let numAct:number=+num;
+    params.numero=numAct+1
+    var result = await Normativa.updateNormativa(id, params);
+    response.status(200).json(result);
+  }
+  public async updateNormativaRes(request: Request, response: Response) {
+    var Normativa: BussNormativa = new BussNormativa();
+    let id: string = request.params.id;
+    var params = request.body;
+    let res: INormativa = await Normativa.readNormativa(id);
+    let num:any =res.numero;
+    let numAct:number=+num;
+    params.numero=numAct-1
+    var result = await Normativa.updateNormativa(id, params);
+    response.status(200).json(result);
   }
 
   ///////////PRESTAMOS///////////

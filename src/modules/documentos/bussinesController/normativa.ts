@@ -94,6 +94,11 @@ class BussNormativa {
     let result = await normativaModel.deleteOne({ _id: id });
     return result;
   }
+  public async updateNormativaAll( params: any) {
+   
+    let result = await normativaModel.updateMany({ $set: params });
+    return result;
+  }
 }
 
 export default BussNormativa;

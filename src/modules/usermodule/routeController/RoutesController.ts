@@ -1128,6 +1128,9 @@ class RoutesController {
     var aux: any = {};
     var order: any = {};
     var select = "";
+    if(params.destino === "" || params.destino === "null" ){
+      delete params.destino;
+    }
     if (params.destino != null) {
       if (params.destino.includes("(")) {
         const searchValue = decodeURIComponent(params.destino);
@@ -1145,6 +1148,10 @@ class RoutesController {
     if (params.estado != null) {
       var expresion = new RegExp(params.estado);
       filter["estado"] = expresion;
+    }
+    if (params.recibidox != null) {
+      let expresionRec = params.recibidox;
+      filter["recibidox"] = expresionRec;
     }
     if (params.fecharecepcion != null) {
       var expresion = new RegExp(params.fecharecepcion);
@@ -1186,6 +1193,8 @@ class RoutesController {
     } else {
       order = { fechaderivado: -1 };
     }
+    console.log("paramas", filter);
+    
     let res: Array<ISeguimiento> = await segui.readOficina(
       filter,
       skip,

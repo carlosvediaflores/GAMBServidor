@@ -91,6 +91,15 @@ class Routes {
     app
       .route(`${this.routeparent}/normativa/:id`)
       .delete(this.routesController.removeNormativa);
+    app
+      .route(`${this.routeparent}/normativa`)
+      .put(this.routesController.updateNormativaAll);
+      app
+      .route(`${this.routeparent}/normativaSum/:id`)
+      .put(this.routesController.updateNormativaSum);
+      app
+      .route(`${this.routeparent}/normativaRes/:id`)
+      .put(this.routesController.updateNormativaRes);
 
     ///////////PRESTAMOS//////////
     //Crear,Prestamo

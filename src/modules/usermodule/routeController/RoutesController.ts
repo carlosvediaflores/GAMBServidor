@@ -690,6 +690,12 @@ class RoutesController {
     let res = await hoja.search(searchString);
     response.status(200).json({ serverResponse: res });
   }
+  public async searchPublicHR(request: Request, response: Response) {
+    var hoja: BusinessHoja = new BusinessHoja();
+    var searchString = request.params.term;
+    let res = await hoja.searchPublicHR(searchString);
+    response.status(200).json({ serverResponse: res });
+  }
   public async asociarHojas(request: Request, response: Response) {
     var hoja: BusinessHoja = new BusinessHoja();
     //let id: string = request.params.id;

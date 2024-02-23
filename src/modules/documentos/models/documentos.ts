@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Number } from "mongoose";
 
 export interface IDocumento extends Document {
+  numero:string;
   titulo: string;
   fecha: Date;
   vigente:boolean;
@@ -12,6 +13,7 @@ export interface IDocumento extends Document {
 }
 const documentoSchema: Schema = new Schema(
   {
+    numero: { type: Number, default:0 },
     titulo: { type: String },
     fecha: { type: Date },
     vigente: { type: Boolean, default:true },

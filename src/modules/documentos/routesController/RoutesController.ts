@@ -129,7 +129,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = {modelo_tipo: -1, numero: -1 };
     }
     let res: Array<IDocumento> = await Document.readDocument(
       filter,
@@ -341,6 +341,30 @@ class RoutesController {
     var result1 = await Modelo.removeDocId(res.modelo_tipo, id);
     response.status(200).json({ serverResponse: "Se elimino la Plantilla" });
   }
+  public async updatedocumentSum(request: Request, response: Response) {
+    var Document: BussDocument = new BussDocument();
+    let id: string = request.params.id;
+    var params = request.body;
+    let res: IDocumento = await Document.readDocument(id);
+    let num:any =res.numero;
+    let numAct:number=+num;
+    params.numero=numAct+1
+    var result = await Document.updateDocument(id, params);
+    response.status(200).json(result);
+  }
+  public async updatedocumentRes(request: Request, response: Response) {
+    var Document: BussDocument = new BussDocument();
+    let id: string = request.params.id;
+    var params = request.body;
+    let res: IDocumento = await Document.readDocument(id);
+    let num:any =res.numero;
+    let numAct:number=+num;
+    if(numAct!=0){
+      params.numero=numAct-1
+      var result = await Document.updateDocument(id, params);
+      response.status(200).json(result);
+    }
+  }
 
   //----------TIPOS NORMATIVAS------------//
 
@@ -448,7 +472,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { tipo_normativa: -1, numero: 1 };
+      order = { tipo_normativa: -1, numero: -1 };
     }
     let res: Array<INormativa> = await Normativa.readNormativa(
       filter,
@@ -686,9 +710,11 @@ class RoutesController {
     let res: INormativa = await Normativa.readNormativa(id);
     let num:any =res.numero;
     let numAct:number=+num;
-    params.numero=numAct-1
-    var result = await Normativa.updateNormativa(id, params);
-    response.status(200).json(result);
+    if(numAct!=0){
+      params.numero=numAct-1
+      var result = await Normativa.updateNormativa(id, params);
+      response.status(200).json(result);
+    }
   }
 
   ///////////PRESTAMOS///////////
@@ -804,7 +830,7 @@ class RoutesController {
         response.status(200).json({
           serverResponse: "Préstamo actualizado",
         });
-        return;
+        return; 
       }
     }
   }

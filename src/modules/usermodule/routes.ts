@@ -124,6 +124,9 @@ class Routes {
       .route(`${this.routeparent}/hojasearch/:search`)
       .get(this.routesController.searchHoja);
     app
+      .route(`${this.routeparent}/searchPublicHR/:term`)
+      .get(this.routesController.searchPublicHR);
+    app
       .route(`${this.routeparent}/uploadhojaruta/:id`)
       .post(this.routesController.uploadHoja);
     app

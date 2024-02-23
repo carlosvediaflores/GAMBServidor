@@ -155,6 +155,32 @@ class BusinessHoja {
       .sort({ _id: -1 });
     return listHoja;
   }
+  public async searchPublicHR(query?: any): Promise<Array<IHojaruta>>;
+  public async searchPublicHR(
+    search: string | any,
+    params2?: number,
+    params3?: number
+  ) {
+    var filter = {
+      $or: [
+        { nuit: search },
+        { origen: { $regex: search, $options: "i" } },
+        
+      ],
+    };
+    let skip = params2 ? params2 : 0;
+    let limit = params3 ? params3 : 800;
+    let listHoja: Array<IHojaruta> = await HojaModel.find(filter)
+    .populate({
+      path: "seguimiento",
+      model: "seguimiento",
+      populate: { path: "archivofi", model: "hrarchivo" },
+    })
+      .skip(skip)
+      .limit(limit)
+      .sort({ _id: -1 });
+    return listHoja;
+  }
   public async addHoja(hoja: IHojaruta) {
     try {
       let userDb = new HojaModel(hoja);

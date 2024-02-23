@@ -47,6 +47,12 @@ class Routes {
     app
       .route(`${this.routeparent}/document/:id`)
       .delete(this.routesController.removeDocument);
+      app
+      .route(`${this.routeparent}/documentSum/:id`)
+      .put(this.routesController.updatedocumentSum);
+      app
+      .route(`${this.routeparent}/documentRes/:id`)
+      .put(this.routesController.updatedocumentRes);
 
     ///////////TipoNormativas////////////////
     //Crear

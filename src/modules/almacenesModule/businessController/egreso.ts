@@ -85,7 +85,7 @@ class BussEgreso {
     }
   }
   public async getNumEgreso() {
-    var result = await EgresosModel.find().limit(1).sort({ numeroSalida: -1 });
+    var result = await EgresosModel.find().limit(1).sort({_id: -1 });
     return result;
   }
   public async total({}) {

@@ -1417,7 +1417,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { numeroSalida: -1 };
+      order = { _id: -1 };
     }
     let res: Array<IEgreso> = await Egreso.readEgresos(
       filter,

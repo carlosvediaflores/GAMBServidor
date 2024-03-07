@@ -5,7 +5,7 @@ export interface IUser extends Document {
   username: string;
   surnames: string;
   ci: string;
-  muneroLicencia:string;
+  categoriaLicencia:string;
   numberphone: number;
   email: string;
   birthday: Date;
@@ -22,7 +22,7 @@ const userSchema: Schema = new Schema({
   username: { type: String },
   surnames: { type: String },
   ci: { type: String, required: true, unique: true },
-  muneroLicencia: { type: String, required: true, unique: true },
+  categoriaLicencia: { type: String },
   numberphone: { type: Number },
   email: { type: String, required: true, unique: true },
   birthday: { type: Date },

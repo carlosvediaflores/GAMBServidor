@@ -1,6 +1,6 @@
 import { Express } from "express";
 import RoutesController from "./routesController/RoutesController";
-import jsonwebtokenSecurity from "../usermodule/middleware"
+import jsonwebtokenSecurity from "../usermodule/middleware";
 class Routes {
   private routesController: RoutesController;
   private routeparent: string;
@@ -186,7 +186,7 @@ class Routes {
     app
       .route(`${this.routeparent}/articuloNombre`)
       .get(this.routesController.getArticuloNombre);
-      app
+    app
       .route(`${this.routeparent}/searchArticulosAll`)
       .get(this.routesController.searchArticulosAll);
     //-------MEDIDAS--//
@@ -287,6 +287,9 @@ class Routes {
     app
       .route(`${this.routeparent}/searchCompra/:search?`)
       .get(this.routesController.searchCompra);
+      app
+      .route(`${this.routeparent}/searchCombustible/:articulo?/:catProgra?`)
+      .get(this.routesController.searchCombustible);
     app
       .route(`${this.routeparent}/queryCompraCatPro/:search`)
       .get(this.routesController.queryCompraCatPro);
@@ -305,6 +308,28 @@ class Routes {
     app
       .route(`${this.routeparent}/cierreGestion`)
       .get(this.routesController.cierreGestion);
+
+    //-------Vales--//
+    //crear
+    app
+      .route(`${this.routeparent}/vale`)
+      .post(this.routesController.createVale);
+      //listar
+    app
+      .route(`${this.routeparent}/vales`)
+      .get(this.routesController.getVales);
+      //buscar vale por ID
+    /* app
+      .route(`${this.routeparent}/vale/:id`)
+      .get(this.routesController.getVale);
+       //editar vale por ID
+    app
+      .route(`${this.routeparent}/vale/:id`)
+      .put(this.routesController.updateVale);
+      //eliminar vale por ID
+    app
+      .route(`${this.routeparent}/vale/:id`)
+      .delete(this.routesController.removeVale); */
   }
 }
 export default Routes;

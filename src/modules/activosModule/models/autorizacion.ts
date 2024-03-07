@@ -6,7 +6,7 @@ export interface IAutorizacion extends Document {
   fechaSalida: Date;
   motivo:string;
   destino:string;
-  UnidadSolicitante: string;
+  unidadSolicitante: string;
   encargadoControl: string;
   conductor: string;
   vehiculo: string;
@@ -19,7 +19,7 @@ const autorizationSchema: Schema = new Schema(
     fechaSalida: { type: Date, default:new Date()},
     motivo:{type: String},
     destino:{type: String},
-    UnidadSolicitante: { type: String},
+    unidadSolicitante: { type: Schema.Types.ObjectId, ref: "Subdirecciones" },
     encargadoControl: { type: Schema.Types.ObjectId, ref: "User" },
     conductor: { type: Schema.Types.ObjectId, ref: "User" },
     vehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },

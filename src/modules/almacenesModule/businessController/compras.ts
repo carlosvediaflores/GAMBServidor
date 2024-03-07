@@ -163,9 +163,27 @@ class BussCompra {
     return listCompra;
   } */
 
-  public async searchCompra(search:string) {
+  public async searchCompra(searchArticulo:string) {
     let listCompra: any  = await compraModel
-    .find({estadoCompra:'EXISTE', idProducto:search})
+    .find({estadoCompra:'EXISTE', idProducto:searchArticulo})
+    .sort({ createdAt: -1 })
+    .populate("idArticulo")
+    .populate("idEntrada")
+    .populate({
+      path: "idArticulo",
+      model: "alm_articulos",
+      populate: {
+        path: "idPartida",
+        model: "partidas",
+      },
+    });
+    
+  return listCompra;
+  }
+  public async searchCombustible(searchArticulo:string, searchCatProgra:string,) {
+    console.log(searchArticulo, searchCatProgra);
+    let listCompra: any  = await compraModel
+    .find({estadoCompra:'EXISTE', idProducto:searchArticulo, catProgra:searchCatProgra})
     .sort({ createdAt: -1 })
     .populate("idArticulo")
     .populate("idEntrada")

@@ -27,7 +27,18 @@ class BussAutorization {
         .skip(skip)
         .limit(limit)
         .sort(order)
-        .populate("id_programa");
+        .populate("encargadoControl")
+        .populate("conductor")
+        .populate("vehiculo")
+        .populate({
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "unidad",
+            model: "Organizacion",
+          },
+        });
+        
       return listAutorization;
     } else {
       let listAutorization: Array<IAutorizacion> = await autorizacionModel.find().populate("id_programa");

@@ -6,10 +6,7 @@ import path from "path";
 import fs from "fs";
 import slug from "slugify";
 import sharp from "sharp";
-//import escapeStringRegexp  from "escape-string-RegExp"
-//import csv from "fast-csv";
 import * as csv from "@fast-csv/parse";
-//const ObjectId = require("mongoose").Types.ObjectId;
 import { isValidObjectId } from "mongoose";
 
 import { ICategoria } from "../models/categorias";
@@ -37,6 +34,8 @@ import { ICompra } from "../models/compras";
 import BussCompra from "../businessController/compras";
 import { ISalida } from "../models/salida";
 import BussSalida from "../businessController/salida";
+import { IVale } from "../models/vale";
+import BussVale from "../businessController/vale";
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   //----------CATEGORIA------------//
@@ -1032,7 +1031,7 @@ class RoutesController {
     var Articulo: BussArticulo = new BussArticulo();
     var IngresoData = request.body;
     let result: any;
-    const resp: any = await Ingreso.getNumIngreso();
+    const resp: any = await compra.getNumCompra();
     if (isEmpty(resp)) {
       IngresoData["numeroEntrada"] = 1;
       result = await Ingreso.addIngreso(IngresoData);
@@ -1735,6 +1734,13 @@ class RoutesController {
     let res = await Compra.searchCompra(searchCompra);
     response.status(200).json({ serverResponse: res });
   }
+  public async searchCombustible(request: Request, response: Response) {
+    var Compra: BussCompra = new BussCompra();
+    var searchArticulo = request.params.articulo;
+    var searchCatProgra = request.params.catProgra;
+    let res = await Compra.searchCombustible(searchArticulo,searchCatProgra);
+    response.status(200).json({ serverResponse: res });
+  }
   public async queryCompraCatPro(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     var quieryIngreso = request.params.search;
@@ -1965,5 +1971,131 @@ class RoutesController {
     response.status(200).json({ serverResponse: result, total: resStokCompra.length})
 
   }
+  //------------VALES---------//
+  //listar
+  public async getVales(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    var filter: any = {};
+    var search: string | any;
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.codigo != null) {
+      var expresion = new RegExp(params.codigo);
+      filter["codigo"] = expresion;
+    }
+    if (params.denominacion != null) {
+      var expresion = new RegExp(params.denominacion);
+      filter["denominacion"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IVale> = await Vale.readVale();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IVale> = await Vale.readVale(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  //crear
+  public async createVale(request: Request, response: Response) {
+    var vale: BussVale = new BussVale();
+    var compra: BussCompra = new BussCompra();
+    var Ingreso: BussIngreso = new BussIngreso();
+    var Articulo: BussArticulo = new BussArticulo();
+    var valeData = request.body;
+   // let result: any;
+    const resp: any = await vale.getNumVale();
+    console.log(resp);
+    let year = new Date();
+    let yearAct = year.getFullYear()
+    if (isEmpty(resp)) {
+      console.log(valeData);
+      valeData["numeroVale"] = 1;
+      let result = await vale.addVale(valeData);
+      response.status(201).json({ serverResponse: result});
+      return;
+    }
+    let yearRes = resp.fecha.getFullYear()
+    console.log(yearAct, yearRes);
+    if (yearAct!=yearRes) {
+      console.log(valeData);
+      valeData["numeroVale"] = 1;
+      let result = await vale.addVale(valeData);
+      response.status(201).json({ serverResponse: result});
+      return;
+    }
+    valeData["numeroVale"] = resp.numeroVale +1;
+    let result = await vale.addVale(valeData);
+    console.log(valeData);
+    response.status(201).json({ serverResponse: result });
+
+
+    /* 
+    for (let i = 0; i < IngresoData.articulos.length; i++) {
+      let data = IngresoData.articulos[i];
+      let articulo = await Articulo.readArticulo(data.idArticulo);
+      let stock: Number = articulo.cantidad + parseInt(data.cantidadCompra);
+      var params: any = request.body;
+      let compraData: any = request.body;
+      params["cantidad"] = stock;
+      compraData["idEntrada"] = result._id;
+      compraData["idArticulo"] = data.idArticulo;
+      compraData["idProducto"] = data.idArticulo;
+      compraData["catProgra"] = data.catProgra;
+      compraData["factura"] = data.factura;
+      compraData["cantidadCompra"] = data.cantidadCompra;
+      compraData["stockCompra"] = data.cantidadCompra;
+      compraData["ubicacion"] = data.ubicacion;
+      compraData["precio"] = data.precio;
+      let resultCompra = await Vale.addVale(compraData);
+      let idCompra = resultCompra._id;
+      var resultAdd = await Ingreso.addCompras(result._id, idCompra);
+      let result1 = await Articulo.updateArticulo(articulo.id, params);
+    }
+    response.status(201).json({ serverResponse: result }); */
+  }
+
 }
 export default RoutesController;

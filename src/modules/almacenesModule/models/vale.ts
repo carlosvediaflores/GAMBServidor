@@ -16,7 +16,7 @@ const valeSchema: Schema = new Schema(
     fecha: { type: Date, default:new Date()},
     cantidad: { type: Number, default: 0 },
     catProgra: { type: String },
-    idProducto:{type: String},
+    idProducto:{ type: Schema.Types.ObjectId, ref: "alm_articulos" },
     autorizacion:{ type: Schema.Types.ObjectId, ref: "act_autorizations" },
     encargadoControl: { type: Schema.Types.ObjectId, ref: "User" },
     idCompra: { type: Schema.Types.ObjectId, ref: "alm_compras" },

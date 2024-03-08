@@ -8,7 +8,6 @@ import slug from "slugify";
 import sharp from "sharp";
 import * as csv from "@fast-csv/parse";
 import { isValidObjectId } from "mongoose";
-
 import { ICategoria } from "../models/categorias";
 import BussCategoria from "../businessController/categorias";
 import { ISubCategoria } from "../models/sub_categorias";
@@ -36,11 +35,18 @@ import { ISalida } from "../models/salida";
 import BussSalida from "../businessController/salida";
 import { IVale } from "../models/vale";
 import BussVale from "../businessController/vale";
+//import BussAutorization from "../activosModule/businessController/autotizacion";
+//import jsonwebtokenSecurity from "../usermodule/middleware";
+
+
+
+
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   //----------CATEGORIA------------//
   public async createCategoria(request: Request, response: Response) {
     var Categoria: BussCategoria = new BussCategoria();
+    //var Autorizacion: BussAutorization = new BussAutorization();
     var categoriaData = request.body;
     let result = await Categoria.addCategoria(categoriaData);
     response.status(201).json({ serverResponse: result });
@@ -2041,6 +2047,7 @@ class RoutesController {
   //crear
   public async createVale(request: Request, response: Response) {
     var vale: BussVale = new BussVale();
+    //var Autorizacion: BussAutorization = new BussAutorization();
     var compra: BussCompra = new BussCompra();
     var Ingreso: BussIngreso = new BussIngreso();
     var Articulo: BussArticulo = new BussArticulo();
@@ -2068,7 +2075,10 @@ class RoutesController {
     }
     valeData["numeroVale"] = resp.numeroVale +1;
     let result = await vale.addVale(valeData);
-    console.log(valeData);
+    let idAut= result.autorizacion._id
+    console.log(result);
+    //let repres = await Autorizacion.readAutorization(idAut);
+
     response.status(201).json({ serverResponse: result });
 
 

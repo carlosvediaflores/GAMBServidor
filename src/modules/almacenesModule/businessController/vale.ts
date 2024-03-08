@@ -28,8 +28,8 @@ class BussVale {
         .limit(limit)
         .sort(order)
         .populate("encargadoControl")
-        .populate("conductor")
-        .populate("vehiculo")
+        .populate("autorizacion")
+        .populate("idProducto")
         .populate({
           path: "unidadSolicitante",
           model: "Subdirecciones",

@@ -1,5 +1,5 @@
 import autorizacionModel, { IAutorizacion } from "../models/autorizacion";
-class BussAutorization {
+export class BussAutorization {
   constructor() {}
   public async readAutorization(): Promise<Array<IAutorizacion>>;
   public async readAutorization(id: string): Promise<IAutorizacion>;

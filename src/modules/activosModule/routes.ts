@@ -1,4 +1,4 @@
-import { Express } from "express";
+/* import { Express } from "express";
 import RoutesController from "./routesController/RoutesController";
 import jsonwebtokenSecurity from "../usermodule/middleware"
 class Routes {
@@ -56,3 +56,4 @@ class Routes {
   }
 }
 export default Routes;
+ */

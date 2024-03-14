@@ -20,7 +20,7 @@ const egresoSchema: Schema = new Schema(
     glosaSalida: { type: String },
     entregado: { type: String },
     cargo: { type: String },
-    fecha: { type: Date, default:new Date},
+    fecha: { type: Date, default:new Date()},
     numeroSalida: { type: Number},
     estadoEgreso: {type: String, default:"REGISTRADO"},
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },

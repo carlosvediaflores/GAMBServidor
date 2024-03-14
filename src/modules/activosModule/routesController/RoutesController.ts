@@ -1,17 +1,5 @@
-import e, { Request, Response } from "express";
-//import { Request, Response } from "express";
-import sha1 from "sha1";
-import jsonwebtoken from "jsonwebtoken";
+/* import e, { Request, Response } from "express";
 import isEmpty from "is-empty";
-import path from "path";
-import fs from "fs";
-import slug from "slugify";
-import sharp from "sharp";
-//import escapeStringRegexp  from "escape-string-RegExp"
-//import csv from "fast-csv";
-import * as csv from "@fast-csv/parse";
-//const ObjectId = require("mongoose").Types.ObjectId;
-import { isValidObjectId } from "mongoose";
 import { IAutorizacion } from "../models/autorizacion";
 import BussAutorization from "../businessController/autotizacion";
 
@@ -20,7 +8,7 @@ import BussVehiculo from "../businessController/vehiculo";
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   
-  //----------ACTIVIDAD------------//
+  //----------AUTORIZACION------------//
   public async createAutorizacion(request: Request, response: Response) {
     var Autorizacion: BussAutorization = new BussAutorization();
     var AutorizacionData = request.body;
@@ -232,3 +220,4 @@ class RoutesController {
  
 }
 export default RoutesController;
+ */

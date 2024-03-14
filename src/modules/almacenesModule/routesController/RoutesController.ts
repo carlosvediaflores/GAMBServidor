@@ -35,11 +35,10 @@ import { ISalida } from "../models/salida";
 import BussSalida from "../businessController/salida";
 import { IVale } from "../models/vale";
 import BussVale from "../businessController/vale";
-//import BussAutorization from "../activosModule/businessController/autotizacion";
-//import jsonwebtokenSecurity from "../usermodule/middleware";
-
-
-
+import { IAutorizacion } from "../models/autorizacion";
+import BussAutorization from "../businessController/autotizacion";
+import { IVehiculo } from "../models/vehiculo";
+import BussVehiculo from "../businessController/vehiculo";
 
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
@@ -1037,7 +1036,7 @@ class RoutesController {
     var Articulo: BussArticulo = new BussArticulo();
     var IngresoData = request.body;
     let result: any;
-    const resp: any = await compra.getNumCompra();
+    const resp: any = await Ingreso.getNumIngreso();
     if (isEmpty(resp)) {
       IngresoData["numeroEntrada"] = 1;
       result = await Ingreso.addIngreso(IngresoData);
@@ -1111,10 +1110,10 @@ class RoutesController {
       filter1["fecha"] = aux;
     }
     if (params.idProve != null) {
-      let idProve=params.idProve
-      if(!ObjectId.isValid(idProve)){   
-        filter2["_id"] = ""
-      }else {
+      let idProve = params.idProve;
+      if (!ObjectId.isValid(idProve)) {
+        filter2["_id"] = "";
+      } else {
         filter2["_id"] = idProve;
       }
     }
@@ -1197,29 +1196,35 @@ class RoutesController {
       let compraModif: any = {};
       let salidaM: any = {};
       if (data.idCompra) {
-        let listCompra: ICompra= await compra.readCompra(data.idCompra);
+        let listCompra: ICompra = await compra.readCompra(data.idCompra);
         let sumStock = parseInt(data.cantidadCompra) + listCompra.stockCompra;
-        let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;        
-        let listIngreso:any = listCompra.idEntrada
-        if (listIngreso.estado =="EGRESADO") {
-          data.cantidadSalida=data.cantidadCompra
-          let resultEditS = await salida.updateSalida(listCompra.salidas[0]._id, data);
-        } else{
-          
-          if(listCompra.cantidadCompra <= sumStock){
-            let stockAct = sumStock - listCompra.cantidadCompra 
-            let stock: Number = sumArticulo - listCompra.cantidadCompra ;
+        let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad;
+        let listIngreso: any = listCompra.idEntrada;
+        if (listIngreso.estado == "EGRESADO") {
+          data.cantidadSalida = data.cantidadCompra;
+          let resultEditS = await salida.updateSalida(
+            listCompra.salidas[0]._id,
+            data
+          );
+        } else {
+          if (listCompra.cantidadCompra <= sumStock) {
+            let stockAct = sumStock - listCompra.cantidadCompra;
+            let stock: Number = sumArticulo - listCompra.cantidadCompra;
             articuloModif["cantidad"] = stock;
-            data.stockCompra=stockAct
-            if(stockAct > 0){
-              data.estadoCompra="EXISTE"
+            data.stockCompra = stockAct;
+            if (stockAct > 0) {
+              data.estadoCompra = "EXISTE";
+            } else {
+              data.estadoCompra = "AGOTADO";
             }
-            else{
-              data.estadoCompra="AGOTADO"
-            }
-          }else{
-            response.status(300).json({ serverResponse: "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad" });
-             return;
+          } else {
+            response
+              .status(300)
+              .json({
+                serverResponse:
+                  "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad",
+              });
+            return;
           }
         }
         await Articulo.updateArticulo(articulo.id, articuloModif);
@@ -1240,17 +1245,14 @@ class RoutesController {
           compraModif["estadoCompra"] = "AGOTADO";
           let resultSalida = await salida.addSalida(salidaM);
           let idSalida = resultSalida._id;
-          await Egreso.addSalidas(
-            res.idEgreso[0]._id,
-            idSalida
-          );
+          await Egreso.addSalidas(res.idEgreso[0]._id, idSalida);
           var compraAdd = await compra.addSalidas(idCompra, idSalida);
           let result2 = await compra.updateCompra(data._id, compraModif);
-        } else{
-          let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad ;
-          articuloModif["cantidad"] = sumArticulo; 
+        } else {
+          let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad;
+          articuloModif["cantidad"] = sumArticulo;
           await Articulo.updateArticulo(articulo.id, articuloModif);
-        }   
+        }
       }
     }
     var result = await Ingreso.updateIngreso(id, params);
@@ -1322,8 +1324,7 @@ class RoutesController {
       EgresoData["numeroSalida"] = 1;
       result = await Egreso.addEgreso(EgresoData);
     } else {
-      const resp1: any = resp[0];
-      let num = resp1.numeroSalida + 1;
+      let num = resp.numeroSalida + 1;
       EgresoData["numeroSalida"] = num;
       EgresoData["glosaSalida"] = EgresoData.concepto;
       result = await Egreso.addEgreso(EgresoData);
@@ -1342,19 +1343,18 @@ class RoutesController {
       var resultAdd = await Egreso.addSalidas(result._id, idSalida);
       var compraAdd = await compra.addSalidas(data.idCompra, idSalida);
       let stock: Number = Simplearticulo.cantidad - EgresoData.cantidadSalida;
-      let stockCompra: Number =
-        listCompra.stockCompra - EgresoData.cantidadSalida;
+      let stockCompra: Number = listCompra.stockCompra - EgresoData.cantidadSalida;
       EgresoData.stockCompra = stockCompra;
-      EgresoData.cantidad = stock;      
+      EgresoData.cantidad = stock;
       if (stockCompra === 0) {
         EgresoData.estadoCompra = "AGOTADO";
-      }else{
+      } else {
         EgresoData.estadoCompra = "EXISTE";
       }
       let result1 = await articulo.updateArticulo(
         Simplearticulo._id,
         EgresoData
-      );      
+      );
       let resultCompra = await compra.updateCompra(data.idCompra, EgresoData);
       const ENTRADA: ISimpleIngreso = {
         estado: "SALIDA",
@@ -1464,22 +1464,25 @@ class RoutesController {
       let listArticulo = await articulo.readArticulo(data.idArticulo);
       let sumStock = listSalida.cantidadSalida + listCompra.stockCompra;
       let sumCantidad = listArticulo.cantidad + listSalida.cantidadSalida;
-      if(sumStock >= data.cantidadCompra){
-        data.cantidadSalida=data.cantidadCompra;
+      if (sumStock >= data.cantidadCompra) {
+        data.cantidadSalida = data.cantidadCompra;
         data.stockCompra = sumStock - data.cantidadCompra;
         data.cantidad = sumCantidad - data.cantidadCompra;
-        if(data.stockCompra<=0){
-          data.estadoCompra="AGOTADO"
+        if (data.stockCompra <= 0) {
+          data.estadoCompra = "AGOTADO";
+        } else {
+          data.estadoCompra = "EXISTE";
         }
-        else{
-          data.estadoCompra="EXISTE"
-        }
-      }else{
-      response.status(300).json({ serverResponse: `La Cantidad de este artículo ya no existe en Stock, Stock: ${listCompra.stockCompra}` });
-       return;
+      } else {
+        response
+          .status(300)
+          .json({
+            serverResponse: `La Cantidad de este artículo ya no existe en Stock, Stock: ${listCompra.stockCompra}`,
+          });
+        return;
       }
       delete data.cantidadCompra;
-      let result1 = await articulo.updateArticulo(data.idArticulo, data);  
+      let result1 = await articulo.updateArticulo(data.idArticulo, data);
       let resultCompra = await compra.updateCompra(data.idCompra, data);
       let resultSalida = await salida.updateSalida(data.idSalida, data);
     }
@@ -1530,8 +1533,9 @@ class RoutesController {
         data.idCompra._id,
         updateData
       );
-      let removeSalida= await compra.removeIdSalida(
-        data.idCompra._id, data._id
+      let removeSalida = await compra.removeIdSalida(
+        data.idCompra._id,
+        data._id
       );
       let deleteSalida = await salida.deleteSalida(data._id);
     }
@@ -1595,8 +1599,7 @@ class RoutesController {
       egresoData["numeroSalida"] = 1;
       result = await Egreso.addEgreso(egresoData);
     } else {
-      const resp1: any = resp[0];
-      let num = resp1.numeroSalida + 1;
+      let num = resp.numeroSalida + 1;
       egresoData["numeroSalida"] = num;
       result = await Egreso.addEgreso(egresoData);
     }
@@ -1649,37 +1652,35 @@ class RoutesController {
     var order: any = {};
     let year = new Date();
     let gestion = year.getFullYear();
-    params.concepto=`Saldo Inicial ${gestion}`;
+    params.concepto = `Saldo Inicial ${gestion}`;
     if (params.limit) {
       limit = parseInt(params.limit);
     }
     if (params.del != null) {
       var gt = params.del;
       aux["$gte"] = gt;
-    }
-    else{
+    } else {
       aux["$gte"] = `${gestion}-01-01T04:00:00.000Z`;
     }
     if (params.al != null) {
       var lt = params.al;
-      let date = new Date(lt)
+      let date = new Date(lt);
       date.setDate(date.getDate() + 1);
 
       aux["$lte"] = date;
-    }
-    else{
+    } else {
       aux["$lte"] = `${gestion}-12-31T04:00:00.000Z`;
     }
     if (params.estadoCompra != null) {
       var estadoCompra = new RegExp(params.estadoCompra, "i");
-      filter["estadoCompra"] =  estadoCompra;
+      filter["estadoCompra"] = estadoCompra;
     }
     if (params.catProgra != null) {
-      if(params.catProgra === ""){
+      if (params.catProgra === "") {
         delete params.catProgra;
-      }else{
+      } else {
         var catProgra = params.catProgra;
-        filter["catProgra"] =  catProgra;
+        filter["catProgra"] = catProgra;
       }
     }
     if (Object.entries(aux).length > 0) {
@@ -1700,8 +1701,6 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    console.log("filter",filter);
-    
     const [res, totalDocs] = await Promise.all([
       Compra.readCompra(filter, skip, limit, order),
       Compra.total({}),
@@ -1744,7 +1743,7 @@ class RoutesController {
     var Compra: BussCompra = new BussCompra();
     var searchArticulo = request.params.articulo;
     var searchCatProgra = request.params.catProgra;
-    let res = await Compra.searchCombustible(searchArticulo,searchCatProgra);
+    let res = await Compra.searchCombustible(searchArticulo, searchCatProgra);
     response.status(200).json({ serverResponse: res });
   }
   public async queryCompraCatPro(request: Request, response: Response) {
@@ -1753,7 +1752,7 @@ class RoutesController {
     let res = await Compra.queryCompraCatPro(quieryIngreso);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
-  
+
   public async searchCompraAll(request: Request, response: Response) {
     var Compra: BussCompra = new BussCompra();
     var filter1: any = {};
@@ -1887,10 +1886,10 @@ class RoutesController {
       filter1["codigo"] = codigo;
     }
     if (params.unidadDeMedida != null) {
-      let unidadDeMedida=params.unidadDeMedida
-      if(unidadDeMedida!="null" && unidadDeMedida!=""){
+      let unidadDeMedida = params.unidadDeMedida;
+      if (unidadDeMedida != "null" && unidadDeMedida != "") {
         filter1["unidadDeMedida"] = unidadDeMedida;
-      }else{
+      } else {
         delete filter1.unidadDeMedida;
       }
     }
@@ -1907,21 +1906,21 @@ class RoutesController {
       }
     }
     if (params.idPartida != null) {
-      let idPartida=params.idPartida
-      if(!ObjectId.isValid(idPartida)){   
-        filter2["_id"] = ""
-      }else {
+      let idPartida = params.idPartida;
+      if (!ObjectId.isValid(idPartida)) {
+        filter2["_id"] = "";
+      } else {
         filter2["_id"] = idPartida;
       }
     }
     if (params.stock != null) {
       var stock: number = parseInt(params.stock);
-      if (stock===1) {
+      if (stock === 1) {
         aux["$lt"] = stock;
-      } else if(stock===0) {
+      } else if (stock === 0) {
         aux["$gt"] = stock;
-      }else{
-        aux[""]
+      } else {
+        aux[""];
       }
     }
     if (Object.entries(aux).length > 0) {
@@ -1934,24 +1933,24 @@ class RoutesController {
     var ingreso: BussIngreso = new BussIngreso();
     var compra: BussCompra = new BussCompra();
     const params = request.body;
-    var filter: any = {stockCompra:{$gt:0}};
-    let resStokCompra:any = await compra.readCompra(filter)
+    var filter: any = { stockCompra: { $gt: 0 } };
+    let resStokCompra: any = await compra.readCompra(filter);
     let year = new Date();
     let gestion = year.getFullYear();
-    let date = `${gestion-1}-12-31`
-    params.concepto=`Saldo Inicial ${gestion}`;
-    params.fecha=year;
-    params.numeroEntrada=1
-    params.estado="REGISTRADO"
-    params.tipo="SALDO_INICIAL";
-    params.idPersona="6253bf6900ae6f0014f7bc23";//cambiar
-    params.idUsuario="6253bf6900ae6f0014f7bc23";//cambiar
-    params.idProveedor="65c63b0580c97d003f229223"//cambiar a proveedor gamb
+    let date = `${gestion - 1}-12-31`;
+    params.concepto = `Saldo Inicial ${gestion}`;
+    params.fecha = year;
+    params.numeroEntrada = 1;
+    params.estado = "REGISTRADO";
+    params.tipo = "SALDO_INICIAL";
+    params.idPersona = "6253bf6900ae6f0014f7bc23"; //cambiar
+    params.idUsuario = "6253bf6900ae6f0014f7bc23"; //cambiar
+    params.idProveedor = "65c63b0580c97d003f229223"; //cambiar a proveedor gamb
     let result = await ingreso.addIngreso(params);
     console.log(params);
     for (let i = 0; i < resStokCompra.length; i++) {
       let data = resStokCompra[i];
-      
+
       let saldoData: any = {};
       let compraData: any = {};
       saldoData["idEntrada"] = result._id;
@@ -1962,20 +1961,233 @@ class RoutesController {
       saldoData["stockCompra"] = data.stockCompra;
       saldoData["ubicacion"] = data.ubicacion;
       saldoData["precio"] = data.precio;
-      compraData.stockCompra=0;
-      compraData.estadoCompra="AGOTADO"
+      compraData.stockCompra = 0;
+      compraData.estadoCompra = "AGOTADO";
       let resultCompra = await compra.addCompra(saldoData);
       let idCompra = resultCompra._id;
       await ingreso.addCompras(result._id, idCompra);
       await compra.updateCompra(data._id, compraData);
     }
     let paramsDate: any = {};
-    paramsDate["createdAt"]= new Date(date)
-    var filter: any = {createdAt:{$gt:`${gestion}-01-01`},estadoCompra:"AGOTADO"};
-    let resCompra:any = await compra.readCompra(filter)
+    paramsDate["createdAt"] = new Date(date);
+    var filter: any = {
+      createdAt: { $gt: `${gestion}-01-01` },
+      estadoCompra: "AGOTADO",
+    };
+    let resCompra: any = await compra.readCompra(filter);
     compra.updateCompraAll(filter, paramsDate);
-    response.status(200).json({ serverResponse: result, total: resStokCompra.length})
-
+    response
+      .status(200)
+      .json({ serverResponse: result, total: resStokCompra.length });
+  }
+  //----------AUTORIZACION------------//
+  public async createAutorizacion(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    var AutorizacionData = request.body;
+    const resp: any = await Autorizacion.getNumAut();
+    //console.log(resp);
+    let year = new Date();
+    let yearAct = year.getFullYear();
+    if (isEmpty(resp)) {
+      //console.log(AutorizacionData);
+      AutorizacionData["numeroAutorizacion"] = 1;
+      let result = await Autorizacion.addAutorization(AutorizacionData);
+      response.status(201).json({ serverResponse: result });
+      return;
+    }
+    let yearRes = resp.fecha.getFullYear();
+    if (yearAct != yearRes) {
+      //console.log(AutorizacionData);
+      AutorizacionData["numeroAutorizacion"] = 1;
+      let result = await Autorizacion.addAutorization(AutorizacionData);
+      response.status(201).json({ serverResponse: result });
+      return;
+    }
+    AutorizacionData["numeroAutorizacion"] = resp.numeroAutorizacion + 1;
+    let result = await Autorizacion.addAutorization(AutorizacionData);
+    console.log(AutorizacionData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getAutorizaciones(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    var filter: any = {};
+    var search: string | any;
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.codigo != null) {
+      var expresion = new RegExp(params.codigo);
+      filter["codigo"] = expresion;
+    }
+    if (params.denominacion != null) {
+      var expresion = new RegExp(params.denominacion);
+      filter["denominacion"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IAutorizacion> = await Autorizacion.readAutorization();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IAutorizacion> = await Autorizacion.readAutorization(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async listAutorizacion(request: Request, response: Response) {
+    var convenio: BussAutorization = new BussAutorization();
+    var searchAutorizacion = request.params.search;
+    let res = await convenio.searchAutorization();
+    response.status(200).json({ serverResponse: res });
+  }
+  public async getAutorizacion(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let repres = await Autorizacion.readAutorization(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async getAutorizacionCod(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let codigo = request.params.codigo;
+    let repres = await Autorizacion.readAutorization(codigo);
+    response.status(200).json(repres);
+  }
+  public async updateAutorizacion(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Autorizacion.updateAutorization(id, params);
+    response.status(200).json(result);
+  }
+  public async removeAutorizacion(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let id: string = request.params.id;
+    let result = await Autorizacion.deleteAutorization(id);
+    response.status(200).json({ serverResponse: "Se elimino el Registro" });
+  }
+  //----------VEHICULOS------------//
+  public async createVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var VehiculoData = request.body;
+    let result = await Vehiculo.addVehiculo(VehiculoData);
+    response.status(201).json({ serverResponse: result });
+  }
+  public async getVehiculos(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IVehiculo> = await Vehiculo.readVehiculo();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IVehiculo> = await Vehiculo.readVehiculo(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async getVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let repres = await Vehiculo.readVehiculo(request.params.id);
+    response.status(200).json(repres);
+  }
+  public async updateVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Vehiculo.updateVehiculo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    let id: string = request.params.id;
+    let result = await Vehiculo.deleteVehiculo(id);
+    response.status(200).json({ serverResponse: "Se elimino Vehiculo" });
+  }
+  public async searchVehiculo(request: Request, response: Response) {
+    var Vehiculo: BussVehiculo = new BussVehiculo();
+    var searchVehiculo = request.params.search;
+    let res = await Vehiculo.searchVehiculo(searchVehiculo);
+    response.status(200).json({ serverResponse: res });
   }
   //------------VALES---------//
   //listar
@@ -2029,12 +2241,7 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    let res: Array<IVale> = await Vale.readVale(
-      filter,
-      skip,
-      limit,
-      order
-    );
+    let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -2047,65 +2254,84 @@ class RoutesController {
   //crear
   public async createVale(request: Request, response: Response) {
     var vale: BussVale = new BussVale();
-    //var Autorizacion: BussAutorization = new BussAutorization();
+    var Autorizacion: BussAutorization = new BussAutorization();
     var compra: BussCompra = new BussCompra();
     var Ingreso: BussIngreso = new BussIngreso();
     var Articulo: BussArticulo = new BussArticulo();
+    var Egreso: BussEgreso = new BussEgreso();
+    var salida: BussSalida = new BussSalida();
     var valeData = request.body;
-   // let result: any;
+    let numero:Number=1;
+    let paramsAut: any = {};
+    let paramsEgreso: any = {};
+    let paramsSalida: any = {};
+    let paramsCompra: any = {};
+    let paramsArticulo: any = {};
+    let paramsIngreso: any = {};
+    let AutorizacionData:any = await Autorizacion.readAutorization(valeData.autorizacion);
+    const respEgreso: any = await Egreso.getNumEgreso();
+    if (valeData.idCompra == "") {
+      delete valeData.idCompra;
+    }
     const resp: any = await vale.getNumVale();
-    console.log(resp);
     let year = new Date();
-    let yearAct = year.getFullYear()
-    if (isEmpty(resp)) {
-      console.log(valeData);
-      valeData["numeroVale"] = 1;
-      let result = await vale.addVale(valeData);
-      response.status(201).json({ serverResponse: result});
-      return;
+    let yearAct = year.getFullYear();
+    if (resp) {
+      numero=resp.numeroVale+numero
+     
+      let yearRes = resp.fecha.getFullYear();
+      if (yearAct != yearRes) {
+        numero= 1;
+      }
     }
-    let yearRes = resp.fecha.getFullYear()
-    console.log(yearAct, yearRes);
-    if (yearAct!=yearRes) {
-      console.log(valeData);
-      valeData["numeroVale"] = 1;
-      let result = await vale.addVale(valeData);
-      response.status(201).json({ serverResponse: result});
-      return;
-    }
-    valeData["numeroVale"] = resp.numeroVale +1;
+    valeData["numeroVale"] = numero;
     let result = await vale.addVale(valeData);
-    let idAut= result.autorizacion._id
-    console.log(result);
-    //let repres = await Autorizacion.readAutorization(idAut);
-
-    response.status(201).json({ serverResponse: result });
-
-
-    /* 
-    for (let i = 0; i < IngresoData.articulos.length; i++) {
-      let data = IngresoData.articulos[i];
-      let articulo = await Articulo.readArticulo(data.idArticulo);
-      let stock: Number = articulo.cantidad + parseInt(data.cantidadCompra);
-      var params: any = request.body;
-      let compraData: any = request.body;
-      params["cantidad"] = stock;
-      compraData["idEntrada"] = result._id;
-      compraData["idArticulo"] = data.idArticulo;
-      compraData["idProducto"] = data.idArticulo;
-      compraData["catProgra"] = data.catProgra;
-      compraData["factura"] = data.factura;
-      compraData["cantidadCompra"] = data.cantidadCompra;
-      compraData["stockCompra"] = data.cantidadCompra;
-      compraData["ubicacion"] = data.ubicacion;
-      compraData["precio"] = data.precio;
-      let resultCompra = await Vale.addVale(compraData);
-      let idCompra = resultCompra._id;
-      var resultAdd = await Ingreso.addCompras(result._id, idCompra);
-      let result1 = await Articulo.updateArticulo(articulo.id, params);
+    paramsAut.numeroVale = result.numeroVale;
+    await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
+    if (!valeData.idCompra) {
+      response.status(201).json({ serverResponse: result });
+      return;
     }
-    response.status(201).json({ serverResponse: result }); */
+    let listCompra = await compra.readCompra(valeData.idCompra);
+    let entrada: any = listCompra.idEntrada;
+    let Simplearticulo: any = listCompra.idArticulo;
+    let solicitante:String = `${AutorizacionData.unidadSolicitante.user.username }${""} ${ AutorizacionData.unidadSolicitante.user.surnames}`
+    let entregadoA:String = `${AutorizacionData.conductor.username }${" "}${ AutorizacionData.conductor.surnames} `
+    paramsEgreso.entregado=entregadoA;
+    paramsEgreso.cargo=AutorizacionData.conductor.post;
+    paramsEgreso.numeroSalida=respEgreso.numeroSalida + 1;
+    paramsEgreso.idProveedor=entrada.idProveedor._id;
+    paramsEgreso.idPersona=valeData.encargadoControl;
+    paramsEgreso.idIngreso=entrada._id
+    paramsEgreso.glosaSalida=`Salida de ${Simplearticulo.nombre } solicitado por ${solicitante } para ${AutorizacionData.motivo}`
+    let resultEgreso = await Egreso.addEgreso(paramsEgreso);
+    paramsSalida.cantidadSalida=valeData.cantidad;
+    paramsSalida.catProgra=valeData.catProgra;
+    paramsSalida.idCompra=valeData.idCompra;
+    paramsSalida.idEgreso=resultEgreso._id;
+    let resultSalida = await salida.addSalida(paramsSalida);
+    let idSalida = resultSalida._id;
+    var resultAdd = await Egreso.addSalidas(resultEgreso._id, idSalida);
+    var compraAdd = await compra.addSalidas(valeData.idCompra, idSalida);
+    let stock: Number = Simplearticulo.cantidad - valeData.cantidad;
+    let stockCompra: Number = listCompra.stockCompra - valeData.cantidad;
+    paramsCompra.stockCompra = stockCompra;
+    paramsArticulo.cantidad= stock;
+    if (stockCompra === 0) {
+      paramsCompra.estadoCompra = "AGOTADO";
+    } else {
+      paramsCompra.estadoCompra = "EXISTE";
+    }
+    let result1 = await Articulo.updateArticulo(Simplearticulo._id,paramsArticulo);
+    let resultCompra = await compra.updateCompra(valeData.idCompra, paramsCompra);
+    paramsIngreso.estado="SALIDA"
+    var resul = await Ingreso.updateIngreso(entrada._id, paramsIngreso);
+    response.status(201).json({ serverResponse: result });
   }
-
+  public async getVale(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    let valeData = await Vale.readVale(request.params.id);
+    response.status(200).json(valeData);
+  }
 }
 export default RoutesController;

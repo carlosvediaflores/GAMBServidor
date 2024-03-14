@@ -174,12 +174,24 @@ class RoutesController {
     if (params["password"] != null) {
       params["password"] = sha1(params["password"]);
     }
+    console.log(params);
+    if(params.cargo===""){
+      delete params.cargo
+    }
     if(params.cargo){
       var sub:any = await subdir.readSubId(params.cargo);
       params.post=sub.nombresubdir
       params.user=id
       await subdir.updateSubdi(sub._id, params);
     }
+    if(params.birthday===""){
+      delete params.birthday
+    }
+    if(params.password===""){
+      delete params.password
+    }
+    console.log(params);
+    
     var result = await user.updateUser(id, params);
     response.status(200).json(result);
   }

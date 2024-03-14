@@ -1,4 +1,4 @@
-/* import autorizacionModel, { IAutorizacion } from "../models/autorizacion";
+import autorizacionModel, { IAutorizacion } from "../models/autorizacion";
 export class BussAutorization {
   constructor() {}
   public async readAutorization(): Promise<Array<IAutorizacion>>;
@@ -17,7 +17,27 @@ export class BussAutorization {
     order?:any
   ): Promise<Array<IAutorizacion> | IAutorizacion> {
     if (params1 && typeof params1 == "string") {
-      var result: IAutorizacion = await autorizacionModel.findOne({ _id: params1 }).populate("id_programa");
+      var result: IAutorizacion = await autorizacionModel.findOne({ _id: params1 })
+      .populate("encargadoControl")
+      .populate("conductor")
+      .populate("vehiculo")
+      .populate({
+        path: "unidadSolicitante",
+        model: "Subdirecciones",
+        populate: {
+          path: "unidad",
+          model: "Organizacion",
+        },    
+      })
+      .populate({
+        path: "unidadSolicitante",
+        model: "Subdirecciones",
+        populate: {
+          path: "user",
+          model: "User",
+        },
+        
+      });  
       return result;
     } else if (params1) {
       let skip = params2;
@@ -36,26 +56,66 @@ export class BussAutorization {
           populate: {
             path: "unidad",
             model: "Organizacion",
+          },    
+        })
+        .populate({
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "user",
+            model: "User",
           },
-        });
-        
+          
+        });  
       return listAutorization;
     } else {
-      let listAutorization: Array<IAutorizacion> = await autorizacionModel.find().populate("id_programa");
+      let listAutorization: Array<IAutorizacion> = await autorizacionModel.find()
+      .populate("encargadoControl")
+      .populate("conductor")
+      .populate("vehiculo")
+      .populate({
+        path: "unidadSolicitante",
+        model: "Subdirecciones",
+        populate: {
+          path: "unidad",
+          model: "Organizacion",
+        },    
+      })
+      .populate({
+        path: "unidadSolicitante",
+        model: "Subdirecciones",
+        populate: {
+          path: "user",
+          model: "User",
+        },
+        
+      });
       return listAutorization;
     }
   }
-  public async searchAutorization(query?: any): Promise<Array<IAutorizacion>>;
-  public async searchAutorization(
-    search: string | any,
-  ) {
-    var filter = {
-      $or: [
-        { codigo: { $regex: search, $options: "i" } },
-        { denominacion: { $regex: search, $options: "i" } },
-      ],
-    };
-    let listAutorization: Array<IAutorizacion> = await autorizacionModel.find(filter).sort({ _id: -1 })
+  public async searchAutorization() {
+    let listAutorization: Array<IAutorizacion> = await autorizacionModel.find({numeroVale:null}).sort({ _id: -1 })
+    .populate("encargadoControl")
+        .populate("conductor")
+        .populate("vehiculo")
+        .populate({
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "unidad",
+            model: "Organizacion",
+          },
+          
+        })
+        .populate({
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "user",
+            model: "User",
+          },
+          
+        })
     return listAutorization;
   }
   public async readAutorizationCod(codigo: string | any): Promise<IAutorizacion>;
@@ -97,4 +157,3 @@ export class BussAutorization {
   }
 }
 export default BussAutorization;
- */

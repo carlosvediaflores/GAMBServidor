@@ -28,14 +28,30 @@ class BussVale {
         .limit(limit)
         .sort(order)
         .populate("encargadoControl")
-        .populate("autorizacion")
         .populate("idProducto")
         .populate({
-          path: "unidadSolicitante",
-          model: "Subdirecciones",
+          path: "autorizacion",
+          model: "act_autorizations",
           populate: {
-            path: "unidad",
-            model: "Organizacion",
+            path: "unidadSolicitante",
+            model: "Subdirecciones",
+            populate: { path: "user", model: "User" },
+          },
+        })
+        .populate({
+          path: "autorizacion",
+          model: "act_autorizations",
+          populate: {
+            path: "conductor",
+            model: "User",
+          },
+        })
+        .populate({
+          path: "autorizacion",
+          model: "act_autorizations",
+          populate: {
+            path: "vehiculo",
+            model: "alm_vehiculos",
           },
         });
         

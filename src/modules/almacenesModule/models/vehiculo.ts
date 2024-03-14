@@ -1,4 +1,4 @@
-/* import mongoose, { Schema, Document, Number } from "mongoose";
+import mongoose, { Schema, Document, Number } from "mongoose";
 
 export interface IVehiculo extends Document {
   codigoDejurbe:string;
@@ -33,4 +33,3 @@ const vehiculoSchema: Schema = new Schema(
   }
 );
 export default mongoose.model<IVehiculo>("alm_vehiculos", vehiculoSchema);
- */

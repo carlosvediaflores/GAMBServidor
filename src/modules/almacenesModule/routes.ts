@@ -309,6 +309,49 @@ class Routes {
       .route(`${this.routeparent}/cierreGestion`)
       .get(this.routesController.cierreGestion);
 
+    //-------AUTORIZATION--//
+    app
+      .route(`${this.routeparent}/autorizacion`)
+      .post(this.routesController.createAutorizacion);
+    app
+      .route(`${this.routeparent}/autorizaciones`)
+      .get(this.routesController.getAutorizaciones);
+    app
+      .route(`${this.routeparent}/autorizacion/:id`)
+      .get(this.routesController.getAutorizacion);
+    app
+      .route(`${this.routeparent}/autorizacionCod/:codigo`)
+      .get(this.routesController.getAutorizacionCod);
+    app
+      .route(`${this.routeparent}/autorizacion/:id`)
+      .put(this.routesController.updateAutorizacion);
+    app
+      .route(`${this.routeparent}/autorizacion/:id`)
+      .delete(this.routesController.removeAutorizacion);
+    app
+      .route(`${this.routeparent}/listAutorizacion`)
+      .get(this.routesController.listAutorizacion);
+    //-------VEHICULOS--//
+    app
+      .route(`${this.routeparent}/vehiculo`)
+      .post(this.routesController.createVehiculo);
+    app
+      .route(`${this.routeparent}/vehiculos`)
+      .get(this.routesController.getVehiculos);
+    app
+      .route(`${this.routeparent}/vehiculo/:id`)
+      .get(this.routesController.getVehiculo);
+    app
+      .route(`${this.routeparent}/vehiculo/:id`)
+      .put(this.routesController.updateVehiculo);
+    app
+      .route(`${this.routeparent}/vehiculo/:id`)
+      .delete(this.routesController.removeVehiculo);
+    app
+      .route(`${this.routeparent}/searchVehiculo/:search?`)
+      .get(this.routesController.searchVehiculo);
+ 
+
     //-------Vales--//
     //crear
     app
@@ -319,11 +362,11 @@ class Routes {
       .route(`${this.routeparent}/vales`)
       .get(this.routesController.getVales);
       //buscar vale por ID
-    /* app
+    app
       .route(`${this.routeparent}/vale/:id`)
       .get(this.routesController.getVale);
        //editar vale por ID
-    app
+ /*    app
       .route(`${this.routeparent}/vale/:id`)
       .put(this.routesController.updateVale);
       //eliminar vale por ID

@@ -1,4 +1,4 @@
-/* import vehiculoModel, { IVehiculo } from "../models/vehiculo";
+import vehiculoModel, { IVehiculo } from "../models/vehiculo";
 class BussVehiculo {
   constructor() {}
   public async readVehiculo(): Promise<Array<IVehiculo>>;
@@ -38,6 +38,25 @@ class BussVehiculo {
       return listVehiculos;
     }
   }
+  /* public async searchVehiculo(query?: any): Promise<Array<IVehiculo>>;
+  public async searchVehiculo(search: string | any) {
+    var filter = {
+      $or: [
+        { 'idArticulo._id': { $regex: search, $options: "i" } },
+        /* { catProgra: { $regex: search, $options: "i" } },
+        { factura: { $regex: search, $options: "i" } },
+        { estadoVehiculo: { $regex: search, $options: "i" } }, 
+      ],
+    };
+    console.log(filter.$or)
+    let listVehiculo: Array<IVehiculo> = await vehiculoModel
+      .find({ 'idArticulo.codigo': search })
+      .sort({ createdAt: -1 })
+      .populate("idArticulo")
+      .populate("idEntrada");
+    return listVehiculo;
+  } */
+
   public async searchVehiculo(search:string) {
     let listVehiculo: any  = await vehiculoModel
     .find({estadoVehiculo:'EXISTE', idProducto:search})
@@ -66,4 +85,3 @@ class BussVehiculo {
   }
 }
 export default BussVehiculo;
- */

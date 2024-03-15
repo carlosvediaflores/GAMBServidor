@@ -193,8 +193,7 @@ class RoutesController {
       delete params.birthday
     }    
     var result = await user.updateUser(id, params);
-    response.status(200).json(result);
-    
+    response.status(200).json(result); 
   }
   public async removeUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();

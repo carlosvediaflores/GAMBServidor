@@ -171,27 +171,27 @@ class RoutesController {
     let subdir: BussinesSubdir = new BussinesSubdir();
     let id: string = request.params.id;
     var params = request.body;
+    if(params.password===""){
+      delete params.password
+    }
     if (params["password"] != null) {
       params["password"] = sha1(params["password"]);
     }
-    console.log(params);
     if(params.cargo===""){
       delete params.cargo
     }
     if(params.cargo){
       var sub:any = await subdir.readSubId(params.cargo);
+      if(!sub){
+        var sub:any = await subdir.readSubId(params.cargo._id);
+      }
       params.post=sub.nombresubdir
       params.user=id
       await subdir.updateSubdi(sub._id, params);
     }
     if(params.birthday===""){
       delete params.birthday
-    }
-    if(params.password===""){
-      delete params.password
-    }
-    console.log(params);
-    
+    }    
     var result = await user.updateUser(id, params);
     response.status(200).json(result);
   }
@@ -353,10 +353,12 @@ class RoutesController {
       return;
     }
     var org: BussinesOrganizacion = new BussinesOrganizacion();
-    //var userResult: IUser = await orgToUpdate.save();
     let subdir: BussinesSubdir = new BussinesSubdir();
     var subdirData: any = request.body;
+    subdirData.unidad=idOrg;
     var result1 = await subdir.addSubdir(subdirData);
+    console.log("Dataunidad", subdirData);
+    console.log("unidad", result1); 
     let idSub = result1._id;
     var result = await org.addSub(idOrg, idSub);
 

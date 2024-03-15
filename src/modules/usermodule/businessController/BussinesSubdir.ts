@@ -6,15 +6,22 @@ class BussinesSubdir {
 
     public async readSub(params1?: string | any, params2?: number, params3?: number): Promise<Array<ISubdireciones> | ISubdireciones> {
         if (params1 && typeof params1 == "string") {
-            var result: ISubdireciones = await SubdireccionesModel.findOne({ nombresubdir: params1 });
+            var result: ISubdireciones = await SubdireccionesModel.findOne({ nombresubdir: params1 })
+            .populate("user")
+            .populate("unidad");
             return result;
         } else if (params1) {
             let skip = params2 ? params2 : 0;
             let limit = params3 ? params3 : 1;
-            let listUser: Array<ISubdireciones> = await SubdireccionesModel.find(params1).skip(skip).limit(limit);
+            let listUser: Array<ISubdireciones> = await SubdireccionesModel.find(params1)
+            .populate("user")
+            .populate("unidad")
+            .skip(skip).limit(limit);
             return listUser;
         } else {
-            let listUser: Array<ISubdireciones> = await SubdireccionesModel.find();
+            let listUser: Array<ISubdireciones> = await SubdireccionesModel.find()
+            .populate("user")
+            .populate("unidad");
             return listUser;
 
         }
@@ -51,6 +58,14 @@ class BussinesSubdir {
     public async deleteSubdir(id: String) {
         let result = await SubdireccionesModel.deleteOne({ _id: id });
         ////----------////
+        return result;
+    }
+    public async addOrg(idOr: string, organizacion: any) {
+        let result = await SubdireccionesModel.updateOne({ _id: idOr }, { $push: organizacion })
+        return result;
+    }
+    public async removeOrg(idOr: string, organizacion: any) {
+        let result = await SubdireccionesModel.updateOne({ _id: idOr }, { $pull: organizacion })
         return result;
     }
 

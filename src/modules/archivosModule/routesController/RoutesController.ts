@@ -391,7 +391,7 @@ class RoutesController {
             msg: "No es una extensión permitida",
           });
         }
-        var newname: string = `${"GAMB"}_${area}_${
+        var newname: string = `${"GAMB"}_${filehash}_${area}_${
           carpetaResult.tipo
         }_${"Nro"}${contaData.numero}_${
           carpetaResult.gestion
@@ -704,7 +704,7 @@ class RoutesController {
       }
       let carpeta = result.idCarpeta[0]
 
-      var newname: string = `${"GAMB"}_${carpeta.area}_${
+      var newname: string = `${"GAMB"}_${filehash}_${carpeta.area}_${
         carpeta.tipo
       }_${"Nro"}${result.numero}_${
         carpeta.gestion
@@ -717,6 +717,8 @@ class RoutesController {
       if (totalpath != result.path) {
         borrarImagen(pathViejo);
       }
+      console.log(params);
+      
       params.uri = "getArchivos/" + newname;
       
       var Result = await Conta.updateConta(id, params);

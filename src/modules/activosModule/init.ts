@@ -1,4 +1,4 @@
-import { Express } from "express";
+/* import { Express } from "express";
 import Routes from "./routes";
 class ActivosModule {
     private routes: Routes;
@@ -7,4 +7,4 @@ class ActivosModule {
         this.routes = new Routes(root, app);
     }   
 }
-export default ActivosModule;
+export default ActivosModule; */

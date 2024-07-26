@@ -15,6 +15,7 @@ export interface IVale extends Document {
   unidadSolicitante:string;
   conductor:string;
   vehiculo:string;
+  precio:number;
   //productos:[string];
 }
 const valeSchema: Schema = new Schema(
@@ -35,6 +36,7 @@ const valeSchema: Schema = new Schema(
     conductor: { type: Schema.Types.ObjectId, ref: "User" },
     vehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
     productos: { type: Array },
+    precio:{type:Number,  default:0},
     estado:{type:String, default:"REGISTRADO"}
 
   },

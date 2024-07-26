@@ -2307,7 +2307,6 @@ class RoutesController {
     let paramsCompra: any = {};
     let paramsArticulo: any = {};
     let paramsIngreso: any = {};
-    console.log(valeData);
     
     let AutorizacionData:any = await Autorizacion.readAutorization(valeData.autorizacion);
     const respEgreso: any = await Egreso.getNumEgreso();
@@ -2317,16 +2316,28 @@ class RoutesController {
     const resp: any = await vale.getNumVale();
     let year = new Date();
     let yearAct = year.getFullYear();
+    
     if (resp) {
       numero=resp.numeroVale+numero
-     
+      
       let yearRes = resp.fecha.getFullYear();
       if (yearAct != yearRes) {
         numero= 1;
       }
     }
+    if(valeData.precio){
+      if(valeData.idProducto==='642c3e7b3b1ac20013da2571'){
+        valeData.cantidad=valeData.precio / 3.74
+      }
+      if(valeData.idProducto==='6439b82156cc6b00132c9ab2'){
+        valeData.cantidad=valeData.precio / 3.72
+      }
+
+    }
     valeData["numeroVale"] = numero;
     let result = await vale.addVale(valeData);
+    console.log(valeData)
+    console.log(result)
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
     if (!valeData.idCompra) {

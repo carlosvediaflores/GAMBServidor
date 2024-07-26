@@ -7,8 +7,13 @@ export interface ISegPoa extends Document {
   presupuesto_vigente: string;
   ejecucion_presupuestaria:string;
   saldo:string ;
-  etapa:string
-  responsable:string
+  etapa:string;
+  esVigente:boolean;
+  responsable:string;
+  canton:string;
+  subcentalia:string;
+  comunidad:string;
+  user:string
 }
 const SegPoaSchema: Schema = new Schema(
   {
@@ -20,7 +25,12 @@ const SegPoaSchema: Schema = new Schema(
     ejecucion_presupuestaria:{type: String},
     saldo:{type: String},
     etapa:{type:String},
-    responsable:{ type: Schema.Types.ObjectId, ref: 'User'}
+    esVigente:{type:Boolean, default:true},
+    responsable:{ type: Schema.Types.ObjectId, ref: 'User'},
+    canton:{type:String},
+    subcentralia:{type:String},
+    comunidad:{type:String},
+    user:{ type: Schema.Types.ObjectId, ref: 'User'},
   },
   {
     timestamps: true,

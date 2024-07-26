@@ -62,7 +62,7 @@ class BusSegPoa {
     return listSegPoa;
   }
   public async getCatProg (){
-    let result: Array<ISegPoa> = await segPoaModule.find({partida:""});
+    let result: Array<ISegPoa> = await segPoaModule.find();
     return result;
   }
   public async addSegPoa(SegPoa: ISegPoa) {

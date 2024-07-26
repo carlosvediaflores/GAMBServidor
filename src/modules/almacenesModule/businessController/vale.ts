@@ -17,7 +17,44 @@ class BussVale {
     order?:any
   ): Promise<Array<IVale> | IVale> {
     if (params1 && typeof params1 == "string") {
-      var result: IVale = await valeModel.findOne({ _id: params1 }).populate("id_programa");
+      var result: IVale = await valeModel.findOne({ _id: params1 })
+      .populate("encargadoControl")
+      .populate({
+        path: "conductor",
+        model: "User",
+        populate: {
+          path: "cargo",
+          model: "Subdirecciones",
+        },
+        
+      })
+      .populate("vehiculo")
+      .populate("idProducto")
+      .populate({
+        path: "autorizacion",
+        model: "act_autorizations",
+        populate: {
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: { path: "user", model: "User" },
+        },
+      })
+      .populate({
+        path: "autorizacion",
+        model: "act_autorizations",
+        populate: {
+          path: "conductor",
+          model: "User",
+        },
+      })
+      .populate({
+        path: "autorizacion",
+        model: "act_autorizations",
+        populate: {
+          path: "vehiculo",
+          model: "alm_vehiculos",
+        },
+      });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -28,6 +65,16 @@ class BussVale {
         .limit(limit)
         .sort(order)
         .populate("encargadoControl")
+        .populate({
+          path: "conductor",
+          model: "User",
+          populate: {
+            path: "cargo",
+            model: "Subdirecciones",
+          },
+          
+        })
+        .populate("vehiculo")
         .populate("idProducto")
         .populate({
           path: "autorizacion",

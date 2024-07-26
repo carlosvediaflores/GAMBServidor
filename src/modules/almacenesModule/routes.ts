@@ -144,6 +144,9 @@ class Routes {
       .get(this.routesController.searchActividad); */
     //--------------CSV--------------//
     app
+      .route(`${this.routeparent}/excel`)
+      .post(this.routesController.uploadExcelSegPoa);
+    app
       .route(`${this.routeparent}/csv`)
       .post(this.routesController.uploadCsvPoa);
     app

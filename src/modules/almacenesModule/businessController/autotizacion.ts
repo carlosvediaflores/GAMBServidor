@@ -94,7 +94,7 @@ export class BussAutorization {
     }
   }
   public async searchAutorization() {
-    let listAutorization: Array<IAutorizacion> = await autorizacionModel.find({numeroVale:null}).sort({ _id: -1 })
+    let listAutorization: Array<IAutorizacion> = await autorizacionModel.find({numeroVale:null}).sort({ _id: -1 }).limit(50)
     .populate("encargadoControl")
         .populate("conductor")
         .populate("vehiculo")

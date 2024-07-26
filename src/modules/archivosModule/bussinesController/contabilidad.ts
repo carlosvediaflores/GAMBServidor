@@ -64,7 +64,7 @@ class BussConta {
       return err;
     }
   }
-  public async updatePushConta(id: string, Conta: any) {
+  public async  updatePushConta(id: string, Conta: any) {
     let result = await contaModel.updateOne({ _id: id }, { $push: Conta });
     return result;
   }

@@ -7,6 +7,7 @@ import fs from "fs";
 import slug from "slugify";
 import sharp from "sharp";
 import * as csv from "@fast-csv/parse";
+import * as XLSX from 'xlsx';
 import { isValidObjectId } from "mongoose";
 import { ICategoria } from "../models/categorias";
 import BussCategoria from "../businessController/categorias";
@@ -665,6 +666,35 @@ class RoutesController {
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
   } */
   //////Seguimiento Poa-------//
+  public async uploadExcelSegPoa(request: Request, response: Response) {
+    if (isEmpty(request.files)) {
+      
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+    var file: any = request.files.file;
+    var dir = `${__dirname}/../../../../uploads`;
+    var absolutepath = path.resolve(dir);
+    var totalpath = `${absolutepath}/${"segPoa.xlsx"}`;
+    console.log(totalpath);
+    file.mv(totalpath, async (err: any, success: any) => {
+      if (err) {
+        response
+          .status(300)
+          .json({ serverResponse: "No se pudo almacenar el archivo" });
+        return;
+      }
+      let xlFile = XLSX.readFile(totalpath);
+      let sheet = xlFile.Sheets[xlFile.SheetNames[0]];
+      let json = XLSX.utils.sheet_to_json(sheet);
+      console.log(json);
+      response.status(300).json({ serverResponse: "simpleUser" });
+    });
+
+    
+  }
   public async uploadCsvPoa(request: Request, response: Response) {
     var segPoa: BussSegPoa = new BussSegPoa();
     var id: string = request.params.id;
@@ -2018,23 +2048,31 @@ class RoutesController {
     var aux: any = {};
     var order: any = {};
     var select = "";
-    if (params.codigo != null) {
-      var expresion = new RegExp(params.codigo);
-      filter["codigo"] = expresion;
+    if (params.destino != null) {
+      var expresion = new RegExp(params.destino,"i");
+      filter["destino"] = expresion;
     }
-    if (params.denominacion != null) {
-      var expresion = new RegExp(params.denominacion);
-      filter["denominacion"] = expresion;
+    if (params.motivo != null) {
+      var expresion = new RegExp(params.motivo,"i");
+      filter["motivo"] = expresion;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
+    if (params.numeroAutorizacion != null) {
+      let expresion = params.numeroAutorizacion;
+      filter["numeroAutorizacion"] = expresion;
+    }
+    if (params.numeroVale != null) {
+      let expresion = params.numeroVale;
+      filter["numeroVale"] = expresion;
+    }
+    if (params.fecha != null) {
+      var gt = params.fecha;
       aux["$gt"] = gt;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
+    if (params.fecha != null) {
+      var lt = params.fecha;
       aux["$lt"] = lt;
     }
     if (Object.entries(aux).length > 0) {
@@ -2058,6 +2096,7 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
+    
     let res: Array<IAutorizacion> = await Autorizacion.readAutorization(
       filter,
       skip,
@@ -2268,6 +2307,8 @@ class RoutesController {
     let paramsCompra: any = {};
     let paramsArticulo: any = {};
     let paramsIngreso: any = {};
+    console.log(valeData);
+    
     let AutorizacionData:any = await Autorizacion.readAutorization(valeData.autorizacion);
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {

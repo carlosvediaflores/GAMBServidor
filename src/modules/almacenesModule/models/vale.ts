@@ -9,6 +9,13 @@ export interface IVale extends Document {
   encargadoControl: string;
   idCompra: string;
   idEgreso: string;
+
+  motivo:string;
+  destino:string;
+  unidadSolicitante:string;
+  conductor:string;
+  vehiculo:string;
+  //productos:[string];
 }
 const valeSchema: Schema = new Schema(
   {
@@ -21,6 +28,15 @@ const valeSchema: Schema = new Schema(
     encargadoControl: { type: Schema.Types.ObjectId, ref: "User" },
     idCompra: { type: Schema.Types.ObjectId, ref: "alm_compras" },
     idEgreso: { type: Schema.Types.ObjectId, ref: "alm_egresos" },
+    // Vales Salud Pacos Lublicantes y otros
+    motivo:{type: String},
+    destino:{type: String},
+    unidadSolicitante: { type: Schema.Types.ObjectId, ref: "Subdirecciones" },
+    conductor: { type: Schema.Types.ObjectId, ref: "User" },
+    vehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
+    productos: { type: Array },
+    estado:{type:String, default:"REGISTRADO"}
+
   },
   {
     timestamps: true,

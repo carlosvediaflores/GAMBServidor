@@ -2129,13 +2129,13 @@ class RoutesController {
     let repres = await Autorizacion.readAutorization(codigo);
     response.status(200).json(repres);
   }
-  public async updateAutorizacion(request: Request, response: Response) {
-    var Autorizacion: BussAutorization = new BussAutorization();
-    let id: string = request.params.id;
-    var params = request.body;
-    var result = await Autorizacion.updateAutorization(id, params);
-    response.status(200).json(result);
-  }
+    public async updateAutorizacion(request: Request, response: Response) {
+      var Autorizacion: BussAutorization = new BussAutorization();
+      let id: string = request.params.id;
+      var params = request.body;
+      var result = await Autorizacion.updateAutorization(id, params);
+      response.status(200).json(result);
+    }
   public async removeAutorizacion(request: Request, response: Response) {
     var Autorizacion: BussAutorization = new BussAutorization();
     let id: string = request.params.id;
@@ -2336,8 +2336,8 @@ class RoutesController {
     }
     valeData["numeroVale"] = numero;
     let result = await vale.addVale(valeData);
-    console.log(valeData)
-    console.log(result)
+    // console.log(valeData)
+    // console.log(result)
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
     if (!valeData.idCompra) {
@@ -2384,6 +2384,13 @@ class RoutesController {
     var Vale: BussVale = new BussVale();
     let valeData = await Vale.readVale(request.params.id);
     response.status(200).json(valeData);
+  }
+  public async updateVale(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Vale.updateVale(id, params);
+    response.status(200).json(result);
   }
 }
 export default RoutesController;

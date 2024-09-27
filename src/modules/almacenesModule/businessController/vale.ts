@@ -4,10 +4,10 @@ class BussVale {
   public async readVale(): Promise<Array<IVale>>;
   public async readVale(id: string): Promise<IVale>;
   public async readVale(
-    query: any,
-    skip: number,
-    limit: number,
-    order: any
+    query?: any,
+    skip?: number,
+    limit?: number,
+    order?: any
   ): Promise<Array<IVale>>;
 
   public async readVale(

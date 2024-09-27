@@ -366,6 +366,9 @@ class Routes {
       .get(this.routesController.getVales);
       //buscar vale por ID
     app
+      .route(`${this.routeparent}/finalizarVales`)
+      .post(this.routesController.setVales);
+    app
       .route(`${this.routeparent}/vale/:id`)
       .get(this.routesController.getVale);
        //editar vale por ID
@@ -373,9 +376,9 @@ class Routes {
       .route(`${this.routeparent}/vale/:id`)
       .put(this.routesController.updateVale);
       //eliminar vale por ID
-    /* app
+    app
       .route(`${this.routeparent}/vale/:id`)
-      .delete(this.routesController.removeVale); */
+      .delete(this.routesController.deleteVale);
   }
 }
 export default Routes;

@@ -17,7 +17,7 @@ import { IProveedor } from "../models/proveedores";
 import BussProveedores from "../businessController/proveedores";
 import { IPrograma } from "../models/programa";
 import BussPrograma from "../businessController/programa";
-import { IProyecto } from "../models/proyecto";
+import proyecto, { IProyecto } from "../models/proyecto";
 import BussProyecto from "../businessController/proyecto";
 import { ISegPoa } from "../models/seg_poa";
 import BussSegPoa from "../businessController/seg_poa";
@@ -1168,7 +1168,6 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    console.log(filter1);
     let res = await Ingreso.readIngresos(filter1, filter2, skip, limit, order);
     response.status(200).json({
       serverResponse: res,
@@ -1231,6 +1230,7 @@ class RoutesController {
         let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad;
         let listIngreso: any = listCompra.idEntrada;
         if (listIngreso.estado == "EGRESADO") {
+          
           data.cantidadSalida = data.cantidadCompra;
           let resultEditS = await salida.updateSalida(
             listCompra.salidas[0]._id,
@@ -2233,35 +2233,48 @@ class RoutesController {
   public async getVales(request: Request, response: Response) {
     var Vale: BussVale = new BussVale();
     var filter: any = {};
-    var search: string | any;
     var params: any = request.query;
     var limit = 0;
     var skip = 0;
     var aux: any = {};
+    var aux1: any = {};
     var order: any = {};
     var select = "";
-    if (params.codigo != null) {
-      var expresion = new RegExp(params.codigo);
-      filter["codigo"] = expresion;
+    if (params.catProgra != null) {
+      let expresion = params.catProgra;
+      filter["catProgra"] = expresion;
     }
-    if (params.denominacion != null) {
-      var expresion = new RegExp(params.denominacion);
-      filter["denominacion"] = expresion;
+    if (params.estado != null) {
+      let expresion = params.estado;
+      filter["estado"] = expresion;
+    }
+    if (params.numeroVale != null) {
+      let expresion = params.numeroVale;
+      filter["numeroVale"] = expresion;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
-    if (params.dategt != null) {
-      var gt = params.dategt;
-      aux["$gt"] = gt;
+    if (params.del != null) {
+      var gt = params.del;
+      let fechaDel = new Date(gt)
+      aux["$gte"] = fechaDel;
     }
-    if (params.datelt != null) {
-      var lt = params.datelt;
-      aux["$lt"] = lt;
+    if (params.al != null) {
+      var lt = params.al;
+      let fechaAl = lt+'T23:59:59.000Z'
+
+      aux["$lte"] = fechaAl;
+    }
+    if (params.productos === true) {
+      var size = params.productos;
+      filter["productos"]= {'$exists': true, '$not': {'$size': 0}}
     }
     if (Object.entries(aux).length > 0) {
       filter["createdAt"] = aux;
     }
+    console.log(filter);
+    
     let respost: Array<IVale> = await Vale.readVale();
     var totalDocs = respost.length;
     var totalpage = Math.ceil(respost.length / limit);
@@ -2279,8 +2292,10 @@ class RoutesController {
       order[data[0]] = number;
     } else {
       order = { _id: -1 };
-    }
+    }    
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
+    //console.log(res);
+    
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -2391,6 +2406,104 @@ class RoutesController {
     var params = request.body;
     var result = await Vale.updateVale(id, params);
     response.status(200).json(result);
+  }
+  public async setVales(request: Request, response: Response) {
+    var compra: BussCompra = new BussCompra();
+    var Vale: BussVale = new BussVale();
+    var Ingreso: BussIngreso = new BussIngreso();
+    var Articulo: BussArticulo = new BussArticulo();
+    var Egreso: BussEgreso = new BussEgreso();
+    var salida: BussSalida = new BussSalida();
+    var resp = request.body;
+    const compraData: any = {};
+    const ingresoData: any = {};
+    const salidaData: any = {};
+    const egresoData: any = {};
+    
+    if (resp.length<1) {
+      response.status(201).json({ serverResponse: "Debe existir al menos un vale" });
+      return;
+    }
+    const resNum: any = await Ingreso.getNumIngresoOne();
+    const respEgreso: any = await Egreso.getNumEgreso();
+    
+    let dataFecha = resp[resp.length-1]
+    let fecha = dataFecha.createdAt
+    
+    ingresoData.numeroEntrada = resNum.numeroEntrada + 1;
+    ingresoData.idPersona = '6253bf6900ae6f0014f7bc23';
+    ingresoData.idProveedor = '643473b2adb0190013ff255b';
+    ingresoData.concepto = 'Ingreso de COMBUSTIBLE para el viaje programado a diferentes comunidades'
+    ingresoData.estado = 'EGRESADO';
+    ingresoData.fecha = fecha;
+    let resultIngreso = await Ingreso.addIngreso(ingresoData);
+    
+    egresoData.numeroSalida = respEgreso.numeroSalida + 1;
+    egresoData.estadoEgreso = "DIRECTO";
+    egresoData.glosaSalida = "Salida de COMBUSTIBLE para el viaje programado a diferentes comunidades"
+    egresoData.entregado = "Conductores de vehículos"
+    egresoData.cargo = "Chofer";
+    egresoData.idPersona = '6253bf6900ae6f0014f7bc23';
+    egresoData.idProveedor = '643473b2adb0190013ff255b';
+    egresoData.idIngreso = resultIngreso._id; 
+    //console.log("resul ingreso",resultIngreso);
+    let resultEgreso = await Egreso.addEgreso(egresoData);
+    
+    const egresoAdd = await Ingreso.addEgresos(resultIngreso, resultEgreso._id);
+    //console.log('resultEgreso',resultEgreso);
+    for (let i = 0; i < resp.length; i++) {
+      let data:any = resp[i];
+      compraData.cantidadCompra = data.cantidad;
+      compraData.estadoCompra = "AGOTADO";
+      compraData.idEntrada = resultIngreso._id;
+      compraData.idArticulo = data.idProducto._id;
+      compraData.idProducto = data.idProducto._id;
+      compraData.catProgra = data.catProgra;
+      if(data.precio!= null){
+        compraData.precio = data.precio / data.cantidad;
+      }
+      let resultCompra = await compra.addCompra(compraData);
+      const resultAdd = await Ingreso.addCompras(resultIngreso._id, resultCompra._id);
+      
+      salidaData.cantidadSalida = data.cantidad;
+      salidaData.catProgra = data.catProgra;
+      salidaData.idCompra = resultCompra._id;
+      salidaData.idEgreso = resultEgreso._id
+      let resultSalida = await salida.addSalida(salidaData);
+      const compraAdd = await compra.addSalidas(resultCompra._id, resultSalida._id);
+      const resultAddEgreso = await Egreso.addSalidas(resultEgreso._id, resultSalida._id);
+      
+      const updateVale = await Vale.updateVale(data._id, {estado:"FINALIZADO", idCompra:resultCompra._id});
+    }
+
+    response.status(200).json({resp});
+  }
+  public async deleteVale(request: Request, response: Response) {
+    var vale: BussVale = new BussVale();
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let id: string = request.params.id;
+    const valeData:any = await vale.readVale(id);
+    if(valeData.idCompra){
+      response
+        .status(300)
+        .json({ serverResponse: "Este registro no se puede eliminar!!! Motivo de que ya tiene Ingreso y Salida" });
+      return;
+    }
+    if(valeData.estado==='PENDIENTE'){
+      response
+        .status(300)
+        .json({ serverResponse: "Para poder eliminar el registro. Debe cambiar el estado de PENDIENTE a REGISTRADO" });
+      return;
+    }
+    if(valeData.autorizacion){
+      if(valeData.numeroVale===valeData.autorizacion.numeroVale){
+        let params:any = {};
+        params.numeroVale= null      
+        await Autorizacion.updateAutorization(valeData.autorizacion._id, params);
+      }
+    }
+    let result = await vale.deleteVale(id);
+    response.status(200).json({ serverResponse: "Se elimino el Registro" });
   }
 }
 export default RoutesController;

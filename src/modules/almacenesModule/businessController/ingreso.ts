@@ -109,6 +109,13 @@ class BussIngreso {
       .sort({ _id: -1 });
     return result;
   }
+  public async getNumIngresoOne() {
+    var result = await ingresosModel
+      .findOne()
+      .limit(1)
+      .sort({ _id: -1 });
+    return result;
+  }
   public async total({}) {
     var result = await ingresosModel.countDocuments();
     return result;

@@ -11,6 +11,8 @@ export interface IVehiculo extends Document {
   destino:string;
   estado:string;
   color: string;
+  propietario:string;
+  observacion:string;
   idChofer:string;
 }
 const vehiculoSchema: Schema = new Schema(
@@ -23,8 +25,10 @@ const vehiculoSchema: Schema = new Schema(
     numMotor: { type: String },
     numChasis: { type: String},
     destino:{type: String},
-    estado: {type:String},
+    estado: {type:String, default:"ACTIVO"},
     color: { type:String},
+    propietario:{type:String},
+    observacion:{type:String},
     idChofer: { type: Schema.Types.ObjectId, ref: "User" }
   },
   {

@@ -10,6 +10,7 @@ import mongoose, { Mongoose } from "mongoose";
 import FileUpload from "express-fileupload";
 import Cors from "cors";
 import DocumentosModule from "./modules/documentos/init";
+import DependenciasModule from "./modules/correspondenciasModule/init";
 
 //import WebpageModule from "./modules/webpagemodule/init";
 class App {
@@ -54,6 +55,7 @@ class App {
     //const activos = new ActivosModule("/api", this.app);
     const archivos = new ArchivosModule("/api", this.app);
     const documentos = new DocumentosModule("/api", this.app);
+    const dependencias = new DependenciasModule("/api", this.app);
   }
 }
 export default new App();

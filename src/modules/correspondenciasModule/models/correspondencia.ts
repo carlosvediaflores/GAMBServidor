@@ -13,6 +13,7 @@ export interface ICorrespondencia extends Document {
   hojaRuta:string;
   fsAdjunto:string;
   idTipo: string;
+  fileName:string;
   idSubTipo:string;
   idDependencia: string;
   idUsuario: string;
@@ -26,10 +27,11 @@ const correspondenciaSchema: Schema = new Schema(
     nombreDestino: { type: String },
     cargoDestino:{type:String},
     lugarDestino:{type:String, default:"Presente"},
-    via:{type:String},
+    via:{type: Schema.Types.ObjectId, ref: "User"},
     referencia:{type:String},
     hojaRuta:{type:String},
-    fsAdjunto:{type:String},
+    fsAdjunto:{type:String, default:1},
+    fileName:{type:String},
     idTipo: { type: Schema.Types.ObjectId, ref: "corr_Tipo" },
     idSubTipo:{ type: Schema.Types.ObjectId, ref: "corr_subTipo"},
     idDependencia: { type: Schema.Types.ObjectId, ref: "corr_dependencias"},

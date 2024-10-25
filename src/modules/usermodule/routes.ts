@@ -28,6 +28,9 @@ class Routes {
     app
       .route(`${this.routeparent}/userPost/:post`)
       .get(this.routesController.getUs);
+      app
+      .route(`${this.routeparent}/userSurnames/:surnames`)
+      .get(this.routesController.getUserSurnames);
     app
       .route(`${this.routeparent}/user/:id`)
       .put(jsonwebtokenSecurity, this.routesController.updateUser);

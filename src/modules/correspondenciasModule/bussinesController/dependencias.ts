@@ -94,8 +94,8 @@ class BussDependencia {
       return result;
     }
   }
-  public async readContaFile(uri: string) {   
-    let result = await dependenciaModel.findOne({nameFile:uri});
+  public async getFile(file: string) {   
+    let result = await dependenciaModel.findOne({fileName:file});
     return result;
   }
   public async queryContaAll(query1?: any, query2?: any,): Promise<Array<IDependemcias>>;

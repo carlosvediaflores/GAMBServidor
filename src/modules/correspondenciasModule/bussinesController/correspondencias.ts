@@ -24,7 +24,8 @@ class BussCorrespondencia {
         .populate("idTipo")
         .populate("idSubTipo")
         .populate("idDependencia")
-        .populate("idUsuario");
+        .populate("idUsuario")
+        .populate("via");
 
       return result;
     } else if (params1) {
@@ -36,6 +37,7 @@ class BussCorrespondencia {
         .populate("idSubTipo")
         .populate("idDependencia")
         .populate("idUsuario")
+        .populate("via")
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -46,7 +48,8 @@ class BussCorrespondencia {
         .populate("idTipo")
         .populate("idSubTipo")
         .populate("idDependencia")
-        .populate("idUsuario");
+        .populate("idUsuario")
+        .populate("via");
       return listCarpetas;
     }
   }
@@ -145,12 +148,24 @@ class BussCorrespondencia {
       .populate("idTipo")
       .populate("idSubTipo")
       .populate("idDependencia")
-      .populate("idUsuario");
+      .populate("idUsuario")
+      .populate("via");
     return listCarpetas;
     /* const filterCarpeta = listCarpetas.filter((carpeta: any) => {
       return carpeta.idCarpeta.length != 0;
     });
     return filterCarpeta; */
+  }
+  public async getFile(file: string) {   
+    console.log(file);
+    
+    let result = await correspondenciaModel.findOne({fileName:file})
+    .populate("idTipo")
+      .populate("idSubTipo")
+      .populate("idDependencia")
+      .populate("idUsuario")
+      .populate("via");
+    return result;
   }
 }
 export default BussCorrespondencia;

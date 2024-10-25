@@ -85,5 +85,12 @@ class BusinessUser {
         let result = await UsersModel.deleteOne({ _id: id });
         return result;
     }
+    public async getUserSurnames(surnames: string) {   
+        console.log(surnames);
+        
+        let result = await UsersModel.findOne({surnames:surnames})
+        .populate("cargo")
+        return result;
+      }
 }
 export default BusinessUser;

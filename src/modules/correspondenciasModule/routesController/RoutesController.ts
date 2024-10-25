@@ -4,8 +4,8 @@ import jsonwebtoken from "jsonwebtoken";
 import isEmpty from "is-empty";
 import path from "path";
 import fs from "fs";
-import slug from "slugify";
-import sharp from "sharp";
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
 //import csv from "fast-csv";
 import * as csv from "@fast-csv/parse";
 
@@ -17,17 +17,30 @@ import { ISubTipo } from "../models/subTipo";
 import BussSubTipo from "../bussinesController/subTipo";
 import { ITipo } from "../models/tipo";
 import BussTipo from "../bussinesController/tipos";
+import { DateFormatter } from "../helpers";
+
 class RoutesController {
   //* ---------------CorrespondenciaS--------------*//
   public async createCorrespondencia(request: Request, response: Response) {
-    var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
+    const Correspondencia: BussCorrespondencia = new BussCorrespondencia();
+    const SubTipo: BussSubTipo = new BussSubTipo();
+    const dependencia: BussDependencia = new BussDependencia();
+    const Tipo: BussTipo = new BussTipo();
     var CorrespondenciaData = request.body;
     var filter: any = {};
+    console.log("data",CorrespondenciaData);
     let result: ICorrespondencia;
     let year = new Date();
     let yearAct = CorrespondenciaData.gestion ?? year.getFullYear();
 
     CorrespondenciaData.gestion = yearAct;
+    if(!CorrespondenciaData.via){
+      CorrespondenciaData.via= CorrespondenciaData.idUsuario
+    }
+
+    if(CorrespondenciaData.idSubTipo === ''){
+      delete CorrespondenciaData.idSubTipo
+    }
     if (CorrespondenciaData.gestion != null) {
       var gestion = CorrespondenciaData.gestion;
       filter["gestion"] = gestion;
@@ -44,22 +57,73 @@ class RoutesController {
       var idDependencia = CorrespondenciaData.idDependencia;
       filter["idDependencia"] = idDependencia;
     }
-    console.log("Daata", CorrespondenciaData);
-    console.log("filter", filter);
     let resp: any = await Correspondencia.queryCorresp(filter);
-    console.log("Res", resp);
+     console.log("Res", filter);
 
+    let resultDependencia = await dependencia.readDependencias(idDependencia);
+    let resultSubTipo = await SubTipo.readSubTipo(idSubTipo);
+    let resulTipo = await Tipo.readTipo(idTipo);
+
+    let fileName = '';
+
+    
     if (!resp) {
+      if(resulTipo.nombreTipo === 'nota'){
+        fileName=`${resultDependencia.sigla} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      }else if (resulTipo.nombreTipo === 'decreto') {
+          fileName=`${resulTipo.nombreTipo}_${resultSubTipo.nombreSubTipo}} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      } else {
+        fileName=`${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      }
+      CorrespondenciaData.fileName=fileName
       result = await Correspondencia.addCorrespondencia(CorrespondenciaData);
       response.status(201).json({ serverResponse: result });
-      return
+      return;
     } else {
       CorrespondenciaData.numCite = resp.numCite + 1;
+      if(resulTipo.nombreTipo === 'nota'){
+        fileName=`${resultDependencia.sigla} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      }else if (resulTipo.nombreTipo === 'decreto') {
+          fileName=`${resulTipo.nombreTipo}_${resultSubTipo.nombreSubTipo}} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      } else {
+        fileName=`${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      }
+      CorrespondenciaData.fileName=fileName
+      
       result = await Correspondencia.addCorrespondencia(CorrespondenciaData);
       response.status(201).json({ serverResponse: result });
-      return
+      return;
     }
   }
+  public async buscarUltimo(request: Request, response: Response) {
+    const Correspondencia: BussCorrespondencia = new BussCorrespondencia();
+    var params: any = request.query;
+    var filter: any = {};
+    let year = new Date();
+    let yearAct = params.gestion ?? year.getFullYear();
+    if (params.gestion != null) {
+      var gestion = params.gestion;
+      filter["gestion"] = gestion;
+    }
+    if (params.idTipo != null) {
+      var idTipo = params.idTipo;
+      filter["idTipo"] = idTipo;
+    }
+    if (params.idSubTipo != null) {
+      var idSubTipo = params.idSubTipo;
+      filter["idSubTipo"] = idSubTipo;
+    }
+    if (params.idDependencia != null) {
+      var idDependencia = params.idDependencia;
+      filter["idDependencia"] = idDependencia;
+    }
+    let resp: any = await Correspondencia.queryCorresp(filter);
+    console.log("Fil", filter);
+    console.log("Res", resp);
+    response.status(201).json({ serverResponse: resp });
+      return;
+  }
+
   public async getCorrespondencias(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
     var filter: any = {};
@@ -69,45 +133,34 @@ class RoutesController {
     var skip = 0;
     var aux: any = {};
     var order: any = { gestion: -1 };
-    if (params.area != null) {
-      var area = new RegExp(params.area, "i");
-      filter["area"] = area;
-    }
-    if (params.tipo != null) {
-      var tipo = new RegExp(params.tipo, "i");
-      filter["tipo"] = tipo;
-    }
-    if (params.subTipo != null) {
-      var subTipo = new RegExp(params.subTipo, "i");
-      filter["subTipo"] = subTipo;
-    }
+   
     if (params.gestion != null) {
-      var gestion = new RegExp(params.gestion, "i");
+      var gestion = params.gestion;
       filter["gestion"] = gestion;
     }
-    if (params.numCorrespondencia != null) {
-      var numCorrespondencia: number = parseInt(params.numCorrespondencia);
-      if (Number.isNaN(numCorrespondencia)) {
-        filter["numCorrespondencia"];
-      } else {
-        filter["numCorrespondencia"] = numCorrespondencia;
-      }
+    if (params.idTipo != null) {
+      var idTipo = params.idTipo;
+      filter["idTipo"] = idTipo;
     }
-    if (params.nameCorrespondencia != null) {
-      var nameCorrespondencia = new RegExp(params.nameCorrespondencia, "i");
-      filter["nameCorrespondencia"] = nameCorrespondencia;
+    if (params.idSubTipo != null) {
+      var idSubTipo = params.idSubTipo;
+      filter["idSubTipo"] = idSubTipo;
     }
-    if (params.estante != null) {
-      var estante: number = parseInt(params.estante);
-      if (Number.isNaN(estante)) {
-        filter["estante"];
-      } else {
-        filter["estante"] = estante;
-      }
+    if (params.idDependencia != null) {
+      var idDependencia = params.idDependencia;
+      filter["idDependencia"] = idDependencia;
     }
-    if (params.lugar != null) {
-      var lugar = new RegExp(params.lugar, "i");
-      filter["lugar"] = lugar;
+    if (params.numCite != null) {
+      let numCite = params.numCite;
+      filter["numCite"] = numCite;
+    }
+    if (params.referencia != null) {
+      var referencia = new RegExp(params.referencia, "i");
+      filter["referencia"] = referencia;
+    }
+    if (params.hojaRuta != null) {
+      let hojaDeRuta = new RegExp(params.hojaRuta, "i");
+      filter["hojaRuta"] = hojaDeRuta;
     }
     if (params.limit) {
       limit = parseInt(params.limit);
@@ -162,17 +215,87 @@ class RoutesController {
   }
   public async getNota(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    console.log("leendo nota");
-    var dir = `${__dirname}/../../../../uploads/plantillaNotas.docx`;
-    var dir2 = `${__dirname}/../../../../uploads/README.md`;
-    const data = fs.readFileSync(dir, 'utf8')
-    const newData = data.replace(/Betanzos/ig, 'Chaquí');
-    fs.writeFileSync('plantillaNotas2.docx', newData)
+    let res: any = await Correspondencia.getFile(request.params.fileName); 
+      console.log(res);
+      let sigla = '';
+      let siglaTipo = '';
+      let nombreTipo = '';
+      let nombreSubTipo = '';
+      let viaNombre = '';
+      let viaCargo = '';
+      let vistoBueno = '';
+      let de = `${res.idUsuario.username?? ''} ${res.idUsuario.surnames?? ''}`;
+      let simpleUser = '';
+      const namePartsDe = de.split(' ');
+      simpleUser = namePartsDe
+      .filter(part => part.length > 0)  // Asegura que solo usemos palabras válidas
+      .map(part => part[0].toUpperCase())  // Obtiene la primera letra de cada palabra y la convierte en mayúscula
+      .join('');  // Une todas las iniciales en un solo string
+      console.log("initials",vistoBueno);
+      if(res.idSubTipo){
+        nombreSubTipo=  res.idSubTipo.nombreSubTipo.toUpperCase()
+      }
+      if(res.via){
+        viaNombre=`${res.via.username?? ''} ${res.via.surnames}`
+        viaCargo=res.via.post
+        //vistoBueno=res.via.username
+        const namePartsVia = viaNombre.split(' ');
+        vistoBueno = namePartsVia
+        .filter(part => part.length > 0)  // Asegura que solo usemos palabras válidas
+        .map(part => part[0].toUpperCase())  // Obtiene la primera letra de cada palabra y la convierte en mayúscula
+        .join('');  // Une todas las iniciales en un solo string
+        console.log("initials",vistoBueno);
+        
+      }
+    const newRes: any = {
+      lugar: res.lugar,    
+      fecha: DateFormatter.getDDMMMMYYYY(res.fecha),
+      numCite: res.numCite,
+      lugarDestino: res.lugarDestino,
+      gestion: res.gestion,
+      nombreDestino: res.nombreDestino,
+      cargoDestino: res.cargoDestino,
+      referencia: res.referencia,
+      hojaRuta: res.hojaRuta,
+      fsAdjunto: res.fsAdjunto?? '',
+      sigla:res.idDependencia.sigla,
+      siglaTipo:res.idTipo.siglaTipo?? '',
+      nombreTipo:res.idTipo.nombreTipo.toUpperCase() ?? '',
+      nombreSubTipo:nombreSubTipo,
+      viaNombre:viaNombre,
+      viaCargo:viaCargo?? '',
+      nombreUsuario:`${res.idUsuario.username?? ''} ${res.idUsuario.surnames?? ''}`,
+      cargoUsuario:res.idUsuario.post?? '',
+      vistoBueno:vistoBueno,
+      simpleUser:simpleUser
+    };
+    console.log('new',newRes);
+    var dir = `${__dirname}/../../../../uploads/cites/plantillas/${res.idTipo.nombreTipo}.docx`;
+    const data = fs.readFileSync(dir, "binary");
+    const zip = new PizZip(data);
+    const doc = new Docxtemplater(zip);
+    doc.setData(newRes);
     console.log(dir);
-    console.log(newData);
-    //let id: string = request.params.id;
-   // let res = await Correspondencia.readCorrespondencia(request.params.id);
-    response.status(200).json({ serverResponse: "res" });
+    //Intentar reemplazar los datos
+    try {
+      doc.render();
+    } catch (error) {
+      console.error("Error al reemplazar los datos:", error);
+    }
+
+    // Exportar el documento modificado a un nuevo archivo
+    const buf = doc.getZip().generate({ type: "nodebuffer" });
+
+    // Guardar el archivo con los cambios
+    fs.writeFileSync(
+      `${__dirname}/../../../../uploads/cites/${res.idTipo.nombreTipo}/${res.fileName}.docx`,
+      buf
+    );
+    const pathFile = path.join(
+      __dirname,
+      `/../../../../uploads/cites/${res.idTipo.nombreTipo}/${res.fileName}.docx`
+    );
+    response.sendFile( pathFile);
   }
   public async searchCorrespondencia(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
@@ -329,7 +452,7 @@ class RoutesController {
   //     return;
   //   }
   //   var Conta: BussDependencia = new BussDependencia();
-  //   var ArchivoData: IDependemcias = await Conta.readContaFile(uri);
+  //   var ArchivoData: IDependemcias = await Conta.getFile(uri);
   //   if (!ArchivoData) {
   //     const pathImg = path.join(
   //       __dirname,
@@ -519,11 +642,9 @@ class RoutesController {
           response.status(200).json({ serverResponse: resultArea });
           return;
         }
-        response
-          .status(300)
-          .json({
-            serverResponse: "Ya existe el ARCHIVO en esta Correspondencia",
-          });
+        response.status(300).json({
+          serverResponse: "Ya existe el ARCHIVO en esta Correspondencia",
+        });
         return;
       }
     }
@@ -564,11 +685,9 @@ class RoutesController {
           response.status(200).json({ serverResponse: "Se movió el archivo" });
           return;
         }
-        response
-          .status(300)
-          .json({
-            serverResponse: "Ya no existe el ARCHIVO en esta Correspondencia",
-          });
+        response.status(300).json({
+          serverResponse: "Ya no existe el ARCHIVO en esta Correspondencia",
+        });
         return;
       }
     }
@@ -617,7 +736,7 @@ class RoutesController {
     let res = await Conta.queryContaAll(filter1, filter2);
     response.status(200).json({ serverResponse: res, total: res.length });
   }
-  //----------CONTABILIDAD------------//
+  //----------DEPENDENCIA------------//
   public async createDependencia(request: Request, response: Response) {
     var Dependencia: BussDependencia = new BussDependencia();
     var DependenciaData = request.body;

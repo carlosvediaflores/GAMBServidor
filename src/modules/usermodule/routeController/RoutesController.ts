@@ -95,6 +95,14 @@ class RoutesController {
     var aux: any = {};
     var order: any = {};
     var select = "";
+    if (params.username != null) {
+      var expresion = new RegExp(params.username);
+      filter["username"] = expresion;
+    }
+    if (params.surnames != null) {
+      var expresion = new RegExp(params.surnames);
+      filter["surnames"] = expresion;
+    }
     if (params.cargo != null) {
       var expresion = new RegExp(params.cargo);
       filter["cargo"] = expresion;
@@ -164,6 +172,14 @@ class RoutesController {
     var user: BusinessUser = new BusinessUser();
     //let id: string = request.params.id;
     let res = await user.readUsers(request.params.id);
+    response.status(200).json(res);
+  }
+  public async getUserSurnames(request: Request, response: Response) {
+    var user: BusinessUser = new BusinessUser();
+    //let id: string = request.params.id;
+    let res = await user.getUserSurnames(request.params.surnames);
+    console.log(request.params.surnames, res);
+    
     response.status(200).json(res);
   }
   public async updateUser(request: Request, response: Response) {

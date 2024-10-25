@@ -1,5 +1,6 @@
 import { Express } from "express";
 import RoutesController from "./routesController/RoutesController";
+import jsonwebtokenSecurity from "../usermodule/middleware";
 class Routes {
   private routesController: RoutesController;
   private routeparent: string;
@@ -25,8 +26,11 @@ class Routes {
     app
       .route(`${this.routeparent}/correspondencias`)
       .get(this.routesController.getCorrespondencias);
+    app
+      .route(`${this.routeparent}/buscarUltimo`)
+      .get(this.routesController.buscarUltimo);
       app
-      .route(`${this.routeparent}/plantillaNota`)
+      .route(`${this.routeparent}/plantilla/:fileName`)
       .get(this.routesController.getNota);
     app
       .route(`${this.routeparent}/correspondencia/:id`)

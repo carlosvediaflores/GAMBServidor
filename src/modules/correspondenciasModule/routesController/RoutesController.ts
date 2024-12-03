@@ -18,6 +18,7 @@ import BussSubTipo from "../bussinesController/subTipo";
 import { ITipo } from "../models/tipo";
 import BussTipo from "../bussinesController/tipos";
 import { DateFormatter } from "../helpers";
+import BusinessUser from "../../usermodule/businessController/BusinessUser";
 
 class RoutesController {
   //* ---------------CorrespondenciaS--------------*//
@@ -28,18 +29,18 @@ class RoutesController {
     const Tipo: BussTipo = new BussTipo();
     var CorrespondenciaData = request.body;
     var filter: any = {};
-    console.log("data",CorrespondenciaData);
+    console.log("data", CorrespondenciaData);
     let result: ICorrespondencia;
     let year = new Date();
     let yearAct = CorrespondenciaData.gestion ?? year.getFullYear();
 
     CorrespondenciaData.gestion = yearAct;
-    if(!CorrespondenciaData.via){
-      CorrespondenciaData.via= CorrespondenciaData.idUsuario
+    if (!CorrespondenciaData.via) {
+      CorrespondenciaData.via = CorrespondenciaData.idUsuario;
     }
 
-    if(CorrespondenciaData.idSubTipo === ''){
-      delete CorrespondenciaData.idSubTipo
+    if (CorrespondenciaData.idSubTipo === "") {
+      delete CorrespondenciaData.idSubTipo;
     }
     if (CorrespondenciaData.gestion != null) {
       var gestion = CorrespondenciaData.gestion;
@@ -58,38 +59,53 @@ class RoutesController {
       filter["idDependencia"] = idDependencia;
     }
     let resp: any = await Correspondencia.queryCorresp(filter);
-     console.log("Res", filter);
+    console.log("Res", filter);
 
     let resultDependencia = await dependencia.readDependencias(idDependencia);
     let resultSubTipo = await SubTipo.readSubTipo(idSubTipo);
     let resulTipo = await Tipo.readTipo(idTipo);
 
-    let fileName = '';
+    let fileName = "";
 
-    
     if (!resp) {
-      if(resulTipo.nombreTipo === 'nota'){
-        fileName=`${resultDependencia.sigla} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
-      }else if (resulTipo.nombreTipo === 'decreto') {
-          fileName=`${resulTipo.nombreTipo}_${resultSubTipo.nombreSubTipo}} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      if (resulTipo.nombreTipo === "nota") {
+        fileName = `${resultDependencia.sigla} Nº ${1}_${
+          CorrespondenciaData.gestion
+        } ${CorrespondenciaData.referencia}`;
+      } else if (resulTipo.nombreTipo === "decreto") {
+        fileName = `${resulTipo.nombreTipo}_${
+          resultSubTipo.nombreSubTipo
+        }} Nº ${1}_${CorrespondenciaData.gestion} ${
+          CorrespondenciaData.referencia
+        }`;
       } else {
-        fileName=`${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+        fileName = `${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${1}_${
+          CorrespondenciaData.gestion
+        } ${CorrespondenciaData.referencia}`;
       }
-      CorrespondenciaData.fileName=fileName
+      CorrespondenciaData.fileName = fileName;
       result = await Correspondencia.addCorrespondencia(CorrespondenciaData);
       response.status(201).json({ serverResponse: result });
       return;
     } else {
       CorrespondenciaData.numCite = resp.numCite + 1;
-      if(resulTipo.nombreTipo === 'nota'){
-        fileName=`${resultDependencia.sigla} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
-      }else if (resulTipo.nombreTipo === 'decreto') {
-          fileName=`${resulTipo.nombreTipo}_${resultSubTipo.nombreSubTipo}} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+      if (resulTipo.nombreTipo === "nota") {
+        fileName = `${resultDependencia.sigla} Nº ${resp.numCite + 1}_${
+          CorrespondenciaData.gestion
+        } ${CorrespondenciaData.referencia}`;
+      } else if (resulTipo.nombreTipo === "decreto") {
+        fileName = `${resulTipo.nombreTipo}_${
+          resultSubTipo.nombreSubTipo
+        }} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${
+          CorrespondenciaData.referencia
+        }`;
       } else {
-        fileName=`${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${resp.numCite + 1}_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`
+        fileName = `${resulTipo.siglaTipo}_${resultDependencia.sigla} Nº ${
+          resp.numCite + 1
+        }_${CorrespondenciaData.gestion} ${CorrespondenciaData.referencia}`;
       }
-      CorrespondenciaData.fileName=fileName
-      
+      CorrespondenciaData.fileName = fileName;
+
       result = await Correspondencia.addCorrespondencia(CorrespondenciaData);
       response.status(201).json({ serverResponse: result });
       return;
@@ -121,7 +137,7 @@ class RoutesController {
     console.log("Fil", filter);
     console.log("Res", resp);
     response.status(201).json({ serverResponse: resp });
-      return;
+    return;
   }
 
   public async getCorrespondencias(request: Request, response: Response) {
@@ -133,7 +149,8 @@ class RoutesController {
     var skip = 0;
     var aux: any = {};
     var order: any = { gestion: -1 };
-   
+    console.log(params);
+
     if (params.gestion != null) {
       var gestion = params.gestion;
       filter["gestion"] = gestion;
@@ -149,6 +166,10 @@ class RoutesController {
     if (params.idDependencia != null) {
       var idDependencia = params.idDependencia;
       filter["idDependencia"] = idDependencia;
+    }
+    if (params.idUsuario != null) {
+      var idUsuario = params.idUsuario;
+      filter["idUsuario"] = idUsuario;
     }
     if (params.numCite != null) {
       let numCite = params.numCite;
@@ -192,7 +213,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { gestion: -1, numCorrespondencia: 1 };
+      order = { gestion: -1, numCorrespondencia: -1 };
     }
     let res: Array<ICorrespondencia> =
       await Correspondencia.readCorrespondencia(filter, skip, limit, order);
@@ -215,40 +236,39 @@ class RoutesController {
   }
   public async getNota(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    let res: any = await Correspondencia.getFile(request.params.fileName); 
-      console.log(res);
-      let sigla = '';
-      let siglaTipo = '';
-      let nombreTipo = '';
-      let nombreSubTipo = '';
-      let viaNombre = '';
-      let viaCargo = '';
-      let vistoBueno = '';
-      let de = `${res.idUsuario.username?? ''} ${res.idUsuario.surnames?? ''}`;
-      let simpleUser = '';
-      const namePartsDe = de.split(' ');
-      simpleUser = namePartsDe
-      .filter(part => part.length > 0)  // Asegura que solo usemos palabras válidas
-      .map(part => part[0].toUpperCase())  // Obtiene la primera letra de cada palabra y la convierte en mayúscula
-      .join('');  // Une todas las iniciales en un solo string
-      console.log("initials",vistoBueno);
-      if(res.idSubTipo){
-        nombreSubTipo=  res.idSubTipo.nombreSubTipo.toUpperCase()
-      }
-      if(res.via){
-        viaNombre=`${res.via.username?? ''} ${res.via.surnames}`
-        viaCargo=res.via.post
-        //vistoBueno=res.via.username
-        const namePartsVia = viaNombre.split(' ');
-        vistoBueno = namePartsVia
-        .filter(part => part.length > 0)  // Asegura que solo usemos palabras válidas
-        .map(part => part[0].toUpperCase())  // Obtiene la primera letra de cada palabra y la convierte en mayúscula
-        .join('');  // Une todas las iniciales en un solo string
-        console.log("initials",vistoBueno);
-        
-      }
+    let res: any = await Correspondencia.getFile(request.params.fileName);
+    console.log(res);
+    let sigla = "";
+    let siglaTipo = "";
+    let nombreTipo = "";
+    let nombreSubTipo = "";
+    let viaNombre = "";
+    let viaCargo = "";
+    let vistoBueno = "";
+    let de = `${res.idUsuario.username ?? ""} ${res.idUsuario.surnames ?? ""}`;
+    let simpleUser = "";
+    const namePartsDe = de.split(" ");
+    simpleUser = namePartsDe
+      .filter((part) => part.length > 0) // Asegura que solo usemos palabras válidas
+      .map((part) => part[0].toUpperCase()) // Obtiene la primera letra de cada palabra y la convierte en mayúscula
+      .join(""); // Une todas las iniciales en un solo string
+    console.log("initials", vistoBueno);
+    if (res.idSubTipo) {
+      nombreSubTipo = res.idSubTipo.nombreSubTipo.toUpperCase();
+    }
+    if (res.via) {
+      viaNombre = `${res.via.username ?? ""} ${res.via.surnames}`;
+      viaCargo = res.via.post;
+      //vistoBueno=res.via.username
+      const namePartsVia = viaNombre.split(" ");
+      vistoBueno = namePartsVia
+        .filter((part) => part.length > 0) // Asegura que solo usemos palabras válidas
+        .map((part) => part[0].toUpperCase()) // Obtiene la primera letra de cada palabra y la convierte en mayúscula
+        .join(""); // Une todas las iniciales en un solo string
+      console.log("initials", vistoBueno);
+    }
     const newRes: any = {
-      lugar: res.lugar,    
+      lugar: res.lugar,
       fecha: DateFormatter.getDDMMMMYYYY(res.fecha),
       numCite: res.numCite,
       lugarDestino: res.lugarDestino,
@@ -257,25 +277,29 @@ class RoutesController {
       cargoDestino: res.cargoDestino,
       referencia: res.referencia,
       hojaRuta: res.hojaRuta,
-      fsAdjunto: res.fsAdjunto?? '',
-      sigla:res.idDependencia.sigla,
-      siglaTipo:res.idTipo.siglaTipo?? '',
-      nombreTipo:res.idTipo.nombreTipo.toUpperCase() ?? '',
-      nombreSubTipo:nombreSubTipo,
-      viaNombre:viaNombre,
-      viaCargo:viaCargo?? '',
-      nombreUsuario:`${res.idUsuario.username?? ''} ${res.idUsuario.surnames?? ''}`,
-      cargoUsuario:res.idUsuario.post?? '',
-      vistoBueno:vistoBueno,
-      simpleUser:simpleUser
+      fsAdjunto: res.fsAdjunto ?? "",
+      sigla: res.idDependencia.sigla,
+      siglaTipo: res.idTipo.siglaTipo ?? "",
+      nombreTipo: res.idTipo.nombreTipo.toUpperCase() ?? "",
+      nombreSubTipo: nombreSubTipo,
+      viaNombre: viaNombre,
+      viaCargo: viaCargo ?? "",
+      nombreUsuario: `${res.idUsuario.username ?? ""} ${
+        res.idUsuario.surnames ?? ""
+      }`,
+      cargoUsuario: res.idUsuario.post ?? "",
+      vistoBueno: vistoBueno,
+      simpleUser: simpleUser,
+      genero: res.genero ?? "",
+      entidadDestino: res.entidadDestino ?? "",
     };
-    console.log('new',newRes);
+
     var dir = `${__dirname}/../../../../uploads/cites/plantillas/${res.idTipo.nombreTipo}.docx`;
     const data = fs.readFileSync(dir, "binary");
     const zip = new PizZip(data);
     const doc = new Docxtemplater(zip);
     doc.setData(newRes);
-    console.log(dir);
+
     //Intentar reemplazar los datos
     try {
       doc.render();
@@ -295,8 +319,19 @@ class RoutesController {
       __dirname,
       `/../../../../uploads/cites/${res.idTipo.nombreTipo}/${res.fileName}.docx`
     );
-    response.sendFile( pathFile);
+    response.sendFile(pathFile);
   }
+  public async downloadFile(request: Request, response: Response) {
+    var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
+    //let id: string = request.params.id;
+    let res:any = await Correspondencia.getFile(request.params.fileName);
+    const pathFile = path.join(
+      __dirname,
+      `/../../../../uploads/cites/${res.idTipo.nombreTipo}/${res.fileName}.docx`
+    );
+    response.sendFile(pathFile);
+  }
+
   public async searchCorrespondencia(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
     var searchString = request.params.search;
@@ -328,13 +363,6 @@ class RoutesController {
       .json({ serverResponse: "Se eliminó la Correspondencia" });
   }
   public async uploadCorrespondencia(request: Request, response: Response) {
-    /* const borrarImagen: any = (path: any) => {
-      if (fs.existsSync(path)) {
-        // borrar la imagen anterior
-        fs.unlinkSync(path);
-      }
-    };
-    let pathViejo = ""; */
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
     var id: string = request.params.id;
     var CorrespondenciaToUpdate: ICorrespondencia =
@@ -345,21 +373,15 @@ class RoutesController {
         .json({ serverResponse: "Correspondencia no existe!" });
       return;
     }
-    if (isEmpty(request.files) && id) {
-      var filData: any = request.body;
-      var Result = await Correspondencia.updateCorrespondencia(id, filData);
-      response
-        .status(200)
-        .json({ serverResponse: "Correspondencia modificado" });
-      return;
-    }
+    //console.log("Cite",CorrespondenciaToUpdate);
     if (isEmpty(request.files)) {
-      var filData: any = request.body;
-      //var Correspondencia: ICorrespondencia = await Correspondencia.addCorrespondencia(filData);
-      response.status(300).json({ serverResponse: Correspondencia });
-      return;
+      response
+      .status(200)
+      .json({ serverResponse: "No hay archivo seleccionado" });
+    return;
     }
-    var dir = `${__dirname}/../../../../uploads/archivos`;
+    const tipo:any=CorrespondenciaToUpdate.idTipo
+    var dir = `${__dirname}/../../../../uploads/cites/${tipo.nombreTipo}`;
     var absolutepath = path.resolve(dir);
     var files: any = request.files;
     var key: Array<string> = Object.keys(files);
@@ -375,94 +397,34 @@ class RoutesController {
         });
       });
     };
-    if (!id) {
-      var filData = request.body;
-      for (var i = 0; i < key.length; i++) {
-        var file: any = files[key[i]];
-        var filehash: string = sha1(new Date().toString()).substr(0, 5);
-        var nombreCortado = file.name.split(".");
-        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-        // Validar extension
-        var extensionesValidas = ["pdf"];
-        if (!extensionesValidas.includes(extensionArchivo)) {
-          return response.status(400).json({
-            ok: false,
-            msg: "No es una extensión permitida",
-          });
-        }
-        var newname: string = `${"GAMB"}_${filData.area}_${
-          filData.gestion
-        }.${extensionArchivo}`;
-        var totalpath = `${absolutepath}/${newname}`;
-        await copyDirectory(totalpath, file);
-        filData.archivo = newname;
-        filData.uri = "getArchivo/" + newname;
-        filData.path = totalpath;
-        var sliderResult: ICorrespondencia =
-          await Correspondencia.addCorrespondencia(filData);
-      }
-      response.status(200).json({
-        serverResponse: sliderResult,
-      });
-      return;
-    }
     var filData: any = request.body;
+    filData.isUpdated=true;
     for (var i = 0; i < key.length; i++) {
       var file: any = files[key[i]];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       // Validar extension
-      var extensionesValidas = ["pdf"];
+      var extensionesValidas = ["docx"];
       if (!extensionesValidas.includes(extensionArchivo)) {
         return response.status(400).json({
           ok: false,
           msg: "No es una extensión permitida",
         });
       }
-      var newname: string = `${"GAMB"}_${filData.area}_${
-        filData.gestion
-      }.${extensionArchivo}`;
+      var newname: string = `${CorrespondenciaToUpdate.fileName}.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
-      filData.archivo = newname;
-      /* pathViejo = CorrespondenciaToUpdate.path;
-      filData.path = totalpath;
-      if(totalpath!=CorrespondenciaToUpdate.path){
-        borrarImagen(pathViejo);
-      } */
-      filData.uri = "getArchivo/" + newname;
-      var Result = await Correspondencia.updateCorrespondencia(id, filData);
+      var result = await Correspondencia.updateCorrespondencia(id, filData);
       response
         .status(200)
-        .json({ serverResponse: "Correspondencia modificado" });
+        .json({ serverResponse: "Archivo actualizado" });
       return;
     }
-    /* pathViejo = filData.path;
-    borrarImagen(pathViejo); */
     response.status(200).json({ serverResponse: "Ocurrio un error" });
     return;
   }
-  // public async getFileArchivo(request: Request, response: Response) {
-  //   var uri: string = request.params.name;
-  //   if (!uri) {
-  //     response
-  //       .status(300)
-  //       .json({ serverResponse: "Identificador no encontrado" });
-  //     return;
-  //   }
-  //   var Conta: BussDependencia = new BussDependencia();
-  //   var ArchivoData: IDependemcias = await Conta.getFile(uri);
-  //   if (!ArchivoData) {
-  //     const pathImg = path.join(
-  //       __dirname,
-  //       `/../../../../uploads/no-hay-archivo.png`
-  //     );
-  //     response.sendFile(pathImg);
-  //     return;
-  //   }
-  //   response.sendFile(ArchivoData.path);
-  // }
+
   public async updateCorrespondencia(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
     let id: string = request.params.id;
@@ -470,272 +432,7 @@ class RoutesController {
     var result = await Correspondencia.updateCorrespondencia(id, params);
     response.status(200).json({ res: "se editó" });
   }
-  // public async addArea(request: Request, response: Response) {
-  //   const borrarImagen: any = (path: any) => {
-  //     if (fs.existsSync(path)) {
-  //       // borrar la imagen anterior
-  //       fs.unlinkSync(path);
-  //     }
-  //   };
-  //   let pathViejo = "";
-  //   let idCorrespondencia: string = request.params.id;
-  //   var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-  //   let conta: BussDependencia = new BussDependencia();
-  //   if (idCorrespondencia == null) {
-  //     response.status(300).json({ serverResponse: "El id es necesario" });
-  //     return;
-  //   }
-  //   let CorrespondenciaResult = await Correspondencia.readCorrespondencia(idCorrespondencia);
-  //   let area = CorrespondenciaResult.area;
-  //   var contaData: any = request.body;
-  //   //contaData.idCorrespondencia = idCorrespondencia;
-  //   if (contaData.fojas == "") {
-  //     contaData.fojas = 0;
-  //   }
-  //   let result: any = {};
-  //   let result1: any = {};
-  //   if (isEmpty(request.files)) {
-  //     if (area === "Contabilidad") {
-  //       var resultArea: any = await conta.addDependencia(contaData);
-  //       let idArea = resultArea._id;
-  //       if (contaData.Correspondencias) {
-  //         let partes: any = contaData.Correspondencias.split(",");
-  //         let cantCarp = partes.length;
-  //         for (let i = 0; i < cantCarp; i++) {
-  //           let idArch = partes[i];
-  //           let datos: any = { idCorrespondencia: idArch };
-  //           var editCorrespondencia = await conta.updatePushConta(idArea, datos);
-  //           result = await Correspondencia.addContaId(idArch, idArea);
-  //         }
-  //         response.status(201).json({
-  //           serverResponse: `${"Se agregó a "}${
-  //             contaData.Correspondencias.length
-  //           }${" Correspondencias el archivo"}`,
-  //         });
-  //         return;
-  //       } else {
-  //         let datos: any = { idCorrespondencia: idCorrespondencia };
-  //         var editCorrespondencia = await conta.updatePushConta(idArea, datos);
-  //         result = await Correspondencia.addContaId(idCorrespondencia, idArea);
-  //         response.status(201).json({ serverResponse: result });
-  //         return;
-  //       }
-  //     }
-  //   }
-  //   //SUBIR Archivo
-  //   var dir = `${__dirname}/../../../../uploads/archivos`;
-  //   var absolutepath = path.resolve(dir);
-  //   var files: any = request.files;
-  //   var key: Array<string> = Object.keys(files);
-  //   var copyDirectory = (totalpath: string, file: any) => {
-  //     return new Promise((resolve, reject) => {
-  //       file.mv(totalpath, (err: any, success: any) => {
-  //         if (err) {
-  //           resolve(false);
-  //           return;
-  //         }
-  //         resolve(true);
-  //         return;
-  //       });
-  //     });
-  //   };
-  //   //para area de contabilidad con file
-  //   if (area === "Contabilidad") {
-  //     for (var i = 0; i < key.length; i++) {
-  //       var file: any = files[key[i]];
-  //       var filehash: string = sha1(new Date().toString()).substr(0, 5);
-  //       var nombreCortado = file.name.split(".");
-  //       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-  //       // Validar extension
-  //       var extensionesValidas = ["pdf"];
-  //       if (!extensionesValidas.includes(extensionArchivo)) {
-  //         return response.status(400).json({
-  //           ok: false,
-  //           msg: "No es una extensión permitida",
-  //         });
-  //       }
-  //       var newname: string = `${"GAMB"}_${filehash}_${area}_${
-  //         CorrespondenciaResult.tipo
-  //       }_${"Nro"}${contaData.numero}_${
-  //         CorrespondenciaResult.gestion
-  //       }.${extensionArchivo}`;
-  //       var totalpath = `${absolutepath}/${newname}`;
-  //       await copyDirectory(totalpath, file);
-  //       contaData.nameFile = newname;
-  //       contaData.uri = "getArchivos/" + newname;
-  //       contaData.path = totalpath;
-  //       var resultArea = await conta.addDependencia(contaData);
-  //     }
-  //     let idArea = resultArea._id;
-  //     //si existe Correspondencias
-  //     if (contaData.Correspondencias) {
-  //       let partes: any = contaData.Correspondencias.split(",");
-  //       let cantCarp = partes.length;
-  //       for (let i = 0; i < cantCarp; i++) {
-  //         let idArch = partes[i];
-  //         let datos: any = { idCorrespondencia: idArch };
-  //         var editCorrespondencia = await conta.updatePushConta(idArea, datos);
-  //         result = await Correspondencia.addContaId(idArch, idArea);
-  //       }
-  //       response.status(201).json({
-  //         serverResponse: `${"Se agregó a "}${
-  //           contaData.Correspondencias.length
-  //         }${" Correspondencias el archivo con file"}`,
-  //       });
-  //       return;
-  //       //si no existe Correspondencias
-  //     } else {
-  //       let datos: any = { idCorrespondencia: idCorrespondencia };
-  //       var editCorrespondencia = await conta.updatePushConta(idArea, datos);
-  //       result = await Correspondencia.addContaId(idCorrespondencia, idArea);
-  //       response.status(201).json({ serverResponse: result });
-  //       return;
-  //     }
-  //   }
-  //   if (area === "Juridica") {
-  //     /* result1 = await conta.addConta(contaData);
-  //     let idArea = result1._id;
-  //     result = await Correspondencia.addContaId(idCorrespondencia, idArea); */
-  //   }
-  //   if (resultArea == null) {
-  //     response.status(300).json({ serverResponse: "no se pudo guardar" });
-  //     return;
-  //   }
-  //   //response.status(200).json({ serverResponse: resultArea });
-  // }
-  public async addArchivo(request: Request, response: Response) {
-    let idCorrespondencia: string = request.params.id;
-    var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    let Conta: BussDependencia = new BussDependencia();
-    let idArchivo = request.body.archivo;
-    let CorrespondenciaResult: any = await Correspondencia.readCorrespondencia(
-      idCorrespondencia
-    );
-    if (!CorrespondenciaResult) {
-      response
-        .status(300)
-        .json({ serverResponse: "Correspondencia no existe!" });
-      return;
-    }
-    let area = CorrespondenciaResult.area;
-    if (area === "Contabilidad") {
-      var resultArea = await Conta.readDependencias(idArchivo);
-      if (resultArea != null) {
-        var checksub: any = CorrespondenciaResult.areaContabilidad.filter(
-          (item: any) => {
-            if (resultArea._id.toString() == item._id.toString()) {
-              return true;
-            }
-            return false;
-          }
-        );
-        if (checksub.length == 0) {
-          let datos: any = { idCorrespondencia: idCorrespondencia };
-          var editCorrespondencia = await Conta.updatePushConta(
-            idArchivo,
-            datos
-          );
-          var result = await Correspondencia.addContaId(
-            idCorrespondencia,
-            idArchivo
-          );
-          response.status(200).json({ serverResponse: resultArea });
-          return;
-        }
-        response.status(300).json({
-          serverResponse: "Ya existe el ARCHIVO en esta Correspondencia",
-        });
-        return;
-      }
-    }
-  }
-  public async removeArchivo(request: Request, response: Response) {
-    let idCorrespondencia: string = request.params.id;
-    var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    let Conta: BussDependencia = new BussDependencia();
-    let idArchivo = request.body.idArchivo;
-    let CorrespondenciaResult: any = await Correspondencia.readCorrespondencia(
-      idCorrespondencia
-    );
-    if (!CorrespondenciaResult) {
-      response
-        .status(300)
-        .json({ serverResponse: "Correspondencia no existe!" });
-      return;
-    }
-    let area = CorrespondenciaResult.area;
-    if (area === "Contabilidad") {
-      var resultArea = await Conta.readDependencias(idArchivo);
-      if (resultArea != null) {
-        var checksub: any = CorrespondenciaResult.areaContabilidad.filter(
-          (item: any) => {
-            if (resultArea._id.toString() == item._id.toString()) {
-              return true;
-            }
-            return false;
-          }
-        );
-        if (checksub.length != 0) {
-          let datos: any = { idCorrespondencia: idCorrespondencia };
-          var editCorrespondencia = await Conta.updateContaId(idArchivo, datos);
-          var result = await Correspondencia.removeContaId(
-            idCorrespondencia,
-            idArchivo
-          );
-          response.status(200).json({ serverResponse: "Se movió el archivo" });
-          return;
-        }
-        response.status(300).json({
-          serverResponse: "Ya no existe el ARCHIVO en esta Correspondencia",
-        });
-        return;
-      }
-    }
-  }
-  public async queryContaAll(request: Request, response: Response) {
-    var Conta: BussDependencia = new BussDependencia();
-    var filter1: any = {};
-    var filter2: any = {};
-    var params: any = request.query;
-    if (params.area != null) {
-      var area = new RegExp(params.area, "i");
-      filter1["area"] = area;
-    }
-    if (params.tipo != null) {
-      var tipo = new RegExp(params.tipo, "i");
-      filter1["tipo"] = tipo;
-    }
-    if (params.subTipo != null) {
-      var subTipo = new RegExp(params.subTipo, "i");
-      filter1["subTipo"] = subTipo;
-    }
-    if (params.gestion != null) {
-      var gestion: number = parseInt(params.gestion);
-      if (Number.isNaN(gestion)) {
-        filter1["gestion"];
-      } else {
-        filter1["gestion"] = gestion;
-      }
-    }
-    if (params.glosa != null) {
-      var glosa = new RegExp(params.glosa, "i");
-      filter2["glosa"] = glosa;
-    }
-    if (params.beneficiario != null) {
-      var beneficiario = new RegExp(params.beneficiario, "i");
-      filter2["beneficiario"] = beneficiario;
-    }
-    if (params.numero != null) {
-      var numero = new RegExp(params.numero, "i");
-      filter2["numero"] = numero;
-    }
-    if (params.ci != null) {
-      var ci = new RegExp(params.ci, "i");
-      filter2["ci"] = ci;
-    }
-    let res = await Conta.queryContaAll(filter1, filter2);
-    response.status(200).json({ serverResponse: res, total: res.length });
-  }
+  
   //----------DEPENDENCIA------------//
   public async createDependencia(request: Request, response: Response) {
     var Dependencia: BussDependencia = new BussDependencia();
@@ -820,14 +517,14 @@ class RoutesController {
   }
   public async getDependencia(request: Request, response: Response) {
     var dependencia: BussDependencia = new BussDependencia();
-    let repres = await dependencia.readDependencias(request.params.id);
-    response.status(200).json(repres);
+    let respDepend = await dependencia.getDependencia(request.params.id);
+    response.status(200).json(respDepend);
   }
   //Archivos de conta sin asociar a una Correspondencia
   public async getContaSin(request: Request, response: Response) {
     var Conta: BussDependencia = new BussDependencia();
     let data: any = { idCorrespondencia: { $size: 0 } };
-    let repres = await Conta.getContaSin(data);
+    let repres = await Conta.getDependencia(data);
     response.status(200).json(repres);
   }
   public async updateDependencia(request: Request, response: Response) {
@@ -853,6 +550,28 @@ class RoutesController {
     }
     let result = await Dependencia.deleteDependencia(id);
     response.status(200).json({ serverResponse: "Se elimino la Dependencia" });
+  }
+
+  ///////addFuncionario
+  public async addFuncionario(request: Request, response: Response) {
+    const user: BusinessUser = new BusinessUser();
+    const dependencia: BussDependencia = new BussDependencia();
+    let id: string = request.params.id;
+    const dataUser = request.body;
+    let respDependencia: any = await dependencia.readDependencias(id);
+    let idUser = respDependencia.idUser;
+    let dataIdUder:string = dataUser.idUser.toString()
+    console.log(idUser);
+    console.log(dataIdUder.toString());
+    if (dataUser.idUser.includes(idUser)) {
+      response.status(300).json({ serverResponse: "Ya existe Usuario" });
+      return;
+    }
+    // let result: any = await dependencia.updatePushUser(id, dataUser);
+    // let datos: any = { dependencia: id };
+    // const resultAdd = await user.updateUser(dataUser.idUser, datos);
+
+    //response.status(200).json({ serverResponse: "Usuario añadido" });
   }
   // public async searchConta(request: Request, response: Response) {
   //   var Conta: BussDependencia = new BussDependencia();

@@ -20,6 +20,7 @@ import { ISeguimiento } from "../models/Seguimiento";
 import BussinesFile from "../businessController/BussinesFlies";
 import { IArchivo } from "../models/archivo";
 import BussnesArchivo from "../businessController/BusinessArch";
+import BussDependencia from "../../correspondenciasModule/bussinesController/dependencias";
 import { isValidObjectId } from "mongoose";
 interface Icredentials {
   email: string;
@@ -57,6 +58,7 @@ class RoutesController {
         surnames: loginUser.surnames,
         post: loginUser.post,
         roles: loginUser.roles,
+        dependencia: loginUser.dependencia,
         token,
       });
       return;
@@ -112,7 +114,7 @@ class RoutesController {
       filter["post"] = expresion;
     }
     if (params.isActive != null) {
-      var expres:boolean = params.isActive;
+      var expres: boolean = params.isActive;
       filter["isActive"] = expres;
     }
     if (params.roles != null) {
@@ -144,27 +146,18 @@ class RoutesController {
         skip = 0;
       }
     }
-    if (params.order != null) {
-      var data = params.order.split(",");
-      var number = parseInt(data[1]);
-      order[data[0]] = number;
-    } else {
-      order = { _id: -1 };
-    }
     const result: Array<IUser> = await user.readUsers(
       filter,
       limit,
       skip,
-      order
     );
-   
+
     response.status(200).json({
       serverResponse: result,
       limit,
       totalDocs,
       totalpage,
       skip,
-      order
     });
     return;
   }
@@ -179,37 +172,76 @@ class RoutesController {
     //let id: string = request.params.id;
     let res = await user.getUserSurnames(request.params.surnames);
     console.log(request.params.surnames, res);
-    
+
     response.status(200).json(res);
   }
   public async updateUser(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let subdir: BussinesSubdir = new BussinesSubdir();
+    const dependencia: BussDependencia = new BussDependencia();
     let id: string = request.params.id;
     var params = request.body;
-    if(params.password===""){
-      delete params.password
+    let resUser = await user.readUsers(id);
+    if (params.password === "") {
+      delete params.password;
     }
     if (params["password"] != null) {
       params["password"] = sha1(params["password"]);
     }
-    if(params.cargo===""){
-      delete params.cargo
+    if (params.cargo === "") {
+      delete params.cargo;
     }
-    if(params.cargo){
-      var sub:any = await subdir.readSubId(params.cargo);
-      if(!sub){
-        var sub:any = await subdir.readSubId(params.cargo._id);
+    if (params.cargo) {
+      var sub: any = await subdir.readSubId(params.cargo);
+      if (!sub) {
+        var sub: any = await subdir.readSubId(params.cargo._id);
       }
-      params.post=sub.nombresubdir
-      params.user=id
+      params.post = sub.nombresubdir;
+      params.user = id;
       await subdir.updateSubdi(sub._id, params);
     }
-    if(params.birthday===""){
-      delete params.birthday
+    if (params.birthday === "") {
+      delete params.birthday;
     }
+    if (params.dependencia === "") {
+      delete params.dependencia;
+    }
+    if (params.dependencia) {
+      
+      let respDependencia: any = await dependencia.readDependencias(
+        params.dependencia
+      );
+      if (!respDependencia) {
+        response
+          .status(300)
+          .json({ serverResponse: "No existe Unidad Funcional" });
+        return;
+      }
+      let idUser = respDependencia.idUser;
+      if (idUser.includes(id)) {
+        response.status(300).json({ serverResponse: "Ya existe Usuario" });
+        return;
+      }
+      let datos: any = { idUser: id };
+      let result: any = await dependencia.updatePushUser(params.dependencia, datos);
+      if(resUser.dependencia){
+        let idDepende =resUser.dependencia
+        const respDependenciaAnt: any = await dependencia.readDependencias(
+          idDepende
+        );       
+        if(respDependenciaAnt){
+          let dataDepen = respDependenciaAnt[0]
 
-    
+          let idUsers = dataDepen.idUser         
+          if (idUsers.includes(resUser._id)) {
+            await dependencia.updatePullUser(resUser.dependencia, datos);  
+          }        
+        }      
+      }     
+    }
+    if (params.birthday === "") {
+      delete params.birthday;
+    }
     var result = await user.updateUser(id, params);
     response.status(200).json(result);
   }
@@ -237,6 +269,27 @@ class RoutesController {
     }
     response.status(200).json({ serverResponse: result });
   }
+  public async addFuncionario(request: Request, response: Response) {
+    const user: BusinessUser = new BusinessUser();
+    const dependencia: BussDependencia = new BussDependencia();
+    let id: string = request.params.id;
+    const dataUser = request.body;
+    let respDependencia: any = await dependencia.readDependencias(id);
+    let idUser = respDependencia.idUser;
+    let dataIdUder: string = dataUser.idUser.toString();
+    console.log(idUser);
+    console.log(dataIdUder.toString());
+    if (dataUser.idUser.includes(idUser)) {
+      response.status(300).json({ serverResponse: "Ya existe Usuario" });
+      return;
+    }
+    // let result: any = await dependencia.updatePushUser(id, dataUser);
+    // let datos: any = { dependencia: id };
+    // const resultAdd = await user.updateUser(dataUser.idUser, datos);
+
+    //response.status(200).json({ serverResponse: "Usuario añadido" });
+  }
+
   public async removeRol(request: Request, response: Response) {
     let roles: BussinessRoles = new BussinessRoles();
     let idRol: string = request.params.id;
@@ -373,10 +426,10 @@ class RoutesController {
     var org: BussinesOrganizacion = new BussinesOrganizacion();
     let subdir: BussinesSubdir = new BussinesSubdir();
     var subdirData: any = request.body;
-    subdirData.unidad=idOrg;
+    subdirData.unidad = idOrg;
     var result1 = await subdir.addSubdir(subdirData);
     console.log("Dataunidad", subdirData);
-    console.log("unidad", result1); 
+    console.log("unidad", result1);
     let idSub = result1._id;
     var result = await org.addSub(idOrg, idSub);
 
@@ -760,18 +813,23 @@ class RoutesController {
   public async eliminarEnvio(request: Request, response: Response) {
     const hojaRuta: BusinessHoja = new BusinessHoja();
     const segui: BussinesSegui = new BussinesSegui();
-    let idHR = request.params.id
+    let idHR = request.params.id;
     let params = request.body;
     let res = await hojaRuta.readHoja(idHR);
     let segRes = res.seguimiento[res.seguimiento.length - 1];
-    if(segRes.estado==="ENVIADO" ){
+    if (segRes.estado === "ENVIADO") {
       await segui.deleteSegui(segRes._id);
-      params.estado="RECIBIDO"
+      params.estado = "RECIBIDO";
       await hojaRuta.updateHojas(idHR, params);
       await hojaRuta.removeIdHR(idHR, segRes._id);
       response.status(200).json({ serverResponse: "Se eliminó el envio" });
-    }else{
-      response.status(300).json({ serverResponse: "Esta Hoja de Ruta ya tiene varios seguimientos ó ya fue Recibido" });
+    } else {
+      response
+        .status(300)
+        .json({
+          serverResponse:
+            "Esta Hoja de Ruta ya tiene varios seguimientos ó ya fue Recibido",
+        });
       return;
     }
   }
@@ -791,50 +849,57 @@ class RoutesController {
     }
     let segResA = resA.seguimiento[resA.seguimiento.length - 1];
     let segResB = resB.seguimiento[resB.seguimiento.length - 1];
-    if(request.body.cargo==="SECRETARIA DE DESPACHO"){
+    if (request.body.cargo === "SECRETARIA DE DESPACHO") {
       if (segResB == null) {
         response.status(300).json({
           serverResponse: `No se encontró seguimiento de Nº ${nuitB}`,
         });
         return;
       }
-      if (segResB.estado != "RECIBIDO" || segResB.destino != request.body.cargo) {
-        if (resB.estado==="ENVIADO" ) {
-        var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
-          if (resB._id.toString() == item._id.toString()) {
-            return true;
-          }
-          return false;
-        });
-        if (checksub.length == 0) {    
-          await hojaRuta.addIdHR(resA._id, resB._id);
-          await hojaRuta.addIdHR(resB._id, resA._id);
-          let data: any = { estado: `Asociado al Nº ${nuitA}`};
-          await segui.updateSegui(segResB._id, data);
-          if(resB.asociados.length!=0){ 
-            let resAso:any = resB.asociados;
-            for(let i = 0; i < resAso.length; i++){
-              let dataAso = resAso[i];
-              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
-              await hojaRuta.addIdHR(resA._id, dataAso._id);
-              await hojaRuta.addIdHR(dataAso._id,resA._id);
-              //await segui.updateSegui(segResData._id, data);
+      if (
+        segResB.estado != "RECIBIDO" ||
+        segResB.destino != request.body.cargo
+      ) {
+        if (resB.estado === "ENVIADO") {
+          var checksub: Array<IHojaruta> = resA.asociados.filter(
+            (item: any) => {
+              if (resB._id.toString() == item._id.toString()) {
+                return true;
+              }
+              return false;
+            }
+          );
+          if (checksub.length == 0) {
+            await hojaRuta.addIdHR(resA._id, resB._id);
+            await hojaRuta.addIdHR(resB._id, resA._id);
+            let data: any = { estado: `Asociado al Nº ${nuitA}` };
+            await segui.updateSegui(segResB._id, data);
+            if (resB.asociados.length != 0) {
+              let resAso: any = resB.asociados;
+              for (let i = 0; i < resAso.length; i++) {
+                let dataAso = resAso[i];
+                let segResData =
+                  dataAso.seguimiento[dataAso.seguimiento.length - 1];
+                await hojaRuta.addIdHR(resA._id, dataAso._id);
+                await hojaRuta.addIdHR(dataAso._id, resA._id);
+                //await segui.updateSegui(segResData._id, data);
+              }
+            }
+            if (resA.asociados.length != 0) {
+              let resAso: any = resA.asociados;
+              for (let i = 0; i < resAso.length; i++) {
+                let dataAso = resAso[i];
+                let segResData =
+                  dataAso.seguimiento[dataAso.seguimiento.length - 1];
+                await hojaRuta.addIdHR(resB._id, dataAso._id);
+                await hojaRuta.addIdHR(dataAso._id, resB._id);
+                //await segui.updateSegui(segResData._id, data);
+              }
             }
           }
-          if(resA.asociados.length!=0){ 
-            let resAso:any = resA.asociados;
-            for(let i = 0; i < resAso.length; i++){
-              let dataAso = resAso[i];
-              let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
-              await hojaRuta.addIdHR(resB._id, dataAso._id);
-              await hojaRuta.addIdHR(dataAso._id,resB._id);
-              //await segui.updateSegui(segResData._id, data);
-            }
-          }         
+          response.status(200).json({ serverResponse: resA, resB });
+          return;
         }
-        response.status(200).json({ serverResponse: resA, resB });
-        return;
-      }
         response.status(300).json({
           serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
         });
@@ -846,28 +911,30 @@ class RoutesController {
         }
         return false;
       });
-      if (checksub.length == 0) {   
+      if (checksub.length == 0) {
         await hojaRuta.addIdHR(resA._id, resB._id);
         await hojaRuta.addIdHR(resB._id, resA._id);
-        let data: any = { estado: `Asociado al Nº ${nuitA}`};
+        let data: any = { estado: `Asociado al Nº ${nuitA}` };
         await segui.updateSegui(segResB._id, data);
-        if(resB.asociados.length!=0){  
-          let resAso:any = resB.asociados;
-          for(let i = 0; i < resAso.length; i++){
+        if (resB.asociados.length != 0) {
+          let resAso: any = resB.asociados;
+          for (let i = 0; i < resAso.length; i++) {
             let dataAso = resAso[i];
-            let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+            let segResData =
+              dataAso.seguimiento[dataAso.seguimiento.length - 1];
             await hojaRuta.addIdHR(resA._id, dataAso._id);
-            await hojaRuta.addIdHR(dataAso._id,resA._id);
+            await hojaRuta.addIdHR(dataAso._id, resA._id);
             //await segui.updateSegui(segResData._id, data);
           }
         }
-        if(resA.asociados.length!=0){ 
-          let resAso:any = resA.asociados;
-          for(let i = 0; i < resAso.length; i++){
+        if (resA.asociados.length != 0) {
+          let resAso: any = resA.asociados;
+          for (let i = 0; i < resAso.length; i++) {
             let dataAso = resAso[i];
-            let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
+            let segResData =
+              dataAso.seguimiento[dataAso.seguimiento.length - 1];
             await hojaRuta.addIdHR(resB._id, dataAso._id);
-            await hojaRuta.addIdHR(dataAso._id,resB._id);
+            await hojaRuta.addIdHR(dataAso._id, resB._id);
             //await segui.updateSegui(segResData._id, data);
           }
         }
@@ -893,7 +960,7 @@ class RoutesController {
       });
       return;
     }
-    if(+nuitA === +nuitB){
+    if (+nuitA === +nuitB) {
       response.status(300).json({
         serverResponse: `No se puede asociar a la misma Hoja de Ruta`,
       });
@@ -908,38 +975,36 @@ class RoutesController {
     if (checksub.length == 0) {
       await hojaRuta.addIdHR(resA._id, resB._id);
       await hojaRuta.addIdHR(resB._id, resA._id);
-      let data: any = { estado: `Asociado al Nº ${nuitA}`};
+      let data: any = { estado: `Asociado al Nº ${nuitA}` };
       await segui.updateSegui(segResB._id, data);
-      if(resB.asociados.length!=0){  
-        let resAso:any = resB.asociados;
-        for(let i = 0; i < resAso.length; i++){
+      if (resB.asociados.length != 0) {
+        let resAso: any = resB.asociados;
+        for (let i = 0; i < resAso.length; i++) {
           let dataAso = resAso[i];
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
           await hojaRuta.addIdHR(resA._id, dataAso._id);
-          await hojaRuta.addIdHR(dataAso._id,resA._id);
+          await hojaRuta.addIdHR(dataAso._id, resA._id);
           //await segui.updateSegui(segResData._id, data);
         }
       }
-      if(resA.asociados.length!=0){  
-        let resAso:any = resA.asociados;
-        for(let i = 0; i < resAso.length; i++){
+      if (resA.asociados.length != 0) {
+        let resAso: any = resA.asociados;
+        for (let i = 0; i < resAso.length; i++) {
           let dataAso = resAso[i];
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
           await hojaRuta.addIdHR(resB._id, dataAso._id);
-          await hojaRuta.addIdHR(dataAso._id,resB._id);
+          await hojaRuta.addIdHR(dataAso._id, resB._id);
           //await segui.updateSegui(segResData._id, data);
         }
       }
-      
+
       // console.log(segResA,segResB);
       response.status(200).json({ serverResponse: resA, resB });
       return;
     }
-    response
-      .status(300)
-      .json({
-        serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº ",
-      });
+    response.status(300).json({
+      serverResponse: "Esta Hoja de ruta ya esta asociado a este Nº ",
+    });
     return;
   }
 
@@ -970,7 +1035,7 @@ class RoutesController {
       }
     }
   }
-  
+
   /* public async removeCargo(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
     let idUser: string = request.params.id;
@@ -1166,7 +1231,7 @@ class RoutesController {
     var aux: any = {};
     var order: any = {};
     var select = "";
-    if(params.destino === "" || params.destino === "null" ){
+    if (params.destino === "" || params.destino === "null") {
       delete params.destino;
     }
     if (params.destino != null) {
@@ -1232,7 +1297,7 @@ class RoutesController {
       order = { fechaderivado: -1 };
     }
     console.log("paramas", filter);
-    
+
     let res: Array<ISeguimiento> = await segui.readOficina(
       filter,
       skip,

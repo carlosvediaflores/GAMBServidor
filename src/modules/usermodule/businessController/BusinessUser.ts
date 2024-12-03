@@ -15,7 +15,7 @@ class BusinessUser {
 
     public async readUsers(params1?: string | any, params2?: number, params3?: number, order?:any): Promise<Array<IUser> | IUser> {
         if (params1 && typeof params1 == "string") {
-            var result: IUser = await UsersModel.findOne({ _id: params1 })
+            var result: IUser = await UsersModel.findOne({ _id: params1 },{ password:0})
             .populate({
                 path: "cargo",
                 model: "Subdirecciones",
@@ -23,7 +23,9 @@ class BusinessUser {
                   path: "unidad",
                   model: "Organizacion",
                 },
-              });
+              })
+            .populate('corr_dependencias');
+            
             return result;
             
         } else if (params1) {

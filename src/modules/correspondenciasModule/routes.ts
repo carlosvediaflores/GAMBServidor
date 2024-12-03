@@ -22,7 +22,7 @@ class Routes {
       .delete(this.routesController.removeCorrespondencia);
     app
       .route(`${this.routeparent}/uploadCorrespondencia/:id?`)
-      .post(this.routesController.uploadCorrespondencia);
+      .put(this.routesController.uploadCorrespondencia);
     app
       .route(`${this.routeparent}/correspondencias`)
       .get(this.routesController.getCorrespondencias);
@@ -32,6 +32,9 @@ class Routes {
       app
       .route(`${this.routeparent}/plantilla/:fileName`)
       .get(this.routesController.getNota);
+      app
+      .route(`${this.routeparent}/downloadFile/:fileName`)
+      .get(this.routesController.downloadFile);
     app
       .route(`${this.routeparent}/correspondencia/:id`)
       .put(this.routesController.updateCorrespondencia);
@@ -42,14 +45,12 @@ class Routes {
       .route(`${this.routeparent}/addAreaArch/:id`)
       .put(this.routesController.addArea); */
     app
-      .route(`${this.routeparent}/addArchivo/:id`)
-      .put(this.routesController.addArchivo);
+      .route(`${this.routeparent}/addUserDependencia/:id`)
+      .put(this.routesController.addFuncionario);
     app
-      .route(`${this.routeparent}/removeArchivo/:id`)
-      .put(this.routesController.removeArchivo);
-    app
-      .route(`${this.routeparent}/searchContaAll`)
-      .get(this.routesController.queryContaAll);
+   /*    .route(`${this.routeparent}/removeArchivo/:id`)
+      .put(this.routesController.removeArchivo); */
+
     //-------AREA DEPENDENCIA--//
     app
       .route(`${this.routeparent}/dependencia`)

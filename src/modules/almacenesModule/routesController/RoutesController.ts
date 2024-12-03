@@ -2271,7 +2271,7 @@ class RoutesController {
       filter["productos"]= {'$exists': true, '$not': {'$size': 0}}
     }
     if (Object.entries(aux).length > 0) {
-      filter["createdAt"] = aux;
+      filter["fecha"] = aux;
     }
     console.log(filter);
     
@@ -2291,7 +2291,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { fecha:-1, _id: -1};
     }    
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
     //console.log(res);

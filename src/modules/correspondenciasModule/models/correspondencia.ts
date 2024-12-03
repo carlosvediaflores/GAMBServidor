@@ -7,8 +7,10 @@ export interface ICorrespondencia extends Document {
   numCite: number;
   nombreDestino: string;
   cargoDestino:string;
+  entidadDestino:string;
   lugarDestino:string;
   via:string;
+  genero:string;
   referencia:string;
   hojaRuta:string;
   fsAdjunto:string;
@@ -17,6 +19,8 @@ export interface ICorrespondencia extends Document {
   idSubTipo:string;
   idDependencia: string;
   idUsuario: string;
+  isUpdated:boolean;
+  isActive:boolean;
 }
 const correspondenciaSchema: Schema = new Schema(
   {
@@ -26,8 +30,10 @@ const correspondenciaSchema: Schema = new Schema(
     numCite: { type: Number, required:true, default:1},
     nombreDestino: { type: String },
     cargoDestino:{type:String},
+    entidadDestino:{type:String},
     lugarDestino:{type:String, default:"Presente"},
     via:{type: Schema.Types.ObjectId, ref: "User"},
+    genero:{type:String, default:'Señor'},
     referencia:{type:String},
     hojaRuta:{type:String},
     fsAdjunto:{type:String, default:1},
@@ -36,6 +42,8 @@ const correspondenciaSchema: Schema = new Schema(
     idSubTipo:{ type: Schema.Types.ObjectId, ref: "corr_subTipo"},
     idDependencia: { type: Schema.Types.ObjectId, ref: "corr_dependencias"},
     idUsuario: { type: Schema.Types.ObjectId, ref: "User" },
+    isUpdated:{type:Boolean, default:false},
+    isActive:{type:Boolean, default:true},
   },
   {
     timestamps: true,

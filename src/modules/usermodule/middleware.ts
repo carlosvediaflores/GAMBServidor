@@ -8,7 +8,6 @@ import { IRoles } from "./models/Roles";
 var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunction) => {
 
     var token: string = request.headers["authorization"];
-    //console.log(request.headers);
     
     if (!token) {
         response.status(300).json({ serverResponse: "No tiene acceso a este endpoint" });
@@ -21,7 +20,11 @@ var jsonwebtokenSecurity = (request: Request, response: Response, next: NextFunc
         }
         var id = success.id;
         var user: BusinessUser = new BusinessUser();
-        let userdata:any = await user.readUsers(id);
+        let userdata:any = await user.readUsers(id, );
+        request.body["user"]=userdata;
+        
+       // console.log(request.body);
+        
         if (!userdata) {
             response.status(300).json({ serverResponse: "No valido " });
             return;

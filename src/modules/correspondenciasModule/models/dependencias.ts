@@ -6,14 +6,14 @@ export interface IDependemcias extends Document {
   descripcion: string;
   sigla: string;
   isActive:boolean;
-  idDependencia: string;
+  idUser: string;
 }
 const areaSchema: Schema = new Schema(
   {
     descripcion: { type: String },
     sigla: { type: String, unique: true },
     isActive:{type:Boolean, default:true},
-    idDependencia: { type: Schema.Types.ObjectId, ref: "Subdirecciones" },
+    idUser:[ { type: Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,

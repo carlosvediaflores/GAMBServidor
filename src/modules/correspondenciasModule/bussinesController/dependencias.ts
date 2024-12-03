@@ -14,10 +14,13 @@ class BussDependencia {
     params1?: string | any,
     params2?: number,
     params3?: number,
-    order?:any
+    order?: any
   ): Promise<Array<IDependemcias> | IDependemcias> {
     if (params1 && typeof params1 == "string") {
-      var result: IDependemcias = await dependenciaModel.findOne({ _id: params1 }).populate("idDependencia");
+      var result: IDependemcias = (
+        await dependenciaModel.findOne({ _id: params1 })
+      //  .populate("idUser")
+      );
       return result;
     } else if (params1) {
       let skip = params2;
@@ -26,11 +29,10 @@ class BussDependencia {
         .find(params1)
         .skip(skip)
         .limit(limit)
-        .sort(order)
-        .populate("idDependencia");
+       // .populate("idUser");
       return listConta;
     } else {
-      let listContas: Array<IDependemcias> = await dependenciaModel.find().populate("idDependencia");
+      let listContas: Array<IDependemcias> = await dependenciaModel.find();
       return listContas;
     }
   }
@@ -38,14 +40,13 @@ class BussDependencia {
     var result = await dependenciaModel.countDocuments();
     return result;
   }
-  public async getContaSin(data:any) {
-    var result = await dependenciaModel.find(data);
+  public async getDependencia(id: any) {
+    var result = await dependenciaModel.findOne({_id:id})
+    .populate('idUser');
     return result;
   }
   public async searchConta(query?: any): Promise<Array<IDependemcias>>;
-  public async searchConta(
-    search: string | any,
-  ) {
+  public async searchConta(search: string | any) {
     var filter = {
       $or: [
         { numero: { $regex: search, $options: "i" } },
@@ -53,7 +54,10 @@ class BussDependencia {
         { beneficiario: { $regex: search, $options: "i" } },
       ],
     };
-    let listConta: Array<IDependemcias> = await dependenciaModel.find(filter).sort({ _id: -1 }).populate("idCarpeta")
+    let listConta: Array<IDependemcias> = await dependenciaModel
+      .find(filter)
+      .sort({ _id: -1 })
+      .populate("idCarpeta");
     return listConta;
   }
   public async addDependencia(Conta: IDependemcias) {
@@ -65,12 +69,18 @@ class BussDependencia {
       return err;
     }
   }
-  public async  updatePushConta(id: string, Conta: any) {
-    let result = await dependenciaModel.updateOne({ _id: id }, { $push: Conta });
+  public async updatePushUser(id: string, dpendencia: any) {
+    let result = await dependenciaModel.updateOne(
+      { _id: id },
+      { $push: dpendencia }
+    );
     return result;
   }
-  public async updateContaId(idArchivo: string, Conta: any) {
-    let result = await dependenciaModel.updateOne({ _id: idArchivo }, { $pull: Conta });
+  public async updatePullUser(id: string, dpendencia: any) {
+    let result = await dependenciaModel.updateOne(
+      { _id: id },
+      { $pull: dpendencia }
+    );
     return result;
   }
   //Editar
@@ -87,26 +97,31 @@ class BussDependencia {
   }
   public async readContaFiles(archivo: string): Promise<IDependemcias>;
   public async readContaFiles(
-    params1?: string | any,
+    params1?: string | any
   ): Promise<Array<IDependemcias> | IDependemcias> {
     if (params1 && typeof params1 == "string") {
-      var result: IDependemcias = await dependenciaModel.findOne({ archivo: params1 });
+      var result: IDependemcias = await dependenciaModel.findOne({
+        archivo: params1,
+      });
       return result;
     }
   }
-  public async getFile(file: string) {   
-    let result = await dependenciaModel.findOne({fileName:file});
+  public async getFile(file: string) {
+    let result = await dependenciaModel.findOne({ fileName: file });
     return result;
   }
-  public async queryContaAll(query1?: any, query2?: any,): Promise<Array<IDependemcias>>;
-  public async queryContaAll(search1: string | any, search2: string | any ) {   
+  public async queryContaAll(
+    query1?: any,
+    query2?: any
+  ): Promise<Array<IDependemcias>>;
+  public async queryContaAll(search1: string | any, search2: string | any) {
     let listCarpetas: Array<IDependemcias> = await dependenciaModel
       .find(search2)
       .sort({ createdAt: -1 })
       .populate({
         path: "idCarpeta",
-        match: search1,          
-      })
+        match: search1,
+      });
     //return listCarpetas;
     const filterCarpeta = listCarpetas.filter((carpeta: any) => {
       return carpeta.idCarpeta.length != 0;

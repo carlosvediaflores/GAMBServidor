@@ -17,6 +17,7 @@ export interface IUser extends Document {
   roles: string;
   uriavatar: string;
   pathavatar: string;
+  dependencia:string;
 }
 const userSchema: Schema = new Schema({
   username: { type: String },
@@ -29,6 +30,7 @@ const userSchema: Schema = new Schema({
   registerdate: { type: Date},
   password: { type: String, required: true },
   cargo: {type: Schema.Types.ObjectId, ref: 'Subdirecciones'},
+  dependencia: {type: Schema.Types.ObjectId, ref: 'corr_dependencias'},
   post: { type: String },
   isActive:{type:Boolean, default:true},
   roles: { type: String, default: "SUPER_USER" },

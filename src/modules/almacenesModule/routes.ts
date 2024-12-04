@@ -364,6 +364,10 @@ class Routes {
     app
       .route(`${this.routeparent}/vales`)
       .get(this.routesController.getVales);
+       //listar
+    app
+    .route(`${this.routeparent}/valesAll`)
+    .get(this.routesController.getValesAll);
       //buscar vale por ID
     app
       .route(`${this.routeparent}/finalizarVales`)

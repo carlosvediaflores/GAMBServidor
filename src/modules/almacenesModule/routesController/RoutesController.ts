@@ -2273,7 +2273,6 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["fecha"] = aux;
     }
-    console.log(filter);
     
     let respost: Array<IVale> = await Vale.readVale();
     var totalDocs = respost.length;
@@ -2291,7 +2290,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { fecha:-1, _id: -1};
+      order = {fecha:-1, _id: -1};
     }    
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
     //console.log(res);
@@ -2347,11 +2346,10 @@ class RoutesController {
       if(valeData.idProducto==='6439b82156cc6b00132c9ab2'){
         valeData.cantidad=valeData.precio / 3.72
       }
-
     }
     valeData["numeroVale"] = numero;
     let result = await vale.addVale(valeData);
-    // console.log(valeData)
+   console.log(valeData)
     // console.log(result)
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
@@ -2400,10 +2398,30 @@ class RoutesController {
     let valeData = await Vale.readVale(request.params.id);
     response.status(200).json(valeData);
   }
+  public async getValesAll(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    let valeData = await Vale.readVale();
+    for (let i = 0; i < valeData.length; i++) {
+      let data:any = valeData[i];
+      let datares:any = {}
+      datares.fecha=data.createdAt
+      var result = await Vale.updateVale(data._id, datares);
+    }
+    response.status(200).json(valeData.length);
+  }
   public async updateVale(request: Request, response: Response) {
     var Vale: BussVale = new BussVale();
     let id: string = request.params.id;
     var params = request.body;
+    let valeData = await Vale.readVale(id);
+    if(params.precio){
+      if(params.idProducto==='642c3e7b3b1ac20013da2571'){
+        params.cantidad=params.precio / 3.74
+      }
+      if(params.idProducto==='6439b82156cc6b00132c9ab2'){
+        params.cantidad=params.precio / 3.72
+      }
+    }
     var result = await Vale.updateVale(id, params);
     response.status(200).json(result);
   }

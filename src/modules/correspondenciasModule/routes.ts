@@ -119,6 +119,9 @@ class Routes {
     app
       .route(`${this.routeparent}/tipo/:id`)
       .delete(this.routesController.removeTipo);
+      app
+      .route(`${this.routeparent}/downloadPlantilla/:nombreTipo`)
+      .get(this.routesController.downloadPlantilla);
   }
 }
 export default Routes;

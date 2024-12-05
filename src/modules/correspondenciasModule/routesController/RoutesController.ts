@@ -29,7 +29,7 @@ class RoutesController {
     const Tipo: BussTipo = new BussTipo();
     var CorrespondenciaData = request.body;
     var filter: any = {};
-    console.log("data", CorrespondenciaData);
+    
     let result: ICorrespondencia;
     let year = new Date();
     let yearAct = CorrespondenciaData.gestion ?? year.getFullYear();
@@ -59,7 +59,7 @@ class RoutesController {
       filter["idDependencia"] = idDependencia;
     }
     let resp: any = await Correspondencia.queryCorresp(filter);
-    console.log("Res", filter);
+    
 
     let resultDependencia = await dependencia.readDependencias(idDependencia);
     let resultSubTipo = await SubTipo.readSubTipo(idSubTipo);
@@ -134,8 +134,8 @@ class RoutesController {
       filter["idDependencia"] = idDependencia;
     }
     let resp: any = await Correspondencia.queryCorresp(filter);
-    console.log("Fil", filter);
-    console.log("Res", resp);
+    
+    
     response.status(201).json({ serverResponse: resp });
     return;
   }
@@ -149,7 +149,7 @@ class RoutesController {
     var skip = 0;
     var aux: any = {};
     var order: any = { gestion: -1 };
-    console.log(params);
+    
 
     if (params.gestion != null) {
       var gestion = params.gestion;
@@ -162,6 +162,10 @@ class RoutesController {
     if (params.idSubTipo != null) {
       var idSubTipo = params.idSubTipo;
       filter["idSubTipo"] = idSubTipo;
+    }
+    if (params.isActive != null) {
+      var isActive = params.isActive;
+      filter["isActive"] = isActive;
     }
     if (params.idDependencia != null) {
       var idDependencia = params.idDependencia;
@@ -236,8 +240,7 @@ class RoutesController {
   }
   public async getNota(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    let res: any = await Correspondencia.getFile(request.params.fileName);
-    console.log(res);
+    let res: any = await Correspondencia.getFile(request.params.fileName);;
     let sigla = "";
     let siglaTipo = "";
     let nombreTipo = "";
@@ -252,7 +255,6 @@ class RoutesController {
       .filter((part) => part.length > 0) // Asegura que solo usemos palabras válidas
       .map((part) => part[0].toUpperCase()) // Obtiene la primera letra de cada palabra y la convierte en mayúscula
       .join(""); // Une todas las iniciales en un solo string
-    console.log("initials", vistoBueno);
     if (res.idSubTipo) {
       nombreSubTipo = res.idSubTipo.nombreSubTipo.toUpperCase();
     }
@@ -265,7 +267,6 @@ class RoutesController {
         .filter((part) => part.length > 0) // Asegura que solo usemos palabras válidas
         .map((part) => part[0].toUpperCase()) // Obtiene la primera letra de cada palabra y la convierte en mayúscula
         .join(""); // Une todas las iniciales en un solo string
-      console.log("initials", vistoBueno);
     }
     const newRes: any = {
       lugar: res.lugar,
@@ -373,7 +374,7 @@ class RoutesController {
         .json({ serverResponse: "Correspondencia no existe!" });
       return;
     }
-    //console.log("Cite",CorrespondenciaToUpdate);
+    //
     if (isEmpty(request.files)) {
       response
       .status(200)
@@ -561,8 +562,8 @@ class RoutesController {
     let respDependencia: any = await dependencia.readDependencias(id);
     let idUser = respDependencia.idUser;
     let dataIdUder:string = dataUser.idUser.toString()
-    console.log(idUser);
-    console.log(dataIdUder.toString());
+    
+    
     if (dataUser.idUser.includes(idUser)) {
       response.status(300).json({ serverResponse: "Ya existe Usuario" });
       return;
@@ -573,12 +574,7 @@ class RoutesController {
 
     //response.status(200).json({ serverResponse: "Usuario añadido" });
   }
-  // public async searchConta(request: Request, response: Response) {
-  //   var Conta: BussDependencia = new BussDependencia();
-  //   var searchConta = request.params.search;
-  //   let res = await Conta.searchConta(searchConta);
-  //   response.status(200).json({ serverResponse: res });
-  // }
+
   // ----------SUBTIPO------------
   public async createSubTipo(request: Request, response: Response) {
     var SubTipo: BussSubTipo = new BussSubTipo();
@@ -657,20 +653,7 @@ class RoutesController {
     var result = await SubTipo.updateSubTipo(id, params);
     response.status(200).json(result);
   }
-  // public async addTipo(request: Request, response: Response) {
-  //   var SubTipo: BussSubTipo = new BussSubTipo();
-  //   let id: string = request.params.id;
-  //   var params = request.body;
-  //   var result = await SubTipo.addTipo(id, params);
-  //   response.status(200).json(result);
-  // }
-  // public async removeTipo(request: Request, response: Response) {
-  //   var SubTipo: BussSubTipo = new BussSubTipo();
-  //   let id: string = request.params.id;
-  //   var params = request.body;
-  //   var result = await SubTipo.removeTipo(id, params);
-  //   response.status(200).json(result);
-  // }
+
   public async removeSubTipo(request: Request, response: Response) {
     var SubTipo: BussSubTipo = new BussSubTipo();
     let id: string = request.params.id;
@@ -678,11 +661,85 @@ class RoutesController {
     response.status(200).json({ serverResponse: "Se elimino SubTipo" });
   }
   // ----------TIPO------------
+  // public async createTipo(request: Request, response: Response) {
+  //   var Tipo: BussTipo = new BussTipo();
+  //   var TipoData = request.body;
+  //   let result = await Tipo.addTipo(TipoData);
+  //   response.status(201).json({ serverResponse: result });
+  // }
+
   public async createTipo(request: Request, response: Response) {
     var Tipo: BussTipo = new BussTipo();
-    var TipoData = request.body;
-    let result = await Tipo.addTipo(TipoData);
-    response.status(201).json({ serverResponse: result });
+    const tipoData = request.body;
+    // const id: string = request.params.id;
+    const dataResult: ITipo =
+      await Tipo.getNombreTipo(tipoData.nombreTipo);
+    if (dataResult) {
+      response
+        .status(300)
+        .json({ serverResponse: `Ya existe tipo registrado con nombre ${tipoData.nombreTipo}` });
+      return;
+    }
+    tipoData.nombreTipo = tipoData.nombreTipo.toLowerCase()
+    //
+    if (isEmpty(request.files)) {
+      response
+      .status(200)
+      .json({ serverResponse: "No hay archivo seleccionado" });
+    return;
+    }
+    //const tipo:any=CorrespondenciaToUpdate.idTipo
+    var dir = `${__dirname}/../../../../uploads/cites/plantillas`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["docx"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una archivo permitida",
+        });
+      }
+      var newname: string = `${tipoData.nombreTipo}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      let result = await Tipo.addTipo(tipoData);
+      response
+        .status(200)
+        .json({ serverResponse: "Tipo de Plantilla creado" });
+      return;
+    }
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  public async downloadPlantilla(request: Request, response: Response) {
+    var Tipo: BussTipo = new BussTipo();
+    let nombreTipo: string = request.params.nombreTipo;
+    const dataResult: ITipo =
+    await Tipo.getNombreTipo(nombreTipo);
+    const pathFile = path.join(
+      __dirname,
+      `/../../../../uploads/cites/plantillas/${dataResult.nombreTipo}.docx`
+    );
+    response.sendFile(pathFile);
   }
   public async getTipos(request: Request, response: Response) {
     var Tipo: BussTipo = new BussTipo();
@@ -726,7 +783,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { _id: -1 };
+      order = { _id: 1 };
     }
     let res: Array<ITipo> = await Tipo.readTipo(filter, skip, limit, order);
     response.status(200).json({
@@ -747,8 +804,53 @@ class RoutesController {
     var Tipo: BussTipo = new BussTipo();
     let id: string = request.params.id;
     var params = request.body;
-    var result = await Tipo.updateTipo(id, params);
-    response.status(200).json(result);
+    let resultData = await Tipo.readTipo(id);
+    
+    
+    if (isEmpty(request.files)) {
+      response
+      .status(200)
+      .json({ serverResponse: "No hay archivo seleccionado" });
+    return;
+    }
+    var dir = `${__dirname}/../../../../uploads/cites/plantillas`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = ["docx"];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una archivo permitida",
+        });
+      }
+      var newname: string = `${resultData.nombreTipo}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      var result = await Tipo.updateTipo(id, params);
+      response
+        .status(200)
+        .json({ serverResponse: "Tipo de Plantilla actualizado" });
+      return;
+    }
   }
   public async addSubTipo(request: Request, response: Response) {
     const Tipo: BussTipo = new BussTipo();
@@ -761,16 +863,23 @@ class RoutesController {
     const resultAdd = await Tipo.addIdSubTipo(id, datos);
     response.status(200).json(result);
   }
-  // public async removeTipo(request: Request, response: Response) {
-  //   var Tipo: BussTipo = new BussTipo();
-  //   let id: string = request.params.id;
-  //   var params = request.body;
-  //   var result = await Tipo.removeTipo(id, params);
-  //   response.status(200).json(result);
-  // }
   public async removeTipo(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
     var Tipo: BussTipo = new BussTipo();
     let id: string = request.params.id;
+    let resultData = await Tipo.readTipo(id);
+    
+    pathViejo = path.join(
+      __dirname,
+      `/../../../../uploads/cites/plantillas/${resultData.nombreTipo}.docx`
+    );
+    borrarImagen(pathViejo);
     let result = await Tipo.deleteTipo(id);
     response.status(200).json({ serverResponse: "Se elimino Tipo" });
   }

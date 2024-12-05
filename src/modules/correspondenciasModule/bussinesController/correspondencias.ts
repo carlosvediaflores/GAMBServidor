@@ -129,10 +129,10 @@ class BussCorrespondencia {
     let result = await OrganizacionModel.updateOne({ _id: idOr }, { $pull: organizacion })
     return result;
 } */
-  public async updateCorrespondencia(id: string, Carpeta: any) {
+  public async updateCorrespondencia(id: string, correspondencia: any) {
     let result = await correspondenciaModel.updateOne(
       { _id: id },
-      { $set: Carpeta }
+      { $set: correspondencia }
     );
     return result;
   }

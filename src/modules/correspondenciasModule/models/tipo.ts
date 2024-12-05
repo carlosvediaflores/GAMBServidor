@@ -6,8 +6,8 @@ export interface ITipo extends Document {
 }
 const areaSchema: Schema = new Schema(
   {
-    nombreTipo: { type: String, unique:true },
-    siglaTipo: { type: String },
+    nombreTipo: { type: String, unique:true,lowercase: true, trim: true },
+    siglaTipo: { type: String, trim: true},
     idSubTipos: [{ type: Schema.Types.ObjectId, ref: "corr_subTipo" }],
   },
   {

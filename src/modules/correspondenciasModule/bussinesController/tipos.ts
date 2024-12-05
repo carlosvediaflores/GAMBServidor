@@ -51,6 +51,10 @@ class BussTipo {
     let listArea: Array<ITipo> = await tipoModel.find(filter).sort({ _id: -1 });
     return listArea;
   }
+  public async getNombreTipo(nombreTipo: any) {
+    var result = await tipoModel.findOne({nombreTipo:nombreTipo})
+    return result;
+  }
   public async addTipo(Area: ITipo) {
     try {
       let AreaDb = new tipoModel(Area);

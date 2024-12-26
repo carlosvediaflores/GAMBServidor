@@ -2350,14 +2350,18 @@ class RoutesController {
       }
     } */
     valeData["numeroVale"] = numero;
-    let numAntiguo = await vale.getValeAntiguo(valeData.numAntiguo);
-    console.log(numAntiguo);
-    
-    if(numAntiguo) {
-      response
-        .status(300)
-        .json({ serverResponse: `Numero de vale antiguo ${valeData.numAntiguo} ya se encuentra registrado` });
-      return;
+    if(valeData.numAntiguo === '' ){
+      delete valeData.numAntiguo;
+    }
+    if(valeData.numAntiguo != undefined){
+
+      let numAntiguo = await vale.getValeAntiguo(valeData.numAntiguo);
+      if(numAntiguo!=null){ 
+        response
+          .status(300)
+          .json({ serverResponse: `Numero de vale antiguo ${valeData.numAntiguo} ya se encuentra registrado` });
+        return;
+      }
     }
     let result = await vale.addVale(valeData);
     paramsAut.numeroVale = result.numeroVale;

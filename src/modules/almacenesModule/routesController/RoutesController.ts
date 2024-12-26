@@ -2576,6 +2576,7 @@ class RoutesController {
     }else{
       params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
     }
+    
     params.cantidadAdquirida = valeData.cantidadAdquirida + resultFactura.montoFactura;
     params.saldoDevolucion = valeData.precio-params.cantidadAdquirida;
     params.estado = "PENDIENTE";

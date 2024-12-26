@@ -14,50 +14,51 @@ class BussVale {
     params1?: string | any,
     params2?: number,
     params3?: number,
-    order?:any
+    order?: any
   ): Promise<Array<IVale> | IVale> {
     if (params1 && typeof params1 == "string") {
-      var result: IVale = await valeModel.findOne({ _id: params1 })
-      .populate("encargadoControl", "_id ci email username surnames roles")
-      .populate("idFacturas")
-      .populate({
-        path: "conductor",
-        model: "User",
-        select: '_id ci email username surnames roles',
-        populate: {
-          path: "cargo",
-          model: "Subdirecciones",
-          select: '_id nombresubdir unidad ',
-        },
-        
-      })
-      .populate("vehiculo")
-      .populate("idProducto")
-      .populate({
-        path: "autorizacion",
-        model: "act_autorizations",
-        populate: {
-          path: "unidadSolicitante",
-          model: "Subdirecciones",
-          populate: { path: "user", model: "User" },
-        },
-      })
-      .populate({
-        path: "autorizacion",
-        model: "act_autorizations",
-        populate: {
+      var result: IVale = await valeModel
+        .findOne({ _id: params1 })
+        .populate("encargadoControl", "_id ci email username surnames roles")
+        .populate("idFacturas")
+        .populate({
           path: "conductor",
           model: "User",
-        },
-      })
-      .populate({
-        path: "autorizacion",
-        model: "act_autorizations",
-        populate: {
-          path: "vehiculo",
-          model: "alm_vehiculos",
-        },
-      });
+          select: "_id ci email username surnames roles",
+          populate: {
+            path: "cargo",
+            model: "Subdirecciones",
+            select: "_id nombresubdir unidad ",
+          },
+        })
+        .populate("vehiculo")
+        .populate("idProducto")
+        .populate({
+          path: "autorizacion",
+          model: "act_autorizations",
+          populate: {
+            path: "unidadSolicitante",
+            model: "Subdirecciones",
+            populate: { path: "user", model: "User", select: "_id ci email username surnames roles", },
+          },
+        })
+        .populate({
+          path: "autorizacion",
+          model: "act_autorizations",
+          populate: {
+            path: "conductor",
+            model: "User",
+            select: "_id ci email username surnames roles",
+          },
+        })
+        .populate({
+          path: "autorizacion",
+          model: "act_autorizations",
+          populate: {
+            path: "vehiculo",
+            model: "alm_vehiculos",
+          },
+        });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -72,13 +73,12 @@ class BussVale {
         .populate({
           path: "conductor",
           model: "User",
-          select: '_id ci email username surnames roles',
+          select: "_id ci email username surnames roles",
           populate: {
             path: "cargo",
             model: "Subdirecciones",
-            select: '_id nombresubdir unidad ',
+            select: "_id nombresubdir unidad ",
           },
-          
         })
         .populate("vehiculo")
         .populate("idProducto")
@@ -88,7 +88,7 @@ class BussVale {
           populate: {
             path: "unidadSolicitante",
             model: "Subdirecciones",
-            populate: { path: "user", model: "User" },
+            populate: { path: "user", model: "User", select: "_id ci email username surnames roles", },
           },
         })
         .populate({
@@ -97,6 +97,7 @@ class BussVale {
           populate: {
             path: "conductor",
             model: "User",
+            select: "_id ci email username surnames roles",
           },
         })
         .populate({
@@ -107,37 +108,13 @@ class BussVale {
             model: "alm_vehiculos",
           },
         });
-        
+
       return listVale;
     } else {
-      let listVale: Array<IVale> = await valeModel.find().populate("id_programa");
+      let listVale: Array<IVale> = await valeModel
+        .find()
+        .populate("id_programa");
       return listVale;
-    }
-  }
-  public async searchVale(query?: any): Promise<Array<IVale>>;
-  public async searchVale(
-    search: string | any,
-  ) {
-    var filter = {
-      $or: [
-        { codigo: { $regex: search, $options: "i" } },
-        { denominacion: { $regex: search, $options: "i" } },
-      ],
-    };
-    let listVale: Array<IVale> = await valeModel.find(filter).sort({ _id: -1 })
-    return listVale;
-  }
-  public async readValeCod(codigo: string | any): Promise<IVale>;
-  public async readValeCod(
-    params1?: string | any,
-    params2?: number,
-    params3?: number
-  ): Promise<Array<IVale> | IVale> {
-    if (params1 && typeof params1 == "string") {
-      var result: IVale = await valeModel.findOne({
-        codigo: params1,
-      });
-      return result;
     }
   }
   public async addVale(Vale: any) {
@@ -150,10 +127,7 @@ class BussVale {
     }
   }
   public async getNumVale() {
-    var result = await valeModel
-      .findOne()
-      .limit(1)
-      .sort({ _id: -1 });
+    var result = await valeModel.findOne().limit(1).sort({ _id: -1 });
     return result;
   }
   public async updateVale(id: string, Vale: any) {
@@ -164,12 +138,13 @@ class BussVale {
     let result = await valeModel.deleteOne({ _id: id });
     return result;
   }
-   public async updatePushFactura(id: string, factura: any) {
-        let result = await valeModel.updateOne(
-          { _id: id },
-          { $push: factura }
-        );
-        return result;
-      }
+  public async updatePushFactura(id: string, factura: any) {
+    let result = await valeModel.updateOne({ _id: id }, { $push: factura });
+    return result;
+  }
+   public async getValeAntiguo(numAntiguo: string) {     
+      let result = await valeModel.findOne({numAntiguo:numAntiguo})
+      return result;
+    }
 }
 export default BussVale;

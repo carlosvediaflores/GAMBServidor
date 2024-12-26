@@ -156,9 +156,7 @@ class BussCorrespondencia {
     });
     return filterCarpeta; */
   }
-  public async getFile(file: string) {   
-    console.log(file);
-    
+  public async getFile(file: string) {     
     let result = await correspondenciaModel.findOne({fileName:file})
     .populate("idTipo")
       .populate("idSubTipo")

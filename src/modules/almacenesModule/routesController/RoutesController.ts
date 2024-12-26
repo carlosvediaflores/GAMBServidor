@@ -2350,9 +2350,16 @@ class RoutesController {
       }
     } */
     valeData["numeroVale"] = numero;
+    let numAntiguo = await vale.getValeAntiguo(valeData.numAntiguo);
+    console.log(numAntiguo);
+    
+    if(numAntiguo) {
+      response
+        .status(300)
+        .json({ serverResponse: `Numero de vale antiguo ${valeData.numAntiguo} ya se encuentra registrado` });
+      return;
+    }
     let result = await vale.addVale(valeData);
-    console.log(valeData);
-    // console.log(result)
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
     if (!valeData.idCompra) {
@@ -2580,9 +2587,11 @@ class RoutesController {
     }else{
       params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
     }
+    if(valeData.estado === "REGISTRADO"){
+      params.estado = "PENDIENTE";
+    }
     params.cantidadAdquirida = valeData.cantidadAdquirida + resultFactura.montoFactura;
     params.saldoDevolucion = valeData.precio-params.cantidadAdquirida;
-    params.estado = "PENDIENTE";
     let datos: any = { idFacturas: resultFactura._id};
     await Vale.updatePushFactura(id, datos);
     const result = await Vale.updateVale(id, params);

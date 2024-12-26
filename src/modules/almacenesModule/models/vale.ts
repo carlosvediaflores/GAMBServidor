@@ -44,7 +44,7 @@ const valeSchema: Schema = new Schema(
     cantidadAdquirida: { type: Number, default: 0 },
     saldoDevolucion: { type: Number, default: 0 },
     saldoDevuelto: { type: Number, default: 0 },
-    numAntiguo: { type: String },
+    numAntiguo: { type: String, unique: true },
     idFacturas: [{ type: Schema.Types.ObjectId, ref: "alm_factura"}],
   },
   {

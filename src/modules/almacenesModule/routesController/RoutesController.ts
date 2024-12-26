@@ -2248,6 +2248,10 @@ class RoutesController {
       let expresion = params.numeroVale;
       filter["numeroVale"] = expresion;
     }
+    if (params.numAntiguo != null) {
+      let expresion = params.numAntiguo;
+      filter["numAntiguo"] = expresion;
+    }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
@@ -2286,7 +2290,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { fecha: -1, _id: -1 };
+      order = { numeroVale:-1, _id: -1, fecha: -1 };
     }
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
     //console.log(res);
@@ -2576,12 +2580,9 @@ class RoutesController {
     }else{
       params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
     }
-    
     params.cantidadAdquirida = valeData.cantidadAdquirida + resultFactura.montoFactura;
     params.saldoDevolucion = valeData.precio-params.cantidadAdquirida;
     params.estado = "PENDIENTE";
-    console.log(params);
-    
     let datos: any = { idFacturas: resultFactura._id};
     await Vale.updatePushFactura(id, datos);
     const result = await Vale.updateVale(id, params);

@@ -43,6 +43,7 @@ const valeSchema: Schema = new Schema(
     estado: { type: String, default: "REGISTRADO" },
     cantidadAdquirida: { type: Number, default: 0 },
     saldoDevolucion: { type: Number, default: 0 },
+    saldoDevuelto: { type: Number, default: 0 },
     numAntiguo: { type: String },
     idFacturas: [{ type: Schema.Types.ObjectId, ref: "alm_factura"}],
   },

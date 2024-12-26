@@ -1,33 +1,30 @@
-import valeModel, { IVale } from "../models/vale";
-class BussVale {
+import facturaModel, { IFactura } from "../models/facturas";
+class BussFactura {
   constructor() {}
-  public async readVale(): Promise<Array<IVale>>;
-  public async readVale(id: string): Promise<IVale>;
-  public async readVale(
+  public async readFactura(): Promise<Array<IFactura>>;
+  public async readFactura(id: string): Promise<IFactura>;
+  public async readFactura(
     query?: any,
     skip?: number,
     limit?: number,
     order?: any
-  ): Promise<Array<IVale>>;
+  ): Promise<Array<IFactura>>;
 
-  public async readVale(
+  public async readFactura(
     params1?: string | any,
     params2?: number,
     params3?: number,
     order?:any
-  ): Promise<Array<IVale> | IVale> {
+  ): Promise<Array<IFactura> | IFactura> {
     if (params1 && typeof params1 == "string") {
-      var result: IVale = await valeModel.findOne({ _id: params1 })
-      .populate("encargadoControl", "_id ci email username surnames roles")
-      .populate("idFacturas")
+      var result: IFactura = await facturaModel.findOne({ _id: params1 })
+      .populate("encargadoControl")
       .populate({
         path: "conductor",
         model: "User",
-        select: '_id ci email username surnames roles',
         populate: {
           path: "cargo",
           model: "Subdirecciones",
-          select: '_id nombresubdir unidad ',
         },
         
       })
@@ -62,21 +59,18 @@ class BussVale {
     } else if (params1) {
       let skip = params2;
       let limit = params3;
-      let listVale: Array<IVale> = await valeModel
+      let listFactura: Array<IFactura> = await facturaModel
         .find(params1)
         .skip(skip)
         .limit(limit)
         .sort(order)
-        .populate("idFacturas")
-        .populate("encargadoControl", "_id ci email username surnames roles")
+        .populate("encargadoControl")
         .populate({
           path: "conductor",
           model: "User",
-          select: '_id ci email username surnames roles',
           populate: {
             path: "cargo",
             model: "Subdirecciones",
-            select: '_id nombresubdir unidad ',
           },
           
         })
@@ -108,14 +102,14 @@ class BussVale {
           },
         });
         
-      return listVale;
+      return listFactura;
     } else {
-      let listVale: Array<IVale> = await valeModel.find().populate("id_programa");
-      return listVale;
+      let listFactura: Array<IFactura> = await facturaModel.find().populate("id_programa");
+      return listFactura;
     }
   }
-  public async searchVale(query?: any): Promise<Array<IVale>>;
-  public async searchVale(
+  public async searchFactura(query?: any): Promise<Array<IFactura>>;
+  public async searchFactura(
     search: string | any,
   ) {
     var filter = {
@@ -124,52 +118,52 @@ class BussVale {
         { denominacion: { $regex: search, $options: "i" } },
       ],
     };
-    let listVale: Array<IVale> = await valeModel.find(filter).sort({ _id: -1 })
-    return listVale;
+    let listFactura: Array<IFactura> = await facturaModel.find(filter).sort({ _id: -1 })
+    return listFactura;
   }
-  public async readValeCod(codigo: string | any): Promise<IVale>;
-  public async readValeCod(
+  public async readFacturaCod(codigo: string | any): Promise<IFactura>;
+  public async readFacturaCod(
     params1?: string | any,
     params2?: number,
     params3?: number
-  ): Promise<Array<IVale> | IVale> {
+  ): Promise<Array<IFactura> | IFactura> {
     if (params1 && typeof params1 == "string") {
-      var result: IVale = await valeModel.findOne({
+      var result: IFactura = await facturaModel.findOne({
         codigo: params1,
       });
       return result;
     }
   }
-  public async addVale(Vale: any) {
+  public async addFactura(Factura: any) {
     try {
-      let ValeDb = new valeModel(Vale);
-      let result = await ValeDb.save();
+      let FacturaDb = new facturaModel(Factura);
+      let result = await FacturaDb.save();
       return result;
     } catch (err) {
       return err;
     }
   }
-  public async getNumVale() {
-    var result = await valeModel
+  public async getNumFactura() {
+    var result = await facturaModel
       .findOne()
       .limit(1)
       .sort({ _id: -1 });
     return result;
   }
-  public async updateVale(id: string, Vale: any) {
-    let result = await valeModel.updateOne({ _id: id }, { $set: Vale });
+  public async updateFactura(id: string, Factura: any) {
+    let result = await facturaModel.updateOne({ _id: id }, { $set: Factura });
     return result;
   }
-  public async deleteVale(id: string) {
-    let result = await valeModel.deleteOne({ _id: id });
+  public async deleteFactura(id: string) {
+    let result = await facturaModel.deleteOne({ _id: id });
     return result;
   }
-   public async updatePushFactura(id: string, factura: any) {
-        let result = await valeModel.updateOne(
-          { _id: id },
-          { $push: factura }
-        );
-        return result;
-      }
+  public async updatePushFactura(id: string, factura: any) {
+      let result = await facturaModel.updateOne(
+        { _id: id },
+        { $push: factura }
+      );
+      return result;
+    }
 }
-export default BussVale;
+export default BussFactura;

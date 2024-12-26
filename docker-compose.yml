@@ -10,7 +10,7 @@ services:
       - .:/opt/app
       - /opt/app/node_modules
     environment:
-      DBHOST: "mongodb://172.18.0.2:27017"
+      DBHOST: "mongodb://172.19.0.2:27017"
       DATABASE: "GAMB_BD"
   
   mongo:

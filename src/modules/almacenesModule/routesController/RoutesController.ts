@@ -7,7 +7,7 @@ import fs from "fs";
 import slug from "slugify";
 import sharp from "sharp";
 import * as csv from "@fast-csv/parse";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 import { isValidObjectId } from "mongoose";
 import { ICategoria } from "../models/categorias";
 import BussCategoria from "../businessController/categorias";
@@ -40,6 +40,9 @@ import { IAutorizacion } from "../models/autorizacion";
 import BussAutorization from "../businessController/autotizacion";
 import { IVehiculo } from "../models/vehiculo";
 import BussVehiculo from "../businessController/vehiculo";
+import { IFactura } from "../models/facturas";
+import BussFactura from "../businessController/facturas";
+import { log } from "console";
 
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
@@ -668,7 +671,6 @@ class RoutesController {
   //////Seguimiento Poa-------//
   public async uploadExcelSegPoa(request: Request, response: Response) {
     if (isEmpty(request.files)) {
-      
       response
         .status(300)
         .json({ serverResponse: "No existe un archivo adjunto" });
@@ -692,8 +694,6 @@ class RoutesController {
       console.log(json);
       response.status(300).json({ serverResponse: "simpleUser" });
     });
-
-    
   }
   public async uploadCsvPoa(request: Request, response: Response) {
     var segPoa: BussSegPoa = new BussSegPoa();
@@ -1230,7 +1230,6 @@ class RoutesController {
         let sumArticulo = parseInt(data.cantidadCompra) + articulo.cantidad;
         let listIngreso: any = listCompra.idEntrada;
         if (listIngreso.estado == "EGRESADO") {
-          
           data.cantidadSalida = data.cantidadCompra;
           let resultEditS = await salida.updateSalida(
             listCompra.salidas[0]._id,
@@ -1248,12 +1247,10 @@ class RoutesController {
               data.estadoCompra = "AGOTADO";
             }
           } else {
-            response
-              .status(300)
-              .json({
-                serverResponse:
-                  "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad",
-              });
+            response.status(300).json({
+              serverResponse:
+                "No puede reducir la cantidad de entrda, motivivo q ya salieron en su totalidad",
+            });
             return;
           }
         }
@@ -1373,7 +1370,8 @@ class RoutesController {
       var resultAdd = await Egreso.addSalidas(result._id, idSalida);
       var compraAdd = await compra.addSalidas(data.idCompra, idSalida);
       let stock: Number = Simplearticulo.cantidad - EgresoData.cantidadSalida;
-      let stockCompra: Number = listCompra.stockCompra - EgresoData.cantidadSalida;
+      let stockCompra: Number =
+        listCompra.stockCompra - EgresoData.cantidadSalida;
       EgresoData.stockCompra = stockCompra;
       EgresoData.cantidad = stock;
       if (stockCompra === 0) {
@@ -1504,11 +1502,9 @@ class RoutesController {
           data.estadoCompra = "EXISTE";
         }
       } else {
-        response
-          .status(300)
-          .json({
-            serverResponse: `La Cantidad de este artículo ya no existe en Stock, Stock: ${listCompra.stockCompra}`,
-          });
+        response.status(300).json({
+          serverResponse: `La Cantidad de este artículo ya no existe en Stock, Stock: ${listCompra.stockCompra}`,
+        });
         return;
       }
       delete data.cantidadCompra;
@@ -2049,11 +2045,11 @@ class RoutesController {
     var order: any = {};
     var select = "";
     if (params.destino != null) {
-      var expresion = new RegExp(params.destino,"i");
+      var expresion = new RegExp(params.destino, "i");
       filter["destino"] = expresion;
     }
     if (params.motivo != null) {
-      var expresion = new RegExp(params.motivo,"i");
+      var expresion = new RegExp(params.motivo, "i");
       filter["motivo"] = expresion;
     }
     if (params.limit) {
@@ -2096,7 +2092,7 @@ class RoutesController {
     } else {
       order = { _id: -1 };
     }
-    
+
     let res: Array<IAutorizacion> = await Autorizacion.readAutorization(
       filter,
       skip,
@@ -2129,13 +2125,13 @@ class RoutesController {
     let repres = await Autorizacion.readAutorization(codigo);
     response.status(200).json(repres);
   }
-    public async updateAutorizacion(request: Request, response: Response) {
-      var Autorizacion: BussAutorization = new BussAutorization();
-      let id: string = request.params.id;
-      var params = request.body;
-      var result = await Autorizacion.updateAutorization(id, params);
-      response.status(200).json(result);
-    }
+  public async updateAutorizacion(request: Request, response: Response) {
+    var Autorizacion: BussAutorization = new BussAutorization();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await Autorizacion.updateAutorization(id, params);
+    response.status(200).json(result);
+  }
   public async removeAutorizacion(request: Request, response: Response) {
     var Autorizacion: BussAutorization = new BussAutorization();
     let id: string = request.params.id;
@@ -2257,23 +2253,23 @@ class RoutesController {
     }
     if (params.del != null) {
       var gt = params.del;
-      let fechaDel = new Date(gt)
+      let fechaDel = new Date(gt);
       aux["$gte"] = fechaDel;
     }
     if (params.al != null) {
       var lt = params.al;
-      let fechaAl = lt+'T23:59:59.000Z'
+      let fechaAl = lt + "T23:59:59.000Z";
 
       aux["$lte"] = fechaAl;
     }
     if (params.productos === true) {
       var size = params.productos;
-      filter["productos"]= {'$exists': true, '$not': {'$size': 0}}
+      filter["productos"] = { $exists: true, $not: { $size: 0 } };
     }
     if (Object.entries(aux).length > 0) {
       filter["fecha"] = aux;
     }
-    
+
     let respost: Array<IVale> = await Vale.readVale();
     var totalDocs = respost.length;
     var totalpage = Math.ceil(respost.length / limit);
@@ -2290,11 +2286,11 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = {fecha:-1, _id: -1};
-    }    
+      order = { fecha: -1, _id: -1 };
+    }
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
     //console.log(res);
-    
+
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -2314,15 +2310,17 @@ class RoutesController {
     var Egreso: BussEgreso = new BussEgreso();
     var salida: BussSalida = new BussSalida();
     var valeData = request.body;
-    let numero:Number=1;
+    let numero: Number = 1;
     let paramsAut: any = {};
     let paramsEgreso: any = {};
     let paramsSalida: any = {};
     let paramsCompra: any = {};
     let paramsArticulo: any = {};
     let paramsIngreso: any = {};
-    
-    let AutorizacionData:any = await Autorizacion.readAutorization(valeData.autorizacion);
+
+    let AutorizacionData: any = await Autorizacion.readAutorization(
+      valeData.autorizacion
+    );
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {
       delete valeData.idCompra;
@@ -2330,26 +2328,26 @@ class RoutesController {
     const resp: any = await vale.getNumVale();
     let year = new Date();
     let yearAct = year.getFullYear();
-    
+
     if (resp) {
-      numero=resp.numeroVale+numero
-      
+      numero = resp.numeroVale + numero;
+
       let yearRes = resp.fecha.getFullYear();
       if (yearAct != yearRes) {
-        numero= 1;
+        numero = 1;
       }
     }
-    if(valeData.precio){
+    /*  if(valeData.precio){
       if(valeData.idProducto==='642c3e7b3b1ac20013da2571'){
         valeData.cantidad=valeData.precio / 3.74
       }
       if(valeData.idProducto==='6439b82156cc6b00132c9ab2'){
         valeData.cantidad=valeData.precio / 3.72
       }
-    }
+    } */
     valeData["numeroVale"] = numero;
     let result = await vale.addVale(valeData);
-   console.log(valeData)
+    console.log(valeData);
     // console.log(result)
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
@@ -2360,20 +2358,24 @@ class RoutesController {
     let listCompra = await compra.readCompra(valeData.idCompra);
     let entrada: any = listCompra.idEntrada;
     let Simplearticulo: any = listCompra.idArticulo;
-    let solicitante:String = `${AutorizacionData.unidadSolicitante.user.username }${""} ${ AutorizacionData.unidadSolicitante.user.surnames}`
-    let entregadoA:String = `${AutorizacionData.conductor.username }${" "}${ AutorizacionData.conductor.surnames} `
-    paramsEgreso.entregado=entregadoA;
-    paramsEgreso.cargo=AutorizacionData.conductor.post;
-    paramsEgreso.numeroSalida=respEgreso.numeroSalida + 1;
-    paramsEgreso.idProveedor=entrada.idProveedor._id;
-    paramsEgreso.idPersona=valeData.encargadoControl;
-    paramsEgreso.idIngreso=entrada._id
-    paramsEgreso.glosaSalida=`Salida de ${Simplearticulo.nombre } solicitado por ${solicitante } para ${AutorizacionData.motivo}`
+    let solicitante: String = `${
+      AutorizacionData.unidadSolicitante.user.username
+    }${""} ${AutorizacionData.unidadSolicitante.user.surnames}`;
+    let entregadoA: String = `${AutorizacionData.conductor.username}${" "}${
+      AutorizacionData.conductor.surnames
+    } `;
+    paramsEgreso.entregado = entregadoA;
+    paramsEgreso.cargo = AutorizacionData.conductor.post;
+    paramsEgreso.numeroSalida = respEgreso.numeroSalida + 1;
+    paramsEgreso.idProveedor = entrada.idProveedor._id;
+    paramsEgreso.idPersona = valeData.encargadoControl;
+    paramsEgreso.idIngreso = entrada._id;
+    paramsEgreso.glosaSalida = `Salida de ${Simplearticulo.nombre} solicitado por ${solicitante} para ${AutorizacionData.motivo}`;
     let resultEgreso = await Egreso.addEgreso(paramsEgreso);
-    paramsSalida.cantidadSalida=valeData.cantidad;
-    paramsSalida.catProgra=valeData.catProgra;
-    paramsSalida.idCompra=valeData.idCompra;
-    paramsSalida.idEgreso=resultEgreso._id;
+    paramsSalida.cantidadSalida = valeData.cantidad;
+    paramsSalida.catProgra = valeData.catProgra;
+    paramsSalida.idCompra = valeData.idCompra;
+    paramsSalida.idEgreso = resultEgreso._id;
     let resultSalida = await salida.addSalida(paramsSalida);
     let idSalida = resultSalida._id;
     var resultAdd = await Egreso.addSalidas(resultEgreso._id, idSalida);
@@ -2381,15 +2383,21 @@ class RoutesController {
     let stock: Number = Simplearticulo.cantidad - valeData.cantidad;
     let stockCompra: Number = listCompra.stockCompra - valeData.cantidad;
     paramsCompra.stockCompra = stockCompra;
-    paramsArticulo.cantidad= stock;
+    paramsArticulo.cantidad = stock;
     if (stockCompra === 0) {
       paramsCompra.estadoCompra = "AGOTADO";
     } else {
       paramsCompra.estadoCompra = "EXISTE";
     }
-    let result1 = await Articulo.updateArticulo(Simplearticulo._id,paramsArticulo);
-    let resultCompra = await compra.updateCompra(valeData.idCompra, paramsCompra);
-    paramsIngreso.estado="SALIDA"
+    let result1 = await Articulo.updateArticulo(
+      Simplearticulo._id,
+      paramsArticulo
+    );
+    let resultCompra = await compra.updateCompra(
+      valeData.idCompra,
+      paramsCompra
+    );
+    paramsIngreso.estado = "SALIDA";
     var resul = await Ingreso.updateIngreso(entrada._id, paramsIngreso);
     response.status(201).json({ serverResponse: result });
   }
@@ -2402,9 +2410,9 @@ class RoutesController {
     var Vale: BussVale = new BussVale();
     let valeData = await Vale.readVale();
     for (let i = 0; i < valeData.length; i++) {
-      let data:any = valeData[i];
-      let datares:any = {}
-      datares.fecha=data.createdAt
+      let data: any = valeData[i];
+      let datares: any = {};
+      datares.fecha = data.createdAt;
       var result = await Vale.updateVale(data._id, datares);
     }
     response.status(200).json(valeData.length);
@@ -2414,12 +2422,12 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     let valeData = await Vale.readVale(id);
-    if(params.precio){
-      if(params.idProducto==='642c3e7b3b1ac20013da2571'){
-        params.cantidad=params.precio / 3.74
+    if (params.precio) {
+      if (params.idProducto === "642c3e7b3b1ac20013da2571") {
+        params.cantidad = params.precio / 3.74;
       }
-      if(params.idProducto==='6439b82156cc6b00132c9ab2'){
-        params.cantidad=params.precio / 3.72
+      if (params.idProducto === "6439b82156cc6b00132c9ab2") {
+        params.cantidad = params.precio / 3.72;
       }
     }
     var result = await Vale.updateVale(id, params);
@@ -2437,91 +2445,146 @@ class RoutesController {
     const ingresoData: any = {};
     const salidaData: any = {};
     const egresoData: any = {};
-    
-    if (resp.length<1) {
-      response.status(201).json({ serverResponse: "Debe existir al menos un vale" });
+
+    if (resp.length < 1) {
+      response
+        .status(201)
+        .json({ serverResponse: "Debe existir al menos un vale" });
       return;
     }
     const resNum: any = await Ingreso.getNumIngresoOne();
     const respEgreso: any = await Egreso.getNumEgreso();
-    
-    let dataFecha = resp[resp.length-1]
-    let fecha = dataFecha.createdAt
-    
+
+    let dataFecha = resp[resp.length - 1];
+    let fecha = dataFecha.createdAt;
+
     ingresoData.numeroEntrada = resNum.numeroEntrada + 1;
-    ingresoData.idPersona = '6253bf6900ae6f0014f7bc23';
-    ingresoData.idProveedor = '643473b2adb0190013ff255b';
-    ingresoData.concepto = 'Ingreso de COMBUSTIBLE para el viaje programado a diferentes comunidades'
-    ingresoData.estado = 'EGRESADO';
+    ingresoData.idPersona = "6253bf6900ae6f0014f7bc23";
+    ingresoData.idProveedor = "643473b2adb0190013ff255b";
+    ingresoData.concepto =
+      "Ingreso de COMBUSTIBLE para el viaje programado a diferentes comunidades";
+    ingresoData.estado = "EGRESADO";
     ingresoData.fecha = fecha;
     let resultIngreso = await Ingreso.addIngreso(ingresoData);
-    
+
     egresoData.numeroSalida = respEgreso.numeroSalida + 1;
     egresoData.estadoEgreso = "DIRECTO";
-    egresoData.glosaSalida = "Salida de COMBUSTIBLE para el viaje programado a diferentes comunidades"
-    egresoData.entregado = "Conductores de vehículos"
+    egresoData.glosaSalida =
+      "Salida de COMBUSTIBLE para el viaje programado a diferentes comunidades";
+    egresoData.entregado = "Conductores de vehículos";
     egresoData.cargo = "Chofer";
-    egresoData.idPersona = '6253bf6900ae6f0014f7bc23';
-    egresoData.idProveedor = '643473b2adb0190013ff255b';
-    egresoData.idIngreso = resultIngreso._id; 
+    egresoData.idPersona = "6253bf6900ae6f0014f7bc23";
+    egresoData.idProveedor = "643473b2adb0190013ff255b";
+    egresoData.idIngreso = resultIngreso._id;
     //console.log("resul ingreso",resultIngreso);
     let resultEgreso = await Egreso.addEgreso(egresoData);
-    
+
     const egresoAdd = await Ingreso.addEgresos(resultIngreso, resultEgreso._id);
     //console.log('resultEgreso',resultEgreso);
     for (let i = 0; i < resp.length; i++) {
-      let data:any = resp[i];
+      let data: any = resp[i];
       compraData.cantidadCompra = data.cantidad;
       compraData.estadoCompra = "AGOTADO";
       compraData.idEntrada = resultIngreso._id;
       compraData.idArticulo = data.idProducto._id;
       compraData.idProducto = data.idProducto._id;
       compraData.catProgra = data.catProgra;
-      if(data.precio!= null){
+      if (data.precio != null) {
         compraData.precio = data.precio / data.cantidad;
       }
       let resultCompra = await compra.addCompra(compraData);
-      const resultAdd = await Ingreso.addCompras(resultIngreso._id, resultCompra._id);
-      
+      const resultAdd = await Ingreso.addCompras(
+        resultIngreso._id,
+        resultCompra._id
+      );
+
       salidaData.cantidadSalida = data.cantidad;
       salidaData.catProgra = data.catProgra;
       salidaData.idCompra = resultCompra._id;
-      salidaData.idEgreso = resultEgreso._id
+      salidaData.idEgreso = resultEgreso._id;
       let resultSalida = await salida.addSalida(salidaData);
-      const compraAdd = await compra.addSalidas(resultCompra._id, resultSalida._id);
-      const resultAddEgreso = await Egreso.addSalidas(resultEgreso._id, resultSalida._id);
-      
-      const updateVale = await Vale.updateVale(data._id, {estado:"FINALIZADO", idCompra:resultCompra._id});
+      const compraAdd = await compra.addSalidas(
+        resultCompra._id,
+        resultSalida._id
+      );
+      const resultAddEgreso = await Egreso.addSalidas(
+        resultEgreso._id,
+        resultSalida._id
+      );
+
+      const updateVale = await Vale.updateVale(data._id, {
+        estado: "FINALIZADO",
+        idCompra: resultCompra._id,
+      });
     }
 
-    response.status(200).json({resp});
+    response.status(200).json({ resp });
   }
   public async deleteVale(request: Request, response: Response) {
     var vale: BussVale = new BussVale();
     var Autorizacion: BussAutorization = new BussAutorization();
     let id: string = request.params.id;
-    const valeData:any = await vale.readVale(id);
-    if(valeData.idCompra){
+    const valeData: any = await vale.readVale(id);
+    if (valeData.idCompra) {
       response
         .status(300)
-        .json({ serverResponse: "Este registro no se puede eliminar!!! Motivo de que ya tiene Ingreso y Salida" });
+        .json({
+          serverResponse:
+            "Este registro no se puede eliminar!!! Motivo de que ya tiene Ingreso y Salida",
+        });
       return;
     }
-    if(valeData.estado==='PENDIENTE'){
+    if (valeData.estado === "PENDIENTE") {
       response
         .status(300)
-        .json({ serverResponse: "Para poder eliminar el registro. Debe cambiar el estado de PENDIENTE a REGISTRADO" });
+        .json({
+          serverResponse:
+            "Para poder eliminar el registro. Debe cambiar el estado de PENDIENTE a REGISTRADO",
+        });
       return;
     }
-    if(valeData.autorizacion){
-      if(valeData.numeroVale===valeData.autorizacion.numeroVale){
-        let params:any = {};
-        params.numeroVale= null      
-        await Autorizacion.updateAutorization(valeData.autorizacion._id, params);
+    if (valeData.autorizacion) {
+      if (valeData.numeroVale === valeData.autorizacion.numeroVale) {
+        let params: any = {};
+        params.numeroVale = null;
+        await Autorizacion.updateAutorization(
+          valeData.autorizacion._id,
+          params
+        );
       }
     }
     let result = await vale.deleteVale(id);
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
+  }
+  public async addFactura(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    const factura: BussFactura = new BussFactura();
+    let id: string = request.params.id;
+    var params = request.body;
+    let valeData: any = await Vale.readVale(id);
+    let idProducto:string = valeData.idProducto._id;
+    if (idProducto == "642c3e7b3b1ac20013da2571") {
+      params.cantidadFactura = params.montoFactura / 3.74;
+    }
+    if (idProducto == "6439b82156cc6b00132c9ab2") {
+      params.cantidadFactura = params.montoFactura / 3.72;
+    }
+    params.idVale = id;
+    const resultFactura = await factura.addFactura(params); 
+    if(valeData.idFacturas.length === 0){    
+      params.cantidad = resultFactura.cantidadFactura;
+    }else{
+      params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
+    }
+    params.cantidadAdquirida = valeData.cantidadAdquirida + resultFactura.montoFactura;
+    params.saldoDevolucion = valeData.precio-params.cantidadAdquirida;
+    params.estado = "PENDIENTE";
+    console.log(params);
+    
+    let datos: any = { idFacturas: resultFactura._id};
+    await Vale.updatePushFactura(id, datos);
+    const result = await Vale.updateVale(id, params);
+    response.status(200).json(valeData);
   }
 }
 export default RoutesController;

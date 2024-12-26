@@ -84,6 +84,8 @@ class RoutesController {
         } ${CorrespondenciaData.referencia}`;
       }
       CorrespondenciaData.fileName = fileName;
+      console.log(CorrespondenciaData);
+      
       result = await Correspondencia.addCorrespondencia(CorrespondenciaData);
       response.status(201).json({ serverResponse: result });
       return;
@@ -217,7 +219,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { gestion: -1, numCorrespondencia: -1 };
+      order = {numCite: -1, gestion: -1 };
     }
     let res: Array<ICorrespondencia> =
       await Correspondencia.readCorrespondencia(filter, skip, limit, order);

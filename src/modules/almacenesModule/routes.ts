@@ -383,6 +383,10 @@ class Routes {
     app
       .route(`${this.routeparent}/vale/:id`)
       .delete(this.routesController.deleteVale);
+    //agregar factura a vale
+    app
+      .route(`${this.routeparent}/addFactura/:id`)
+      .put(this.routesController.addFactura);
   }
 }
 export default Routes;

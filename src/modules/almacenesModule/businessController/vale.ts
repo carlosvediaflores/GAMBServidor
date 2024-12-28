@@ -126,6 +126,11 @@ class BussVale {
       return err;
     }
   }
+  public async getVales(params1:any, params2?:any) {
+    var result = await valeModel.find(params1)
+    .populate("idProducto");
+    return result;
+  }
   public async getNumVale() {
     var result = await valeModel.findOne().limit(1).sort({ _id: -1 });
     return result;

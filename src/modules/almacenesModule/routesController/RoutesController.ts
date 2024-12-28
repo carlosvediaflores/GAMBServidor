@@ -2304,6 +2304,96 @@ class RoutesController {
     });
     return;
   }
+  public async getValesReport(request: Request, response: Response) {
+    var Vale: BussVale = new BussVale();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var aux1: any = {};
+    var order: any = {};
+    var select = "";
+    if (params.catProgra != null) {
+      let expresion = params.catProgra;
+      filter["catProgra"] = expresion;
+    }
+    if (params.estado != null) {
+      let expresion = params.estado;
+      filter["estado"] = expresion;
+    }
+    if (params.numeroVale != null) {
+      let expresion = params.numeroVale;
+      filter["numeroVale"] = expresion;
+    }
+    if (params.numAntiguo != null) {
+      let expresion = params.numAntiguo;
+      filter["numAntiguo"] = expresion;
+    }
+    if (params.numAntiguo != null) {
+      let expresion = params.numAntiguo;
+      filter["numAntiguo"] = expresion;
+    }
+    if (params.conductor != null) {
+      let expresion = params.conductor;
+      filter["conductor"] = expresion;
+    }
+    if (params.vehiculo != null) {
+      let expresion = params.vehiculo;
+      filter["vehiculo"] = expresion;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.del != null) {
+      var gt = params.del;
+      let fechaDel = new Date(gt);
+      aux["$gte"] = fechaDel;
+    }
+    if (params.al != null) {
+      var lt = params.al;
+      let fechaAl = lt + "T23:59:59.000Z";
+
+      aux["$lte"] = fechaAl;
+    }
+    if (params.productos === true) {
+      var size = params.productos;
+      filter["productos"] = { $exists: true, $not: { $size: 0 } };
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["fecha"] = aux;
+    }
+
+    let respost: Array<IVale> = await Vale.getVales(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { numeroVale:-1, _id: -1, fecha: -1 };
+    }
+    let res: Array<IVale> = await Vale.getVales(filter, order);
+    //console.log(res);
+
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
   //crear
   public async createVale(request: Request, response: Response) {
     var vale: BussVale = new BussVale();
@@ -2505,7 +2595,7 @@ class RoutesController {
       compraData.idProducto = data.idProducto._id;
       compraData.catProgra = data.catProgra;
       if (data.precio != null) {
-        compraData.precio = data.precio / data.cantidad;
+        compraData.precio = data.cantidadAdquirida / data.cantidad;
       }
       let resultCompra = await compra.addCompra(compraData);
       const resultAdd = await Ingreso.addCompras(

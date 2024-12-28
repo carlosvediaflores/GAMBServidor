@@ -364,6 +364,11 @@ class Routes {
     app
       .route(`${this.routeparent}/vales`)
       .get(this.routesController.getVales);
+
+     //listar
+    app
+     .route(`${this.routeparent}/valesReport`)
+     .get(this.routesController.getValesReport);
        //listar
     app
     .route(`${this.routeparent}/valesAll`)

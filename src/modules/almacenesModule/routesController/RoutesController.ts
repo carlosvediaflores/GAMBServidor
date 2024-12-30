@@ -2260,6 +2260,8 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["fecha"] = aux;
     }
+    filter["productos"] = {$exists: true, $not: { $ne: [] } };
+// console.log(filter);
 
     let respost: Array<IVale> = await Vale.getVales(filter);
     var totalDocs = respost.length;

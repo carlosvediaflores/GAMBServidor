@@ -2261,6 +2261,7 @@ class RoutesController {
       filter["fecha"] = aux;
     }
     filter["productos"] = {$exists: true, $not: { $ne: [] } };
+    filter["precio"] = { $ne: null };
 // console.log(filter);
 
     let respost: Array<IVale> = await Vale.getVales(filter);

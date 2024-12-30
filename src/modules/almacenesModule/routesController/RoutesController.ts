@@ -560,114 +560,7 @@ class RoutesController {
     let result = await Proyecto.deleteProyecto(id);
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
   }
-  //----------ACTIVIDAD------------//
-  /* public async createActividad(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    var Programa: BussPrograma = new BussPrograma();
-    var ActividadData = request.body;
-    let idPrograma = ActividadData.id_programa;
-    let programa = await Programa.readPrograma(idPrograma);
-    ActividadData[
-      "cat_prog"
-    ] = `${programa.codigo} 000 ${ActividadData.codigo}`;
-    let result = await Actividad.addActividad(ActividadData);
-    response.status(201).json({ serverResponse: result });
-  }
-  public async getActividades(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    var filter: any = {};
-    var search: string | any;
-    var params: any = request.query;
-    var limit = 0;
-    var skip = 0;
-    var aux: any = {};
-    var order: any = {};
-    var select = "";
-    if (params.codigo != null) {
-      var expresion = new RegExp(params.codigo);
-      filter["codigo"] = expresion;
-    }
-    if (params.denominacion != null) {
-      var expresion = new RegExp(params.denominacion);
-      filter["denominacion"] = expresion;
-    }
-    if (params.limit) {
-      limit = parseInt(params.limit);
-    }
-    if (params.dategt != null) {
-      var gt = params.dategt;
-      aux["$gt"] = gt;
-    }
-    if (params.datelt != null) {
-      var lt = params.datelt;
-      aux["$lt"] = lt;
-    }
-    if (Object.entries(aux).length > 0) {
-      filter["createdAt"] = aux;
-    }
-    let respost: Array<IActividad> = await Actividad.readActividad();
-    var totalDocs = respost.length;
-    var totalpage = Math.ceil(respost.length / limit);
-    if (params.skip) {
-      skip = parseInt(params.skip);
-      if (skip <= totalpage && skip >= 2) {
-        skip = limit * (skip - 1);
-      } else {
-        skip = 0;
-      }
-    }
-    if (params.order != null) {
-      var data = params.order.split(",");
-      var number = parseInt(data[1]);
-      order[data[0]] = number;
-    } else {
-      order = { _id: -1 };
-    }
-    let res: Array<IActividad> = await Actividad.readActividad(
-      filter,
-      skip,
-      limit,
-      order
-    );
-    response.status(200).json({
-      serverResponse: res,
-      totalDocs,
-      limit,
-      totalpage,
-      skip,
-    });
-    return;
-  }
-  public async searchActividad(request: Request, response: Response) {
-    var convenio: BussActividad = new BussActividad();
-    var searchActividad = request.params.search;
-    let res = await convenio.searchActividad(searchActividad);
-    response.status(200).json({ serverResponse: res });
-  }
-  public async getActividad(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    let repres = await Actividad.readActividad(request.params.id);
-    response.status(200).json(repres);
-  }
-  public async getActividadCod(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    let codigo = request.params.codigo;
-    let repres = await Actividad.readActividadCod(codigo);
-    response.status(200).json(repres);
-  }
-  public async updateActividad(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    let id: string = request.params.id;
-    var params = request.body;
-    var result = await Actividad.updateActividad(id, params);
-    response.status(200).json(result);
-  }
-  public async removeActividad(request: Request, response: Response) {
-    var Actividad: BussActividad = new BussActividad();
-    let id: string = request.params.id;
-    let result = await Actividad.deleteActividad(id);
-    response.status(200).json({ serverResponse: "Se elimino el Registro" });
-  } */
+  
   //////Seguimiento Poa-------//
   public async uploadExcelSegPoa(request: Request, response: Response) {
     if (isEmpty(request.files)) {
@@ -2342,6 +2235,10 @@ class RoutesController {
       let expresion = params.vehiculo;
       filter["vehiculo"] = expresion;
     }
+    if (params.saldoDevolucion != null) {
+      let expresion = params.saldoDevolucion;
+      filter["saldoDevolucion"] = { $ne: +expresion };
+    }
     if (params.limit) {
       limit = parseInt(params.limit);
     }
@@ -2691,5 +2588,6 @@ class RoutesController {
     const result = await Vale.updateVale(id, params);
     response.status(200).json(valeData);
   }
+
 }
 export default RoutesController;

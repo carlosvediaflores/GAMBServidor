@@ -2200,6 +2200,7 @@ class RoutesController {
   public async getValesReport(request: Request, response: Response) {
     var Vale: BussVale = new BussVale();
     var filter: any = {};
+    var filter2: any = {};
     var params: any = request.query;
     var limit = 0;
     var skip = 0;
@@ -2230,10 +2231,12 @@ class RoutesController {
     if (params.conductor != null) {
       let expresion = params.conductor;
       filter["conductor"] = expresion;
+       filter2["conductor"] = expresion;
     }
     if (params.vehiculo != null) {
       let expresion = params.vehiculo;
       filter["vehiculo"] = expresion;
+     
     }
     if (params.saldoDevolucion != null) {
       let expresion = params.saldoDevolucion;
@@ -2262,9 +2265,8 @@ class RoutesController {
     }
     filter["productos"] = {$exists: true, $not: { $ne: [] } };
     filter["precio"] = { $ne: null };
-// console.log(filter);
 
-    let respost: Array<IVale> = await Vale.getVales(filter);
+    let respost: Array<IVale> = await Vale.getVales(filter,filter2);
     var totalDocs = respost.length;
     var totalpage = Math.ceil(respost.length / limit);
     if (params.skip) {
@@ -2283,10 +2285,10 @@ class RoutesController {
       order = { numeroVale:-1, _id: -1, fecha: -1 };
     }
     let res: Array<IVale> = await Vale.getVales(filter, order);
-    //console.log(res);
-
+    let resp: Array<IVale> = await Vale.getValesAut(filter, filter2);
+    const result: any = res.concat(resp);
     response.status(200).json({
-      serverResponse: res,
+      serverResponse: result,
       totalDocs,
       limit,
       totalpage,

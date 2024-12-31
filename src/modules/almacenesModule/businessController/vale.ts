@@ -1,4 +1,6 @@
+import path from "path";
 import valeModel, { IVale } from "../models/vale";
+import { match } from "assert";
 class BussVale {
   constructor() {}
   public async readVale(): Promise<Array<IVale>>;
@@ -128,8 +130,18 @@ class BussVale {
   }
   public async getVales(params1:any, params2?:any) {
     var result = await valeModel.find(params1)
-    .populate("idProducto");
+    .populate("idProducto")
+
     return result;
+  }
+  public async getValesAut(params1:any, params2?:any) {
+    var result = await valeModel.find(params1)
+    .populate("idProducto")
+    .populate({path:'autorizacion', match:params2});
+    const filterConductor = result.filter((conductor: any) => {
+      return conductor.autorizacion != null;
+    });
+    return filterConductor;
   }
   public async getNumVale() {
     var result = await valeModel.findOne().limit(1).sort({ _id: -1 });

@@ -2265,7 +2265,8 @@ class RoutesController {
     }
     filter["productos"] = {$exists: true, $not: { $ne: [] } };
     filter["precio"] = { $ne: null };
-
+    //console.log(filter,filter2);
+    
     let respost: Array<IVale> = await Vale.getVales(filter,filter2);
     var totalDocs = respost.length;
     var totalpage = Math.ceil(respost.length / limit);
@@ -2284,9 +2285,20 @@ class RoutesController {
     } else {
       order = { numeroVale:-1, _id: -1, fecha: -1 };
     }
+    let resp: Array<IVale>=[]
+    let result: Array<IVale>=[]
     let res: Array<IVale> = await Vale.getVales(filter, order);
-    let resp: Array<IVale> = await Vale.getValesAut(filter, filter2);
-    const result: any = res.concat(resp);
+    if(filter2 && typeof filter2 === "object" && Object.keys(filter2).length === 0){
+     // console.log(filter2, "Vacío");
+      
+      result = res;
+    }else{
+        resp = await Vale.getValesAut(filter, filter2);
+      result = res.concat(resp);
+    }
+
+    
+    console.log(res.length, resp.length, result.length);
     response.status(200).json({
       serverResponse: result,
       totalDocs,

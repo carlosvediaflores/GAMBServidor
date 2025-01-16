@@ -188,8 +188,9 @@ class BussinesSegui {
     let result = await SeguiModel.updateMany({ nuit: nuit }, { $set: segui });
     return result;
   }
-  public async updateSeguiOfi(destino: string, segui: ISeguimiento) {
-    let result = await SeguiModel.updateMany({ destino: "ARQUITECTO OMOT", estado:"RECIBIDO" }, { $set: segui });
+  public async updateSeguiOfi(destino:string  , segui: ISeguimiento) {
+    console.log( 'oficina', destino,"params", segui);
+    let result = await SeguiModel.updateMany({destino:destino}, { $set: segui });
     return result;
   }
 

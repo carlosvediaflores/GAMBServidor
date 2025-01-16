@@ -1393,6 +1393,8 @@ class RoutesController {
     let oficina: string = request.params.oficina;
     var params = request.body;
     var result = await segui.updateSeguiOfi(oficina, params);
+    console.log( 'oficina', oficina,"params", params);
+    
     response.status(200).json(result);
   }
   public async removeSegui(request: Request, response: Response) {

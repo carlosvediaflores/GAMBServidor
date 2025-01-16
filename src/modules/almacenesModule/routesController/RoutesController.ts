@@ -2605,6 +2605,22 @@ class RoutesController {
     const result = await Vale.updateVale(id, params);
     response.status(200).json(valeData);
   }
+  public async getFacturas(request: Request, response: Response) {
+    const factura: BussFactura = new BussFactura();
+    var filter: any = {};
+    var params: any = request.query;
+    let year = new Date();
+    let yearAct = params.gestion ?? year.getFullYear();
+    if (yearAct != null) {
+      filter["fechaFactura"] = {$gte:`${yearAct}-01-01T00:00:00.000Z`,$lte:(`${yearAct}-12-31T23:59:59.000Z`)};
+    }
+    const pdfDoc = await factura.gerReportFactura(filter);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Factura";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
 
 }
 export default RoutesController;

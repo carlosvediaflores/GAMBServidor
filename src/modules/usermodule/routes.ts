@@ -173,7 +173,7 @@ class Routes {
       .route(`${this.routeparent}/seguiaso/:nuit`)
       .put(this.routesController.updateSeguiAs);
     app
-      .route(`${this.routeparent}/seguiOfi/:id`)
+      .route(`${this.routeparent}/seguiOfi/:oficina`)
       .put(this.routesController.updateSeguiOfi);
     app
       .route(`${this.routeparent}/eliminarEnvio/:id`)

@@ -1,6 +1,15 @@
+import PdfPrinter from "pdfmake";
+import PrinterService from "../../../printer";
 import facturaModel, { IFactura } from "../models/facturas";
+import { TDocumentDefinitions } from "pdfmake/interfaces";
+import { getFacturasReport } from "../../../reports/almacenes";
+
+
 class BussFactura {
-  constructor() {}
+  constructor(
+    private readonly printerService: PrinterService = new PrinterService()
+  ) {}
+  
   public async readFactura(): Promise<Array<IFactura>>;
   public async readFactura(id: string): Promise<IFactura>;
   public async readFactura(
@@ -164,6 +173,12 @@ class BussFactura {
         { $push: factura }
       );
       return result;
+    }
+  public async gerReportFactura(filter:any) {
+    const listFactura: any= await facturaModel.find(filter).populate("idVale").sort({ fechaFactura: -1 });
+    const docDefinition = getFacturasReport(listFactura);
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
     }
 }
 export default BussFactura;

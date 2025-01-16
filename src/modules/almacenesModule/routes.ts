@@ -392,6 +392,10 @@ class Routes {
     app
       .route(`${this.routeparent}/addFactura/:id`)
       .put(this.routesController.addFactura);
+    //listar facturas
+    app
+    .route(`${this.routeparent}/facturas`)
+    .get(this.routesController.getFacturas);
   }
 }
 export default Routes;

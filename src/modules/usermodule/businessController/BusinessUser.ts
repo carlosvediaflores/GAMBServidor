@@ -94,5 +94,9 @@ class BusinessUser {
         .populate("cargo")
         return result;
       }
+      public async getUserEmail(email: string) {   
+        let result = await UsersModel.findOne({email:email})
+        return result;
+      }
 }
 export default BusinessUser;

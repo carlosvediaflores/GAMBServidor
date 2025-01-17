@@ -18,6 +18,7 @@ export interface ISimpleSeguimiento {
     copia?:string; //17
     oficina?:string; //18 
     nombre?:string; //19 
+    usuario?:string; //19
 }
 export interface ISeguimiento extends Document {
     idhj:  string;
@@ -38,6 +39,7 @@ export interface ISeguimiento extends Document {
     oficina:string; 
     nombre:string; 
     archivofi:Array<IArchivo>;//20
+    usuario:string;
 }
 const SeguiSchema = new Schema({
     //idhj: { type: Schema.Types.ObjectId, ref: "Hojaruta"},
@@ -58,6 +60,7 @@ const SeguiSchema = new Schema({
     copia:{type:String},
     oficina:{type:String},
     nombre:{type:String},
+    usuario:{type:String},
     archivofi:{type: [Schema.Types.ObjectId], ref: "hrarchivo"}
 },
 {

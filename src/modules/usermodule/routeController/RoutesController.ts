@@ -22,6 +22,7 @@ import { IArchivo } from "../models/archivo";
 import BussnesArchivo from "../businessController/BusinessArch";
 import BussDependencia from "../../correspondenciasModule/bussinesController/dependencias";
 import { isValidObjectId } from "mongoose";
+import * as bcryptjs from 'bcryptjs';
 interface Icredentials {
   email: string;
   password: string;
@@ -29,7 +30,7 @@ interface Icredentials {
 class RoutesController {
   constructor() {}
   public async login(request: Request, response: Response) {
-    var credentials: Icredentials = request.body;
+    var credentials: any = request.body;
     if (credentials.email == undefined) {
       response
         .status(300)
@@ -42,11 +43,30 @@ class RoutesController {
         .json({ serverResponse: "Es necesario el parámetro de password" });
       return;
     }
-    credentials.password = sha1(credentials.password);
+   //credentials.password = sha1(credentials.password);
     const user: BusinessUser = new BusinessUser();
-    let result: Array<IUser> = await user.loginUsers(credentials, 0, 1);
-    if (result.length == 1) {
-      var loginUser: IUser = result[0];
+    let result: any = await user.getUserEmail(credentials.email);
+    if (!result) {
+      response
+      .status(300)
+      .json({ serverResponse: 'Credenciales no válidas - correo electrónico' });
+    return;
+    }
+    if (!bcryptjs.compareSync(credentials.password, result.password)) {
+      response
+      .status(300)
+      .json({ serverResponse: 'Credenciales no válidas - contraseña' });
+    return;
+    }
+    if (result.isActive == false) {
+      response
+      .status(300)
+      .json({ serverResponse: 'No tienes Acceso!!! No intente más...' });
+    return;
+    }
+    
+    if (result) {
+      var loginUser: IUser = result;
       var token: string = jsonwebtoken.sign(
         { id: loginUser._id, email: loginUser.email },
         "secret"
@@ -64,9 +84,10 @@ class RoutesController {
       return;
     }
     response
-      .status(200)
+      .status(300)
       .json({ serverResponse: "Credenciales incorrectas!!!" });
   }
+
   public async createUsers(request: Request, response: Response) {
     var user: BusinessUser = new BusinessUser();
 
@@ -78,7 +99,7 @@ class RoutesController {
       return;
     }
     userData["registerdate"] = new Date();
-    userData["password"] = sha1(userData["password"]);
+    userData["password"] = bcryptjs.hashSync(userData.password, 10);
     let result = await user.addUsers(userData);
     response.status(201).json({ serverResponse: result });
   }
@@ -186,7 +207,7 @@ class RoutesController {
       delete params.password;
     }
     if (params["password"] != null) {
-      params["password"] = sha1(params["password"]);
+      params["password"] = bcryptjs.hashSync(params.password, 10);
     }
     if (params.cargo === "") {
       delete params.cargo;
@@ -219,8 +240,7 @@ class RoutesController {
       }
       let idUser = respDependencia.idUser;
       if (idUser.includes(id)) {
-        response.status(300).json({ serverResponse: "Ya existe Usuario" });
-        return;
+        delete params.dependencia;
       }
       let datos: any = { idUser: id };
       let result: any = await dependencia.updatePushUser(params.dependencia, datos);
@@ -1166,11 +1186,10 @@ class RoutesController {
     if (idRuta == null) {
       response
         .status(300)
-        .json({ serverResponse: "El id es necesario para crear subdir" });
+        .json({ serverResponse: "El id es necesario para crear seguimiento" });
       return;
     }
     var ruta: BusinessHoja = new BusinessHoja();
-    //var userResult: IUser = await orgToUpdate.save();
     let segui: BussinesSegui = new BussinesSegui();
     var seguiData: any = request.body;
     seguiData["fechaderivado"] = new Date();
@@ -1180,7 +1199,6 @@ class RoutesController {
     var result1 = await segui.addSegui(seguiData);
     let idSegui = result1._id;
     var result = await ruta.addSeguim(idRuta, idSegui);
-    //console.log(result + "esto es el resultado");
     if (result1 == null) {
       response.status(300).json({ serverResponse: "no se pudo guardar..." });
       return;

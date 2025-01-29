@@ -1603,7 +1603,7 @@ class RoutesController {
       }
     }
     if (Object.entries(aux).length > 0) {
-      filter["fecha"] = aux;
+      filter["createdAt"] = aux;
     }
     if (params.skip) {
       skip = parseInt(params.skip);

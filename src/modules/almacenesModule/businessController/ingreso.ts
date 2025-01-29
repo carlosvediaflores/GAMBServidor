@@ -2,8 +2,10 @@ import ingresosModel, { IIngreso } from "../models/ingreso";
 import compraModel, { ICompra } from "../models/compras";
 import egresoModel, { IEgreso } from "../models/egreso";
 import proveedores from "../models/proveedores";
+import { getReportsIngresosTotalCompras } from "../../../reports/almacenes";
+import PrinterService from "../../../printer";
 class BussIngreso {
-  constructor() {}
+  constructor(private readonly printerService: PrinterService = new PrinterService()) {}
   public async readIngreso(): Promise<Array<IIngreso>>;
   public async readIngreso(id: string): Promise<IIngreso>;
   public async readIngreso(
@@ -357,5 +359,13 @@ class BussIngreso {
       });
       return filterIngreso;
   } 
+  public async getReportsIngresosTotalCompras(filter?:any) {
+      const listFactura: any= await ingresosModel.find(filter).populate("productos").sort({ fecha: -1 });
+      // console.log(listFactura);
+      
+      const docDefinition = getReportsIngresosTotalCompras(listFactura);
+      const doc = this.printerService.createPdf(docDefinition);
+      return doc;
+      }
 }
 export default BussIngreso;

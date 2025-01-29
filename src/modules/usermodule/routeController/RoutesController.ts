@@ -49,7 +49,7 @@ class RoutesController {
     if (!result) {
       response
       .status(300)
-      .json({ serverResponse: 'Credenciales no válidas - correo electrónico' });
+      .json({ serverResponse: 'Credenciales no válidas - correo electrónico o CI' });
     return;
     }
     if (!bcryptjs.compareSync(credentials.password, result.password)) {

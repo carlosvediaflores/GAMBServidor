@@ -1603,7 +1603,7 @@ class RoutesController {
       }
     }
     if (Object.entries(aux).length > 0) {
-      filter["createdAt"] = aux;
+      filter["fecha"] = aux;
     }
     if (params.skip) {
       skip = parseInt(params.skip);
@@ -2345,14 +2345,14 @@ class RoutesController {
         numero = 1;
       }
     }
-    /*  if(valeData.precio){
+     if(valeData.precio){
       if(valeData.idProducto==='642c3e7b3b1ac20013da2571'){
         valeData.cantidad=valeData.precio / 3.74
       }
       if(valeData.idProducto==='6439b82156cc6b00132c9ab2'){
         valeData.cantidad=valeData.precio / 3.72
       }
-    } */
+    }
     valeData["numeroVale"] = numero;
     if(valeData.numAntiguo === '' ){
       delete valeData.numAntiguo;
@@ -2617,6 +2617,43 @@ class RoutesController {
     const pdfDoc = await factura.gerReportFactura(filter);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Factura";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
+  public async getReportsIngresosTotalCompras(request: Request, response: Response) {
+    const ingreso: BussIngreso = new BussIngreso();
+    var filter: any = {};
+    var params: any = request.query;
+    let year = new Date();
+    let yearAct = params.gestion ?? year.getFullYear();
+    if (yearAct != null) {
+      filter["fecha"] = {$gte:`${yearAct}-01-01T00:00:00.000Z`,$lte:(`${yearAct}-12-31T23:59:59.000Z`)};
+    }
+    console.log(filter);
+    
+    const pdfDoc = await ingreso.getReportsIngresosTotalCompras(filter);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Ingresos Total Compras";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
+  public async getReportsLubricantes(request: Request, response: Response) {
+    var vale: BussVale = new BussVale();
+    var filter: any = {};
+    var params: any = request.query;
+    let year = new Date();
+    let yearAct = params.gestion ?? year.getFullYear();
+    if (yearAct != null) {
+      filter["fecha"] = {$gte:`${yearAct}-01-01T00:00:00.000Z`,$lte:(`${yearAct}-12-31T23:59:59.000Z`)};
+    }
+    filter["productos"] = { $exists: true, $not: { $size: 0 } };
+    console.log(filter);
+    
+    const pdfDoc = await vale.getReportsLubricantes(filter);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Ingresos Total Compras";
     pdfDoc.pipe(response);
     pdfDoc.end();
     return;

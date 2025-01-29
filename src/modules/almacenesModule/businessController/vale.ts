@@ -1,8 +1,10 @@
 import path from "path";
 import valeModel, { IVale } from "../models/vale";
 import { match } from "assert";
+import PrinterService from "../../../printer";
+import { getReportsLubricantes } from "../../../reports/almacenes";
 class BussVale {
-  constructor() {}
+  constructor( private readonly printerService: PrinterService = new PrinterService()) {}
   public async readVale(): Promise<Array<IVale>>;
   public async readVale(id: string): Promise<IVale>;
   public async readVale(
@@ -41,7 +43,11 @@ class BussVale {
           populate: {
             path: "unidadSolicitante",
             model: "Subdirecciones",
-            populate: { path: "user", model: "User", select: "_id ci email username surnames roles", },
+            populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
           },
         })
         .populate({
@@ -90,7 +96,11 @@ class BussVale {
           populate: {
             path: "unidadSolicitante",
             model: "Subdirecciones",
-            populate: { path: "user", model: "User", select: "_id ci email username surnames roles", },
+            populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
           },
         })
         .populate({
@@ -128,16 +138,16 @@ class BussVale {
       return err;
     }
   }
-  public async getVales(params1:any, params2?:any) {
-    var result = await valeModel.find(params1)
-    .populate("idProducto")
+  public async getVales(params1: any, params2?: any) {
+    var result = await valeModel.find(params1).populate("idProducto");
 
     return result;
   }
-  public async getValesAut(params1:any, params2?:any) {
-    var result = await valeModel.find(params1)
-    .populate("idProducto")
-    .populate({path:'autorizacion', match:params2});
+  public async getValesAut(params1: any, params2?: any) {
+    var result = await valeModel
+      .find(params1)
+      .populate("idProducto")
+      .populate({ path: "autorizacion", match: params2 });
     const filterConductor = result.filter((conductor: any) => {
       return conductor.autorizacion != null;
     });
@@ -159,9 +169,17 @@ class BussVale {
     let result = await valeModel.updateOne({ _id: id }, { $push: factura });
     return result;
   }
-   public async getValeAntiguo(numAntiguo: string) {     
-      let result = await valeModel.findOne({numAntiguo:numAntiguo})
-      return result;
-    }
+  public async getValeAntiguo(numAntiguo: string) {
+    let result = await valeModel.findOne({ numAntiguo: numAntiguo });
+    return result;
+  }
+   public async getReportsLubricantes(filter?:any) {
+        const listFactura: any= await valeModel.find(filter).populate("conductor").populate("vehiculo").sort({ fecha: -1 });
+        // console.log(listFactura);
+        
+        const docDefinition = getReportsLubricantes(listFactura);
+        const doc = this.printerService.createPdf(docDefinition);
+        return doc;
+        }
 }
 export default BussVale;

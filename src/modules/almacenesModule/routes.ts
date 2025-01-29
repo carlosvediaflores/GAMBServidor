@@ -396,6 +396,12 @@ class Routes {
     app
     .route(`${this.routeparent}/facturas`)
     .get(this.routesController.getFacturas);
+    app
+    .route(`${this.routeparent}/reportsIngresosTotalCompras`)
+    .get(this.routesController.getReportsIngresosTotalCompras);
+    app
+    .route(`${this.routeparent}/getReportsLubricantes`)
+    .get(this.routesController.getReportsLubricantes);
   }
 }
 export default Routes;

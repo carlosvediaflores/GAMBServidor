@@ -144,6 +144,8 @@ class BussVale {
     return result;
   }
   public async getValesAut(params1: any, params2?: any) {
+    console.log(params1, params2);
+    
     var result = await valeModel
       .find(params1)
       .populate("idProducto")

@@ -2290,21 +2290,18 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { numeroVale:-1, _id: -1, fecha: -1 };
+      order = { _id: -1, numeroVale:-1, fecha: -1 };
     }
     let resp: Array<IVale>=[]
     let result: Array<IVale>=[]
     let res: Array<IVale> = await Vale.getVales(filter, order);
-    if(filter2 && typeof filter2 === "object" && Object.keys(filter2).length === 0){
-      result = res;
-    }else{
-      resp = await Vale.getValesAut(filter, filter2);
-      result = res.concat(resp);
-    }
+    // if(filter2 && typeof filter2 === "object" && Object.keys(filter2).length === 0){
+    //   result = res;
+    // }else{
+    //   resp = await Vale.getValesAut(filter, filter2);
+    //   result = res.concat(resp);
+    // }
     console.log(filter2, filter);
-
-    
-    console.log('SOLO FILTER',res, 'filters',resp, "result",result);
     response.status(200).json({
       serverResponse: res,
       totalDocs,
@@ -2331,30 +2328,31 @@ class RoutesController {
     let paramsCompra: any = {};
     let paramsArticulo: any = {};
     let paramsIngreso: any = {};
-    
+    let AutorizacionData: any = {};
     let year = new Date();
     let yearAct = year.getFullYear();
+    let nombreConductor =  'Conductor';
     
-    let AutorizacionData: any = await Autorizacion.readAutorization(
-      valeData.autorizacion
-    );
+    if(valeData.autorizacion){
+      AutorizacionData = await Autorizacion.readAutorization(valeData.autorizacion);
+      nombreConductor = `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames}`;
+    }
+    
     if(AutorizacionData.numeroVale!=null){
       response.status(300).json({ serverResponse: `Este vale ya fue generado para la autorización Nº ${AutorizacionData.numeroVale} ` });
       return;
     }
-    // console.log('Respuesta',AutorizacionData);
-    
-    let filter1: any = {estado:'REGISTRADO', fecha: { $gte: `${yearAct}-01-01T00:00:00.000Z`, $lte: `${yearAct}-12-31T23:59:59.000Z` }, productos: { $exists: true, $not: { $ne: [] } }, precio: { $ne: null } };
+    let conductor = valeData.conductor?? AutorizacionData.conductor._id ;
+    let vehiculo =  valeData.vehiculo?? AutorizacionData.vehiculo._id;
+    let filter1: any = {conductor: conductor, estado:'REGISTRADO', fecha: { $gte: `${yearAct}-01-01T00:00:00.000Z`, $lte: `${yearAct}-12-31T23:59:59.000Z` }, productos: { $exists: true, $not: { $ne: [] } }, precio: { $ne: null } };
     // let filter2: any = {conductor:AutorizacionData.conductor._id};
-    // const respVale: any = await vale.getValesAut(filter1, filter2);
-    // console.log('filter2',filter2, 'filter1',filter1);
-    // console.log('Respuesta',respVale.length);
-    
-    // if(respVale.length>6){
-    //   response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
-    //   return;
-    // }
+    const respVale: any = await vale.getVales(filter1);
 
+    
+    if(respVale.length>6){
+      response.status(300).json({ serverResponse: `${nombreConductor} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
+      return;
+    }
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {
       delete valeData.idCompra;
@@ -2379,10 +2377,10 @@ class RoutesController {
     }
     // console.log('valeData',valeData);
     valeData["numeroVale"] = numero;
-    // valeData["conductor"] = AutorizacionData.conductor._id;
-    // valeData["vehiculo"] = AutorizacionData.vehiculo._id;
+    valeData["conductor"] = valeData.conductor?? AutorizacionData.conductor._id ;
+    valeData["vehiculo"] =  valeData.vehiculo?? AutorizacionData.vehiculo._id;
     let result = await vale.addVale(valeData);
-    // console.log('result',result);
+     console.log('result',result);
     
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);

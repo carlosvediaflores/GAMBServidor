@@ -2345,15 +2345,16 @@ class RoutesController {
     // console.log('Respuesta',AutorizacionData);
     
     let filter1: any = {estado:'REGISTRADO', fecha: { $gte: `${yearAct}-01-01T00:00:00.000Z`, $lte: `${yearAct}-12-31T23:59:59.000Z` }, productos: { $exists: true, $not: { $ne: [] } }, precio: { $ne: null } };
-    let filter2: any = {conductor:AutorizacionData.conductor._id};
-    const respVale: any = await vale.getValesAut(filter1, filter2);
+    // let filter2: any = {conductor:AutorizacionData.conductor._id};
+    // const respVale: any = await vale.getValesAut(filter1, filter2);
     // console.log('filter2',filter2, 'filter1',filter1);
     // console.log('Respuesta',respVale.length);
     
-    /* if(respVale.length>6){
-      response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
-      return;
-    } */
+    // if(respVale.length>6){
+    //   response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
+    //   return;
+    // }
+
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {
       delete valeData.idCompra;
@@ -2378,8 +2379,8 @@ class RoutesController {
     }
     // console.log('valeData',valeData);
     valeData["numeroVale"] = numero;
-    valeData["conductor"] = AutorizacionData.conductor._id;
-    valeData["vehiculo"] = AutorizacionData.vehiculo._id;
+    // valeData["conductor"] = AutorizacionData.conductor._id;
+    // valeData["vehiculo"] = AutorizacionData.vehiculo._id;
     let result = await vale.addVale(valeData);
     // console.log('result',result);
     

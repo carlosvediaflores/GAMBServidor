@@ -2350,10 +2350,10 @@ class RoutesController {
     // console.log('filter2',filter2, 'filter1',filter1);
     // console.log('Respuesta',respVale.length);
     
-    if(respVale.length>6){
+    /* if(respVale.length>6){
       response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
       return;
-    }
+    } */
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {
       delete valeData.idCompra;

@@ -2350,7 +2350,7 @@ class RoutesController {
     // console.log('filter2',filter2, 'filter1',filter1);
     // console.log('Respuesta',respVale.length);
     
-    if(respVale.length>4){
+    if(respVale.length>6){
       response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
       return;
     }

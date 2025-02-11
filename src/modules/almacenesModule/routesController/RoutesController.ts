@@ -38,7 +38,7 @@ import { IVale } from "../models/vale";
 import BussVale from "../businessController/vale";
 import { IAutorizacion } from "../models/autorizacion";
 import BussAutorization from "../businessController/autotizacion";
-import { IVehiculo } from "../models/vehiculo";
+import vehiculo, { IVehiculo } from "../models/vehiculo";
 import BussVehiculo from "../businessController/vehiculo";
 import { IFactura } from "../models/facturas";
 import BussFactura from "../businessController/facturas";
@@ -2133,6 +2133,14 @@ class RoutesController {
       let expresion = params.catProgra;
       filter["catProgra"] = expresion;
     }
+    if (params.conductor != null) {
+      let expresion = params.conductor;
+      filter["conductor"] = expresion;
+    }
+    if (params.vehiculo != null) {
+      let expresion = params.vehiculo;
+      filter["vehiculo"] = expresion;
+    }
     if (params.estado != null) {
       let expresion = params.estado;
       filter["estado"] = expresion;
@@ -2156,7 +2164,7 @@ class RoutesController {
     if (params.al != null) {
       var lt = params.al;
       let fechaAl = lt + "T23:59:59.000Z";
-
+      
       aux["$lte"] = fechaAl;
     }
     if (params.productos === true) {
@@ -2166,7 +2174,6 @@ class RoutesController {
     if (Object.entries(aux).length > 0) {
       filter["fecha"] = aux;
     }
-
     let respost: Array<IVale> = await Vale.readVale();
     var totalDocs = respost.length;
     var totalpage = Math.ceil(respost.length / limit);
@@ -2183,10 +2190,10 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = { numeroVale:-1, _id: -1, fecha: -1 };
+      order = { _id: -1, numeroVale:-1, fecha: -1 };
     }
     let res: Array<IVale> = await Vale.readVale(filter, skip, limit, order);
-    //console.log(res);
+    console.log('SOLO FILTER',filter);
 
     response.status(200).json({
       serverResponse: res,
@@ -2289,18 +2296,17 @@ class RoutesController {
     let result: Array<IVale>=[]
     let res: Array<IVale> = await Vale.getVales(filter, order);
     if(filter2 && typeof filter2 === "object" && Object.keys(filter2).length === 0){
-     // console.log(filter2, "Vacío");
-      
       result = res;
     }else{
-        resp = await Vale.getValesAut(filter, filter2);
+      resp = await Vale.getValesAut(filter, filter2);
       result = res.concat(resp);
     }
+    console.log(filter2, filter);
 
     
-    console.log(res.length, resp.length, result.length);
+    console.log('SOLO FILTER',res, 'filters',resp, "result",result);
     response.status(200).json({
-      serverResponse: result,
+      serverResponse: res,
       totalDocs,
       limit,
       totalpage,
@@ -2325,18 +2331,35 @@ class RoutesController {
     let paramsCompra: any = {};
     let paramsArticulo: any = {};
     let paramsIngreso: any = {};
-
+    
+    let year = new Date();
+    let yearAct = year.getFullYear();
+    
     let AutorizacionData: any = await Autorizacion.readAutorization(
       valeData.autorizacion
     );
+    if(AutorizacionData.numeroVale!=null){
+      response.status(300).json({ serverResponse: `Este vale ya fue generado para la autorización Nº ${AutorizacionData.numeroVale} ` });
+      return;
+    }
+    // console.log('Respuesta',AutorizacionData);
+    
+    let filter1: any = {estado:'REGISTRADO', fecha: { $gte: `${yearAct}-01-01T00:00:00.000Z`, $lte: `${yearAct}-12-31T23:59:59.000Z` }, productos: { $exists: true, $not: { $ne: [] } }, precio: { $ne: null } };
+    let filter2: any = {conductor:AutorizacionData.conductor._id};
+    const respVale: any = await vale.getValesAut(filter1, filter2);
+    // console.log('filter2',filter2, 'filter1',filter1);
+    // console.log('Respuesta',respVale.length);
+    
+    if(respVale.length>4){
+      response.status(300).json({ serverResponse: `${AutorizacionData.conductor.username} ${AutorizacionData.conductor.surnames} debe presentar las facturas pendientes al responsable de fondo rotatorio` });
+      return;
+    }
     const respEgreso: any = await Egreso.getNumEgreso();
     if (valeData.idCompra == "") {
       delete valeData.idCompra;
     }
     const resp: any = await vale.getNumVale();
-    let year = new Date();
-    let yearAct = year.getFullYear();
-
+    
     if (resp) {
       numero = resp.numeroVale + numero;
 
@@ -2353,21 +2376,13 @@ class RoutesController {
         valeData.cantidad=valeData.precio / 3.72
       }
     }
+    // console.log('valeData',valeData);
     valeData["numeroVale"] = numero;
-    if(valeData.numAntiguo === '' ){
-      delete valeData.numAntiguo;
-    }
-    if(valeData.numAntiguo != undefined){
-
-      let numAntiguo = await vale.getValeAntiguo(valeData.numAntiguo);
-      if(numAntiguo!=null){ 
-        response
-          .status(300)
-          .json({ serverResponse: `Numero de vale antiguo ${valeData.numAntiguo} ya se encuentra registrado` });
-        return;
-      }
-    }
+    valeData["conductor"] = AutorizacionData.conductor._id;
+    valeData["vehiculo"] = AutorizacionData.vehiculo._id;
     let result = await vale.addVale(valeData);
+    // console.log('result',result);
+    
     paramsAut.numeroVale = result.numeroVale;
     await Autorizacion.updateAutorization(valeData.autorizacion, paramsAut);
     if (!valeData.idCompra) {
@@ -2379,7 +2394,7 @@ class RoutesController {
     let Simplearticulo: any = listCompra.idArticulo;
     let solicitante: String = `${
       AutorizacionData.unidadSolicitante.user.username
-    }${""} ${AutorizacionData.unidadSolicitante.user.surnames}`;
+    } ${AutorizacionData.unidadSolicitante.user.surnames}`;
     let entregadoA: String = `${AutorizacionData.conductor.username}${" "}${
       AutorizacionData.conductor.surnames
     } `;
@@ -2449,6 +2464,8 @@ class RoutesController {
         params.cantidad = params.precio / 3.72;
       }
     }
+    console.log("params", params);
+    
     var result = await Vale.updateVale(id, params);
     response.status(200).json(result);
   }
@@ -2495,6 +2512,7 @@ class RoutesController {
     egresoData.idPersona = "6253bf6900ae6f0014f7bc23";
     egresoData.idProveedor = "643473b2adb0190013ff255b";
     egresoData.idIngreso = resultIngreso._id;
+    egresoData.fecha = fecha;
     //console.log("resul ingreso",resultIngreso);
     let resultEgreso = await Egreso.addEgreso(egresoData);
 
@@ -2589,6 +2607,12 @@ class RoutesController {
       params.cantidadFactura = params.montoFactura / 3.72;
     }
     params.idVale = id;
+    let filter = { idVale: id, numeroFactura: params.numeroFactura };
+    const getFactura = await factura.readFactura(filter);
+    if (getFactura.length > 0) {
+      response.status(300).json({ serverResponse: "Este numero de factura ya fue registrado" });
+      return
+    }
     const resultFactura = await factura.addFactura(params); 
     if(valeData.idFacturas.length === 0){    
       params.cantidad = resultFactura.cantidadFactura;

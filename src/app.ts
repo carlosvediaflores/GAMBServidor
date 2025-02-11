@@ -43,7 +43,7 @@ class App {
   public configuration() {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
-    this.app.use(FileUpload({ limits: { fileSize: 100 * 1024 * 1024 } }));
+    this.app.use(FileUpload({ limits: { fileSize: 300 * 1024 * 1024 } }));
   }
   public initApp() {
     this.app.use(Cors());

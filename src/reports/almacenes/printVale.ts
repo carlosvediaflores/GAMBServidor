@@ -269,9 +269,14 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                 margin: [0, 0, 0, 0],
                 layout: "customLayout04", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [180, 80, 120, 120],
+                  widths: [15,180, 70, 120, 100],
                   body: [
                     [
+                      {
+                        text: "Nº",
+                        style: "tableHeader",
+                        alignment: "center",
+                      },
                       {
                         text: "Producto",
                         style: "tableHeader",
@@ -301,7 +306,8 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                             cantidadCompra: any;
                             unidadMedida: string;
                             precio: number;
-                          }) => [
+                          }, indice: number) => [
+                            { text: indice + 1, style: "tableBody", alignment: "center", },
                             {
                               text: producto.articulo || "Sin Nombre",
                               alignment: "center",
@@ -332,6 +338,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                       : [
                           // Si no hay productos, mostrar idProducto si está disponible
                           [
+                            { text: 1, style: "tableBody", alignment: "center", },
                             {
                               text: values.idProducto?.nombre || "Sin Producto",
                               alignment: "center",
@@ -370,7 +377,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                 layout: "customLayout01", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
-                  widths: [180, 60, 140, 120],
+                  widths: [180, 60, 160, 100],
                   body: [
                     [
                       {
@@ -667,9 +674,14 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               {
                 layout: "customLayout04", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [180, 80, 120, 120],
+                  widths: [15,180, 70, 120, 100],
                   body: [
                     [
+                      {
+                        text: "Nº",
+                        style: "tableHeader",
+                        alignment: "center",
+                      },
                       {
                         text: "Producto",
                         style: "tableHeader",
@@ -699,7 +711,8 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                             cantidadCompra: string;
                             unidadMedida: string;
                             precio: number;
-                          }) => [
+                          },indice: number) => [
+                            { text: indice + 1, style: "tableBody", alignment: "center", },
                             {
                               text: producto.articulo || "Sin Nombre",
                               alignment: "center",
@@ -730,6 +743,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                       : [
                           // Si no hay productos, mostrar idProducto si está disponible
                           [
+                            { text: 1, style: "tableBody", alignment: "center", },
                             {
                               text: values.idProducto?.nombre || "Sin Producto",
                               alignment: "center",
@@ -768,7 +782,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                 layout: "customLayout01", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
-                  widths: [180, 60, 140, 120],
+                  widths: [180, 60, 160, 100],
                   body: [
                     [
                       {

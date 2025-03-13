@@ -285,7 +285,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                 margin: [0, 0, 0, 0],
                 layout: "customLayout04", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [180, 80, 120, 120],
+                  widths: [235, 120, 160],
                   body: [
                     [
                       {
@@ -303,11 +303,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                         style: "tableHeader",
                         alignment: "center",
                       },
-                      {
-                        text: "Monto (Bs.)",
-                        style: "tableHeader",
-                        alignment: "center",
-                      },
+                     
                     ],
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
@@ -335,14 +331,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               alignment: "center",
                               fontSize: 7,
                             },
-                            {
-                              text:
-                                CurrencyFormatter.formatCurrency(
-                                  producto.precio
-                                ) || "0.00",
-                              alignment: "center",
-                              fontSize: 7,
-                            },
                           ]
                         )
                       : [
@@ -366,13 +354,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               }s`,
                               alignment: "center",
                             },
-                            {
-                              text:
-                                CurrencyFormatter.formatCurrency(
-                                  values.precio
-                                ) || "0.00",
-                              alignment: "center",
-                            },
+                            
                           ],
                         ]),
                   ],
@@ -386,7 +368,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                 layout: "customLayout01", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
-                  widths: [180, 60, 140, 120],
+                  widths: [180, 60, 160, 100],
                   body: [
                     [
                       {
@@ -692,7 +674,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                   margin: [0, 0, 0, 0],
                   layout: "customLayout04", // 'lightHorizontalLines', // optional
                   table: {
-                    widths: [180, 80, 120, 120],
+                    widths: [235, 120, 160],
                     body: [
                       [
                         {
@@ -710,11 +692,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                           style: "tableHeader",
                           alignment: "center",
                         },
-                        {
-                          text: "Monto (Bs.)",
-                          style: "tableHeader",
-                          alignment: "center",
-                        },
+                      
                       ],
                       // Si existen productos, listarlos
                       ...(values.productos.length > 0
@@ -742,14 +720,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                                 alignment: "center",
                                 fontSize: 7,
                               },
-                              {
-                                text:
-                                  CurrencyFormatter.formatCurrency(
-                                    producto.precio
-                                  ) || "0.00",
-                                alignment: "center",
-                                fontSize: 7,
-                              },
+                             
                             ]
                           )
                         : [
@@ -773,13 +744,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                                 }s`,
                                 alignment: "center",
                               },
-                              {
-                                text:
-                                  CurrencyFormatter.formatCurrency(
-                                    values.precio
-                                  ) || "0.00",
-                                alignment: "center",
-                              },
+                             
                             ],
                           ]),
                     ],
@@ -793,7 +758,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                   layout: "customLayout01", // 'lightHorizontalLines', // optional
                   table: {
                     headerRows: 2,
-                    widths: [180, 60, 140, 120],
+                    widths: [180, 60, 160, 100],
                     body: [
                       [
                         {
@@ -1090,7 +1055,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
               {
                 layout: "customLayout04", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [180, 80, 120, 120],
+                  widths: [235, 120, 160],
                   body: [
                     [
                       {
@@ -1108,11 +1073,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                         style: "tableHeader",
                         alignment: "center",
                       },
-                      {
-                        text: "Monto (Bs.)",
-                        style: "tableHeader",
-                        alignment: "center",
-                      },
+                     
                     ],
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
@@ -1140,14 +1101,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               alignment: "center",
                               fontSize: 7,
                             },
-                            {
-                              text:
-                                CurrencyFormatter.formatCurrency(
-                                  producto.precio
-                                ) || "0.00",
-                              alignment: "center",
-                              fontSize: 7,
-                            },
+                          
                           ]
                         )
                       : [
@@ -1171,13 +1125,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               }s`,
                               alignment: "center",
                             },
-                            {
-                              text:
-                                CurrencyFormatter.formatCurrency(
-                                  values.precio
-                                ) || "0.00",
-                              alignment: "center",
-                            },
+                            
                           ],
                         ]),
                   ],
@@ -1191,7 +1139,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                 layout: "customLayout01", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
-                  widths: [180, 60, 140, 120],
+                  widths: [180, 60, 160, 100],
                   body: [
                     [
                       {
@@ -1291,7 +1239,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
           body: [
             [
               {
-                text: values.productos.length > 0 ? "Entrgué Conforme" : "Entregué Conforme  \n (Resp. Fondo Rotatorio)",
+                text: "Entrgué Conforme",
                 style: "tableHeader",
                 alignment: "center",
               },

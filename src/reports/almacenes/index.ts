@@ -1,3 +1,5 @@
 export * from './getFacturas'
 export * from './getReportsIngresosTotalCompras'
 export * from './getReportsLubricantes'
+export * from './printVale'
+export * from './printVale2'

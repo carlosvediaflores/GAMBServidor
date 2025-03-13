@@ -2,9 +2,11 @@ import path from "path";
 import valeModel, { IVale } from "../models/vale";
 import { match } from "assert";
 import PrinterService from "../../../printer";
-import { getReportsLubricantes } from "../../../reports/almacenes";
+import { getReportsLubricantes, printVale, printVale2 } from "../../../reports/almacenes";
 class BussVale {
-  constructor( private readonly printerService: PrinterService = new PrinterService()) {}
+  constructor(
+    private readonly printerService: PrinterService = new PrinterService()
+  ) {}
   public async readVale(): Promise<Array<IVale>>;
   public async readVale(id: string): Promise<IVale>;
   public async readVale(
@@ -145,7 +147,7 @@ class BussVale {
   }
   public async getValesAut(params1: any, params2?: any) {
     console.log(params1, params2);
-    
+
     var result = await valeModel
       .find(params1)
       .populate("idProducto")
@@ -175,13 +177,45 @@ class BussVale {
     let result = await valeModel.findOne({ numAntiguo: numAntiguo });
     return result;
   }
-   public async getReportsLubricantes(filter?:any) {
-        const listFactura: any= await valeModel.find(filter).populate("conductor").populate("vehiculo").sort({ fecha: -1 });
-        // console.log(listFactura);
-        
-        const docDefinition = getReportsLubricantes(listFactura);
-        const doc = this.printerService.createPdf(docDefinition);
-        return doc;
-        }
+  public async getReportsLubricantes(filter?: any) {
+    const listFactura: any = await valeModel
+      .find(filter)
+      .populate("conductor")
+      .populate("vehiculo")
+      .sort({ fecha: -1 });
+    // console.log(listFactura);
+
+    const docDefinition = getReportsLubricantes(listFactura);
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+  public async printVale(id: string, user: any) {
+    const vale: any = await valeModel
+      .findOne({ _id: id })
+      .populate("conductor")
+      .populate("vehiculo")
+      .populate({
+        path: "autorizacion",
+        model: "act_autorizations",
+        populate: {
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "user",
+            model: "User",
+            select: "_id ci email username surnames roles post",
+          },
+        },
+      })
+      .populate("idProducto");
+    let docDefinition;
+    if (vale.idFacturas.length === 0 && vale.idCompra) {
+      docDefinition = printVale2(vale, user); // Usa printVale2 si la condición se cumple
+    } else {
+      docDefinition = printVale(vale, user); // Usa printVale si no se cumple
+    }
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
 }
 export default BussVale;

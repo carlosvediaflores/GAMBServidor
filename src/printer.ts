@@ -36,10 +36,10 @@ const customTableLayouts: Record<string, CustomTableLayout> = {
       },
       fillColor: function (i, node) {
         if (i === 0) {
-          return '#2c9bfa';
+          return '#5cb7f5';
         }
         if (i === node.table.body.length - 1) {
-          return '#acb3c1';
+          return null;
         }
   
         return i % 2 === 0 ? '#f3f3f3' : null;
@@ -64,7 +64,7 @@ const customTableLayouts: Record<string, CustomTableLayout> = {
       },
       fillColor: function (i, node) {
         if (i === 0) {
-          return '#2c9bfa';
+          return '#99cff5';
         }
         if (i === node.table.body.length - 1) {
           return '#acb3c1';

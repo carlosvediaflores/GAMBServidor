@@ -2682,5 +2682,17 @@ class RoutesController {
     return;
   }
 
+  public async printVale(request: Request, response: Response) {
+    var vale: BussVale = new BussVale();
+    let id: string = request.params.id;
+    let user: string = request.body.user;
+    const pdfDoc = await vale.printVale(id, user);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Información del Vale";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
+
 }
 export default RoutesController;

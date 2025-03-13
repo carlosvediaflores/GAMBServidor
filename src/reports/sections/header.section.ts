@@ -43,17 +43,7 @@ export const headerSection = (options: HeaderOptions): Content => {
     
     const hedarLogo: Content = showLogo ? logoGamb : null;
     const hedarLogo2: Content = showLogo2 ? sisal : null;
-   /*  const info: Content = {
-        text: `Gobierno Autónomo Municipal de Betanzos \n Diercción de Planificación \n Gestión 2021- 2026 \n Ususario: ${userActual}`,style: {
-            bold: true,
-            fontSize:7  ,
-          },
-          
-        alignment:'justify',
-        margin:[20,30],
-        width:180
-    } */
-
+ 
     const headerSubTitle:Content=subTitle?{
         text: subTitle,
         alignment: 'center',
@@ -73,7 +63,7 @@ export const headerSection = (options: HeaderOptions): Content => {
             margin:[0,30,0,0],
             style:{
                 bold:true,
-                fontSize:11,
+                fontSize:15,
                 color: '#0e78d1',
             },
         },

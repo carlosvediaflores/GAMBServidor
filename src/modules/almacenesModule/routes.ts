@@ -402,6 +402,9 @@ class Routes {
     app
     .route(`${this.routeparent}/getReportsLubricantes`)
     .get(this.routesController.getReportsLubricantes);
+    app
+    .route(`${this.routeparent}/printVale/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printVale);
   }
 }
 export default Routes;

@@ -882,7 +882,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
           body: [
             [
               {
-                text: values.productos.length > 0 ? "Entrgué Conforme" : "Entregué Conforme  \n (Resp. Fondo Rotatorio)",
+                text: values.productos.length > 0 ? "Entregué Conforme" : "Entregué Conforme  \n (Resp. Fondo Rotatorio)",
                 style: "tableHeader",
                 alignment: "center",
               },

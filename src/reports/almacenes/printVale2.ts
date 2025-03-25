@@ -929,7 +929,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
       // Detalles del Vale
 
       headerSection({
-        title: `SOLICITUD DE COMBUSTIBLE`,
+        title: `ENTREGA DE COMBUSTIBLE`,
         subTitle:
           "En el presente documento se detalla la solicitud de combustible",
         showLogo: true,

@@ -26,6 +26,8 @@ import BussEvaluacion from "../bussinesController/evaluacion";
 import { IEvaluacion } from "../models/evaluacion";
 import BussEvaluacionFile from "../bussinesController/fileEvaluacion";
 import { IFileEvaluacion } from "../models/fileEvaluacion";
+import BussSegControl from "../bussinesController/seguimientoControl";
+import { IsegControl } from "../models/seguimientoControl";
 
 class RoutesController {
   //----------MODELOS------------//
@@ -1532,5 +1534,246 @@ class RoutesController {
     //var result1 = await tipoNormativa.removeNormativaId(res.tipo_normativa, id);
     response.status(200).json({ serverResponse: "Se elimino el documento" });
   }
+
+  /////DOCUMENTS
+  //listar buscar filtrar
+  public async getSegControlAll(request: Request, response: Response) {
+    var Document: BussSegControl = new BussSegControl();
+    var filter: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.titulo != null) {
+      var titulo = new RegExp(params.titulo, "i");
+      filter["titulo"] = titulo;
+    }
+    if (params.estado != null) {
+      var estado = params.estado;
+      filter["estado"] = estado;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    if (params.dategt != null) {
+      var gt = params.dategt;
+      aux["$gt"] = gt;
+    }
+    if (params.datelt != null) {
+      var lt = params.datelt;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["createdAt"] = aux;
+    }
+    let respost: Array<IsegControl> = await Document.readSegControl();
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(respost.length / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = {modelo_tipo: -1, numero: -1 };
+    }
+    let res: Array<IsegControl> = await Document.readSegControl(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  //buscar por Id a document
+  public async getSegControl(request: Request, response: Response) {
+    const Document: BussSegControl = new BussSegControl();
+    //let id: string = request.params.id;
+    let res = await Document.readSegControl(request.params.id);
+    response.status(200).json({ serverResponse: res });
+  }
+  //Crear Subir Modificar Modelo de Documento
+  public async uploadSegControl(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Document: BussSegControl = new BussSegControl();
+    var Modelo: BussModelo = new BussModelo();
+    var id: string = request.params.id;
+    var resultPrestamo: IsegControl = await Document.readSegControl(id);
+    var filData: any = request.body;
+    if (!resultPrestamo) {
+      response.status(300).json({ serverResponse: "Document no existe!" });
+      return;
+    }
+    if (isEmpty(request.files) && id) {
+      await Document.updateDocument(id, filData);
+      response.status(200).json({ serverResponse: "Document modificado" });
+      return;
+    }
+    if (isEmpty(request.files)) {
+      var Documento: IsegControl = await Document.addSegControl(filData);
+      response.status(300).json({ serverResponse: Documento });
+      return;
+    }
+    var dir = `${__dirname}/../../../../uploads/documentos`;
+    var absolutepath = path.resolve(dir);
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+    if (!id) {
+      for (var i = 0; i < key.length; i++) {
+        var file: any = files[key[i]];
+        var filehash: string = sha1(new Date().toString()).substr(0, 5);
+        var nombreCortado = file.name.split(".");
+        var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+        // Validar extension
+        var extensionesValidas = [
+          "pdf",
+          "jpg",
+          "jpeg",
+          "png",
+        ];
+        if (!extensionesValidas.includes(extensionArchivo)) {
+          return response.status(400).json({
+            ok: false,
+            msg: "No es una extensión permitida",
+          });
+        }
+        var newname: string = `${"GAMB"}_${
+          filData.titulo
+        }_${filehash}.${extensionArchivo}`;
+        var totalpath = `${absolutepath}/${newname}`;
+        await copyDirectory(totalpath, file);
+        filData.archivo = newname;
+        filData.uri = "getFileSegControl/" + newname;
+        filData.path = totalpath;
+        filData.nameFile = newname;
+        var Documento: IsegControl = await Document.addSegControl(filData);
+        let idModel = filData.modelo_tipo;
+        let idDoc = Documento._id;
+        // let pushDoc = await Modelo.updatePushDoc(idModel, idDoc);
+      }
+      response.status(200).json({
+        serverResponse: Documento,
+      });
+      return;
+    }
+    var filData: any = request.body;
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+      // Validar extension
+      var extensionesValidas = [
+        "pdf",
+        "jpg",
+        "jpeg", 
+        "png",    
+      ];
+      if (!extensionesValidas.includes(extensionArchivo)) {
+        return response.status(400).json({
+          ok: false,
+          msg: "No es una extensión permitida",
+        });
+      }
+      var newname: string = `${"GAMB"}_${
+        filData.titulo
+      }_${filehash}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+      await copyDirectory(totalpath, file);
+      filData.archivo = newname;
+      pathViejo = resultPrestamo.path;
+      filData.path = totalpath;
+      if (totalpath != resultPrestamo.path) {
+        borrarImagen(pathViejo);
+      }
+      filData.uri = "getFileSegControl/" + newname;
+      filData.nameFile = newname;
+      if (resultPrestamo.modelo_tipo == filData.modelo_tipo) {
+        var Result = await Document.updateDocument(id, filData);
+      } else {
+        var Result = await Document.updateDocument(id, filData);
+      }
+      response.status(200).json({ serverResponse: "Document modificado" });
+      return;
+    }
+    pathViejo = filData.path;
+    borrarImagen(pathViejo);
+    response.status(200).json({ serverResponse: "Ocurrio un error" });
+    return;
+  }
+  //Ver Archivo
+  public async getFileSegControl(request: Request, response: Response) {
+    var uri: string = request.params.name;
+    if (!uri) {
+      response
+        .status(300)
+        .json({ serverResponse: "Identificador no encontrado" });
+      return;
+    }
+    var Document: BussSegControl = new BussSegControl();
+    var DocumentoData: IsegControl = await Document.readDocumentFile(uri);
+    if (!DocumentoData) {
+      const pathImg = path.join(
+        __dirname,
+        `/../../../../uploads/no-hay-archivo.png`
+      );
+      response.sendFile(pathImg);
+      return;
+    }
+    response.sendFile(DocumentoData.path);
+  }
+  //Elinimar
+  public async removeSegControl(request: Request, response: Response) {
+    const borrarImagen: any = (path: any) => {
+      if (fs.existsSync(path)) {
+        // borrar la imagen anterior
+        fs.unlinkSync(path);
+      }
+    };
+    let pathViejo = "";
+    var Document: BussSegControl = new BussSegControl();
+    var Modelo: BussModelo = new BussModelo();
+    let id: string = request.params.id;
+    let res: IsegControl = await Document.readSegControl(id);
+    pathViejo = res.path;
+    borrarImagen(pathViejo);
+    let result = await Document.deleteDocument(id);
+    var result1 = await Modelo.removeDocId(res.modelo_tipo, id);
+    response.status(200).json({ serverResponse: "Se elimino el registro" });
+  }
+ 
 }
 export default RoutesController;

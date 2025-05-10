@@ -73,7 +73,7 @@ const styles: StyleDictionary = {
     //color: 'black',
   },
 };
-export const printVale = (options: any, user: any): TDocumentDefinitions => {
+export const printPedido = (options: any, user: any): TDocumentDefinitions => {
   const values = options;
   let nombreSolicitado =
     values.conductor.username + " " + values.conductor.surnames;

@@ -43,6 +43,8 @@ import BussVehiculo from "../businessController/vehiculo";
 import { IFactura } from "../models/facturas";
 import BussFactura from "../businessController/facturas";
 import { log } from "console";
+import BussPedidos from "../businessController/pedidos";
+import { IPedidos } from "../models/pedidos";
 
 const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
@@ -2694,5 +2696,136 @@ class RoutesController {
     return;
   }
 
+  public async getPedidos(request: Request, response: Response) {
+    var pedidos: BussPedidos = new BussPedidos();
+    var filter: any = {};
+    var filter2: any = {};
+    var params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    if (params.glosaSalida != null) {
+      var glosaSalida = new RegExp(params.glosaSalida, "i");
+      filter["glosaSalida"] = glosaSalida;
+    }
+    if (params.numeroSalida != null) {
+      var numeroSalida: number = parseInt(params.numeroSalida);
+      if (Number.isNaN(numeroSalida)) {
+        filter["numeroSalida"];
+      } else {
+        filter["numeroSalida"] = numeroSalida;
+      }
+    }
+    if (params.entregado != null) {
+      var entregado = new RegExp(params.entregado, "i");
+      filter["entregado"] = entregado;
+    }
+    if (params.cargo != null) {
+      var cargo = new RegExp(params.cargo, "i");
+      filter["cargo"] = cargo;
+    }
+    if (params.del != null) {
+      var gt = params.del;
+      aux["$gt"] = gt;
+    }
+    if (params.al != null) {
+      var lt = params.al;
+      aux["$lt"] = lt;
+    }
+    if (Object.entries(aux).length > 0) {
+      filter["fecha"] = aux;
+    }
+    if (params.limit) {
+      limit = parseInt(params.limit);
+    }
+    let respost: any = await pedidos.totales(filter);
+    var totalDocs = respost.length;
+    var totalpage = Math.ceil(totalDocs / limit);
+    if (params.skip) {
+      skip = parseInt(params.skip);
+      if (skip <= totalpage && skip >= 2) {
+        skip = limit * (skip - 1);
+      } else {
+        skip = 0;
+      }
+    }
+    if (params.order != null) {
+      var data = params.order.split(",");
+      var number = parseInt(data[1]);
+      order[data[0]] = number;
+    } else {
+      order = { _id: -1 };
+    }
+    let res: Array<IPedidos> = await pedidos.readPedidos(
+      filter,
+      skip,
+      limit,
+      order
+    );
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage,
+      skip,
+    });
+    return;
+  }
+  public async createPedido(request: Request, response: Response) {
+    const pedidos: BussPedidos = new BussPedidos();
+    const Egreso: BussEgreso = new BussEgreso();
+    const compra: BussCompra = new BussCompra();
+    const salida: BussSalida = new BussSalida();
+    const ingreso: BussIngreso = new BussIngreso();
+    const articulo: BussArticulo = new BussArticulo();
+    const pedidoData = request.body;
+    log(pedidoData);
+    let result: any;
+    const resp: any = await pedidos.getNumPedido();
+    if (isEmpty(resp)) {
+      pedidoData["numeroPedido"] = 1;
+      result = await pedidos.addPedido(pedidoData);
+    } else {
+      let num = resp.numeroPedido + 1;
+      pedidoData["numeroPedido"] = num;
+      // pedidoData["glosaSalida"] = EgresoData.concepto;
+      result = await pedidos.addPedido(pedidoData);
+    }
+   /*  for (let i = 0; i < EgresoData.articulos.length; i++) {
+      let data = EgresoData.articulos[i];
+      let listCompra = await compra.readCompra(data.idCompra);
+      let entrada: any = listCompra.idEntrada;
+      let Simplearticulo: any = listCompra.idArticulo;
+      EgresoData.cantidadSalida = data.cantidadSalida;
+      EgresoData.idCompra = data.idCompra;
+      EgresoData.catProgra = data.catProgra;
+      EgresoData.idEgreso = result._id;
+      let resultSalida = await salida.addSalida(EgresoData);
+      let idSalida = resultSalida._id;
+      var resultAdd = await Egreso.addSalidas(result._id, idSalida);
+      var compraAdd = await compra.addSalidas(data.idCompra, idSalida);
+      let stock: Number = Simplearticulo.cantidad - EgresoData.cantidadSalida;
+      let stockCompra: Number =
+        listCompra.stockCompra - EgresoData.cantidadSalida;
+      EgresoData.stockCompra = stockCompra;
+      EgresoData.cantidad = stock;
+      if (stockCompra === 0) {
+        EgresoData.estadoCompra = "AGOTADO";
+      } else {
+        EgresoData.estadoCompra = "EXISTE";
+      }
+      let result1 = await articulo.updateArticulo(
+        Simplearticulo._id,
+        EgresoData
+      );
+      let resultCompra = await compra.updateCompra(data.idCompra, EgresoData);
+      const ENTRADA: ISimpleIngreso = {
+        estado: "SALIDA",
+      };
+      var resul = await ingreso.updateIngreso(entrada._id, ENTRADA);
+    } */
+    response.status(201).json({ serverResponse: result });
+  }
 }
 export default RoutesController;

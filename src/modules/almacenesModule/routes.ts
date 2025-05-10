@@ -405,6 +405,26 @@ class Routes {
     app
     .route(`${this.routeparent}/printVale/:id`)
     .get(jsonwebtokenSecurity, this.routesController.printVale);
+
+     //-------PEDIDOS--//
+     app
+     .route(`${this.routeparent}/pedido`)
+     .post(this.routesController.createPedido);
+   app
+     .route(`${this.routeparent}/pedidos`)
+     .get(this.routesController.getPedidos);
+  //  app
+  //    .route(`${this.routeparent}/egreso/:id`)
+  //    .get(this.routesController.getEgreso);
+  //  app
+  //    .route(`${this.routeparent}/egreso/:id`)
+  //    .put(this.routesController.updateEgreso);
+  //  app
+  //    .route(`${this.routeparent}/egreso/:id`)
+  //    .delete(this.routesController.removeEgreso);
+  //  app
+  //    .route(`${this.routeparent}/searchegreso/:search`)
+  //    .get(this.routesController.searchEgreso);
   }
 }
 export default Routes;

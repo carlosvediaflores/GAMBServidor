@@ -223,6 +223,27 @@ class Routes {
   app
     .route(`${this.routeparent}/evaluacionFile/:id`)
     .delete(this.routesController.removeFileEvaluacion);
+
+     //Crear, Editar Documento
+     app
+     .route(`${this.routeparent}/uploadSegControl/:id?`)
+     .post(this.routesController.uploadSegControl);
+   // Buscar, Filtrar
+   app
+     .route(`${this.routeparent}/getSegControlAll`)
+     .get(this.routesController.getSegControlAll);
+   //Buscar por Id
+   app
+     .route(`${this.routeparent}/getSegControl/:id`)
+     .get(this.routesController.getSegControl);
+   ////Ver Arhivo
+   app
+     .route(`${this.routeparent}/getFileSegControl/:name`)
+     .get(this.routesController.getFileSegControl);
+   //Eliminar Document
+   app
+     .route(`${this.routeparent}/segControl/:id`)
+     .delete(this.routesController.removeSegControl);
   }
 }
 export default Routes;

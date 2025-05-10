@@ -1583,7 +1583,7 @@ class RoutesController {
       var number = parseInt(data[1]);
       order[data[0]] = number;
     } else {
-      order = {modelo_tipo: -1, numero: -1 };
+      order = { _id: -1 };
     }
     let res: Array<IsegControl> = await Document.readSegControl(
       filter,

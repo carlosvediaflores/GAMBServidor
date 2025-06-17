@@ -159,6 +159,9 @@ class Routes {
     app
       .route(`${this.routeparent}/segui/:id`)
       .get(this.routesController.getSegui);
+      app
+      .route(`${this.routeparent}/seguiNuit/:nuit`)
+      .get(this.routesController.getSeguiNuit);
     app
       .route(`${this.routeparent}/seguiTotales`)
       .get(this.routesController.contOficina);

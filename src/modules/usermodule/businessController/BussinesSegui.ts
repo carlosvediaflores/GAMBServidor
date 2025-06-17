@@ -87,6 +87,11 @@ class BussinesSegui {
     return listSegui;
   }
 
+ public async getSeguiNuit(id: string) {
+    let result = await SeguiModel.find({ nuit: id })
+      .populate("archivofi");
+    return result;
+  }
   public async total(query: any): Promise<any>;
 
   public async total(params1?: string | any) {

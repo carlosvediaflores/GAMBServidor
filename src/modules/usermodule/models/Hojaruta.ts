@@ -49,7 +49,7 @@ const hojarutaSchema: Schema = new Schema({
   pathhoja: {type: String},
   archivo:  {type:Array},
   asociado: {type:Array},
-  asociados:[{ type: Schema.Types.ObjectId, ref: "Hojaruta"}],
+  asociados:[{ type: Schema.Types.ObjectId, ref: "Hojaruta", default: [] }],
   numCite: {type: String},
   beneficiarioPago: {type: String},
 },{

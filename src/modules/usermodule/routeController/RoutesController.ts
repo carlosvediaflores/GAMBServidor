@@ -22,7 +22,8 @@ import { IArchivo } from "../models/archivo";
 import BussnesArchivo from "../businessController/BusinessArch";
 import BussDependencia from "../../correspondenciasModule/bussinesController/dependencias";
 import { isValidObjectId } from "mongoose";
-import * as bcryptjs from 'bcryptjs';
+import * as bcryptjs from "bcryptjs";
+import { log } from "console";
 interface Icredentials {
   email: string;
   password: string;
@@ -43,28 +44,28 @@ class RoutesController {
         .json({ serverResponse: "Es necesario el parámetro de password" });
       return;
     }
-   //credentials.password = sha1(credentials.password);
+    //credentials.password = sha1(credentials.password);
     const user: BusinessUser = new BusinessUser();
     let result: any = await user.getUserEmail(credentials.email);
     if (!result) {
-      response
-      .status(300)
-      .json({ serverResponse: 'Credenciales no válidas - correo electrónico o CI' });
-    return;
+      response.status(300).json({
+        serverResponse: "Credenciales no válidas - correo electrónico o CI",
+      });
+      return;
     }
     if (!bcryptjs.compareSync(credentials.password, result.password)) {
       response
-      .status(300)
-      .json({ serverResponse: 'Credenciales no válidas - contraseña' });
-    return;
+        .status(300)
+        .json({ serverResponse: "Credenciales no válidas - contraseña" });
+      return;
     }
     if (result.isActive == false) {
       response
-      .status(300)
-      .json({ serverResponse: 'No tienes Acceso!!! No intente más...' });
-    return;
+        .status(300)
+        .json({ serverResponse: "No tienes Acceso!!! No intente más..." });
+      return;
     }
-    
+
     if (result) {
       var loginUser: IUser = result;
       var token: string = jsonwebtoken.sign(
@@ -167,11 +168,7 @@ class RoutesController {
         skip = 0;
       }
     }
-    const result: Array<IUser> = await user.readUsers(
-      filter,
-      limit,
-      skip,
-    );
+    const result: Array<IUser> = await user.readUsers(filter, limit, skip);
 
     response.status(200).json({
       serverResponse: result,
@@ -228,7 +225,6 @@ class RoutesController {
       delete params.dependencia;
     }
     if (params.dependencia) {
-      
       let respDependencia: any = await dependencia.readDependencias(
         params.dependencia
       );
@@ -243,21 +239,24 @@ class RoutesController {
         delete params.dependencia;
       }
       let datos: any = { idUser: id };
-      let result: any = await dependencia.updatePushUser(params.dependencia, datos);
-      if(resUser.dependencia){
-        let idDepende =resUser.dependencia
+      let result: any = await dependencia.updatePushUser(
+        params.dependencia,
+        datos
+      );
+      if (resUser.dependencia) {
+        let idDepende = resUser.dependencia;
         const respDependenciaAnt: any = await dependencia.readDependencias(
           idDepende
-        );       
-        if(respDependenciaAnt){
-          let dataDepen = respDependenciaAnt[0]
+        );
+        if (respDependenciaAnt) {
+          let dataDepen = respDependenciaAnt[0];
 
-          let idUsers = dataDepen.idUser         
+          let idUsers = dataDepen.idUser;
           if (idUsers.includes(resUser._id)) {
-            await dependencia.updatePullUser(resUser.dependencia, datos);  
-          }        
-        }      
-      }     
+            await dependencia.updatePullUser(resUser.dependencia, datos);
+          }
+        }
+      }
     }
     if (params.birthday === "") {
       delete params.birthday;
@@ -844,12 +843,10 @@ class RoutesController {
       await hojaRuta.removeIdHR(idHR, segRes._id);
       response.status(200).json({ serverResponse: "Se eliminó el envio" });
     } else {
-      response
-        .status(300)
-        .json({
-          serverResponse:
-            "Esta Hoja de Ruta ya tiene varios seguimientos ó ya fue Recibido",
-        });
+      response.status(300).json({
+        serverResponse:
+          "Esta Hoja de Ruta ya tiene varios seguimientos ó ya fue Recibido",
+      });
       return;
     }
   }
@@ -859,16 +856,28 @@ class RoutesController {
     const segui: BussinesSegui = new BussinesSegui();
     let nuitA: string = request.params.nuit;
     let nuitB: string = request.body.nuit;
-    let resA = await hojaRuta.getNuitOne(nuitA);
-    let resB = await hojaRuta.getNuitOne(nuitB);
+    let resB: any = [];
+    let resA: any = [];
+    let respA = await hojaRuta.getNuitOne(nuitA);
+    let respB = await hojaRuta.getNuitOne(nuitB);
+    resA = respA.seguimiento;
+    resB = respB.seguimiento;
+    if (resA.length === 0) {
+      resA = await segui.getSeguiNuit(nuitA);
+      await hojaRuta.addIdHRSegui(respA._id, resA);
+    }
+    if (resB.length === 0) {
+      resB = await segui.getSeguiNuit(nuitB);
+      await hojaRuta.addIdHRSegui(respB._id, resB);
+    }
     if (resA == null || resB == null) {
       response.status(300).json({
         serverResponse: `No se encontró Nº ${nuitA} o Nº ${nuitB}`,
       });
       return;
     }
-    let segResA = resA.seguimiento[resA.seguimiento.length - 1];
-    let segResB = resB.seguimiento[resB.seguimiento.length - 1];
+    let segResA = resA[resA.length - 1];
+    let segResB = resB[resB.length - 1];
     if (request.body.cargo === "SECRETARIA DE DESPACHO") {
       if (segResB == null) {
         response.status(300).json({
@@ -881,43 +890,41 @@ class RoutesController {
         segResB.destino != request.body.cargo
       ) {
         if (resB.estado === "ENVIADO") {
-          var checksub: Array<IHojaruta> = resA.asociados.filter(
-            (item: any) => {
-              if (resB._id.toString() == item._id.toString()) {
-                return true;
-              }
-              return false;
+          var checksub: Array<IHojaruta> = respA.asociados.filter((item: any) => {
+            if (respB._id.toString() == item._id.toString()) {
+              return true;
             }
-          );
+            return false;
+          });
           if (checksub.length == 0) {
-            await hojaRuta.addIdHR(resA._id, resB._id);
-            await hojaRuta.addIdHR(resB._id, resA._id);
+            await hojaRuta.addIdHR(respA._id, respB._id);
+            await hojaRuta.addIdHR(respB._id, respA._id);
             let data: any = { estado: `Asociado al Nº ${nuitA}` };
             await segui.updateSegui(segResB._id, data);
-            if (resB.asociados.length != 0) {
-              let resAso: any = resB.asociados;
+            if (respB.asociados.length != 0) {
+              let resAso: any = respB.asociados;
               for (let i = 0; i < resAso.length; i++) {
                 let dataAso = resAso[i];
                 let segResData =
                   dataAso.seguimiento[dataAso.seguimiento.length - 1];
-                await hojaRuta.addIdHR(resA._id, dataAso._id);
-                await hojaRuta.addIdHR(dataAso._id, resA._id);
+                await hojaRuta.addIdHR(respA._id, dataAso._id);
+                await hojaRuta.addIdHR(dataAso._id, respA._id);
                 //await segui.updateSegui(segResData._id, data);
               }
             }
-            if (resA.asociados.length != 0) {
-              let resAso: any = resA.asociados;
+            if (respA.asociados.length != 0) {
+              let resAso: any = respA.asociados;
               for (let i = 0; i < resAso.length; i++) {
                 let dataAso = resAso[i];
                 let segResData =
                   dataAso.seguimiento[dataAso.seguimiento.length - 1];
-                await hojaRuta.addIdHR(resB._id, dataAso._id);
-                await hojaRuta.addIdHR(dataAso._id, resB._id);
+                await hojaRuta.addIdHR(respB._id, dataAso._id);
+                await hojaRuta.addIdHR(dataAso._id, respB._id);
                 //await segui.updateSegui(segResData._id, data);
               }
             }
           }
-          response.status(200).json({ serverResponse: resA, resB });
+          response.status(200).json({ serverResponse: respA, respB });
           return;
         }
         response.status(300).json({
@@ -925,40 +932,40 @@ class RoutesController {
         });
         return;
       }
-      var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
-        if (resB._id.toString() == item._id.toString()) {
+      var checksub: Array<IHojaruta> = respA.asociados.filter((item: any) => {
+        if (respB._id.toString() == item._id.toString()) {
           return true;
         }
         return false;
       });
       if (checksub.length == 0) {
-        await hojaRuta.addIdHR(resA._id, resB._id);
-        await hojaRuta.addIdHR(resB._id, resA._id);
+        await hojaRuta.addIdHR(respA._id, respB._id);
+        await hojaRuta.addIdHR(respB._id, respA._id);
         let data: any = { estado: `Asociado al Nº ${nuitA}` };
         await segui.updateSegui(segResB._id, data);
-        if (resB.asociados.length != 0) {
-          let resAso: any = resB.asociados;
+        if (respB.asociados.length != 0) {
+          let resAso: any = respB.asociados;
           for (let i = 0; i < resAso.length; i++) {
             let dataAso = resAso[i];
             let segResData =
               dataAso.seguimiento[dataAso.seguimiento.length - 1];
-            await hojaRuta.addIdHR(resA._id, dataAso._id);
-            await hojaRuta.addIdHR(dataAso._id, resA._id);
+            await hojaRuta.addIdHR(respA._id, dataAso._id);
+            await hojaRuta.addIdHR(dataAso._id, respA._id);
             //await segui.updateSegui(segResData._id, data);
           }
         }
-        if (resA.asociados.length != 0) {
-          let resAso: any = resA.asociados;
+        if (respA.asociados.length != 0) {
+          let resAso: any = respA.asociados;
           for (let i = 0; i < resAso.length; i++) {
             let dataAso = resAso[i];
             let segResData =
               dataAso.seguimiento[dataAso.seguimiento.length - 1];
-            await hojaRuta.addIdHR(resB._id, dataAso._id);
-            await hojaRuta.addIdHR(dataAso._id, resB._id);
+            await hojaRuta.addIdHR(respB._id, dataAso._id);
+            await hojaRuta.addIdHR(dataAso._id, respB._id);
             //await segui.updateSegui(segResData._id, data);
           }
         }
-        response.status(200).json({ serverResponse: resA, resB });
+        response.status(200).json({ serverResponse: respA, respB });
         return;
       }
     }
@@ -976,50 +983,50 @@ class RoutesController {
     }
     if (segResB.estado != "RECIBIDO" || segResB.destino != request.body.cargo) {
       response.status(300).json({
-        serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA`,
+        serverResponse: `El Nº ${nuitB} debe estar en estado RECIBIDO y en su OFICINA.`,
       });
       return;
     }
-    if (+nuitA === +nuitB) {
+    if (nuitA === nuitB) {
       response.status(300).json({
         serverResponse: `No se puede asociar a la misma Hoja de Ruta`,
       });
       return;
     }
-    var checksub: Array<IHojaruta> = resA.asociados.filter((item: any) => {
-      if (resB._id.toString() == item._id.toString()) {
+    var checksub: Array<IHojaruta> = respA.asociados.filter((item: any) => {
+      if (respB._id.toString() == item._id.toString()) {
         return true;
       }
       return false;
     });
     if (checksub.length == 0) {
-      await hojaRuta.addIdHR(resA._id, resB._id);
-      await hojaRuta.addIdHR(resB._id, resA._id);
+      await hojaRuta.addIdHR(respA._id, respB._id);
+      await hojaRuta.addIdHR(respB._id, respA._id);
       let data: any = { estado: `Asociado al Nº ${nuitA}` };
       await segui.updateSegui(segResB._id, data);
-      if (resB.asociados.length != 0) {
-        let resAso: any = resB.asociados;
+      if (respB.asociados.length != 0) {
+        let resAso: any = respB.asociados;
         for (let i = 0; i < resAso.length; i++) {
           let dataAso = resAso[i];
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
-          await hojaRuta.addIdHR(resA._id, dataAso._id);
-          await hojaRuta.addIdHR(dataAso._id, resA._id);
+          await hojaRuta.addIdHR(respA._id, dataAso._id);
+          await hojaRuta.addIdHR(dataAso._id, respA._id);
           //await segui.updateSegui(segResData._id, data);
         }
       }
-      if (resA.asociados.length != 0) {
-        let resAso: any = resA.asociados;
+      if (respA.asociados.length != 0) {
+        let resAso: any = respA.asociados;
         for (let i = 0; i < resAso.length; i++) {
           let dataAso = resAso[i];
           let segResData = dataAso.seguimiento[dataAso.seguimiento.length - 1];
-          await hojaRuta.addIdHR(resB._id, dataAso._id);
-          await hojaRuta.addIdHR(dataAso._id, resB._id);
+          await hojaRuta.addIdHR(respB._id, dataAso._id);
+          await hojaRuta.addIdHR(dataAso._id, respB._id);
           //await segui.updateSegui(segResData._id, data);
         }
       }
 
       // console.log(segResA,segResB);
-      response.status(200).json({ serverResponse: resA, resB });
+      response.status(200).json({ serverResponse: respA, respB });
       return;
     }
     response.status(300).json({
@@ -1234,6 +1241,13 @@ class RoutesController {
     let res = await segui.readSegui(request.params.id);
     response.status(200).json(res);
   }
+  public async getSeguiNuit(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let id: string = request.params.nuit;
+    let res = await segui.getSeguiNuit(request.params.nuit);
+    response.status(200).json(res);
+  }
+
   public async getSeguiAs(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     let nuit: string = request.params.nuit;
@@ -1411,8 +1425,8 @@ class RoutesController {
     let oficina: string = request.params.oficina;
     var params = request.body;
     var result = await segui.updateSeguiOfi(oficina, params);
-    console.log( 'oficina', oficina,"params", params);
-    
+    console.log("oficina", oficina, "params", params);
+
     response.status(200).json(result);
   }
   public async removeSegui(request: Request, response: Response) {

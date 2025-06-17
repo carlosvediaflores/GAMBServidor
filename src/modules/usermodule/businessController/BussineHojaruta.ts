@@ -337,6 +337,13 @@ class BusinessHoja {
     );
     return result;
   }
+  public async addIdHRSegui(idHRA: string, idHR: any) {
+    let result = await HojaModel.updateOne(
+      { _id: idHRA },
+      { $push: { seguimiento: idHR } }
+    );
+    return result;
+  }
   public async removeIdHR(idOr: string, idSeg: any) {
     let result = await HojaModel.updateOne(
       { _id: idOr },

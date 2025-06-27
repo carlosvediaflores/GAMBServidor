@@ -2695,6 +2695,19 @@ class RoutesController {
     pdfDoc.end();
     return;
   }
+  //Imprimir Detalle de factura
+   public async printDetalleFactura(request: Request, response: Response) {
+    var vale: BussVale = new BussVale();
+    let id: string = request.params.id;
+    let user: string = request.body.user;
+    const pdfDoc = await vale.printDetalleFactura(id, user);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Detalle de Factura";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
+
 
   public async getPedidos(request: Request, response: Response) {
     var pedidos: BussPedidos = new BussPedidos();

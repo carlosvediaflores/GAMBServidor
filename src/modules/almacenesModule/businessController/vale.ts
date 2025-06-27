@@ -2,7 +2,8 @@ import path from "path";
 import valeModel, { IVale } from "../models/vale";
 import { match } from "assert";
 import PrinterService from "../../../printer";
-import { getReportsLubricantes, printVale, printVale2 } from "../../../reports/almacenes";
+import { getReportsLubricantes, printDetalleFactura, printVale, printVale2 } from "../../../reports/almacenes";
+import { log } from "console";
 class BussVale {
   constructor(
     private readonly printerService: PrinterService = new PrinterService()
@@ -207,13 +208,42 @@ class BussVale {
           },
         },
       })
-      .populate("idProducto");
+      .populate("idProducto")
+      .populate("idFacturas");
     let docDefinition;
     if (vale.idFacturas.length === 0 && vale.idCompra) {
       docDefinition = printVale2(vale, user); // Usa printVale2 si la condición se cumple
     } else {
       docDefinition = printVale(vale, user); // Usa printVale si no se cumple
     }
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+  // Imprime detalle movimiento de fondo en avance
+  public async printDetalleFactura(id: string, user: any) {
+    const vale: any = await valeModel
+      .findOne({ _id: id })
+      .populate("conductor")
+      .populate("vehiculo")
+      .populate({
+        path: "autorizacion",
+        model: "act_autorizations",
+        populate: {
+          path: "unidadSolicitante",
+          model: "Subdirecciones",
+          populate: {
+            path: "user",
+            model: "User",
+            select: "_id ci email username surnames roles post",
+          },
+        },
+      })
+      .populate("idProducto")
+      .populate("idFacturas");
+    let docDefinition;
+   
+      docDefinition = printDetalleFactura(vale, user); // Usa printVale2 si la condición se cumple
+   
     const doc = this.printerService.createPdf(docDefinition);
     return doc;
   }

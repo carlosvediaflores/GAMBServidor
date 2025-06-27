@@ -120,28 +120,7 @@ class Routes {
     app
       .route(`${this.routeparent}/searchProy/:search`)
       .get(this.routesController.searchProy);
-    //-------ACTIVIDAD--//
-    /* app
-      .route(`${this.routeparent}/actividad`)
-      .post(this.routesController.createActividad);
-    app
-      .route(`${this.routeparent}/actividades`)
-      .get(this.routesController.getActividades);
-    app
-      .route(`${this.routeparent}/actividad/:id`)
-      .get(this.routesController.getActividad);
-    app
-      .route(`${this.routeparent}/actividadCod/:codigo`)
-      .get(this.routesController.getActividadCod);
-    app
-      .route(`${this.routeparent}/actividad/:id`)
-      .put(this.routesController.updateActividad);
-    app
-      .route(`${this.routeparent}/actividad/:id`)
-      .delete(this.routesController.removeActividad);
-    app
-      .route(`${this.routeparent}/searchActividad/:search`)
-      .get(this.routesController.searchActividad); */
+    
     //--------------CSV--------------//
     app
       .route(`${this.routeparent}/excel`)
@@ -405,6 +384,9 @@ class Routes {
     app
     .route(`${this.routeparent}/printVale/:id`)
     .get(jsonwebtokenSecurity, this.routesController.printVale);
+     app
+    .route(`${this.routeparent}/printDetailFact/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printDetalleFactura);
 
      //-------PEDIDOS--//
      app

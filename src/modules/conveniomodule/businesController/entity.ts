@@ -17,7 +17,7 @@ class BussEntity{
             let listEntidad: Array<IEntity> = await entityModel.find(params1).skip(skip).limit(limit);
             return listEntidad;
         } else {
-            let listEntidad: Array<IEntity> = await entityModel.find();
+            let listEntidad: Array<IEntity> = await entityModel.find().sort({ _id: -1 });
             return listEntidad;
         }
     }  

@@ -2,7 +2,12 @@ import FileModel, { IFiles } from "./../models/Files";
 import { query } from "express";
 import HojaModel, { IHojaruta } from "./../models/Hojaruta";
 import SeguientoModel, { ISeguimiento } from "./../models/Seguimiento";
+import { printHR } from "../../../reports/hojaRuta";
+import PrinterService from "../../../printer";
 class BusinessHoja {
+    constructor(
+       private readonly printerService: PrinterService = new PrinterService()
+    ) {}
   public async readHoja(): Promise<Array<IHojaruta>>;
   public async readHoja(id: string): Promise<IHojaruta>;
   public async readHoja(nuit: string): Promise<IHojaruta>;
@@ -351,5 +356,20 @@ class BusinessHoja {
     );
     return result;
   }
+
+  // Imprime detalle desembolso
+      public async printHR(id: string, user: any) {
+        const hojaRuta: any = await HojaModel
+          .findOne({ _id: id })
+         
+        //  console.log('Desem', hojaRuta, user);
+          
+        let docDefinition;
+       
+          docDefinition = printHR(hojaRuta, user); 
+       
+        const doc = this.printerService.createPdf(docDefinition);
+        return doc;
+      }
 }
 export default BusinessHoja;

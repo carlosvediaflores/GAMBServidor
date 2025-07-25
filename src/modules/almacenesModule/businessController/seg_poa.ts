@@ -74,6 +74,10 @@ class BusSegPoa {
       return err;
     }
   }
+   public async getCatProgCod(codigo: string) {
+      var result = await segPoaModule.findOne({ proyect_acti: codigo });
+      return result;
+    }
   public async addsegPoa(segPoa: ISegPoa) {
     try {
       let segPoaDb = new segPoaModule(segPoa);

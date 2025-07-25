@@ -1034,7 +1034,19 @@ class RoutesController {
     });
     return;
   }
-
+ //Imprimir Desembolso 
+  public async printHR(request: Request, response: Response) {
+    
+    const desembolso = new BusinessHoja();
+    let id: string = request.params.id;
+    let user: string = request.body.user;
+    const pdfDoc = await desembolso.printHR(id, user);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Detalle de Hoja de Ruta";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
   //PROBAR CON Q EXISTE
 
   public async addSubUni(request: Request, response: Response) {

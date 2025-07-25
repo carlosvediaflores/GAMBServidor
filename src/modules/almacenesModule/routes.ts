@@ -140,6 +140,9 @@ class Routes {
     app
       .route(`${this.routeparent}/searchSegPoa/:search`)
       .get(this.routesController.searchSegPoa);
+       app
+      .route(`${this.routeparent}/catProgCod/:cod`)
+      .get(this.routesController.searchSegPoaCod);
     //-------ARTICULOS--//
     app
       .route(`${this.routeparent}/articulo`)
@@ -338,7 +341,7 @@ class Routes {
     //crear
     app
       .route(`${this.routeparent}/vale`)
-      .post(this.routesController.createVale);
+      .post(jsonwebtokenSecurity, this.routesController.createVale);
       //listar
     app
       .route(`${this.routeparent}/vales`)
@@ -407,6 +410,142 @@ class Routes {
   //  app
   //    .route(`${this.routeparent}/searchegreso/:search`)
   //    .get(this.routesController.searchEgreso);
+  //-------Desembolso--//
+    app
+      .route(`${this.routeparent}/tipoDesembolso`)
+      .post(this.routesController.createTipoDesem);
+    app
+      .route(`${this.routeparent}/tipoDesembolsos`)
+      .get(this.routesController.getTipoDesem);
+    app
+      .route(`${this.routeparent}/tipoDesembolso/:id`)
+      .get(this.routesController.getTipoDesembolso);
+    app
+      .route(`${this.routeparent}/tipoDesembolso/:id`)
+      .patch(this.routesController.updateTipoDesem);
+    app
+      .route(`${this.routeparent}/tipoDesembolso/:id`)
+      .delete(this.routesController.removeTipoDesem);
+
+      //-------gasto fondo--//
+    app
+      .route(`${this.routeparent}/gastoFondo`)
+      .post(this.routesController.createGastoFondo);
+    app
+      .route(`${this.routeparent}/gastoFondos`)
+      .get(this.routesController.getGastoFondos);
+    app
+      .route(`${this.routeparent}/gastoFondo/:id`)
+      .get(this.routesController.getGastoFondo);
+    app
+      .route(`${this.routeparent}/gastoFondo/:id`)
+      .patch(this.routesController.updateGastoFondo);
+    app
+      .route(`${this.routeparent}/gastoFondo/:id`)
+      .delete(this.routesController.removeGastoFondo);    
+   
+    //-------fuentes--//
+    app
+      .route(`${this.routeparent}/fuente`)
+      .post(this.routesController.createFuente);
+    app
+      .route(`${this.routeparent}/fuentes`)
+      .get(this.routesController.getFuentes);
+    app
+      .route(`${this.routeparent}/fuente/:id`)
+      .get(this.routesController.getFuente);
+    app
+      .route(`${this.routeparent}/fuente/:id`)
+      .patch(this.routesController.updateFuente);
+    app
+      .route(`${this.routeparent}/fuente/:id`)
+      .delete(this.routesController.removeFuente);
+   //-------desembolso-------//
+    app
+      .route(`${this.routeparent}/desembolso`)
+      .post(jsonwebtokenSecurity, this.routesController.createDesembolso);
+    app
+      .route(`${this.routeparent}/desembolsos`)
+      .get(this.routesController.getDesembolsos);
+      app
+      .route(`${this.routeparent}/queryDesembolsos`)
+      .get(this.routesController.queryDesembolsos);
+    app
+      .route(`${this.routeparent}/desembolso/:id`)
+      .get(this.routesController.getDesembolso);
+    app
+      .route(`${this.routeparent}/desembolso/:id`)
+      .patch(this.routesController.updateDesembolso);
+    app
+      .route(`${this.routeparent}/desembolso/:id`)
+      .delete(this.routesController.removeDesembolso);
+
+      app.route(`${this.routeparent}/printDesembolso/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printDesemFuente);
+
+
+    // //-------desemFuente-------//
+    app
+      .route(`${this.routeparent}/desemFuente`)
+      .post(jsonwebtokenSecurity, this.routesController.createDesemFuente);
+    app
+      .route(`${this.routeparent}/desemFuentes`)
+      .get(this.routesController.getDesemFuentes);
+    app
+      .route(`${this.routeparent}/desemFuente/:id`)
+      .get(this.routesController.getDesemFuente);
+    app
+      .route(`${this.routeparent}/desemFuente/:id`)
+      .patch(this.routesController.updateDesemFuente);
+    app
+      .route(`${this.routeparent}/desemFuente/:id`)
+      .delete(this.routesController.removeDesemFuente);
+
+
+      //gastos
+
+    app
+      .route(`${this.routeparent}/gasto`)
+      .post(jsonwebtokenSecurity, this.routesController.createGasto);
+    app
+      .route(`${this.routeparent}/gastos`)
+      .get(this.routesController.getGastos);
+    app
+      .route(`${this.routeparent}/gasto/:id`)
+      .get(this.routesController.getGasto);
+    app
+      .route(`${this.routeparent}/gasto/:id`)
+      .patch(this.routesController.updateGasto);
+    app
+      .route(`${this.routeparent}/gasto/:id`)
+      .delete(this.routesController.removeGasto);
+
+       //Organismo Financiador
+
+    app
+      .route(`${this.routeparent}/organismoFinanc`)
+      .post(this.routesController.createOrgFinanc);
+    app
+      .route(`${this.routeparent}/organismoFinanciadores`)
+      .get(this.routesController.getOrgFinanciamientos);
+    app
+      .route(`${this.routeparent}/organismoFinanc/:id`)
+      .get(this.routesController.getOrgFinanciamiento);
+
+      //  Fuente Financiamiento
+
+    app
+      .route(`${this.routeparent}/fuenteFinanc`)
+      .post(this.routesController.createFuenteFinanc);
+    app
+      .route(`${this.routeparent}/fuenteFinanciamientos`)
+      .get(this.routesController.getFuenteFinanciamientos);
+    app
+      .route(`${this.routeparent}/fuenteFinanc/:id`)
+      .get(this.routesController.getFuenteFinanciamiento);
+
   }
+  
+  
 }
 export default Routes;

@@ -3,6 +3,7 @@ export interface ISegPoa extends Document {
   area:string;
   cat_programatica: string;
   partida: string;
+  idFuentes:[];
   proyect_acti: string;
   presupuesto_vigente: string;
   ejecucion_presupuestaria:string;
@@ -31,6 +32,7 @@ const SegPoaSchema: Schema = new Schema(
     subcentralia:{type:String},
     comunidad:{type:String},
     user:{ type: Schema.Types.ObjectId, ref: 'User'},
+    idFuentes:[{type: Schema.Types.ObjectId, ref: "alm_desemFuente", default:[]}]
   },
   {
     timestamps: true,

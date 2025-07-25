@@ -221,6 +221,10 @@ class Routes {
     app
       .route(`${this.routeparent}/arch/:id`)
       .delete(this.routesController.removeArch);
+
+        app.route(`${this.routeparent}/printHR/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printHR);
   }
+
 }
 export default Routes;

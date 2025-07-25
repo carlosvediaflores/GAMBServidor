@@ -1,0 +1,56 @@
+import tipoDesemdModel, { ItipoDesem } from "../models/tipoDesembolso";
+class BussTipoDesembols {
+  constructor() {}
+  public async readTipoDesem(): Promise<Array<ItipoDesem>>;
+  public async readTipoDesem(id: string): Promise<ItipoDesem>;
+  public async readTipoDesem(
+    query: any,
+    skip: number,
+    limit: number,
+    order: any
+  ): Promise<Array<ItipoDesem>>;
+
+  public async readTipoDesem(
+    params1?: string | any,
+    params2?: number,
+    params3?: number,
+    order?:any
+  ): Promise<Array<ItipoDesem> | ItipoDesem> {
+    if (params1 && typeof params1 == "string") {
+      var result: ItipoDesem = await tipoDesemdModel.findOne({ _id: params1 }).populate("id_programa");
+      return result;
+    } else if (params1) {
+      let skip = params2;
+      let limit = params3;
+      let tipoDesem: Array<ItipoDesem> = await tipoDesemdModel
+        .find(params1)
+        .skip(skip)
+        .limit(limit)
+        .sort(order)
+        .populate("id_programa");
+      return tipoDesem;
+    } else {
+      let tipoDesem: Array<ItipoDesem> = await tipoDesemdModel.find().populate("id_programa");
+      return tipoDesem;
+    }
+  }
+  
+  public async addTipoDesem(TipoDesem: ItipoDesem) {
+    try {
+      let TipoDesemDb = new tipoDesemdModel(TipoDesem);
+      let result = await TipoDesemDb.save();
+      return result;
+    } catch (err) {
+      return err;
+    }
+  }
+  public async updateTipoDesem(id: string, tipoDes: any) {
+    let result = await tipoDesemdModel.updateOne({ _id: id }, { $set: tipoDes });
+    return result;
+  }
+  public async deleteTipoDesem(id: string) {
+    let result = await tipoDesemdModel.deleteOne({ _id: id });
+    return result;
+  }
+}
+export default BussTipoDesembols ;

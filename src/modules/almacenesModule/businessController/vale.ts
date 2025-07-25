@@ -1,4 +1,3 @@
-import path from "path";
 import valeModel, { IVale } from "../models/vale";
 import { match } from "assert";
 import PrinterService from "../../../printer";
@@ -28,6 +27,7 @@ class BussVale {
         .findOne({ _id: params1 })
         .populate("encargadoControl", "_id ci email username surnames roles")
         .populate("idFacturas")
+        .populate('idGasto')
         .populate({
           path: "conductor",
           model: "User",
@@ -80,6 +80,7 @@ class BussVale {
         .limit(limit)
         .sort(order)
         .populate("idFacturas")
+        .populate('idGasto')
         .populate("encargadoControl", "_id ci email username surnames roles")
         .populate({
           path: "conductor",
@@ -128,7 +129,8 @@ class BussVale {
     } else {
       let listVale: Array<IVale> = await valeModel
         .find()
-        .populate("id_programa");
+        .populate("id_programa")
+        .populate('idGasto');
       return listVale;
     }
   }

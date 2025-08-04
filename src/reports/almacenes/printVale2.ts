@@ -316,7 +316,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                           }) => [
                             {
                               text: producto.articulo || "Sin Nombre",
-                              alignment: "center",
                               fontSize: 7,
                             },
                             {
@@ -705,7 +704,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                             }) => [
                               {
                                 text: producto.articulo || "Sin Nombre",
-                                alignment: "center",
+
                                 fontSize: 7,
                               },
                               {
@@ -1086,7 +1085,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                           }) => [
                             {
                               text: producto.articulo || "Sin Nombre",
-                              alignment: "center",
                               fontSize: 7,
                             },
                             {

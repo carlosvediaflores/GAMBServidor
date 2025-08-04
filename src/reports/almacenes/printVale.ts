@@ -310,7 +310,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                             { text: indice + 1, style: "tableBody", alignment: "center", },
                             {
                               text: producto.articulo || "Sin Nombre",
-                              alignment: "center",
+
                               fontSize: 7,
                             },
                             {
@@ -715,7 +715,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                             { text: indice + 1, style: "tableBody", alignment: "center", },
                             {
                               text: producto.articulo || "Sin Nombre",
-                              alignment: "center",
+
                               fontSize: 7,
                             },
                             {

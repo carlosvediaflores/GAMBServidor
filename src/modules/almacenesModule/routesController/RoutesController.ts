@@ -2495,7 +2495,6 @@ class RoutesController {
 
       await vale.updateVale(result._id, { idGasto: resultGasto._id });
 
-
       console.log("result", resultGasto);
       // Agregar el ID del nuevo vale al array gastos
       desembolsoData.gastos.push(resultGasto._id);
@@ -2726,45 +2725,171 @@ class RoutesController {
     let result = await vale.deleteVale(id);
     response.status(200).json({ serverResponse: "Se elimino el Registro" });
   }
+  // public async addFactura(request: Request, response: Response) {
+  //   var Vale: BussVale = new BussVale();
+  //   const factura: BussFactura = new BussFactura();
+  //   const desembolso = new BussDesembolso();
+  //   const desembolsoFuente = new BussDesemFuente();
+  //   const gastoFondo = new BussGastoFondo();
+  //   const gasto = new BussGasto();
+  //   let id: string = request.params.id;
+  //   var params = request.body;
+  //   log("params", params);
+  //   let valeData: any = await Vale.readVale(id);
+  //   console.log("valeData", valeData);
+  //   let idProducto: string = valeData.idProducto._id;
+  //   if (idProducto == "642c3e7b3b1ac20013da2571") {
+  //     params.cantidadFactura = params.montoFactura / 3.74;
+  //   }
+  //   if (idProducto == "6439b82156cc6b00132c9ab2") {
+  //     params.cantidadFactura = params.montoFactura / 3.72;
+  //   }
+  //   params.idVale = id;
+  //   let filter = { idVale: id, numeroFactura: params.numeroFactura };
+  //   const getFactura = await factura.readFactura(filter);
+  //   if (getFactura.length > 0) {
+  //     response
+  //       .status(300)
+  //       .json({ serverResponse: "Este numero de factura ya fue registrado" });
+  //     return;
+  //   }
+  //   const resultFactura = await factura.addFactura(params);
+  //   if (valeData.idFacturas.length === 0) {
+  //     params.cantidad = resultFactura.cantidadFactura;
+  //   } else {
+  //     params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
+  //   }
+  //   if (valeData.estado === "REGISTRADO") {
+  //     params.estado = "PENDIENTE";
+  //   }
+  //   params.cantidadAdquirida =
+  //     valeData.cantidadAdquirida + resultFactura.montoFactura;
+  //   params.saldoDevolucion = valeData.precio - params.cantidadAdquirida;
+  //   let datos: any = { idFacturas: resultFactura._id };
+  //   await Vale.updatePushFactura(id, datos);
+  //   const result = await Vale.updateVale(id, params);
+  //   response.status(200).json(valeData);
+  // }
+
   public async addFactura(request: Request, response: Response) {
-    var Vale: BussVale = new BussVale();
-    const factura: BussFactura = new BussFactura();
+    const Vale = new BussVale();
+    const factura = new BussFactura();
+    const gasto = new BussGasto();
+    const desembolso = new BussDesembolso();
+    const desembolsoFuente = new BussDesemFuente();
+
     let id: string = request.params.id;
-    var params = request.body;
+    let params = request.body;
+
     let valeData: any = await Vale.readVale(id);
+    log("valeData", valeData);
     let idProducto: string = valeData.idProducto._id;
-    if (idProducto == "642c3e7b3b1ac20013da2571") {
+
+    // Conversión de litros si aplica
+    if (idProducto === "642c3e7b3b1ac20013da2571") {
       params.cantidadFactura = params.montoFactura / 3.74;
-    }
-    if (idProducto == "6439b82156cc6b00132c9ab2") {
+    } else if (idProducto === "6439b82156cc6b00132c9ab2") {
       params.cantidadFactura = params.montoFactura / 3.72;
     }
+
     params.idVale = id;
-    let filter = { idVale: id, numeroFactura: params.numeroFactura };
-    const getFactura = await factura.readFactura(filter);
+
+    // Validar número de factura único
+    const getFactura = await factura.readFactura({
+      idVale: id,
+      numeroFactura: params.numeroFactura,
+    });
     if (getFactura.length > 0) {
-      response
+      return response
         .status(300)
-        .json({ serverResponse: "Este numero de factura ya fue registrado" });
-      return;
+        .json({ serverResponse: "Este número de factura ya fue registrado" });
     }
+
+    // Guardar la nueva factura
     const resultFactura = await factura.addFactura(params);
-    if (valeData.idFacturas.length === 0) {
-      params.cantidad = resultFactura.cantidadFactura;
-    } else {
-      params.cantidad = valeData.cantidad + resultFactura.cantidadFactura;
-    }
+
+    // Actualizar valores del vale
+    params.cantidad =
+      valeData.idFacturas.length === 0
+        ? resultFactura.cantidadFactura
+        : valeData.cantidad + resultFactura.cantidadFactura;
+
     if (valeData.estado === "REGISTRADO") {
       params.estado = "PENDIENTE";
     }
+
     params.cantidadAdquirida =
       valeData.cantidadAdquirida + resultFactura.montoFactura;
     params.saldoDevolucion = valeData.precio - params.cantidadAdquirida;
-    let datos: any = { idFacturas: resultFactura._id };
-    await Vale.updatePushFactura(id, datos);
-    const result = await Vale.updateVale(id, params);
-    response.status(200).json(valeData);
+
+    // Actualizar el vale con la nueva factura
+    await Vale.updatePushFactura(id, { idFacturas: resultFactura._id });
+    await Vale.updateVale(id, params);
+
+    // ---------------- Lógica adicional para actualizar Gasto, Desembolso y DesemFondo ---------------- //
+
+    const gastoData = valeData.idGasto;
+    const idGasto = gastoData._id;
+    const idDesembolso = gastoData.idDesembolso._id;
+    const idDesemFondo = gastoData.idDesemFondo._id;
+
+    const montoFactura = resultFactura.montoFactura;
+    const nuevoMontoGasto = montoFactura;
+
+    if (gastoData.estado === "PENDIENTE") {
+      const montoGastoActual = gastoData.montoGasto;
+
+      if (montoFactura === montoGastoActual) {
+        // 1. Si montoFactura === montoGastoActual → solo cambiar estado a EJECUTADO
+        await gasto.updateGasto(idGasto, { estado: "EJECUTADO" });
+      } else {
+        // 2. Si son diferentes → recalcular y actualizar montos
+
+        // Restar monto anterior y sumar nuevo montoFactura en desembolso
+        const diferencia = nuevoMontoGasto - montoGastoActual;
+
+        await gasto.updateGasto(idGasto, {
+          montoGasto: nuevoMontoGasto,
+          estado: "EJECUTADO",
+        });
+
+        const MontoGastoDes = gastoData.idDesembolso.montoGasto;
+        const nuevoMontoGastoDes =
+          MontoGastoDes - montoGastoActual + nuevoMontoGasto;
+
+        await desembolso.updateDesembolso(idDesembolso, {
+          montoGasto: nuevoMontoGastoDes,
+        });
+
+        const MontoGastoDesem = gastoData.idDesemFondo.montoGasto;
+        const nuevoMontoGastoDesem =
+          MontoGastoDesem - montoGastoActual + nuevoMontoGasto;
+        await desembolsoFuente.updateDesemFuente(idDesemFondo, {
+          montoGasto: nuevoMontoGastoDesem,
+        });
+      }
+    } else if (gastoData.estado === "EJECUTADO") {
+      // 3. Ya está EJECUTADO → solo sumar montoFactura a gasto, desembolso y desemFondo
+      const montoGasto = gastoData.montoGasto;
+      const nuevoMontoGastoAct = montoGasto + nuevoMontoGasto;
+      await gasto.updateGasto(idGasto, { montoGasto: nuevoMontoGastoAct });
+
+      const montoGastoDes = gastoData.idDesembolso.montoGasto;
+      const nuevoMontoGastoActDes = montoGastoDes + nuevoMontoGasto;
+      await desembolso.updateDesembolso(idDesembolso, {
+        montoGasto: nuevoMontoGastoActDes,
+      });
+
+      const montoGastoDesmF = gastoData.idDesemFondo.montoGasto;
+      const nuevoMontoGastoActDesmF = montoGastoDesmF + nuevoMontoGasto;
+      await desembolsoFuente.updateDesemFuente(idDesemFondo, {
+        montoGasto: nuevoMontoGastoActDesmF,
+      });
+    }
+
+    return response.status(200).json(valeData);
   }
+
   public async getFacturas(request: Request, response: Response) {
     const factura: BussFactura = new BussFactura();
     var filter: any = {};
@@ -3062,7 +3187,9 @@ class RoutesController {
     const fuenteFinanc = new BussFuenteFinanciamiento();
     const orgFinanc = new BussOrganismoFinanciador();
     const fuenteData = request.body;
-    const fuenteFinancData: any = await fuenteFinanc.readFuenteFinanc(fuenteData.idff);
+    const fuenteFinancData: any = await fuenteFinanc.readFuenteFinanc(
+      fuenteData.idff
+    );
     const orgFinancData: any = await orgFinanc.readOrgFinanc(fuenteData.idof);
     fuenteData.ffof = `${fuenteFinancData.codigo}-${orgFinancData.codigo}`;
     fuenteData.denominacion = `${fuenteFinancData.denominacion} - ${orgFinancData.denominacion}`;
@@ -3186,6 +3313,19 @@ class RoutesController {
     const pdfDoc = await desembolso.printDesemFuente(id, user);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Detalle de Desembolso";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
+
+  //Imprimir Desembolso
+  public async printDetailDesemGasto(request: Request, response: Response) {
+    const desembolso = new BussDesembolso();
+    let id: string = request.params.id;
+    let user: string = request.body.user;
+    const pdfDoc = await desembolso.printDetailDesemGasto(id, user);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Detalle de Gasto de Desembolso";
     pdfDoc.pipe(response);
     pdfDoc.end();
     return;
@@ -3434,7 +3574,6 @@ class RoutesController {
   // gastos
 
   public async createGasto(request: Request, response: Response) {
-  
     const desembolso = new BussDesembolso();
     const desembolsoFuente = new BussDesemFuente();
     const gastoFondo = new BussGastoFondo();
@@ -3443,85 +3582,155 @@ class RoutesController {
     const solicitador = new BusinessUser();
     var gastoData = request.body;
     let user: any = request.body.user;
-    log ("gastoData", gastoData);
     const desembolsoData = await desembolso.readDesembolso(
       gastoData.idDesembolso
     );
     const desemFuente: any = await desembolsoFuente.readDesemFuente(
       gastoData.idDesemFuente
     );
-    const gastoFond:any = await gastoFondo.readGastoFondo(gastoData.idGastoFondo);
+    const gastoFond: any = await gastoFondo.readGastoFondo(
+      gastoData.idGastoFondo
+    );
     const solicitante: any = await solicitador.readUsers(gastoData.conductor);
     const catPro: any = await categoria.searchSegPoa(gastoData.catProgra);
     const catProSimple = catPro[0];
     const numPrecio = +gastoData.precio;
-      const sumMonto = numPrecio + desemFuente.montoGasto;
- 
-      if (sumMonto > desemFuente.montoTotal) {
-        response.status(300).json({
-          serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
+    const sumMonto = numPrecio + desemFuente.montoGasto;
+
+    if (sumMonto > desemFuente.montoTotal) {
+      response.status(300).json({
+        serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
            Saldo disponible es de : ${
              desemFuente.montoTotal - desemFuente.montoGasto
            } Bs., 
            Intentas pagar: ${gastoData.precio} Bs.`,
-        });
-        return;
-      }
-      const fechaGasto = new Date(gastoData.fecha);
-      const gestionGasto = fechaGasto.getFullYear();
-       gastoData.fechaRegistro = gastoData.fecha;
-      gastoData.gestion = gestionGasto;
-      gastoData.montoGasto = gastoData.precio;
-      gastoData.tipoFondo = desembolsoData.tipoDesembolso;
-      gastoData.tipoGasto = gastoFond.denominacion;
-      gastoData.idTipoGasto = gastoFond._id;
-      gastoData.fuente = desemFuente.idFuente.ffof;
-      gastoData.idFuente = desemFuente.idFuente._id;
-      gastoData.partida = gastoFond.idPartida.codigo;
-      gastoData.idPartida = gastoFond.idPartida._id;
-      gastoData.catProgra = gastoData.catProgra;
-      gastoData.idCatProgra = catProSimple._id;
-      gastoData.nameCatProg = catProSimple.proyect_acti;
-      gastoData.solicitante = `${solicitante.username} ${solicitante.surnames} `;
-      gastoData.idSolicitante = gastoData.conductor;
-      gastoData.idDesemFondo = desemFuente._id;
-      gastoData.numDesembolso = desembolsoData.numDesembolso;
-      gastoData.idDesembolso = desembolsoData._id;
-      gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
-      gastoData.idVehiculo = gastoData.vehiculo;
-      gastoData.idUserRegister = user._id;
-       log ("gastoData2", gastoData);
-   let result = await gasto.addGasto(gastoData);
+      });
+      return;
+    }
+    const fechaGasto = new Date(gastoData.fecha);
+    const gestionGasto = fechaGasto.getFullYear();
+    gastoData.fechaRegistro = gastoData.fecha;
+    gastoData.gestion = gestionGasto;
+    gastoData.montoGasto = gastoData.precio;
+    gastoData.tipoFondo = desembolsoData.tipoDesembolso;
+    gastoData.tipoGasto = gastoFond.denominacion;
+    gastoData.idTipoGasto = gastoFond._id;
+    gastoData.fuente = desemFuente.idFuente.ffof;
+    gastoData.idFuente = desemFuente.idFuente._id;
+    gastoData.partida = gastoFond.idPartida.codigo;
+    gastoData.idPartida = gastoFond.idPartida._id;
+    gastoData.catProgra = gastoData.catProgra;
+    gastoData.idCatProgra = catProSimple._id;
+    gastoData.nameCatProg = catProSimple.proyect_acti;
+    gastoData.solicitante = `${solicitante.username} ${solicitante.surnames} `;
+    gastoData.idSolicitante = gastoData.conductor;
+    gastoData.idDesemFondo = desemFuente._id;
+    gastoData.numDesembolso = desembolsoData.numDesembolso;
+    gastoData.idDesembolso = desembolsoData._id;
+    gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
+    gastoData.idVehiculo = gastoData.vehiculo;
+    gastoData.idUserRegister = user._id;
+    gastoData.estado = "EJECUTADO";
+    let result = await gasto.addGasto(gastoData);
     desembolsoData.gastos.push(result._id);
-      // Sumar el monto al montoasignado de desembolso
-      desembolsoData.montoGasto += +gastoData.precio;
-      desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+    // Sumar el monto al montoasignado de desembolso
+    desembolsoData.montoGasto += +gastoData.precio;
+    desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
 
-      // Actualizar el estado Desembolso según el nuevo monto asignado
-      if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
-        desembolsoData.estado = "EJECUTADO";
-      } else if (
-        desembolsoData.montoGasto > 0 &&
-        desembolsoData.montoGasto < desembolsoData.montoAsignado
-      ) {
-        desembolsoData.estado = "PARCIAL";
-      } else {
-        desembolsoData.estado = "SIN MOVIMIENTO";
-      }
-      await desembolsoData.save();
+    // Actualizar el estado Desembolso según el nuevo monto asignado
+    if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
+      desembolsoData.estado = "EJECUTADO";
+    } else if (
+      desembolsoData.montoGasto > 0 &&
+      desembolsoData.montoGasto < desembolsoData.montoAsignado
+    ) {
+      desembolsoData.estado = "PARCIAL";
+    } else {
+      desembolsoData.estado = "SIN MOVIMIENTO";
+    }
+    await desembolsoData.save();
 
-      // Sumar el monto al montoasignado de desembolso
-      desemFuente.montoGasto += +gastoData.precio;
-      desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+    // Sumar el monto al montoasignado de desembolso
+    desemFuente.montoGasto += +gastoData.precio;
+    desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
 
-      await desemFuente.save();
-    log ("gastoData3", result);
-   response.status(201).json({ serverResponse: result });
+    await desemFuente.save();
+    response.status(201).json({ serverResponse: result });
   }
   public async getGastos(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();
     let resp = await gasto.readGasto();
     response.status(200).json(resp);
+  }
+  public async queryGastos(request: Request, response: Response) {
+    const gasto: BussGasto = new BussGasto();
+    const filter: any = {};
+    const params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    // Filtro por fechas
+    if (params.deFecha || params.alFecha) {
+      filter.fechaRegistro = {};
+      if (params.deFecha) filter.fechaRegistro.$gte = new Date(params.deFecha);
+      if (params.alFecha) filter.fechaRegistro.$lte = new Date(params.alFecha);
+    }
+
+    // // Filtro por montos
+    // if (params.deMonto || params.AMonto) {
+    //   filter.montoAsignado = {};
+    //   if (params.deMonto) filter.montoAsignado.$gte = params.deMonto;
+    //   if (params.AMonto) filter.montoAsignado.$lte = params.AMonto;
+    // }
+
+    // Filtro por estado
+    if (params.estado) {
+      filter.estado = params.estado;
+    } else {
+      filter.estado = { $ne: "FINALIZADO" };
+    }
+    // Filtro por si esta cerrado
+    if (params.isReposicion) {
+      filter.isReposicion = params.isReposicion;
+    }
+    // Filtro por gestion
+    if (params.gestion) {
+      filter.gestion = params.gestion;
+    }
+    // Filtro por tipo de fondo
+    if (params.tipoFondo) {
+      filter.tipoFondo = params.tipoFondo;
+    }
+    // Filtro por tipo de gasto
+    if (params.tipoGasto) {
+      filter.tipoGasto = params.tipoGasto;
+    }
+    // Filtro por fuente
+    if (params.fuente) {
+      filter.fuente = params.fuente;
+    }
+    // Filtro por partida
+    if (params.partida) {
+      filter.partida = params.partida;
+    }
+    // Filtro por categoria de programa
+    if (params.catProgra) {
+      filter.catProgra = params.catProgra;
+    }
+    // Filtro por solicitante
+    if (params.solicitante) {
+      filter.solicitante = new RegExp(params.solicitante, "i");
+    }
+    // Filtro por numero de desembolso
+    if (params.numDesembolso) {
+      filter.numDesembolso = new RegExp(params.numDesembolso, "i");
+    }
+    log(filter);
+    order["numDesembolso"] = -1; // Ordenar por número de desembolso descendente
+    order["_id"] = -1; // Ordenar por ID descendente por defecto
+    let repres = await gasto.readGasto(filter, skip, limit, order);
+    response.status(200).json(repres);
   }
   public async getGasto(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();

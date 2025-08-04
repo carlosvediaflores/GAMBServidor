@@ -1,7 +1,11 @@
 import valeModel, { IVale } from "../models/vale";
-import { match } from "assert";
 import PrinterService from "../../../printer";
-import { getReportsLubricantes, printDetalleFactura, printVale, printVale2 } from "../../../reports/almacenes";
+import {
+  getReportsLubricantes,
+  printDetalleFactura,
+  printVale,
+  printVale2,
+} from "../../../reports/almacenes";
 import { log } from "console";
 class BussVale {
   constructor(
@@ -27,7 +31,20 @@ class BussVale {
         .findOne({ _id: params1 })
         .populate("encargadoControl", "_id ci email username surnames roles")
         .populate("idFacturas")
-        .populate('idGasto')
+        .populate({
+          path: "idGasto",
+          model: "alm_gasto",
+          populate: [
+            {
+              path: "idDesembolso",
+              model: "alm_desembolso",
+            },
+            {
+              path: "idDesemFondo",
+              model: "alm_desemFuente",
+            },
+          ],
+        })
         .populate({
           path: "conductor",
           model: "User",
@@ -80,7 +97,7 @@ class BussVale {
         .limit(limit)
         .sort(order)
         .populate("idFacturas")
-        .populate('idGasto')
+        .populate("idGasto")
         .populate("encargadoControl", "_id ci email username surnames roles")
         .populate({
           path: "conductor",
@@ -130,7 +147,7 @@ class BussVale {
       let listVale: Array<IVale> = await valeModel
         .find()
         .populate("id_programa")
-        .populate('idGasto');
+        .populate("idGasto");
       return listVale;
     }
   }
@@ -243,11 +260,12 @@ class BussVale {
       .populate("idProducto")
       .populate("idFacturas");
     let docDefinition;
-   
-      docDefinition = printDetalleFactura(vale, user); // Usa printVale2 si la condición se cumple
-   
+
+    docDefinition = printDetalleFactura(vale, user); // Usa printVale2 si la condición se cumple
+
     const doc = this.printerService.createPdf(docDefinition);
     return doc;
   }
 }
 export default BussVale;
+

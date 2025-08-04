@@ -483,6 +483,9 @@ class Routes {
       app.route(`${this.routeparent}/printDesembolso/:id`)
     .get(jsonwebtokenSecurity, this.routesController.printDesemFuente);
 
+    app.route(`${this.routeparent}/printDesemGasto/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printDetailDesemGasto);
+
 
     // //-------desemFuente-------//
     app
@@ -510,6 +513,10 @@ class Routes {
     app
       .route(`${this.routeparent}/gastos`)
       .get(this.routesController.getGastos);
+
+      app
+      .route(`${this.routeparent}/queryGastos`)
+      .get(this.routesController.queryGastos);
     app
       .route(`${this.routeparent}/gasto/:id`)
       .get(this.routesController.getGasto);

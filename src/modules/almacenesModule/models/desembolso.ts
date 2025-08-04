@@ -32,7 +32,7 @@ const desembolsoSchema: Schema = new Schema(
     isClosed:{type:Boolean, default:false},
     estado: { type: String,  default: "SIN MOVIMIENTO" },
     idFuentes: [{ type: Schema.Types.ObjectId, ref: "alm_desemFuente", default:[]}],
-    gastos: [{ type:Schema.Types.ObjectId, ref: "alm_vale", default: [] }],
+    gastos: [{ type:Schema.Types.ObjectId, ref: "alm_gasto", default: [] }],
     idUserRegister:{type:Schema.Types.ObjectId, ref: "User"},
   },
   {

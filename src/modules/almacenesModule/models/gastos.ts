@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document, Number, Types } from "mongoose";
+import proveedores from "./proveedores";
+import facturas from "./facturas";
 export interface Igastos extends Document {
   fechaRegistro?: string;
   gestion: number;
@@ -28,6 +30,10 @@ export interface Igastos extends Document {
   idTipoDesembolso: string;
   nameCatProg: string;
   isReposicion: boolean;
+  idVehiculo?: string;
+  descripcion?: string;
+  proveedor?: string;
+  facturas?: string[];
 }
 const gastoSchema: Schema = new Schema(
   {
@@ -51,15 +57,15 @@ const gastoSchema: Schema = new Schema(
     idDesemFondo: { type: Schema.Types.ObjectId, ref: "alm_desemFuente" },
     idDesembolso: { type: Schema.Types.ObjectId, ref: "alm_desembolso" },
     idTipoGasto: { type: Schema.Types.ObjectId, ref: "alm_gastoFondo" },
-    idTipoDesembolso: {
-      type: Schema.Types.ObjectId,
-      ref: "alm_tipoDesembolso",
-    },
+    idTipoDesembolso: { type: Schema.Types.ObjectId, ref: "alm_tipoDesembolso" },
     idCombustible: { type: Schema.Types.ObjectId, ref: "alm_vale" },
     idEnergiaElectrica: { type: Schema.Types.ObjectId, ref: "alm_vale" },
     idViaticos: { type: Schema.Types.ObjectId, ref: "alm_vale" },
     idVehiculo: { type: Schema.Types.ObjectId, ref: "alm_vehiculos" },
     idUserRegister: { type: Schema.Types.ObjectId, ref: "User" },
+    descripcion: { type: String },
+    proveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
+    facturas: [{ type: Schema.Types.ObjectId, ref: "alm_facturas" }],
   },
   {
     timestamps: true,

@@ -2340,7 +2340,9 @@ class RoutesController {
     var Egreso: BussEgreso = new BussEgreso();
     var salida: BussSalida = new BussSalida();
     const desembolso = new BussDesembolso();
+    const fuente: BussFuente = new BussFuente();
     const desembolsoFuente = new BussDesemFuente();
+    const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
     const gastoFondo = new BussGastoFondo();
     const gasto = new BussGasto();
     const categoria = new BussSegPoa();
@@ -2427,30 +2429,32 @@ class RoutesController {
     const desemFuente: any = await desembolsoFuente.readDesemFuente(
       valeData.idDesemFuente
     );
+    const fuenteData = await fuente.readFuente(valeData.idFuente);
     const gastoFond = await gastoFondo.readGastoFondo(valeData.idGastoFondo);
     const product: any = await Articulo.readArticulo(valeData.idProducto);
     const catPro: any = await categoria.searchSegPoa(valeData.catProgra);
+    let tipoDes = await tipoDesem.readTipoDesem(valeData.idTipoDesembolso);
     const catProSimple = catPro[0];
 
     // Validar que el total pagado no supere el Monto total
-    if (valeData.idCompra != "") {
-      const numPrecio = +valeData.precio;
-      const sumMonto = numPrecio + desemFuente.montoGasto;
+    // if (valeData.idCompra != "") {
+    //   const numPrecio = +valeData.precio;
+    //   const sumMonto = numPrecio + desemFuente.montoGasto;
 
-      if (sumMonto > desemFuente.montoTotal) {
-        response.status(300).json({
-          serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
-           Saldo disponible es de : ${
-             desemFuente.montoTotal - desemFuente.montoGasto
-           } Bs., 
-           Intentas pagar: ${valeData.precio} Bs.`,
-        });
-        return;
-      }
-    }
+    //   if (sumMonto > desemFuente.montoTotal) {
+    //     response.status(300).json({
+    //       serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
+    //        Saldo disponible es de : ${
+    //          desemFuente.montoTotal - desemFuente.montoGasto
+    //        } Bs., 
+    //        Intentas pagar: ${valeData.precio} Bs.`,
+    //     });
+    //     return;
+    //   }
+    // }
 
     let result = await vale.addVale(valeData);
-    console.log("result", result);
+    console.log("valeData", valeData);
     const resultData: any = await vale.readVale(result._id);
     const resultDataSimple = resultData[0];
     log("resultData", resultData);
@@ -2469,11 +2473,11 @@ class RoutesController {
       gastoData.fechaRegistro = result.fecha;
       gastoData.gestion = gestionGasto;
       gastoData.montoGasto = result.precio;
-      gastoData.tipoFondo = desembolsoData.tipoDesembolso;
+      gastoData.tipoFondo = tipoDes.denominacion;
       gastoData.tipoGasto = gastoFond.denominacion;
       gastoData.idTipoGasto = gastoFond._id;
-      gastoData.fuente = desemFuente.idFuente.ffof;
-      gastoData.idFuente = desemFuente.idFuente._id;
+      gastoData.fuente = fuenteData.ffof;
+      gastoData.idFuente = fuenteData._id;
       gastoData.partida = product.idPartida.codigo;
       gastoData.idPartida = product.idPartida._id;
       gastoData.catProgra = result.catProgra;
@@ -2484,10 +2488,10 @@ class RoutesController {
         resultDataSimple.conductor._id ??
         AutorizacionData.unidadSolicitante.user._id;
       gastoData.idDesemFondo = desemFuente._id;
-      gastoData.numDesembolso = desembolsoData.numDesembolso;
-      gastoData.idDesembolso = desembolsoData._id;
+      // gastoData.numDesembolso = desembolsoData.numDesembolso;
+      // gastoData.idDesembolso = desembolsoData._id;
       gastoData.idCombustible = result._id;
-      gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
+      gastoData.idTipoDesembolso = tipoDes._id;
       gastoData.idVehiculo = resultDataSimple.vehiculo._id;
       gastoData.idUserRegister = user._id;
 
@@ -2497,29 +2501,29 @@ class RoutesController {
 
       console.log("result", resultGasto);
       // Agregar el ID del nuevo vale al array gastos
-      desembolsoData.gastos.push(resultGasto._id);
+      // desembolsoData.gastos.push(resultGasto._id);
+      // // Sumar el monto al montoasignado de desembolso
+      // desembolsoData.montoGasto += +valeData.precio;
+      // desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+
+      // // Actualizar el estado Desembolso según el nuevo monto asignado
+      // if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
+      //   desembolsoData.estado = "EJECUTADO";
+      // } else if (
+      //   desembolsoData.montoGasto > 0 &&
+      //   desembolsoData.montoGasto < desembolsoData.montoAsignado
+      // ) {
+      //   desembolsoData.estado = "PARCIAL";
+      // } else {
+      //   desembolsoData.estado = "SIN MOVIMIENTO";
+      // }
+      // await desembolsoData.save();
+
       // Sumar el monto al montoasignado de desembolso
-      desembolsoData.montoGasto += +valeData.precio;
-      desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+      // desemFuente.montoGasto += +valeData.precio;
+      // desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
 
-      // Actualizar el estado Desembolso según el nuevo monto asignado
-      if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
-        desembolsoData.estado = "EJECUTADO";
-      } else if (
-        desembolsoData.montoGasto > 0 &&
-        desembolsoData.montoGasto < desembolsoData.montoAsignado
-      ) {
-        desembolsoData.estado = "PARCIAL";
-      } else {
-        desembolsoData.estado = "SIN MOVIMIENTO";
-      }
-      await desembolsoData.save();
-
-      // Sumar el monto al montoasignado de desembolso
-      desemFuente.montoGasto += +valeData.precio;
-      desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
-
-      await desemFuente.save();
+      // await desemFuente.save();
     }
 
     paramsAut.numeroVale = result.numeroVale;

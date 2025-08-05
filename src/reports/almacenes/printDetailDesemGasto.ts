@@ -142,7 +142,7 @@ export const printDetailDesemGasto = (
         columns: [
           logoGamb,
           {
-            text: `DETALLE DE GASTO DE ${values.numDesembolso}`,
+            text: `REPORTE DETALLADO DEL ${values.numDesembolso}`,
             alignment: "center",
             margin: [0, 30, 0, 0],
             style: {
@@ -285,13 +285,13 @@ export const printDetailDesemGasto = (
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
           headerRows: 1,
-          widths: [18, 40,  70, 70, 40, 40],
+          widths: [18, 30, 255, 55, 42, 40, 30],
 
           body: [
             [
               { text: "Nº", style: "tableHeader" },
               { text: "FF-OF", style: "tableHeader" },
-              // { text: "Descripción", style: "tableHeader" },
+              { text: "Descripción", style: "tableHeader" },
               { text: "Desembolso", style: "tableHeader" },
               { text: "Ejecutado", style: "tableHeader" },
               { text: "Saldo", style: "tableHeader" },
@@ -304,12 +304,12 @@ export const printDetailDesemGasto = (
                 style: "tableBody",
                 alignment: "center",
               },
-              // {
-              //   text: desemFuente.idFuente.denominacion,
-              //   style: "tableBody",
-              //   alignment: "center",
-              // },
-
+              {
+                text: desemFuente.idFuente.denominacion,
+                style: "tableBody2",
+                alignment: "center",
+              },
+              
               {
                 text: CurrencyFormatter.formatCurrency(desemFuente.montoTotal),
                 style: "tableBody",
@@ -335,15 +335,16 @@ export const printDetailDesemGasto = (
                 alignment: "right",
               },
             ]),
-            ["", "", "",  "", "", ""],
-            ["", "", "",  "", "", ""],
+            ["", "", "", "", "", "", ""],
+            ["", "", "","", "", "", ""],
             [
               {
                 text: `Total`,
-                colSpan: 2,
+                colSpan: 3,
               },
 
               "",
+               "",
 
               {
                 text: `${CurrencyFormatter.formatCurrency(totalMonto)}`,
@@ -404,7 +405,7 @@ export const printDetailDesemGasto = (
               { text: "Ap. Prog.", style: "tableHeader2" },
               { text: "Descrip. Ap. Prog.", style: "tableHeader2" },
               { text: "FF-OF", style: "tableHeader2" },
-              { text: "Partida de gasto", style: "tableHeader2" },
+              { text: "Partida Gasto", style: "tableHeader2" },
               { text: "Descripción de partida", style: "tableHeader2" },
               { text: "Tipo de gasto", style: "tableHeader2" },
               { text: "Nº de Vale", style: "tableHeader2" },

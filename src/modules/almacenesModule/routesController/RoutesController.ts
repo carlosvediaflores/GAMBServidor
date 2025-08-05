@@ -3364,9 +3364,7 @@ class RoutesController {
     // Filtro por estado
     if (params.estado) {
       filter.estado = params.estado;
-    } else {
-      filter.estado = { $ne: "EJECUTADO" };
-    }
+    } 
     // Filtro por si esta cerrado
     if (params.isClosed) {
       filter.isClosed = params.isClosed;
@@ -3374,6 +3372,9 @@ class RoutesController {
     // Filtro por gestion
     if (params.gestion) {
       filter.gestion = params.gestion;
+    }
+    if (params.idTipoDesembolso) {
+      filter.idTipoDesembolso = params.idTipoDesembolso;
     }
     log(filter);
     let repres = await desembolso.readDesembolso(filter, skip, limit, order);

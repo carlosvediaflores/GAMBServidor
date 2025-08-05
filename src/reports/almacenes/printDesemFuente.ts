@@ -129,7 +129,7 @@ export const printDesemFuente = (
         columns: [
           logoGamb,
           {
-            text: `DETALLE DE DESEMBOLSO`,
+            text: `COMPROBANTE DE DESEMBOLSO`,
             alignment: "center",
             margin: [0, 30, 0, 0],
             style: {

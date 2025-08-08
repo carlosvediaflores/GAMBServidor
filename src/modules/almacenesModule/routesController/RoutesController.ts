@@ -2466,7 +2466,7 @@ class RoutesController {
       AutorizacionData.unidadSolicitante.user.surnames
     }`;
 
-    if (result.precio != null) {
+    if (result.precio != null && result.precio > 0) {
       const fechaGasto = new Date(valeData.fecha);
       const gestionGasto = fechaGasto.getFullYear();
 

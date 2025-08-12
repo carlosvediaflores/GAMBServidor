@@ -73,7 +73,11 @@ const styles: StyleDictionary = {
     //color: 'black',
   },
 };
-export const printVale = (options: any, user: any): TDocumentDefinitions => {
+export const printVale = (
+  options: any,
+  user: any,
+  catPro: any
+): TDocumentDefinitions => {
   const values = options;
   let nombreSolicitado =
     values.conductor.username + " " + values.conductor.surnames;
@@ -83,8 +87,10 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
   let numAuth = values.autorizacion
     ? values.autorizacion.numeroAutorizacion
     : "";
-    let titulo = `COMBUSTIBLE`;
-    let titulo2 = `FONDO \n ROTATORIO`;
+  let titulo = `COMBUSTIBLE`;
+  let titulo2 = `FONDO \n ROTATORIO`;
+  let subTitulo = `ESTACIÓN DE SERVICIO`;
+  let subTitulo2 = `RESP. FONDO ROTATORIO`;
   if (values.autorizacion) {
     nombreSolicitado =
       values.autorizacion.unidadSolicitante.user.username +
@@ -94,9 +100,11 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
     destino = values.autorizacion.destino;
     motivo = values.autorizacion.motivo;
   }
-  if(values.productos.length>0){
+  if (values.productos.length > 0) {
     titulo = `LUBRICANTES`;
     titulo2 = `\n LUBRICANTES`;
+    subTitulo = `TALLER MECÁNICO`;
+    subTitulo2 = `TALLER MECÁNICO`;
   }
   const currentDate: Content = {
     text: `Fecha: ${DateFormatter.getDDMMYYYY(new Date())}`,
@@ -129,7 +137,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
     pageSize: values.productos.length > 0 ? "LEGAL" : "LETTER",
     pageMargins: [30, 0, 30, 30],
     defaultStyle: {
-      fontSize: 10,
+      fontSize: 9,
     },
     content: [
       // Detalles del Vale
@@ -137,14 +145,25 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
         columns: [
           logoGamb,
           {
-            text: `SOLICITUD DE ${titulo}`,
-            alignment: "center",
-            margin: [0, 30, 0, 0],
-            style: {
-              bold: true,
-              fontSize: 15,
-              color: "#0e78d1",
-            },
+            stack: [
+              {
+                text: `SOLICITUD DE ${titulo}`,
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 15,
+                  color: "#0e78d1",
+                },
+              },
+              {
+                text: `"${subTitulo}"`,
+                alignment: "center",
+                fontSize: 12,
+                color: "#009ffe",
+                margin: [0, 0, 0, 0],
+              },
+            ],
           },
           sisal,
         ],
@@ -168,34 +187,48 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
       {
         layout: "noBorders",
         table: {
-          widths: ["auto", 132, "auto", 257],
+          widths: [95, 132, 60, 125, 48, 55],
           body: [
             [
               {
-                text: values.autorizacion ? "Nº AUTORIZACIÓN" : "",
-                fillColor: "#dbeffe",
+                text: values.autorizacion ? "AUTORIZACIÓN A.F.:" : "",
+                fillColor: "#e7f6de",
                 fontSize: 10,
                 bold: true,
                 // border: [false, false, false, false],
               },
               {
-                text: numAuth,
-                fillColor: "#dbeffe",
+                text: `${numAuth ? "Nº" : ""} ${numAuth}`,
+                // fillColor: "#e7f6de",
                 fontSize: 11,
                 // border: [false, false, false, false],
               },
               {
-                text: "Nº VALE",
-                fillColor: "#dbeffe",
-                alignment: "right",
+                text: "VALE:",
+                fillColor: "#e7f6de",
                 fontSize: 11,
                 bold: true,
+                alignment: "right",
                 // border: [false, false, false, false],
               },
               {
                 text: `Nº ${values.numeroVale}`,
-                fillColor: "#dbeffe",
+                // fillColor: "#e7f6de",
                 fontSize: 13,
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+              {
+                text: "FECHA:",
+                fillColor: "#e7f6de",
+                alignment: "right",
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
+                // fillColor: "#e7f6de",
                 bold: true,
                 //alignment: "center",
                 // border: [false, false, false, false],},
@@ -206,70 +239,80 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 text: "AP. PROGRAMÁTICA:",
-                fillColor: "#dbeffe",
+                fillColor: "#e7f6de",
                 bold: true,
               },
               {
                 text: values.catProgra,
-                fillColor: "white",
               },
+
               {
-                text: "FECHA:",
-                fillColor: "#dbeffe",
+                text: "DESCRIPCIÓN:",
+                fillColor: "#e7f6de",
                 bold: true,
               },
               {
-                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "SOLICITADO POR:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: nombreSolicitado,
-                fillColor: "white",
-              },
-              {
-                text: "CARGO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: cargo,
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "DESTINO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: destino,
-                fillColor: "white",
+                text: catPro ? catPro.proyect_acti : "N/A",
                 colSpan: 3,
               },
               {},
               {},
             ],
+            [
+              {
+                text: "SOLICITADO POR:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: nombreSolicitado,
+              },
+              {
+                text: "CARGO:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: cargo,
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                text: "DESTINO:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: destino,
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                text: "DOC. PARA:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: "ALMACENES",
+              },
+            ],
           ],
         },
       },
       {
-        layout: "borderBlue",
+        layout: "borderSuccess",
         table: {
           body: [
             [
               {
                 margin: [0, 0, 0, 0],
-                layout: "customLayout04", // 'lightHorizontalLines', // optional
+                layout: "customLayout05", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [15,180, 70, 120, 100],
+                  widths: [15, 180, 70, 120, 100],
                   body: [
                     [
                       {
@@ -301,13 +344,20 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
                       ? values.productos.map(
-                          (producto: {
-                            articulo: any;
-                            cantidadCompra: any;
-                            unidadMedida: string;
-                            precio: number;
-                          }, indice: number) => [
-                            { text: indice + 1, style: "tableBody", alignment: "center", },
+                          (
+                            producto: {
+                              articulo: any;
+                              cantidadCompra: any;
+                              unidadMedida: string;
+                              precio: number;
+                            },
+                            indice: number
+                          ) => [
+                            {
+                              text: indice + 1,
+                              style: "tableBody",
+                              alignment: "center",
+                            },
                             {
                               text: producto.articulo || "Sin Nombre",
 
@@ -338,7 +388,11 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                       : [
                           // Si no hay productos, mostrar idProducto si está disponible
                           [
-                            { text: 1, style: "tableBody", alignment: "center", },
+                            {
+                              text: 1,
+                              style: "tableBody",
+                              alignment: "center",
+                            },
                             {
                               text: values.idProducto?.nombre || "Sin Producto",
                               alignment: "center",
@@ -374,7 +428,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 margin: [0, 0, 0, 0],
-                layout: "customLayout01", // 'lightHorizontalLines', // optional
+                layout: "customLayout06", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
                   widths: [180, 60, 160, 100],
@@ -395,25 +449,25 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                         text: "Vehículo",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#e7f6de",
                       },
                       {
                         text: "Nº de Placa",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#e7f6de",
                       },
                       {
                         text: "Conductor",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#e7f6de",
                       },
                       {
                         text: "Nº de Licencia",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#e7f6de",
                       },
                     ],
                     [
@@ -453,7 +507,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 text: "MOTIVO DE SALIDA:",
-                fillColor: "#dbeffe",
+                fillColor: "#e7f6de",
                 bold: true,
               },
               {
@@ -468,7 +522,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
         },
       },
       {
-        margin: [10, values.productos.length > 0 ? 70:70, 0, 5],
+        margin: [10, values.productos.length > 0 ? 70 : 70, 0, 5],
         layout: "noBorders", // 'lightHorizontalLines', // optional
         table: {
           headerRows: 1,
@@ -549,9 +603,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
 
       headerSection({
         title: `AUTORIZACIÓN DE ENTREGA DE ${titulo2}`,
-        subTitle:
-          "En el presente documento se detalla la solicitud de combustible",
-        showLogo: true,
+        subTitle: `"${subTitulo}"`,
         showLogo2: true,
         //userActual: values.userActual.toUpperCase(),
       }),
@@ -574,34 +626,48 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
       {
         layout: "noBorders",
         table: {
-          widths: ["auto", 132, "auto", 257],
+          widths: [95, 132, 60, 100, 40, 90],
           body: [
             [
               {
-                text: values.autorizacion ? "Nº AUTORIZACIÓN" : "",
+                text: values.autorizacion ? "AUTORIZACIÓN A.F.:" : "",
                 fillColor: "#dbeffe",
                 fontSize: 10,
                 bold: true,
                 // border: [false, false, false, false],
               },
               {
-                text: numAuth,
-                fillColor: "#dbeffe",
+                text: `${numAuth ? "Nº" : ""} ${numAuth}`,
+                // fillColor: "#dbeffe",
                 fontSize: 11,
                 // border: [false, false, false, false],
               },
               {
-                text: "Nº VALE",
+                text: "VALE:",
                 fillColor: "#dbeffe",
-                alignment: "right",
                 fontSize: 11,
                 bold: true,
+                alignment: "right",
                 // border: [false, false, false, false],
               },
               {
                 text: `Nº ${values.numeroVale}`,
-                fillColor: "#dbeffe",
+                // fillColor: "#dbeffe",
                 fontSize: 13,
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+              {
+                text: "FECHA:",
+                fillColor: "#dbeffe",
+                alignment: "right",
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
+                // fillColor: "#dbeffe",
                 bold: true,
                 //alignment: "center",
                 // border: [false, false, false, false],},
@@ -617,17 +683,19 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               },
               {
                 text: values.catProgra,
-                fillColor: "white",
               },
+
               {
-                text: "FECHA:",
+                text: "DESCRIPCIÓN:",
                 fillColor: "#dbeffe",
                 bold: true,
               },
               {
-                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
-                fillColor: "white",
+                text: catPro ? catPro.proyect_acti : "N/A",
+                colSpan: 3,
               },
+              {},
+              {},
             ],
             [
               {
@@ -637,7 +705,6 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               },
               {
                 text: nombreSolicitado,
-                fillColor: "white",
               },
               {
                 text: "CARGO:",
@@ -646,8 +713,10 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               },
               {
                 text: cargo,
-                fillColor: "white",
+                colSpan: 3,
               },
+              {},
+              {},
             ],
             [
               {
@@ -657,11 +726,20 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               },
               {
                 text: destino,
-                fillColor: "white",
                 colSpan: 3,
               },
               {},
               {},
+              {
+                text: "DOC. PARA:",
+                fillColor: "#dbeffe",
+                bold: true,
+                fontSize: 7,
+              },
+              {
+                text: subTitulo2,
+                fontSize: 7,
+              },
             ],
           ],
         },
@@ -674,7 +752,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
               {
                 layout: "customLayout04", // 'lightHorizontalLines', // optional
                 table: {
-                  widths: [15,180, 70, 120, 100],
+                  widths: [15, 180, 70, 120, 100],
                   body: [
                     [
                       {
@@ -706,13 +784,20 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
                       ? values.productos.map(
-                          (producto: {
-                            articulo: any;
-                            cantidadCompra: string;
-                            unidadMedida: string;
-                            precio: number;
-                          },indice: number) => [
-                            { text: indice + 1, style: "tableBody", alignment: "center", },
+                          (
+                            producto: {
+                              articulo: any;
+                              cantidadCompra: string;
+                              unidadMedida: string;
+                              precio: number;
+                            },
+                            indice: number
+                          ) => [
+                            {
+                              text: indice + 1,
+                              style: "tableBody",
+                              alignment: "center",
+                            },
                             {
                               text: producto.articulo || "Sin Nombre",
 
@@ -743,7 +828,11 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
                       : [
                           // Si no hay productos, mostrar idProducto si está disponible
                           [
-                            { text: 1, style: "tableBody", alignment: "center", },
+                            {
+                              text: 1,
+                              style: "tableBody",
+                              alignment: "center",
+                            },
                             {
                               text: values.idProducto?.nombre || "Sin Producto",
                               alignment: "center",
@@ -873,7 +962,7 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
         },
       },
       {
-        margin: [20, values.productos.length > 0 ? 70:70, 0, 5],
+        margin: [20, values.productos.length > 0 ? 70 : 70, 0, 5],
         layout: "noBorders", // 'lightHorizontalLines', // optional
         table: {
           headerRows: 1,
@@ -882,7 +971,10 @@ export const printVale = (options: any, user: any): TDocumentDefinitions => {
           body: [
             [
               {
-                text: values.productos.length > 0 ? "Entregué Conforme" : "Entregué Conforme  \n (Resp. Fondo Rotatorio)",
+                text:
+                  values.productos.length > 0
+                    ? "Entregué Conforme"
+                    : "Entregué Conforme  \n (Resp. Fondo Rotatorio)",
                 style: "tableHeader",
                 alignment: "center",
               },

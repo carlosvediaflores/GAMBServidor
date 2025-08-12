@@ -50,7 +50,7 @@ export const headerSection = (options: HeaderOptions): Content => {
         margin: [0,0,0,0],
         style:{
             fontSize:12,
-            bold:true
+            color: "#009ffe", 
         },
         
     }: null;
@@ -67,7 +67,7 @@ export const headerSection = (options: HeaderOptions): Content => {
                 color: '#0e78d1',
             },
         },
-       // headerSubTitle,
+        headerSubTitle,
         ]
         /* text: title,
         style: {

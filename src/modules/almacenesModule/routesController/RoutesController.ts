@@ -2834,8 +2834,8 @@ class RoutesController {
 
     const gastoData = valeData.idGasto;
     const idGasto = gastoData._id;
-    const idDesembolso = gastoData.idDesembolso._id;
-    const idDesemFondo = gastoData.idDesemFondo._id;
+    // const idDesembolso = gastoData.idDesembolso._id;
+    // const idDesemFondo = gastoData.idDesemFondo._id;
 
     const montoFactura = resultFactura.montoFactura;
     const nuevoMontoGasto = montoFactura;
@@ -2857,20 +2857,20 @@ class RoutesController {
           estado: "EJECUTADO",
         });
 
-        const MontoGastoDes = gastoData.idDesembolso.montoGasto;
-        const nuevoMontoGastoDes =
-          MontoGastoDes - montoGastoActual + nuevoMontoGasto;
+        // const MontoGastoDes = gastoData.idDesembolso.montoGasto;
+        // const nuevoMontoGastoDes =
+        //   MontoGastoDes - montoGastoActual + nuevoMontoGasto;
 
-        await desembolso.updateDesembolso(idDesembolso, {
-          montoGasto: nuevoMontoGastoDes,
-        });
+        // await desembolso.updateDesembolso(idDesembolso, {
+        //   montoGasto: nuevoMontoGastoDes,
+        // });
 
-        const MontoGastoDesem = gastoData.idDesemFondo.montoGasto;
-        const nuevoMontoGastoDesem =
-          MontoGastoDesem - montoGastoActual + nuevoMontoGasto;
-        await desembolsoFuente.updateDesemFuente(idDesemFondo, {
-          montoGasto: nuevoMontoGastoDesem,
-        });
+        // const MontoGastoDesem = gastoData.idDesemFondo.montoGasto;
+        // const nuevoMontoGastoDesem =
+        //   MontoGastoDesem - montoGastoActual + nuevoMontoGasto;
+        // await desembolsoFuente.updateDesemFuente(idDesemFondo, {
+        //   montoGasto: nuevoMontoGastoDesem,
+        // });
       }
     } else if (gastoData.estado === "EJECUTADO") {
       // 3. Ya está EJECUTADO → solo sumar montoFactura a gasto, desembolso y desemFondo
@@ -2878,17 +2878,17 @@ class RoutesController {
       const nuevoMontoGastoAct = montoGasto + nuevoMontoGasto;
       await gasto.updateGasto(idGasto, { montoGasto: nuevoMontoGastoAct });
 
-      const montoGastoDes = gastoData.idDesembolso.montoGasto;
-      const nuevoMontoGastoActDes = montoGastoDes + nuevoMontoGasto;
-      await desembolso.updateDesembolso(idDesembolso, {
-        montoGasto: nuevoMontoGastoActDes,
-      });
+      // const montoGastoDes = gastoData.idDesembolso.montoGasto;
+      // const nuevoMontoGastoActDes = montoGastoDes + nuevoMontoGasto;
+      // await desembolso.updateDesembolso(idDesembolso, {
+      //   montoGasto: nuevoMontoGastoActDes,
+      // });
 
-      const montoGastoDesmF = gastoData.idDesemFondo.montoGasto;
-      const nuevoMontoGastoActDesmF = montoGastoDesmF + nuevoMontoGasto;
-      await desembolsoFuente.updateDesemFuente(idDesemFondo, {
-        montoGasto: nuevoMontoGastoActDesmF,
-      });
+      // const montoGastoDesmF = gastoData.idDesemFondo.montoGasto;
+      // const nuevoMontoGastoActDesmF = montoGastoDesmF + nuevoMontoGasto;
+      // await desembolsoFuente.updateDesemFuente(idDesemFondo, {
+      //   montoGasto: nuevoMontoGastoActDesmF,
+      // });
     }
 
     return response.status(200).json(valeData);
@@ -2959,9 +2959,13 @@ class RoutesController {
 
   public async printVale(request: Request, response: Response) {
     var vale: BussVale = new BussVale();
+    const categoria = new BussSegPoa();
     let id: string = request.params.id;
     let user: string = request.body.user;
-    const pdfDoc = await vale.printVale(id, user);
+    const valeData = await vale.readVale(id);
+    const catPro: any = await categoria.searchSegPoa(valeData.catProgra);
+     const catProSimple = catPro[0];
+    const pdfDoc = await vale.printVale(id, user, catProSimple);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Información del Vale";
     pdfDoc.pipe(response);

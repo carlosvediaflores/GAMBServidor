@@ -43,7 +43,6 @@ const sisal1: Content = {
   margin: [0, 30, 20, 0],
 };
 
-
 interface ReportOptions {
   values: any;
 }
@@ -89,8 +88,9 @@ const styles: StyleDictionary = {
     //color: 'black',
   },
 };
-export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
+export const printVale2 = (options: any, user: any, catPro: any): TDocumentDefinitions => {
   const values = options;
+  //log("printVale2 values", values);
   let nombreSolicitado =
     values.conductor.username + " " + values.conductor.surnames;
   let cargo = values.conductor.post;
@@ -99,8 +99,8 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
   let numAuth = values.autorizacion
     ? values.autorizacion.numeroAutorizacion
     : "";
-    let titulo = `COMBUSTIBLE`;
-    let titulo2 = `FONDO \n ROTATORIO`;
+  let titulo = `COMBUSTIBLE`;
+  let titulo2 = `FONDO \n ROTATORIO`;
   if (values.autorizacion) {
     nombreSolicitado =
       values.autorizacion.unidadSolicitante.user.username +
@@ -110,7 +110,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
     destino = values.autorizacion.destino;
     motivo = values.autorizacion.motivo;
   }
-  if(values.productos.length>0){
+  if (values.productos.length > 0) {
     titulo = `LUBRICANTES`;
     titulo2 = `LUBRICANTES`;
   }
@@ -142,10 +142,10 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
   };
   const docDefinition: TDocumentDefinitions = {
     styles: styles,
-    pageSize:  "LEGAL",
+    pageSize: "LEGAL",
     pageMargins: [30, 0, 30, 30],
     defaultStyle: {
-      fontSize: 9,
+      fontSize: 8,
     },
     content: [
       // Detalles del Vale
@@ -153,14 +153,23 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
         columns: [
           logoGamb1,
           {
-            text: `SOLICITUD DE COMBUSTIBLE`,
-            alignment: "center",
-            margin: [0, 30, 0, 0],
-            style: {
-              bold: true,
-              fontSize: 15,
-              color: "#0e78d1",
-            },
+            stack: [
+              {
+                text: "SOLICITUD DE COMBUSTIBLE",
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                bold: true,
+                fontSize: 15,
+                color: "#0e78d1",
+              },
+              {
+                text: `"CISTERNA MAESTRANZA"`,
+                alignment: "center",
+                fontSize: 12,
+                color: "#009ffe", 
+                margin: [0, 0, 0, 0],
+              },
+            ],
           },
           sisal1,
         ],
@@ -184,34 +193,48 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
       {
         layout: "noBorders",
         table: {
-          widths: ["auto", 132, "auto", 257],
+          widths: [95, 132, 55, 130, 48, 55],
           body: [
             [
               {
-                text: values.autorizacion ? "Nº AUTORIZACIÓN" : "",
-                fillColor: "#dbeffe",
+                text: values.autorizacion ? "AUTORIZACIÓN A.F.:" : "",
+                fillColor: "#e7f6de",
                 fontSize: 10,
                 bold: true,
                 // border: [false, false, false, false],
               },
               {
-                text: numAuth,
-                fillColor: "#dbeffe",
+                text: `Nº ${numAuth}`,
+                // fillColor: "#e7f6de",
                 fontSize: 11,
                 // border: [false, false, false, false],
               },
               {
-                text: "Nº VALE",
-                fillColor: "#dbeffe",
-                alignment: "right",
+                text: "VALE:",
+                fillColor: "#e7f6de",
                 fontSize: 11,
                 bold: true,
+                alignment: "right",
                 // border: [false, false, false, false],
               },
               {
                 text: `Nº ${values.numeroVale}`,
-                fillColor: "#dbeffe",
+                // fillColor: "#e7f6de",
                 fontSize: 13,
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+              {
+                text: "FECHA:",
+                fillColor: "#e7f6de",
+                alignment: "right",
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
+                // fillColor: "#e7f6de",
                 bold: true,
                 //alignment: "center",
                 // border: [false, false, false, false],},
@@ -222,68 +245,79 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 text: "AP. PROGRAMÁTICA:",
-                fillColor: "#dbeffe",
+                fillColor: "#e7f6de",
                 bold: true,
               },
               {
                 text: values.catProgra,
-                fillColor: "white",
               },
+
               {
-                text: "FECHA:",
-                fillColor: "#dbeffe",
+                text: "DESCRIPCIÓN:",
+                fillColor: "#e7f6de",
                 bold: true,
               },
               {
-                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "SOLICITADO POR:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: nombreSolicitado,
-                fillColor: "white",
-              },
-              {
-                text: "CARGO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: cargo,
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "DESTINO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: destino,
-                fillColor: "white",
+                text: catPro ? catPro.proyect_acti : "N/A",
                 colSpan: 3,
               },
               {},
               {},
             ],
+            [
+              {
+                text: "SOLICITADO POR:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: nombreSolicitado,
+              },
+              {
+                text: "CARGO:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: cargo,
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                text: "DESTINO:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: destino,
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                text: "DOC. PARA:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: "ALMACENES",
+       
+              },
+            ],
           ],
         },
       },
       {
-        layout: "borderBlue",
+        layout: "borderSuccess",
         table: {
           body: [
             [
               {
                 margin: [0, 0, 0, 0],
-                layout: "customLayout04", // 'lightHorizontalLines', // optional
+                layout: "customLayout05", // 'lightHorizontalLines', // optional
                 table: {
                   widths: [235, 120, 160],
                   body: [
@@ -303,7 +337,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                         style: "tableHeader",
                         alignment: "center",
                       },
-                     
                     ],
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
@@ -353,7 +386,426 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               }s`,
                               alignment: "center",
                             },
-                            
+                          ],
+                        ]),
+                  ],
+                },
+                border: [true, true, true, false],
+              },
+            ],
+            [
+              {
+                margin: [0, 0, 0, 0],
+                layout: "customLayout06", // 'lightHorizontalLines', // optional
+                table: {
+                  headerRows: 2,
+                  widths: [180, 60, 160, 100],
+                  body: [
+                    [
+                      {
+                        text: "DATOS DEL CONDUCTOR - VECHÍCULO",
+                        style: "tableHeader",
+                        alignment: "center",
+                        colSpan: 4,
+                      },
+                      {},
+                      {},
+                      {},
+                    ],
+                    [
+                      {
+                        text: "Vehículo",
+                        style: "tableHeader",
+                        alignment: "center",
+                        fillColor: "#e7f6de",
+                      },
+                      {
+                        text: "Nº de Placa",
+                        style: "tableHeader",
+                        alignment: "center",
+                        fillColor: "#e7f6de",
+                      },
+                      {
+                        text: "Conductor",
+                        style: "tableHeader",
+                        alignment: "center",
+                        fillColor: "#e7f6de",
+                      },
+                      {
+                        text: "Nº de Licencia",
+                        style: "tableHeader",
+                        alignment: "center",
+                        fillColor: "#e7f6de",
+                      },
+                    ],
+                    [
+                      {
+                        text: values.vehiculo.tipo,
+                        alignment: "center",
+                      },
+                      {
+                        text: values.vehiculo.placa,
+                        alignment: "center",
+                      },
+                      {
+                        text:
+                          values.conductor.username +
+                          " " +
+                          values.conductor.surnames,
+                        alignment: "center",
+                      },
+                      {
+                        text: `${values.conductor.ci} - Cat. ${values.conductor.categoriaLicencia}`,
+                        alignment: "center",
+                      },
+                    ],
+                  ],
+                },
+                border: [true, false, true, true],
+              },
+            ],
+          ],
+        },
+      },
+      {
+        layout: "noBorders",
+        table: {
+          widths: ["auto", 132, "auto", "*"],
+          body: [
+            [
+              {
+                text: "MOTIVO DE SALIDA:",
+                fillColor: "#e7f6de",
+                bold: true,
+              },
+              {
+                text: motivo,
+                fillColor: "white",
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+          ],
+        },
+      },
+      {
+        margin: [10, 50, 0, 5],
+        layout: "noBorders", // 'lightHorizontalLines', // optional
+        table: {
+          headerRows: 1,
+          widths: [120, 120, 140, 140],
+
+          body: [
+            [
+              {
+                text: "Solicitado por:",
+                style: "tableHeader",
+                alignment: "center",
+              },
+              {
+                text: "Responsable Almacen",
+                style: "tableHeader",
+                alignment: "center",
+              },
+              {
+                text: "Autorizado por:",
+                style: "tableHeader",
+                alignment: "center",
+              },
+              {
+                text: "Recibí Conforme (chofer)",
+                style: "tableHeader",
+                alignment: "center",
+              },
+            ],
+          ],
+        },
+      },
+      {
+        margin: [0, -5, 0, 0],
+        layout: "noBorders", // 'lightHorizontalLines', // optional
+        table: {
+          headerRows: 1,
+          widths: [120, 120, 140, 140],
+
+          body: [
+            [
+              {
+                text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
+                  new Date()
+                )}`,
+                style: "footer",
+                alignment: "left",
+                colSpan: 2,
+              },
+              {},
+              {
+                text: `Impreso por: ${capitalize(user.username)} ${capitalize(
+                  user.surnames
+                )}`,
+                style: "footer",
+                alignment: "right",
+                colSpan: 2,
+              },
+              {},
+            ],
+          ],
+        },
+      },
+      {
+        margin: [0, -5, 0, 0],
+        canvas: [
+          {
+            type: "line",
+            x1: 0,
+            y1: 5,
+            x2: 550,
+            y2: 5,
+            lineWidth: 1,
+            lineColor: "#3Ae546",
+          },
+        ],
+      },
+
+      // Detalles del Vale
+      {
+        columns: [
+          logoGamb,
+          {
+           stack: [
+              {
+                text: "SOLICITUD DE COMBUSTIBLE",
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                bold: true,
+                fontSize: 15,
+                color: "#0e78d1",
+              },
+              {
+                text: `"CISTERNA MAESTRANZA"`,
+                alignment: "center",
+                fontSize: 12,
+                color: "#009ffe", 
+                margin: [0, 0, 0, 0],
+              },
+            ],
+          },
+          sisal,
+        ],
+      },
+
+      // Horizontal Line
+      {
+        margin: [0, 0, 0, 3],
+        canvas: [
+          {
+            type: "line",
+            x1: 0,
+            y1: 5,
+            x2: 550,
+            y2: 5,
+            lineWidth: 1,
+            lineColor: "#3Ae546",
+          },
+        ],
+      },
+      {
+        layout: "noBorders",
+        table: {
+          widths: [95, 132, 55, 130, 48, 55],
+          body: [
+            [
+              {
+                text: values.autorizacion ? "AUTORIZACIÓN A.F.:" : "",
+                fillColor: "#dbeffe",
+                fontSize: 10,
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: `Nº ${numAuth}`,
+                // fillColor: "#dbeffe",
+                fontSize: 11,
+                // border: [false, false, false, false],
+              },
+              {
+                text: "VALE:",
+                fillColor: "#dbeffe",
+                fontSize: 11,
+                bold: true,
+                alignment: "right",
+                // border: [false, false, false, false],
+              },
+              {
+                text: `Nº ${values.numeroVale}`,
+                // fillColor: "#dbeffe",
+                fontSize: 13,
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+              {
+                text: "FECHA:",
+                fillColor: "#dbeffe",
+                alignment: "right",
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
+                // fillColor: "#dbeffe",
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+            ],
+
+            // Razón social
+            [
+              {
+                text: "AP. PROGRAMÁTICA:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: values.catProgra,
+              },
+
+              {
+                text: "DESCRIPCIÓN:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: catPro ? catPro.proyect_acti : "N/A",
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                text: "SOLICITADO POR:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: nombreSolicitado,
+              },
+              {
+                text: "CARGO:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: cargo,
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                text: "DESTINO:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: destino,
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                text: "DOC. PARA:",
+                fillColor: "#dbeffe",
+                bold: true,
+              },
+              {
+                text: "CONDUCTOR",       
+              },
+            ],
+          ],
+        },
+      },
+      {
+        layout: "borderBlue",
+        table: {
+          body: [
+            [
+              {
+                margin: [0, 0, 0, 0],
+                layout: "customLayout04", // 'lightHorizontalLines', // optional
+                table: {
+                  widths: [235, 120, 160],
+                  body: [
+                    [
+                      {
+                        text: "Producto",
+                        style: "tableHeader",
+                        alignment: "center",
+                      },
+                      {
+                        text: "Cantidad",
+                        style: "tableHeader",
+                        alignment: "center",
+                      },
+                      {
+                        text: "Unidad de Medida",
+                        style: "tableHeader",
+                        alignment: "center",
+                      },
+                    ],
+                    // Si existen productos, listarlos
+                    ...(values.productos.length > 0
+                      ? values.productos.map(
+                          (producto: {
+                            articulo: any;
+                            cantidadCompra: any;
+                            unidadMedida: string;
+                            precio: number;
+                          }) => [
+                            {
+                              text: producto.articulo || "Sin Nombre",
+
+                              fontSize: 7,
+                            },
+                            {
+                              text: producto.cantidadCompra || "0",
+                              alignment: "center",
+                              fontSize: 7,
+                            },
+                            {
+                              text: `${
+                                capitalize(producto.unidadMedida) || "N/A"
+                              }s`,
+                              alignment: "center",
+                              fontSize: 7,
+                            },
+                          ]
+                        )
+                      : [
+                          // Si no hay productos, mostrar idProducto si está disponible
+                          [
+                            {
+                              text: values.idProducto?.nombre || "Sin Producto",
+                              alignment: "center",
+                            },
+                            {
+                              text:
+                                CurrencyFormatter.formatCurrency(
+                                  values.cantidad
+                                ) || "0",
+                              alignment: "center",
+                            },
+                            {
+                              text: `${
+                                capitalize(values.idProducto?.unidadDeMedida) ||
+                                "N/A"
+                              }s`,
+                              alignment: "center",
+                            },
                           ],
                         ]),
                   ],
@@ -458,7 +910,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
         },
       },
       {
-        margin: [10,50, 0, 5],
+        margin: [10, 50, 0, 5],
         layout: "noBorders", // 'lightHorizontalLines', // optional
         table: {
           headerRows: 1,
@@ -535,402 +987,12 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
           },
         ],
       },
-
-         // Detalles del Vale
-         {
-          columns: [
-            logoGamb,
-            {
-              text: `SOLICITUD DE COMBUSTIBLE`,
-              alignment: "center",
-              margin: [0, 30, 0, 0],
-              style: {
-                bold: true,
-                fontSize: 15,
-                color: "#0e78d1",
-              },
-            },
-            sisal,
-          ],
-        },
-  
-        // Horizontal Line
-        {
-          margin: [0, 0, 0, 3],
-          canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 550,
-              y2: 5,
-              lineWidth: 1,
-              lineColor: "#3Ae546",
-            },
-          ],
-        },
-        {
-          layout: "noBorders",
-          table: {
-            widths: ["auto", 132, "auto", 257],
-            body: [
-              [
-                {
-                  text: values.autorizacion ? "Nº AUTORIZACIÓN" : "",
-                  fillColor: "#dbeffe",
-                  fontSize: 10,
-                  bold: true,
-                  // border: [false, false, false, false],
-                },
-                {
-                  text: numAuth,
-                  fillColor: "#dbeffe",
-                  fontSize: 11,
-                  // border: [false, false, false, false],
-                },
-                {
-                  text: "Nº VALE",
-                  fillColor: "#dbeffe",
-                  alignment: "right",
-                  fontSize: 11,
-                  bold: true,
-                  // border: [false, false, false, false],
-                },
-                {
-                  text: `Nº ${values.numeroVale}`,
-                  fillColor: "#dbeffe",
-                  fontSize: 13,
-                  bold: true,
-                  //alignment: "center",
-                  // border: [false, false, false, false],},
-                },
-              ],
-  
-              // Razón social
-              [
-                {
-                  text: "AP. PROGRAMÁTICA:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: values.catProgra,
-                  fillColor: "white",
-                },
-                {
-                  text: "FECHA:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: DateFormatterSimple.getDDMMYYYY(values.fecha),
-                  fillColor: "white",
-                },
-              ],
-              [
-                {
-                  text: "SOLICITADO POR:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: nombreSolicitado,
-                  fillColor: "white",
-                },
-                {
-                  text: "CARGO:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: cargo,
-                  fillColor: "white",
-                },
-              ],
-              [
-                {
-                  text: "DESTINO:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: destino,
-                  fillColor: "white",
-                  colSpan: 3,
-                },
-                {},
-                {},
-              ],
-            ],
-          },
-        },
-        {
-          layout: "borderBlue",
-          table: {
-            body: [
-              [
-                {
-                  margin: [0, 0, 0, 0],
-                  layout: "customLayout04", // 'lightHorizontalLines', // optional
-                  table: {
-                    widths: [235, 120, 160],
-                    body: [
-                      [
-                        {
-                          text: "Producto",
-                          style: "tableHeader",
-                          alignment: "center",
-                        },
-                        {
-                          text: "Cantidad",
-                          style: "tableHeader",
-                          alignment: "center",
-                        },
-                        {
-                          text: "Unidad de Medida",
-                          style: "tableHeader",
-                          alignment: "center",
-                        },
-                      
-                      ],
-                      // Si existen productos, listarlos
-                      ...(values.productos.length > 0
-                        ? values.productos.map(
-                            (producto: {
-                              articulo: any;
-                              cantidadCompra: any;
-                              unidadMedida: string;
-                              precio: number;
-                            }) => [
-                              {
-                                text: producto.articulo || "Sin Nombre",
-
-                                fontSize: 7,
-                              },
-                              {
-                                text: producto.cantidadCompra || "0",
-                                alignment: "center",
-                                fontSize: 7,
-                              },
-                              {
-                                text: `${
-                                  capitalize(producto.unidadMedida) || "N/A"
-                                }s`,
-                                alignment: "center",
-                                fontSize: 7,
-                              },
-                             
-                            ]
-                          )
-                        : [
-                            // Si no hay productos, mostrar idProducto si está disponible
-                            [
-                              {
-                                text: values.idProducto?.nombre || "Sin Producto",
-                                alignment: "center",
-                              },
-                              {
-                                text:
-                                  CurrencyFormatter.formatCurrency(
-                                    values.cantidad
-                                  ) || "0",
-                                alignment: "center",
-                              },
-                              {
-                                text: `${
-                                  capitalize(values.idProducto?.unidadDeMedida) ||
-                                  "N/A"
-                                }s`,
-                                alignment: "center",
-                              },
-                             
-                            ],
-                          ]),
-                    ],
-                  },
-                  border: [true, true, true, false],
-                },
-              ],
-              [
-                {
-                  margin: [0, 0, 0, 0],
-                  layout: "customLayout01", // 'lightHorizontalLines', // optional
-                  table: {
-                    headerRows: 2,
-                    widths: [180, 60, 160, 100],
-                    body: [
-                      [
-                        {
-                          text: "DATOS DEL CONDUCTOR - VECHÍCULO",
-                          style: "tableHeader",
-                          alignment: "center",
-                          colSpan: 4,
-                        },
-                        {},
-                        {},
-                        {},
-                      ],
-                      [
-                        {
-                          text: "Vehículo",
-                          style: "tableHeader",
-                          alignment: "center",
-                          fillColor: "#99cff5",
-                        },
-                        {
-                          text: "Nº de Placa",
-                          style: "tableHeader",
-                          alignment: "center",
-                          fillColor: "#99cff5",
-                        },
-                        {
-                          text: "Conductor",
-                          style: "tableHeader",
-                          alignment: "center",
-                          fillColor: "#99cff5",
-                        },
-                        {
-                          text: "Nº de Licencia",
-                          style: "tableHeader",
-                          alignment: "center",
-                          fillColor: "#99cff5",
-                        },
-                      ],
-                      [
-                        {
-                          text: values.vehiculo.tipo,
-                          alignment: "center",
-                        },
-                        {
-                          text: values.vehiculo.placa,
-                          alignment: "center",
-                        },
-                        {
-                          text:
-                            values.conductor.username +
-                            " " +
-                            values.conductor.surnames,
-                          alignment: "center",
-                        },
-                        {
-                          text: `${values.conductor.ci} - Cat. ${values.conductor.categoriaLicencia}`,
-                          alignment: "center",
-                        },
-                      ],
-                    ],
-                  },
-                  border: [true, false, true, true],
-                },
-              ],
-            ],
-          },
-        },
-        {
-          layout: "noBorders",
-          table: {
-            widths: ["auto", 132, "auto", "*"],
-            body: [
-              [
-                {
-                  text: "MOTIVO DE SALIDA:",
-                  fillColor: "#dbeffe",
-                  bold: true,
-                },
-                {
-                  text: motivo,
-                  fillColor: "white",
-                  colSpan: 3,
-                },
-                {},
-                {},
-              ],
-            ],
-          },
-        },
-        {
-          margin: [10, 50, 0, 5],
-          layout: "noBorders", // 'lightHorizontalLines', // optional
-          table: {
-            headerRows: 1,
-            widths: [120, 120, 140, 140],
-  
-            body: [
-              [
-                {
-                  text: "Solicitado por:",
-                  style: "tableHeader",
-                  alignment: "center",
-                },
-                {
-                  text: "Responsable Almacen",
-                  style: "tableHeader",
-                  alignment: "center",
-                },
-                {
-                  text: "Autorizado por:",
-                  style: "tableHeader",
-                  alignment: "center",
-                },
-                {
-                  text: "Recibí Conforme (chofer)",
-                  style: "tableHeader",
-                  alignment: "center",
-                },
-              ],
-            ],
-          },
-        },
-        {
-          margin: [0, -5, 0, 0],
-          layout: "noBorders", // 'lightHorizontalLines', // optional
-          table: {
-            headerRows: 1,
-            widths: [120, 120, 140, 140],
-  
-            body: [
-              [
-                {
-                  text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
-                    new Date()
-                  )}`,
-                  style: "footer",
-                  alignment: "left",
-                  colSpan: 2,
-                },
-                {},
-                {
-                  text: `Impreso por: ${capitalize(user.username)} ${capitalize(
-                    user.surnames
-                  )}`,
-                  style: "footer",
-                  alignment: "right",
-                  colSpan: 2,
-                },
-                {},
-              ],
-            ],
-          },
-        },
-        {
-          margin: [0, -5, 0, 0],
-          canvas: [
-            {
-              type: "line",
-              x1: 0,
-              y1: 5,
-              x2: 550,
-              y2: 5,
-              lineWidth: 1,
-              lineColor: "#3Ae546",
-            },
-          ],
-        },
       // Detalles del Vale
 
       headerSection({
         title: `ENTREGA DE COMBUSTIBLE`,
         subTitle:
-          "En el presente documento se detalla la solicitud de combustible",
+          `"CISTERNA MAESTRANZA"`,
         showLogo: true,
         showLogo2: true,
         //userActual: values.userActual.toUpperCase(),
@@ -954,34 +1016,48 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
       {
         layout: "noBorders",
         table: {
-          widths: ["auto", 132, "auto", 257],
+          widths: [95, 132, 55, 125, 45, 62],
           body: [
             [
               {
-                text: values.autorizacion ? "Nº AUTORIZACIÓN" : "",
-                fillColor: "#dbeffe",
+                text: values.autorizacion ? "AUTORIZACIÓN A.F.:" : "",
+                fillColor: "#fce7ce",
                 fontSize: 10,
                 bold: true,
                 // border: [false, false, false, false],
               },
               {
-                text: numAuth,
-                fillColor: "#dbeffe",
+                text: `Nº ${numAuth}`,
+                // fillColor: "#fce7ce",
                 fontSize: 11,
                 // border: [false, false, false, false],
               },
               {
-                text: "Nº VALE",
-                fillColor: "#dbeffe",
-                alignment: "right",
+                text: "VALE:",
+                fillColor: "#fce7ce",
                 fontSize: 11,
                 bold: true,
+                alignment: "right",
                 // border: [false, false, false, false],
               },
               {
                 text: `Nº ${values.numeroVale}`,
-                fillColor: "#dbeffe",
+                // fillColor: "#fce7ce",
                 fontSize: 13,
+                bold: true,
+                //alignment: "center",
+                // border: [false, false, false, false],},
+              },
+              {
+                text: "FECHA:",
+                fillColor: "#fce7ce",
+                alignment: "right",
+                bold: true,
+                // border: [false, false, false, false],
+              },
+              {
+                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
+                // fillColor: "#fce7ce",
                 bold: true,
                 //alignment: "center",
                 // border: [false, false, false, false],},
@@ -992,67 +1068,78 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 text: "AP. PROGRAMÁTICA:",
-                fillColor: "#dbeffe",
+                fillColor: "#fce7ce",
                 bold: true,
               },
               {
                 text: values.catProgra,
-                fillColor: "white",
               },
+
               {
-                text: "FECHA:",
-                fillColor: "#dbeffe",
+                text: "DESCRIPCIÓN:",
+                fillColor: "#fce7ce",
                 bold: true,
               },
               {
-                text: DateFormatterSimple.getDDMMYYYY(values.fecha),
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "SOLICITADO POR:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: nombreSolicitado,
-                fillColor: "white",
-              },
-              {
-                text: "CARGO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: cargo,
-                fillColor: "white",
-              },
-            ],
-            [
-              {
-                text: "DESTINO:",
-                fillColor: "#dbeffe",
-                bold: true,
-              },
-              {
-                text: destino,
-                fillColor: "white",
+                text: catPro ? catPro.proyect_acti : "N/A",
                 colSpan: 3,
               },
               {},
               {},
             ],
+            [
+              {
+                text: "SOLICITADO POR:",
+                fillColor: "#fce7ce",
+                bold: true,
+              },
+              {
+                text: nombreSolicitado,
+              },
+              {
+                text: "CARGO:",
+                fillColor: "#fce7ce",
+                bold: true,
+              },
+              {
+                text: cargo,
+                colSpan: 3,
+              },
+              {},
+              {},
+            ],
+            [
+              {
+                text: "DESTINO:",
+                fillColor: "#fce7ce",
+                bold: true,
+              },
+              {
+                text: destino,
+                colSpan: 3,
+              },
+              {},
+              {},
+              {
+                text: "DOC. PARA:",
+                fillColor: "#fce7ce",
+                bold: true,
+              },
+              {
+                text: "RESP. DE ENTREGA",
+                fontSize: 7,
+              },
+            ],
           ],
         },
       },
       {
-        layout: "borderBlue",
+        layout: "borderOrange",
         table: {
           body: [
             [
               {
-                layout: "customLayout04", // 'lightHorizontalLines', // optional
+                layout: "customLayout07", // 'lightHorizontalLines', // optional
                 table: {
                   widths: [235, 120, 160],
                   body: [
@@ -1072,7 +1159,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                         style: "tableHeader",
                         alignment: "center",
                       },
-                     
                     ],
                     // Si existen productos, listarlos
                     ...(values.productos.length > 0
@@ -1099,7 +1185,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               alignment: "center",
                               fontSize: 7,
                             },
-                          
                           ]
                         )
                       : [
@@ -1123,7 +1208,6 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                               }s`,
                               alignment: "center",
                             },
-                            
                           ],
                         ]),
                   ],
@@ -1134,7 +1218,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 margin: [0, 0, 0, 0],
-                layout: "customLayout01", // 'lightHorizontalLines', // optional
+                layout: "customLayout08", // 'lightHorizontalLines', // optional
                 table: {
                   headerRows: 2,
                   widths: [180, 60, 160, 100],
@@ -1155,25 +1239,25 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
                         text: "Vehículo",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#fce7ce",
                       },
                       {
                         text: "Nº de Placa",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#fce7ce",
                       },
                       {
                         text: "Conductor",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#fce7ce",
                       },
                       {
                         text: "Nº de Licencia",
                         style: "tableHeader",
                         alignment: "center",
-                        fillColor: "#99cff5",
+                        fillColor: "#fce7ce",
                       },
                     ],
                     [
@@ -1213,7 +1297,7 @@ export const printVale2 = (options: any, user: any): TDocumentDefinitions => {
             [
               {
                 text: "MOTIVO DE SALIDA:",
-                fillColor: "#dbeffe",
+                fillColor: "#fce7ce",
                 bold: true,
               },
               {

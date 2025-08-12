@@ -209,7 +209,7 @@ class BussVale {
     const doc = this.printerService.createPdf(docDefinition);
     return doc;
   }
-  public async printVale(id: string, user: any) {
+  public async printVale(id: string, user: any, catPro: any) {
     const vale: any = await valeModel
       .findOne({ _id: id })
       .populate("conductor")
@@ -231,9 +231,9 @@ class BussVale {
       .populate("idFacturas");
     let docDefinition;
     if (vale.idFacturas.length === 0 && vale.idCompra) {
-      docDefinition = printVale2(vale, user); // Usa printVale2 si la condición se cumple
+      docDefinition = printVale2(vale, user, catPro); // Usa printVale2 si la condición se cumple
     } else {
-      docDefinition = printVale(vale, user); // Usa printVale si no se cumple
+      docDefinition = printVale(vale, user, catPro); // Usa printVale si no se cumple
     }
     const doc = this.printerService.createPdf(docDefinition);
     return doc;

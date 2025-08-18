@@ -2621,7 +2621,7 @@ class RoutesController {
     const ingresoData: any = {};
     const salidaData: any = {};
     const egresoData: any = {};
-
+    log("resp", resp);
     if (resp.length < 1) {
       response
         .status(201)
@@ -2786,9 +2786,7 @@ class RoutesController {
     let params = request.body;
 
     let valeData: any = await Vale.readVale(id);
-    log("valeData", valeData);
-    let idProducto: string = valeData.idProducto._id;
-
+    let idProducto: string = valeData.idProducto._id.toString();
     // Conversión de litros si aplica
     if (idProducto === "642c3e7b3b1ac20013da2571") {
       params.cantidadFactura = params.montoFactura / 3.74;
@@ -2825,7 +2823,6 @@ class RoutesController {
     params.cantidadAdquirida =
       valeData.cantidadAdquirida + resultFactura.montoFactura;
     params.saldoDevolucion = valeData.precio - params.cantidadAdquirida;
-
     // Actualizar el vale con la nueva factura
     await Vale.updatePushFactura(id, { idFacturas: resultFactura._id });
     await Vale.updateVale(id, params);

@@ -3202,10 +3202,8 @@ class RoutesController {
     fuenteData.ffof = `${fuenteFinancData.codigo}-${orgFinancData.codigo}`;
     fuenteData.denominacion = `${fuenteFinancData.denominacion} - ${orgFinancData.denominacion}`;
     fuenteData.sigla = `${fuenteFinancData.sigla} - ${orgFinancData.sigla}`;
-    log("fuente", fuenteData);
 
     const result = await fuente.addFuente(fuenteData);
-    log("result fuente", result);
     response.status(201).json({ serverResponse: result });
   }
   public async getFuentes(request: Request, response: Response) {
@@ -3238,16 +3236,16 @@ class RoutesController {
   ): Promise<void> {
     try {
       const ordinales = [
-        "ma",
-        "ra",
-        "da",
-        "ra",
-        "ta",
-        "ta",
-        "ta",
-        "ma",
-        "va",
-        "na",
+        "mo",
+        "er",
+        "do",
+        "er",
+        "to",
+        "to",
+        "to",
+        "mo",
+        "vo",
+        "no",
       ];
 
       const desembolsoData = request.body;
@@ -3269,6 +3267,7 @@ class RoutesController {
 
       const tipoDesembolso = tipoDesembolsoData.denominacion;
       desembolsoData.tipoDesembolso = tipoDesembolso;
+
 
       // Buscar si ya existe el número para ese tipo y gestión
       const yaExiste = await desembolso.findByNumeroTipoGestion(
@@ -3303,6 +3302,11 @@ class RoutesController {
       }
       desembolsoData.idUserRegister = user._id;
       const result = await desembolso.addDesembolso(desembolsoData);
+      // ✅ Agregar la fuente y actualizar monto asignado
+      (tipoDesembolsoData as any).desembolsos.push(result._id);
+      await tipoDesembolsoData.save();
+      log("desembolsoData", result);
+      
       response.status(201).json({ serverResponse: result });
     } catch (error) {
       console.error("Error al crear el desembolso:", error);
@@ -3589,6 +3593,8 @@ class RoutesController {
     const gasto = new BussGasto();
     const categoria = new BussSegPoa();
     const solicitador = new BusinessUser();
+    const fuente: BussFuente = new BussFuente();
+    const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
     var gastoData = request.body;
     let user: any = request.body.user;
     const desembolsoData = await desembolso.readDesembolso(
@@ -3600,6 +3606,8 @@ class RoutesController {
     const gastoFond: any = await gastoFondo.readGastoFondo(
       gastoData.idGastoFondo
     );
+    const fuenteData = await fuente.readFuente(gastoData.idFuente);
+    let tipoDes = await tipoDesem.readTipoDesem(gastoData.idTipoDesembolso);
     const solicitante: any = await solicitador.readUsers(gastoData.conductor);
     const catPro: any = await categoria.searchSegPoa(gastoData.catProgra);
     const catProSimple = catPro[0];
@@ -3616,16 +3624,17 @@ class RoutesController {
       });
       return;
     }
+    log("gastoData", gastoData);
     const fechaGasto = new Date(gastoData.fecha);
     const gestionGasto = fechaGasto.getFullYear();
     gastoData.fechaRegistro = gastoData.fecha;
     gastoData.gestion = gestionGasto;
     gastoData.montoGasto = gastoData.precio;
-    gastoData.tipoFondo = desembolsoData.tipoDesembolso;
+    gastoData.tipoFondo =  tipoDes.denominacion;
     gastoData.tipoGasto = gastoFond.denominacion;
     gastoData.idTipoGasto = gastoFond._id;
-    gastoData.fuente = desemFuente.idFuente.ffof;
-    gastoData.idFuente = desemFuente.idFuente._id;
+    gastoData.fuente = fuenteData.ffof;
+    gastoData.idFuente = fuenteData._id;
     gastoData.partida = gastoFond.idPartida.codigo;
     gastoData.idPartida = gastoFond.idPartida._id;
     gastoData.catProgra = gastoData.catProgra;
@@ -3634,36 +3643,36 @@ class RoutesController {
     gastoData.solicitante = `${solicitante.username} ${solicitante.surnames} `;
     gastoData.idSolicitante = gastoData.conductor;
     gastoData.idDesemFondo = desemFuente._id;
-    gastoData.numDesembolso = desembolsoData.numDesembolso;
-    gastoData.idDesembolso = desembolsoData._id;
+    // gastoData.numDesembolso = desembolsoData.numDesembolso;
+    // gastoData.idDesembolso = desembolsoData._id;
     gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
     gastoData.idVehiculo = gastoData.vehiculo;
     gastoData.idUserRegister = user._id;
     gastoData.estado = "EJECUTADO";
     let result = await gasto.addGasto(gastoData);
-    desembolsoData.gastos.push(result._id);
+    // desembolsoData.gastos.push(result._id);
     // Sumar el monto al montoasignado de desembolso
-    desembolsoData.montoGasto += +gastoData.precio;
-    desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+    // desembolsoData.montoGasto += +gastoData.precio;
+    // desembolsoData.montoGasto = +desembolsoData.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
 
     // Actualizar el estado Desembolso según el nuevo monto asignado
-    if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
-      desembolsoData.estado = "EJECUTADO";
-    } else if (
-      desembolsoData.montoGasto > 0 &&
-      desembolsoData.montoGasto < desembolsoData.montoAsignado
-    ) {
-      desembolsoData.estado = "PARCIAL";
-    } else {
-      desembolsoData.estado = "SIN MOVIMIENTO";
-    }
-    await desembolsoData.save();
+    // if (desembolsoData.montoGasto === desembolsoData.montoAsignado) {
+    //   desembolsoData.estado = "EJECUTADO";
+    // } else if (
+    //   desembolsoData.montoGasto > 0 &&
+    //   desembolsoData.montoGasto < desembolsoData.montoAsignado
+    // ) {
+    //   desembolsoData.estado = "PARCIAL";
+    // } else {
+    //   desembolsoData.estado = "SIN MOVIMIENTO";
+    // }
+    // await desembolsoData.save();
 
     // Sumar el monto al montoasignado de desembolso
-    desemFuente.montoGasto += +gastoData.precio;
-    desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
+    // desemFuente.montoGasto += +gastoData.precio;
+    // desemFuente.montoGasto = +desemFuente.montoGasto.toFixed(2); // Asegurarse de que sea un número con dos decimales
 
-    await desemFuente.save();
+    // await desemFuente.save();
     response.status(201).json({ serverResponse: result });
   }
   public async getGastos(request: Request, response: Response) {
@@ -3736,7 +3745,7 @@ class RoutesController {
       filter.numDesembolso = new RegExp(params.numDesembolso, "i");
     }
     log(filter);
-    order["numDesembolso"] = -1; // Ordenar por número de desembolso descendente
+    order["fechaRegistro"] = -1; // Ordenar por fecha de registro descendente
     order["_id"] = -1; // Ordenar por ID descendente por defecto
     let repres = await gasto.readGasto(filter, skip, limit, order);
     response.status(200).json(repres);

@@ -494,6 +494,9 @@ class Routes {
     app
       .route(`${this.routeparent}/desemFuentes`)
       .get(this.routesController.getDesemFuentes);
+       app
+      .route(`${this.routeparent}/queryDesemFuente`)
+      .get(this.routesController.queryDesemFuente);
     app
       .route(`${this.routeparent}/desemFuente/:id`)
       .get(this.routesController.getDesemFuente);
@@ -521,7 +524,7 @@ class Routes {
       .route(`${this.routeparent}/gasto/:id`)
       .get(this.routesController.getGasto);
     app
-      .route(`${this.routeparent}/gasto/:id`)
+      .route(`${this.routeparent}/gasto`)
       .patch(this.routesController.updateGasto);
     app
       .route(`${this.routeparent}/gasto/:id`)
@@ -550,6 +553,23 @@ class Routes {
     app
       .route(`${this.routeparent}/fuenteFinanc/:id`)
       .get(this.routesController.getFuenteFinanciamiento);
+
+    //--------Descargo-------//
+    app
+      .route(`${this.routeparent}/descargo`)
+      .post(jsonwebtokenSecurity, this.routesController.createDescargo);
+    app
+      .route(`${this.routeparent}/descargos`)
+      .get(this.routesController.getDescargos);
+    app
+      .route(`${this.routeparent}/descargo/:id`)
+      .get(this.routesController.getDescargo);
+    app
+      .route(`${this.routeparent}/descargo/:id`)
+      .patch(this.routesController.updateDescargo);
+    app
+      .route(`${this.routeparent}/descargo/:id`)
+      .delete(this.routesController.removeDescargo);
 
   }
   

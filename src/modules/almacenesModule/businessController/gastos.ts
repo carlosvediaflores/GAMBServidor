@@ -27,6 +27,7 @@ class BussGasto {
         .populate("idCombustible")
         .populate("idPartida")
         .populate("idVehiculo")
+        .populate("idTipoDesembolso")
         .populate({
           path: "idFuentes",
           model: "alm_desemFuente",
@@ -42,6 +43,7 @@ class BussGasto {
         .populate("idCombustible")
         .populate("idPartida")
         .populate("idVehiculo")
+        .populate("idTipoDesembolso")
         .populate({
           path: "idFuentes",
           model: "alm_desemFuente",
@@ -59,6 +61,7 @@ class BussGasto {
         .populate("idCombustible")
         .populate("idPartida")
         .populate("idVehiculo")
+        .populate("idTipoDesembolso")
         .populate({
           path: "idFuentes",
           model: "alm_desemFuente",
@@ -90,6 +93,12 @@ class BussGasto {
   public async updateGasto(id: string, Gasto: any) {
     let result = await gastoModule.updateOne(
       { _id: id },
+      { $set: Gasto }
+    );
+    return result;
+  }
+    public async updateGastoMany( Gasto: any) {
+    let result = await gastoModule.updateMany(
       { $set: Gasto }
     );
     return result;

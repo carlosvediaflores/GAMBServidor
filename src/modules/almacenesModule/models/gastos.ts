@@ -57,7 +57,7 @@ const gastoSchema: Schema = new Schema(
     // idDesemFondo: { type: Schema.Types.ObjectId, ref: "alm_desemFuente" },
     // idDesembolso: { type: Schema.Types.ObjectId, ref: "alm_desembolso" },
     idTipoGasto: { type: Schema.Types.ObjectId, ref: "alm_gastoFondo" },
-    // idTipoDesembolso: { type: Schema.Types.ObjectId, ref: "alm_tipoDesembolso" },
+    idTipoDesembolso: { type: Schema.Types.ObjectId, ref: "alm_tipoDesembolso" },
     idCombustible: { type: Schema.Types.ObjectId, ref: "alm_vale" },
     idEnergiaElectrica: { type: Schema.Types.ObjectId, ref: "alm_vale" },
     idViaticos: { type: Schema.Types.ObjectId, ref: "alm_vale" },

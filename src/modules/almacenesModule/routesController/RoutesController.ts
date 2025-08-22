@@ -56,8 +56,12 @@ import BussGasto from "../businessController/gastos";
 import BussOrganismoFinanciador from "../businessController/organizacionFinanciador";
 import BussFuenteFinanciamiento from "../businessController/fuenteFinanciamiento";
 import BusinessUser from "../../../modules/usermodule/businessController/BusinessUser";
+import gastoModule from "../models/gastos";
+import desemFuente from "../models/desemFuente";
+import Bussdescargo from "../businessController/descargo";
+import mongoose from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
 
-const ObjectId = require("mongoose").Types.ObjectId;
 class RoutesController {
   //----------CATEGORIA------------//
   public async createCategoria(request: Request, response: Response) {
@@ -2443,10 +2447,10 @@ class RoutesController {
 
     //   if (sumMonto > desemFuente.montoTotal) {
     //     response.status(300).json({
-    //       serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
+    //       serverResponse: `El precio excede el total restante del monto asignado para este FF-OF.
     //        Saldo disponible es de : ${
     //          desemFuente.montoTotal - desemFuente.montoGasto
-    //        } Bs., 
+    //        } Bs.,
     //        Intentas pagar: ${valeData.precio} Bs.`,
     //     });
     //     return;
@@ -2961,7 +2965,7 @@ class RoutesController {
     let user: string = request.body.user;
     const valeData = await vale.readVale(id);
     const catPro: any = await categoria.searchSegPoa(valeData.catProgra);
-     const catProSimple = catPro[0];
+    const catProSimple = catPro[0];
     const pdfDoc = await vale.printVale(id, user, catProSimple);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Información del Vale";
@@ -3255,8 +3259,8 @@ class RoutesController {
 
       const { numero, idTipoDesembolso } = desembolsoData;
 
-      const tipoDesem = new BussTipoDesembols();
-      const desembolso = new BussDesembolso();
+      const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+      const desembolso: BussDesembolso = new BussDesembolso();
 
       const tipoDesembolsoData = await tipoDesem.readTipoDesem(
         idTipoDesembolso
@@ -3264,7 +3268,6 @@ class RoutesController {
 
       const tipoDesembolso = tipoDesembolsoData.denominacion;
       desembolsoData.tipoDesembolso = tipoDesembolso;
-
 
       // Buscar si ya existe el número para ese tipo y gestión
       const yaExiste = await desembolso.findByNumeroTipoGestion(
@@ -3301,9 +3304,12 @@ class RoutesController {
       const result = await desembolso.addDesembolso(desembolsoData);
       // ✅ Agregar la fuente y actualizar monto asignado
       (tipoDesembolsoData as any).desembolsos.push(result._id);
+      const monto = tipoDesembolsoData.montoAcumulado || 0;
+      const montoAnterior = result.montoTotal || 0;
+      tipoDesembolsoData.montoAcumulado = montoAnterior + monto;
       await tipoDesembolsoData.save();
       log("desembolsoData", result);
-      
+
       response.status(201).json({ serverResponse: result });
     } catch (error) {
       console.error("Error al crear el desembolso:", error);
@@ -3373,7 +3379,7 @@ class RoutesController {
     // Filtro por estado
     if (params.estado) {
       filter.estado = params.estado;
-    } 
+    }
     // Filtro por si esta cerrado
     if (params.isClosed) {
       filter.isClosed = params.isClosed;
@@ -3460,8 +3466,10 @@ class RoutesController {
     try {
       const desembolsoFuenteData = request.body;
       const user: any = request.body.user;
-      const desembolsoFuente = new BussDesemFuente();
-      const bussDesembolso = new BussDesembolso();
+      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+      const bussDesembolso: BussDesembolso = new BussDesembolso();
+      const fuente: BussFuente = new BussFuente();
+      let fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
 
       // 1. Obtener el desembolso original
       const desembolso = await bussDesembolso.readDesembolso(
@@ -3498,6 +3506,10 @@ class RoutesController {
         return;
       }
       desembolsoFuenteData.idUserRegister = user._id;
+      desembolsoFuenteData.gestion = new Date().getFullYear();
+      desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
+      desembolsoFuenteData.fuente = fuenteData.ffof;
+      desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
       const result = await desembolsoFuente.addDesemFuente(
         desembolsoFuenteData
       );
@@ -3535,6 +3547,257 @@ class RoutesController {
       });
     }
   }
+  public async queryDesemFuente(request: Request, response: Response) {
+    try {
+      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+      const params: any = request.query;
+
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.beneficiario)
+        filter.beneficiario = new mongoose.Types.ObjectId(params.beneficiario);
+      if (params.denominacionFuente)
+        filter.denominacionFuente = new RegExp(params.denominacionFuente, "i");
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit ? parseInt(params.limit, 10) : 20;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+
+      // 🔹 Listado de gastos
+      const desembolsoFuentes = await desembolsoFuente.readDesemFuente(
+        filter,
+        skip,
+        limit,
+        order
+      );
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await desemFuente.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente",
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por beneficiario
+
+      const resumenPorBeneficiario = await desemFuente.aggregate([
+        { $match: filter },
+
+        // 1) Agrupamos por beneficiario + fuente
+        {
+          $group: {
+            _id: {
+              beneficiario: "$beneficiario",
+              fuente: "$fuente",
+            },
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+
+        // 2) Agrupamos otra vez solo por beneficiario
+        {
+          $group: {
+            _id: "$_id.beneficiario",
+            fuentes: {
+              $push: {
+                _id: "$_id.fuente",
+                 denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+                totalMonto: "$totalMonto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalMonto: { $sum: "$totalMonto" },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+          },
+        },
+
+        // 3) Hacemos lookup a la colección de usuarios
+        {
+          $lookup: {
+            from: "users", // 👈 nombre de la colección de usuarios en tu DB
+            localField: "_id", // beneficiario _id
+            foreignField: "_id", // id en la colección users
+            as: "beneficiarioData",
+          },
+        },
+
+        // 4) Proyectamos los campos que necesitamos
+        {
+          $project: {
+            _id: 0,
+            beneficiario: {
+              $ifNull: [
+                { $arrayElemAt: ["$beneficiarioData.username", 0] },
+                "SIN BENEFICIARIO",
+              ],
+            },
+            surnames: { $arrayElemAt: ["$beneficiarioData.surnames", 0] },
+            fuentes: 1,
+            sumaTotalMonto: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+      ]);
+      // const resumenPorBeneficiario = await desemFuente.aggregate([
+      //   { $match: filter },
+
+      //   {
+      //     $group: {
+      //       _id: {
+      //         beneficiario: "$beneficiario",
+      //         surnames: "$surnames",
+      //         fuente: "$fuente",
+      //       },
+      //       denominacionFuente: { $first: "$denominacionFuente" }, // 👈 guardamos descripción
+      //       totalMonto: { $sum: "$montoTotal" },
+      //       totalGasto: { $sum: "$montoGasto" },
+      //       count: { $sum: 1 },
+      //     },
+      //   },
+
+      //   {
+      //     $group: {
+      //       _id: {
+      //         beneficiario: "$_id.beneficiario",
+      //         surnames: "$_id.surnames",
+      //       },
+      //       fuentes: {
+      //         $push: {
+      //           _id: "$_id.fuente",
+      //           denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+      //           totalMonto: "$totalMonto",
+      //           totalGasto: "$totalGasto",
+      //           count: "$count",
+      //         },
+      //       },
+      //       sumaTotalMonto: { $sum: "$totalMonto" },
+      //       sumaTotalGasto: { $sum: "$totalGasto" },
+      //       sumaTotalCount: { $sum: "$count" },
+      //     },
+      //   },
+
+      //   {
+      //     $project: {
+      //       _id: 0,
+      //       beneficiario: "$_id.beneficiario",
+      //       surnames: "$_id.surnames",
+      //       fuentes: 1,
+      //       sumaTotalMonto: 1,
+      //       sumaTotalGasto: 1,
+      //       sumaTotalCount: 1,
+      //     },
+      //   },
+      // ]);
+
+      // 🔹 Resumen por tipo fondo
+
+      const resumenPorTipoFondo = await desemFuente.aggregate([
+        { $match: filter },
+
+        {
+          $group: {
+            _id: {
+              tipoFondo: "$tipoFondo",
+              fuente: "$fuente",
+            },
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+
+        {
+          $group: {
+            _id: "$_id.tipoFondo",
+            fuentes: {
+              $push: {
+                _id: "$_id.fuente",
+                denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+                totalMonto: "$totalMonto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalMonto: { $sum: "$totalMonto" },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+          },
+        },
+
+        {
+          $project: {
+            _id: 0,
+            tipoFondo: "$_id",
+            fuentes: 1,
+            sumaTotalMonto: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+      ]);
+
+      // 🔹 Monto total de todos los Desembolsos Fuemnes
+      const montoTotalResult = await desemFuente.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+            montoTotal: { $sum: "$montoTotal" },
+          },
+        },
+      ]);
+
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+      const montoTotal =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotal : 0;
+
+      return response.status(200).json({
+        desembolsoFuentes,
+        resumenPorFuente,
+        resumenPorBeneficiario,
+        resumenPorTipoFondo,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+        montoTotal, // ✅ aquí ya lo tienes
+      });
+    } catch (error) {
+      console.error("❌ Error en queryGastos:", error);
+      return response.status(500).json({
+        message: "Error consultando gastos",
+        error,
+      });
+    }
+  }
+
   public async getDesemFuente(request: Request, response: Response) {
     try {
       const desembolsoFuente = new BussDesemFuente();
@@ -3582,7 +3845,6 @@ class RoutesController {
   }
 
   // gastos
-
   public async createGasto(request: Request, response: Response) {
     const desembolso = new BussDesembolso();
     const desembolsoFuente = new BussDesemFuente();
@@ -3627,7 +3889,7 @@ class RoutesController {
     gastoData.fechaRegistro = gastoData.fecha;
     gastoData.gestion = gestionGasto;
     gastoData.montoGasto = gastoData.precio;
-    gastoData.tipoFondo =  tipoDes.denominacion;
+    gastoData.tipoFondo = tipoDes.denominacion;
     gastoData.tipoGasto = gastoFond.denominacion;
     gastoData.idTipoGasto = gastoFond._id;
     gastoData.fuente = fuenteData.ffof;
@@ -3677,75 +3939,172 @@ class RoutesController {
     let resp = await gasto.readGasto();
     response.status(200).json(resp);
   }
+  // public async queryGastos(request: Request, response: Response) {
+  //   const gasto: BussGasto = new BussGasto();
+  //   const filter: any = {};
+  //   const params: any = request.query;
+  //   var limit = 0;
+  //   var skip = 0;
+  //   var aux: any = {};
+  //   var order: any = {};
+  //   // Filtro por fechas
+  //   if (params.deFecha || params.alFecha) {
+  //     filter.fechaRegistro = {};
+  //     if (params.deFecha) filter.fechaRegistro.$gte = new Date(params.deFecha);
+  //     if (params.alFecha) filter.fechaRegistro.$lte = new Date(params.alFecha);
+  //   }
+
+  //   // // Filtro por montos
+  //   // if (params.deMonto || params.AMonto) {
+  //   //   filter.montoAsignado = {};
+  //   //   if (params.deMonto) filter.montoAsignado.$gte = params.deMonto;
+  //   //   if (params.AMonto) filter.montoAsignado.$lte = params.AMonto;
+  //   // }
+
+  //   // Filtro por estado
+  //   if (params.estado) {
+  //     filter.estado = params.estado;
+  //   } else {
+  //     filter.estado = { $ne: "FINALIZADO" };
+  //   }
+  //   // Filtro por si esta cerrado
+  //   if (params.isReposicion) {
+  //     filter.isReposicion = params.isReposicion;
+  //   }
+  //   // Filtro por gestion
+  //   if (params.gestion) {
+  //     filter.gestion = params.gestion;
+  //   }
+  //   // Filtro por tipo de fondo
+  //   if (params.tipoFondo) {
+  //     filter.tipoFondo = params.tipoFondo;
+  //   }
+  //   // Filtro por tipo de gasto
+  //   if (params.tipoGasto) {
+  //     filter.tipoGasto = params.tipoGasto;
+  //   }
+  //   // Filtro por fuente
+  //   if (params.fuente) {
+  //     filter.fuente = params.fuente;
+  //   }
+  //   // Filtro por partida
+  //   if (params.partida) {
+  //     filter.partida = params.partida;
+  //   }
+  //   // Filtro por categoria de programa
+  //   if (params.catProgra) {
+  //     filter.catProgra = params.catProgra;
+  //   }
+  //   // Filtro por solicitante
+  //   if (params.solicitante) {
+  //     filter.solicitante = new RegExp(params.solicitante, "i");
+  //   }
+  //   // Filtro por numero de Descargo
+  //   if (params.numDescargo) {
+  //     filter.numDescargo = new RegExp(params.numDescargo, "i");
+  //   }
+  //   log(filter);
+  //   order["fechaRegistro"] = -1; // Ordenar por fecha de registro descendente
+  //   order["_id"] = -1; // Ordenar por ID descendente por defecto
+  //   let repres = await gasto.readGasto(filter, skip, limit, order);
+  //   response.status(200).json(repres);
+  // }
   public async queryGastos(request: Request, response: Response) {
-    const gasto: BussGasto = new BussGasto();
-    const filter: any = {};
-    const params: any = request.query;
-    var limit = 0;
-    var skip = 0;
-    var aux: any = {};
-    var order: any = {};
-    // Filtro por fechas
-    if (params.deFecha || params.alFecha) {
-      filter.fechaRegistro = {};
-      if (params.deFecha) filter.fechaRegistro.$gte = new Date(params.deFecha);
-      if (params.alFecha) filter.fechaRegistro.$lte = new Date(params.alFecha);
-    }
+    try {
+      const gasto: BussGasto = new BussGasto();
+      const params: any = request.query;
 
-    // // Filtro por montos
-    // if (params.deMonto || params.AMonto) {
-    //   filter.montoAsignado = {};
-    //   if (params.deMonto) filter.montoAsignado.$gte = params.deMonto;
-    //   if (params.AMonto) filter.montoAsignado.$lte = params.AMonto;
-    // }
+      // 🔹 Armamos el filtro
+      const filter: any = {};
 
-    // Filtro por estado
-    if (params.estado) {
-      filter.estado = params.estado;
-    } else {
-      filter.estado = { $ne: "FINALIZADO" };
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+
+      if (params.estado) {
+        filter.estado = params.estado;
+      } else {
+        filter.estado = { $ne: "FINALIZADO" };
+      }
+
+      if (params.isReposicion) filter.isReposicion = params.isReposicion;
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.partida) filter.partida = params.partida;
+      if (params.catProgra) filter.catProgra = params.catProgra;
+      if (params.solicitante)
+        filter.solicitante = new RegExp(params.solicitante, "i");
+      if (params.numDescargo)
+        filter.numDescargo = new RegExp(params.numDescargo, "i");
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit ? parseInt(params.limit, 10) : 20;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+
+      // 🔹 Listado de gastos
+      const gastos = await gasto.readGasto(filter, skip, limit, order);
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente",
+            id: { $first: "$idFuente" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por catProgra
+      const resumenPorCatProgra = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$catProgra",
+            nameCatProg: { $first: "$nameCatProg" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Monto total de todos los gastos
+      const montoTotalResult = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+          },
+        },
+      ]);
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+      return response.status(200).json({
+        gastos,
+        resumenPorFuente,
+        resumenPorCatProgra,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+      });
+    } catch (error) {
+      console.error("❌ Error en queryGastos:", error);
+      return response.status(500).json({
+        message: "Error consultando gastos",
+        error,
+      });
     }
-    // Filtro por si esta cerrado
-    if (params.isReposicion) {
-      filter.isReposicion = params.isReposicion;
-    }
-    // Filtro por gestion
-    if (params.gestion) {
-      filter.gestion = params.gestion;
-    }
-    // Filtro por tipo de fondo
-    if (params.tipoFondo) {
-      filter.tipoFondo = params.tipoFondo;
-    }
-    // Filtro por tipo de gasto
-    if (params.tipoGasto) {
-      filter.tipoGasto = params.tipoGasto;
-    }
-    // Filtro por fuente
-    if (params.fuente) {
-      filter.fuente = params.fuente;
-    }
-    // Filtro por partida
-    if (params.partida) {
-      filter.partida = params.partida;
-    }
-    // Filtro por categoria de programa
-    if (params.catProgra) {
-      filter.catProgra = params.catProgra;
-    }
-    // Filtro por solicitante
-    if (params.solicitante) {
-      filter.solicitante = new RegExp(params.solicitante, "i");
-    }
-    // Filtro por numero de desembolso
-    if (params.numDesembolso) {
-      filter.numDesembolso = new RegExp(params.numDesembolso, "i");
-    }
-    log(filter);
-    order["fechaRegistro"] = -1; // Ordenar por fecha de registro descendente
-    order["_id"] = -1; // Ordenar por ID descendente por defecto
-    let repres = await gasto.readGasto(filter, skip, limit, order);
-    response.status(200).json(repres);
   }
   public async getGasto(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();
@@ -3756,7 +4115,7 @@ class RoutesController {
     var gasto: BussGasto = new BussGasto();
     let id: string = request.params.id;
     var params = request.body;
-    var result = await gasto.updateGasto(id, params);
+    var result = await gasto.updateGastoMany( {idTipoDesembolso:"6866ab0ba7f78500a418421e"});
     response.status(200).json(result);
   }
   public async removeGasto(request: Request, response: Response) {
@@ -3803,5 +4162,145 @@ class RoutesController {
     let resp = await fuenteFinanc.readFuenteFinanc(request.params.id);
     response.status(200).json(resp);
   }
+
+  //-----------------Descargo---------------------//
+
+  public async createDescargo(
+    request: Request,
+    response: Response
+  ): Promise<void> {
+    try {
+      const ordinales = [
+        "mo",
+        "er",
+        "do",
+        "er",
+        "to",
+        "to",
+        "to",
+        "mo",
+        "vo",
+        "no",
+      ];
+
+      const descargoData = request.body;
+      const user: any = request.body.user;
+      
+      // Extraer el año de la fecha y asignarlo a 'gestion'
+      const fecha = new Date(descargoData.fechaDescargo);
+      const gestion = fecha.getFullYear();
+      
+      const { numero, idTipoDesembolso } = descargoData;
+      
+      const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+      const descargo: Bussdescargo = new Bussdescargo();
+      const desembolso: BussDesembolso = new BussDesembolso();
+      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+
+      const tipoDesembolsoData:any = await tipoDesem.readTipoDesem(
+        idTipoDesembolso
+      );
+      
+      const tipoDesembolso = tipoDesembolsoData.denominacion;
+      descargoData.tipoDesembolso = tipoDesembolso;
+      
+      // Buscar si ya existe el número para ese tipo y gestión
+      const yaExiste = await descargo.findByNumeroTipoGestion(
+        numero,
+        tipoDesembolso,
+        gestion
+      );
+
+      if (yaExiste) {
+        if (numero) {
+          // Si vino un número en el body, dar mensaje de error
+          response.status(409).json({
+            message: `Ya existe un descargo con número ${numero}, tipo ${tipoDesembolso} en gestión ${gestion}`,
+          });
+          return;
+        } else {
+          // Si no vino número, buscar el siguiente número disponible
+          const nuevoNumero = await descargo.getNextNumero(
+            tipoDesembolso,
+            gestion
+          );
+          descargoData.numero = nuevoNumero;
+        }
+      }
+      
+      if (descargoData.numero === 11 || descargoData.numero === 12) {
+        descargoData.numDescargo = `${descargoData.numero}mo Descargo`;
+      } else {
+        let num = descargoData.numero % 10;
+        let ordinal = ordinales[num];
+        descargoData.numDescargo = `${descargoData.numero}${ordinal} Descargo`;
+      }
+      descargoData.idUserRegister = user._id;   
+      descargoData.gestion = gestion;
+      const gastosData = descargoData.gastos
+
+      if (gastosData.length < 1) {
+      response
+        .status(201)
+        .json({ serverResponse: "Debe existir al menos un gasto registrado" });
+      return;
+    }
+      // log("descargoData", descargoData);
+      log("tipoDesembolsoData", tipoDesembolsoData);
+      log("tipoDesembolsoDataFuente", tipoDesembolsoData.desembolsos);
+
+
+     const result = await descargo.addDescargo(descargoData);
+    
+
+      
+      // // ✅ Agregar la fuente y actualizar monto asignado
+      // (tipoDesembolsoData as any).descargos.push(result._id);
+      // const monto = tipoDesembolsoData.montoEjecutado || 0;
+      // const montoAnterior = result.montoDescargo || 0;
+      // tipoDesembolsoData.montoEjecutado = montoAnterior + monto;
+      
+     for (let i = 0; i < gastosData.length; i++) {
+      let data: any = gastosData[i];
+      const tipoDesembolsoDataAc:any = await tipoDesem.readTipoDesem(idTipoDesembolso);
+      const desembolsoData = tipoDesembolsoDataAc.desembolsos;
+      
+     }
+      // await tipoDesembolsoData.save();
+
+      
+      response.status(201).json({ serverResponse: "result" });
+    } catch (error) {
+      console.error("Error al crear el descargo:", error);
+      response.status(500).json({
+        message: "Error interno del servidor al crear el descargo",
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  }
+  public async getDescargos(request: Request, response: Response) {
+    var descargo: Bussdescargo = new Bussdescargo();
+    let resp = await descargo.readDescargo();
+    response.status(200).json(resp);
+  }
+  public async getDescargo(request: Request, response: Response) {
+    var descargo: Bussdescargo = new Bussdescargo();
+    let resp = await descargo.readDescargo(request.params.id);
+    response.status(200).json(resp);
+  }
+  public async updateDescargo(request: Request, response: Response) {
+    var descargo: Bussdescargo = new Bussdescargo();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await descargo.updateDescargo(id, params);
+    response.status(200).json(result);
+  }
+  public async removeDescargo(request: Request, response: Response) {
+    var descargo: Bussdescargo = new Bussdescargo();
+    let id: string = request.params.id;
+    let result = await descargo.deleteDescargo(id);
+    response.status(200).json({ serverResponse: "Se elimino el descargo" });
+  }
+
 }
 export default RoutesController;

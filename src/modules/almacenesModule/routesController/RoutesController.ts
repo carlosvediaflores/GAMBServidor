@@ -4045,7 +4045,7 @@ class RoutesController {
 
       // 🔹 Orden y paginación
       const order: any = { fechaRegistro: -1, _id: -1 };
-      const limit = params.limit ? parseInt(params.limit, 10) : 20;
+      const limit = params.limit ;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
 
       // 🔹 Listado de gastos

@@ -9,7 +9,7 @@ const logo: Content = {
     margin:[0,20,-20,0],
 }
 const logoGamb: Content = {
-    image: 'src/assets/logogamb.png',
+    image: 'src/assets/logogamb1.png',
     width: 100,
     height:40,
     alignment: 'center',

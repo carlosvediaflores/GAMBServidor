@@ -1,5 +1,5 @@
 import PrinterService from "../../../printer";
-import { printDesemFuente } from "../../../reports/almacenes";
+import { printDescargoGasto, printDesemFuente } from "../../../reports/almacenes";
 import gastoModule, { Igastos } from "../models/gastos";
 class BussGasto {
   constructor(
@@ -143,5 +143,25 @@ class BussGasto {
       const doc = this.printerService.createPdf(docDefinition);
       return doc;
     }
+     public async printQueryGastos(data?: any) {
+        // const listGasto: any = await gastoModule
+        //   .find(filter)
+        //   .populate("idSolicitante")
+        //   .populate("idCombustible")
+        //   .populate("idPartida")
+        //   .populate("idVehiculo")
+        //   .populate("idTipoDesembolso")
+        //   .populate({
+        //     path: "idFuentes",
+        //     model: "alm_desemFuente",
+        //     populate: { path: "idFuente", model: "alm_fuente" },
+        //   })
+        //   .sort({ fecha: -1 });
+        // console.log("listGasto", data);
+
+        const docDefinition = printDescargoGasto(data);
+        const doc = this.printerService.createPdf(docDefinition);
+        return doc;
+      }
 }
 export default BussGasto;

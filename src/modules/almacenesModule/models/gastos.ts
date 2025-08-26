@@ -12,7 +12,7 @@ export interface Igastos extends Document {
   estado: string;
   catProgra: string;
   solicitante: string;
-  numDesembolso: string;
+  numDescargo: string;
   idSolicitante: string;
   idPartida: string;
   idFuente: string;
@@ -48,7 +48,7 @@ const gastoSchema: Schema = new Schema(
     catProgra: { type: String },
     nameCatProg: { type: String },
     solicitante: { type: String },
-    // numDesembolso: { type: String },
+    numDescargo: { type: String },
     isReposicion: { type: Boolean, default: false },
     idSolicitante: { type: Schema.Types.ObjectId, ref: "User" },
     idPartida: { type: Schema.Types.ObjectId, ref: "partidas" },

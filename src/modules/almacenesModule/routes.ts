@@ -529,6 +529,9 @@ class Routes {
     app
       .route(`${this.routeparent}/gasto/:id`)
       .delete(this.routesController.removeGasto);
+       app
+      .route(`${this.routeparent}/printQueryGastos`)
+      .get(jsonwebtokenSecurity, this.routesController.printQueryGastos);
 
        //Organismo Financiador
 
@@ -561,6 +564,9 @@ class Routes {
     app
       .route(`${this.routeparent}/descargos`)
       .get(this.routesController.getDescargos);
+       app
+      .route(`${this.routeparent}/queryDescargos`)
+      .get(this.routesController.queryDescargos);
     app
       .route(`${this.routeparent}/descargo/:id`)
       .get(this.routesController.getDescargo);
@@ -570,6 +576,9 @@ class Routes {
     app
       .route(`${this.routeparent}/descargo/:id`)
       .delete(this.routesController.removeDescargo);
+
+    app.route(`${this.routeparent}/printDescargo/:id`)
+    .get(jsonwebtokenSecurity, this.routesController.printDescargoGasto);
 
   }
   

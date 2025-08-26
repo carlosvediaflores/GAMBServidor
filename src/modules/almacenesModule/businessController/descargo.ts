@@ -1,5 +1,5 @@
 import PrinterService from "../../../printer";
-import { printDesemFuente, printDetailDesemGasto } from "../../../reports/almacenes";
+import { printDesemFuente, printDescargoGasto } from "../../../reports/almacenes";
 import descargoModule, { Idescargo } from "../models/descargo";
 class Bussdescargo {
   constructor(
@@ -127,7 +127,7 @@ class Bussdescargo {
     }
 
      // Imprime detalle descargo
-    public async printDetailDesemGasto(id: string, user: any) {
+    public async printDescargoGasto(id: string, user: any) {
       const descargo: any = await descargoModule
         .findOne({ _id: id })
         .populate("beneficiario")
@@ -159,7 +159,7 @@ class Bussdescargo {
         
       let docDefinition;
 
-        docDefinition = printDetailDesemGasto(descargo, user);
+        docDefinition = printDescargoGasto(descargo,);
 
       const doc = this.printerService.createPdf(docDefinition);
       return doc;

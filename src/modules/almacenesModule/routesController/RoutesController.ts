@@ -3625,7 +3625,7 @@ class RoutesController {
             fuentes: {
               $push: {
                 _id: "$_id.fuente",
-                 denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+                denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
                 totalMonto: "$totalMonto",
                 totalGasto: "$totalGasto",
                 count: "$count",
@@ -4045,7 +4045,7 @@ class RoutesController {
 
       // 🔹 Orden y paginación
       const order: any = { fechaRegistro: -1, _id: -1 };
-      const limit = params.limit ;
+      const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
 
       // 🔹 Listado de gastos
@@ -4106,6 +4106,114 @@ class RoutesController {
       });
     }
   }
+  public async printQueryGastos(request: Request, response: Response) {
+    try {
+      const gasto: BussGasto = new BussGasto();
+      const params: any = request.query;
+      let id: string = request.params.id;
+      let user: string = request.body.user;
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+
+      if (params.estado) {
+        filter.estado = params.estado;
+      } else {
+        filter.estado = { $ne: "FINALIZADO" };
+      }
+
+      if (params.isReposicion) filter.isReposicion = params.isReposicion;
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.partida) filter.partida = params.partida;
+      if (params.catProgra) filter.catProgra = params.catProgra;
+      if (params.solicitante)
+        filter.solicitante = new RegExp(params.solicitante, "i");
+      if (params.numDescargo)
+        filter.numDescargo = new RegExp(params.numDescargo, "i");
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+
+      // 🔹 Listado de gastos
+      const gastos = await gasto.readGasto(filter, skip, limit, order);
+      log("filter", filter);
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente",
+            id: { $first: "$idFuente" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por catProgra
+      const resumenPorCatProgra = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$catProgra",
+            nameCatProg: { $first: "$nameCatProg" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Monto total de todos los gastos
+      const montoTotalResult = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+          },
+        },
+      ]);
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+      const data = {
+        user,
+        gastos,
+        resumenPorFuente,
+        resumenPorCatProgra,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+      };
+      // log("data", data);
+      
+      const pdfDoc = await gasto.printQueryGastos(data);
+      response.setHeader("Content-Type", "application/pdf");
+      pdfDoc.info.Title = "Ingresos Total Compras";
+      pdfDoc.pipe(response);
+      pdfDoc.end();
+      return;
+    } catch (error) {
+      console.error("❌ Error en queryGastos:", error);
+      return response.status(500).json({
+        message: "Error consultando gastos",
+        error,
+      });
+    }
+  }
   public async getGasto(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();
     let resp = await gasto.readGasto(request.params.id);
@@ -4115,7 +4223,9 @@ class RoutesController {
     var gasto: BussGasto = new BussGasto();
     let id: string = request.params.id;
     var params = request.body;
-    var result = await gasto.updateGastoMany( {idTipoDesembolso:"6866ab0ba7f78500a418421e"});
+    var result = await gasto.updateGastoMany({
+      idTipoDesembolso: "6866ab0ba7f78500a418421e",
+    });
     response.status(200).json(result);
   }
   public async removeGasto(request: Request, response: Response) {
@@ -4185,25 +4295,26 @@ class RoutesController {
 
       const descargoData = request.body;
       const user: any = request.body.user;
-      
+
       // Extraer el año de la fecha y asignarlo a 'gestion'
       const fecha = new Date(descargoData.fechaDescargo);
       const gestion = fecha.getFullYear();
-      
+
       const { numero, idTipoDesembolso } = descargoData;
-      
+
       const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
       const descargo: Bussdescargo = new Bussdescargo();
       const desembolso: BussDesembolso = new BussDesembolso();
       const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+      const gasto: BussGasto = new BussGasto();
 
-      const tipoDesembolsoData:any = await tipoDesem.readTipoDesem(
+      const tipoDesembolsoData: any = await tipoDesem.readTipoDesem(
         idTipoDesembolso
       );
-      
+
       const tipoDesembolso = tipoDesembolsoData.denominacion;
       descargoData.tipoDesembolso = tipoDesembolso;
-      
+
       // Buscar si ya existe el número para ese tipo y gestión
       const yaExiste = await descargo.findByNumeroTipoGestion(
         numero,
@@ -4227,7 +4338,7 @@ class RoutesController {
           descargoData.numero = nuevoNumero;
         }
       }
-      
+
       if (descargoData.numero === 11 || descargoData.numero === 12) {
         descargoData.numDescargo = `${descargoData.numero}mo Descargo`;
       } else {
@@ -4235,41 +4346,120 @@ class RoutesController {
         let ordinal = ordinales[num];
         descargoData.numDescargo = `${descargoData.numero}${ordinal} Descargo`;
       }
-      descargoData.idUserRegister = user._id;   
+      descargoData.idUserRegister = user._id;
       descargoData.gestion = gestion;
-      const gastosData = descargoData.gastos
+      const gastosData = descargoData.gastos;
 
       if (gastosData.length < 1) {
-      response
-        .status(201)
-        .json({ serverResponse: "Debe existir al menos un gasto registrado" });
-      return;
-    }
-      // log("descargoData", descargoData);
-      log("tipoDesembolsoData", tipoDesembolsoData);
-      log("tipoDesembolsoDataFuente", tipoDesembolsoData.desembolsos);
+        response.status(201).json({
+          serverResponse: "Debe existir al menos un gasto registrado",
+        });
+        return;
+      }
+      // log("tipoDesembolsoData", tipoDesembolsoData);
+      // log("tipoDesembolsoDataFuente", tipoDesembolsoData.desembolsos);
 
+      const result = await descargo.addDescargo(descargoData);
 
-     const result = await descargo.addDescargo(descargoData);
-    
-
-      
       // // ✅ Agregar la fuente y actualizar monto asignado
       // (tipoDesembolsoData as any).descargos.push(result._id);
       // const monto = tipoDesembolsoData.montoEjecutado || 0;
       // const montoAnterior = result.montoDescargo || 0;
       // tipoDesembolsoData.montoEjecutado = montoAnterior + monto;
-      
-     for (let i = 0; i < gastosData.length; i++) {
-      let data: any = gastosData[i];
-      const tipoDesembolsoDataAc:any = await tipoDesem.readTipoDesem(idTipoDesembolso);
-      const desembolsoData = tipoDesembolsoDataAc.desembolsos;
-      
-     }
+
+      //
+      for (let i = 0; i < gastosData.length; i++) {
+        let dataSimple: any = gastosData[i];
+        let data: any = await gasto.readGasto(dataSimple);
+        data.idDescargo = result._id;
+        data.estado = "DESCARGADO";
+
+        // const idTipoDesembolso = data.idTipoDesembolso;
+
+        log("tipoDesembolsoData", tipoDesembolsoData);
+        // 1. Recuperar todos los desembolsos ordenados por fecha (ASC)
+        const tipoDesembolsoDataAc: any = await tipoDesem.readTipoDesem(
+          idTipoDesembolso
+        );
+        log("tipoDesembolsoDataAc", tipoDesembolsoDataAc);
+        let desembolsos: any[] = tipoDesembolsoDataAc.desembolsos;
+
+        // Ordenar por fecha (asegurar FIFO)
+        desembolsos.sort(
+          (a, b) =>
+            new Date(a.fechaDesembolso).getTime() -
+            new Date(b.fechaDesembolso).getTime()
+        );
+
+        let montoPendiente = data.montoGasto;
+
+        for (let d of desembolsos) {
+          log("Desembolso:", d.beneficiario, "montoPendiente:", montoPendiente);
+          if (montoPendiente <= 0) break; // Si ya no queda pendiente, romper
+          // 2. Validar condiciones del desembolso
+          if (
+            String(d.beneficiario) === String(descargoData.encargado) &&
+            d.montoGasto < d.montoTotal
+          ) {
+            log(
+              "descargoDataEn:",
+              descargoData.encargado,
+              "bene:",
+              d.beneficiario,
+              "montoG",
+              d.montoGasto,
+              "montoT",
+              d.montoTotal
+            );
+            // 3. Buscar la fuente dentro de este desembolso
+            let fuente = d.idFuentes.find(
+              (f: any) => String(f.idFuente) === String(data.idFuente)
+            );
+            log("fuente:", fuente);
+            if (!fuente) continue; // si no existe esa fuente, saltar
+
+            let disponible = fuente.montoTotal - fuente.montoGasto;
+
+            if (disponible > 0) {
+              let usar = Math.min(disponible, montoPendiente);
+
+              // 4. Actualizar fuente y desembolso
+              fuente.montoGasto += usar;
+              d.montoGasto += usar;
+
+              montoPendiente -= usar;
+
+              // Guardar cambios en la BD (ejemplo)
+              await desembolsoFuente.updateDesemFuente(fuente._id, {
+                montoGasto: fuente.montoGasto,
+              });
+              await desembolso.updateDesembolso(d._id, {
+                montoGasto: d.montoGasto,
+              });
+
+              // Si ya consumí todo el gasto → romper
+              if (montoPendiente === 0) {
+                data.estado = "CONSOLIDADO";
+                break;
+              }
+            }
+          }
+        }
+
+        // Si no se pudo consolidar todo el gasto → marcar pendiente
+        if (montoPendiente > 0) {
+          data.estado = "PENDIENTE";
+        }
+
+        // Guardar cambios en el gasto
+        await gasto.updateGasto(data._id, {
+          estado: data.estado,
+          numDescargo: result.numDescargo,
+        });
+      }
       // await tipoDesembolsoData.save();
 
-      
-      response.status(201).json({ serverResponse: "result" });
+      response.status(201).json({ serverResponse: result });
     } catch (error) {
       console.error("Error al crear el descargo:", error);
       response.status(500).json({
@@ -4282,6 +4472,49 @@ class RoutesController {
     var descargo: Bussdescargo = new Bussdescargo();
     let resp = await descargo.readDescargo();
     response.status(200).json(resp);
+  }
+  public async queryDescargos(request: Request, response: Response) {
+    const descargo: Bussdescargo = new Bussdescargo();
+    const filter: any = {};
+    const params: any = request.query;
+    var limit = 0;
+    var skip = 0;
+    var aux: any = {};
+    var order: any = {};
+    // Filtro por fechas
+    if (params.deFecha || params.alFecha) {
+      filter.fechaDesembolso = {};
+      if (params.deFecha)
+        filter.fechaDesembolso.$gte = new Date(params.deFecha);
+      if (params.alFecha)
+        filter.fechaDesembolso.$lte = new Date(params.alFecha);
+    }
+
+    // Filtro por montos
+    if (params.deMonto || params.AMonto) {
+      filter.montoAsignado = {};
+      if (params.deMonto) filter.montoAsignado.$gte = params.deMonto;
+      if (params.AMonto) filter.montoAsignado.$lte = params.AMonto;
+    }
+
+    // Filtro por estado
+    if (params.estado) {
+      filter.estado = params.estado;
+    }
+    // Filtro por si esta cerrado
+    if (params.isClosed) {
+      filter.isClosed = params.isClosed;
+    }
+    // Filtro por gestion
+    if (params.gestion) {
+      filter.gestion = params.gestion;
+    }
+    if (params.idTipoDesembolso) {
+      filter.idTipoDesembolso = params.idTipoDesembolso;
+    }
+    log(filter);
+    let repres = await descargo.readDescargo(filter, skip, limit, order);
+    response.status(200).json(repres);
   }
   public async getDescargo(request: Request, response: Response) {
     var descargo: Bussdescargo = new Bussdescargo();
@@ -4301,6 +4534,17 @@ class RoutesController {
     let result = await descargo.deleteDescargo(id);
     response.status(200).json({ serverResponse: "Se elimino el descargo" });
   }
-
+  //Imprimir Descargo
+  public async printDescargoGasto(request: Request, response: Response) {
+    const descargo: Bussdescargo = new Bussdescargo();
+    let id: string = request.params.id;
+    let user: string = request.body.user;
+    const pdfDoc = await descargo.printDescargoGasto(id, user);
+    response.setHeader("Content-Type", "application/pdf");
+    pdfDoc.info.Title = "Detalle de Gasto de Desembolso";
+    pdfDoc.pipe(response);
+    pdfDoc.end();
+    return;
+  }
 }
 export default RoutesController;

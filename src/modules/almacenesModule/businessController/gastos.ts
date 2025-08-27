@@ -28,11 +28,7 @@ class BussGasto {
         .populate("idPartida")
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        });
+        .populate("idFuente");
       return result;
     } else if (params1) {
       let skip = params2;
@@ -44,11 +40,7 @@ class BussGasto {
         .populate("idPartida")
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        })
+        .populate("idFuente")
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -62,11 +54,7 @@ class BussGasto {
         .populate("idPartida")
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        });
+        .populate("idFuente");
 
       return Gasto;
     }

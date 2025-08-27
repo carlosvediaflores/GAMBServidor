@@ -60,6 +60,7 @@ import gastoModule from "../models/gastos";
 import desemFuente from "../models/desemFuente";
 import Bussdescargo from "../businessController/descargo";
 import mongoose from "mongoose";
+import fuente from "../models/fuente";
 const ObjectId = mongoose.Types.ObjectId;
 
 class RoutesController {
@@ -3939,76 +3940,6 @@ class RoutesController {
     let resp = await gasto.readGasto();
     response.status(200).json(resp);
   }
-  // public async queryGastos(request: Request, response: Response) {
-  //   const gasto: BussGasto = new BussGasto();
-  //   const filter: any = {};
-  //   const params: any = request.query;
-  //   var limit = 0;
-  //   var skip = 0;
-  //   var aux: any = {};
-  //   var order: any = {};
-  //   // Filtro por fechas
-  //   if (params.deFecha || params.alFecha) {
-  //     filter.fechaRegistro = {};
-  //     if (params.deFecha) filter.fechaRegistro.$gte = new Date(params.deFecha);
-  //     if (params.alFecha) filter.fechaRegistro.$lte = new Date(params.alFecha);
-  //   }
-
-  //   // // Filtro por montos
-  //   // if (params.deMonto || params.AMonto) {
-  //   //   filter.montoAsignado = {};
-  //   //   if (params.deMonto) filter.montoAsignado.$gte = params.deMonto;
-  //   //   if (params.AMonto) filter.montoAsignado.$lte = params.AMonto;
-  //   // }
-
-  //   // Filtro por estado
-  //   if (params.estado) {
-  //     filter.estado = params.estado;
-  //   } else {
-  //     filter.estado = { $ne: "FINALIZADO" };
-  //   }
-  //   // Filtro por si esta cerrado
-  //   if (params.isReposicion) {
-  //     filter.isReposicion = params.isReposicion;
-  //   }
-  //   // Filtro por gestion
-  //   if (params.gestion) {
-  //     filter.gestion = params.gestion;
-  //   }
-  //   // Filtro por tipo de fondo
-  //   if (params.tipoFondo) {
-  //     filter.tipoFondo = params.tipoFondo;
-  //   }
-  //   // Filtro por tipo de gasto
-  //   if (params.tipoGasto) {
-  //     filter.tipoGasto = params.tipoGasto;
-  //   }
-  //   // Filtro por fuente
-  //   if (params.fuente) {
-  //     filter.fuente = params.fuente;
-  //   }
-  //   // Filtro por partida
-  //   if (params.partida) {
-  //     filter.partida = params.partida;
-  //   }
-  //   // Filtro por categoria de programa
-  //   if (params.catProgra) {
-  //     filter.catProgra = params.catProgra;
-  //   }
-  //   // Filtro por solicitante
-  //   if (params.solicitante) {
-  //     filter.solicitante = new RegExp(params.solicitante, "i");
-  //   }
-  //   // Filtro por numero de Descargo
-  //   if (params.numDescargo) {
-  //     filter.numDescargo = new RegExp(params.numDescargo, "i");
-  //   }
-  //   log(filter);
-  //   order["fechaRegistro"] = -1; // Ordenar por fecha de registro descendente
-  //   order["_id"] = -1; // Ordenar por ID descendente por defecto
-  //   let repres = await gasto.readGasto(filter, skip, limit, order);
-  //   response.status(200).json(repres);
-  // }
   public async queryGastos(request: Request, response: Response) {
     try {
       const gasto: BussGasto = new BussGasto();
@@ -4052,18 +3983,42 @@ class RoutesController {
       const gastos = await gasto.readGasto(filter, skip, limit, order);
 
       // 🔹 Resumen por fuente
-      const resumenPorFuente = await gastoModule.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: "$fuente",
-            id: { $first: "$idFuente" },
-            totalMonto: { $sum: "$montoGasto" },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { totalMonto: -1 } },
-      ]);
+     const resumenPorFuente = await gastoModule.aggregate([
+  { $match: filter },
+  {
+    $group: {
+      _id: "$fuente", // "41-113"
+      idFuente: { $first: "$idFuente" }, // actualmente string
+      totalMonto: { $sum: "$montoGasto" },
+      count: { $sum: 1 },
+    },
+  },
+  // 🔹 Convertir a ObjectId
+  {
+    $addFields: {
+      idFuente: { $toObjectId: "$idFuente" },
+    },
+  },
+  {
+    $lookup: {
+      from: "alm_fuentes",       // nombre real de la colección
+      localField: "idFuente",
+      foreignField: "_id",
+      as: "fuenteData",
+    },
+  },
+  { $unwind: "$fuenteData" },
+  {
+    $project: {
+      _id: 1,
+      idFuente: 1,
+      totalMonto: 1,
+      count: 1,
+      denominacion: "$fuenteData.denominacion",
+    },
+  },
+  { $sort: { totalMonto: -1 } },
+]);
 
       // 🔹 Resumen por catProgra
       const resumenPorCatProgra = await gastoModule.aggregate([
@@ -4072,6 +4027,7 @@ class RoutesController {
           $group: {
             _id: "$catProgra",
             nameCatProg: { $first: "$nameCatProg" },
+            fuente: { $first: "$fuente" },
             totalMonto: { $sum: "$montoGasto" },
             count: { $sum: 1 },
           },
@@ -4148,21 +4104,63 @@ class RoutesController {
 
       // 🔹 Listado de gastos
       const gastos = await gasto.readGasto(filter, skip, limit, order);
-      log("filter", filter);
 
       // 🔹 Resumen por fuente
       const resumenPorFuente = await gastoModule.aggregate([
-        { $match: filter },
-        {
-          $group: {
-            _id: "$fuente",
-            id: { $first: "$idFuente" },
-            totalMonto: { $sum: "$montoGasto" },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { totalMonto: -1 } },
-      ]);
+  { $match: filter },
+  {
+    $group: {
+      _id: "$fuente", // "41-113"
+      idFuente: { $first: "$idFuente" }, // actualmente string
+      totalMonto: { $sum: "$montoGasto" },
+      count: { $sum: 1 },
+    },
+  },
+  // 🔹 Convertir a ObjectId
+  {
+    $addFields: {
+      idFuente: { $toObjectId: "$idFuente" },
+    },
+  },
+  {
+    $lookup: {
+      from: "alm_fuentes",       // nombre real de la colección
+      localField: "idFuente",
+      foreignField: "_id",
+      as: "fuenteData",
+    },
+  },
+  { $unwind: "$fuenteData" },
+  {
+    $project: {
+      _id: 1,
+      idFuente: 1,
+      totalMonto: 1,
+      count: 1,
+      denominacion: "$fuenteData.denominacion",
+    },
+  },
+  { $sort: { totalMonto: -1 } },
+]);
+      // const resumenPorFuente = gastos.reduce((acc: { [key: string]: { idFuente: any; denominacion: string; ffof: string; totalMonto: number; count: number } }, gasto) => {
+      //   const fuente = gasto.idFuente as any;
+      //   const key = fuente._id.toString();
+
+      //   if (!acc[key]) {
+      //     acc[key] = {
+      //       idFuente: fuente._id,
+      //       denominacion: fuente.denominacion,
+      //       ffof: fuente.ffof,
+      //       totalMonto: 0,
+      //       count: 0,
+      //     };
+      //   }
+
+      //   acc[key].totalMonto += gasto.montoGasto;
+      //   acc[key].count++;
+
+      //   return acc;
+      // }, {} as { [key: string]: { idFuente: any; denominacion: string; ffof: string; totalMonto: number; count: number } });
 
       // 🔹 Resumen por catProgra
       const resumenPorCatProgra = await gastoModule.aggregate([
@@ -4171,6 +4169,7 @@ class RoutesController {
           $group: {
             _id: "$catProgra",
             nameCatProg: { $first: "$nameCatProg" },
+            fuente: { $first: "$fuente" },
             totalMonto: { $sum: "$montoGasto" },
             count: { $sum: 1 },
           },
@@ -4199,7 +4198,7 @@ class RoutesController {
         montoTotalGasto, // ✅ aquí ya lo tienes
       };
       // log("data", data);
-      
+
       const pdfDoc = await gasto.printQueryGastos(data);
       response.setHeader("Content-Type", "application/pdf");
       pdfDoc.info.Title = "Ingresos Total Compras";

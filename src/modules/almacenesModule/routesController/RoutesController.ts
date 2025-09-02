@@ -3959,7 +3959,7 @@ class RoutesController {
       if (params.estado) {
         filter.estado = params.estado;
       } else {
-        filter.estado = { $ne: "FINALIZADO" };
+        filter.estado = { $ne: "DESCARGO" };
       }
 
       if (params.isReposicion) filter.isReposicion = params.isReposicion;

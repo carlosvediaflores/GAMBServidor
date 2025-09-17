@@ -83,12 +83,12 @@ const styles: StyleDictionary = {
     color: "black",
   },
 };
-export const printDescargoGasto = (options: any,): TDocumentDefinitions => {
+export const printQueryGasto = (options: any): TDocumentDefinitions => {
   const values = options;
   const user = values.user;
-log('values', values);
+  log("printDescargoGasto", user);
   const desemFuentes = values.idFuentes || [];
-  const desemGast = values.descargoData.gastos || [];
+  const desemGast = values.gastos || [];
   const resumenPorFuente = values.resumenPorFuente || [];
   const resumenPorCatProgra = values.resumenPorCatProgra || [];
   const totalMonto = resumenPorFuente.reduce(
@@ -141,15 +141,15 @@ log('values', values);
       fontSize: 10,
     },
 
-    // ✅ Marca de agua en diagonal
-  watermark: {
-    text: "NO VÁLIDO",
-    color: "#d00000",
-    opacity: 0.1,
-    bold: true,
-    fontSize: 150,
-    angle: -60    // 🔹 Rotación en grados (positivo = antihorario)
-  },
+  //   // ✅ Marca de agua en diagonal
+  // watermark: {
+  //   text: "NO VÁLIDO",
+  //   color: "#d00000",
+  //   opacity: 0.1,
+  //   bold: true,
+  //   fontSize: 150,
+  //   angle: -60    // 🔹 Rotación en grados (positivo = antihorario)
+  // },
     header: [
       {
         columns: [
@@ -204,7 +204,7 @@ log('values', values);
         ],
       }, */
       {
-        text: "II. Detalle de Gastos de Fuentes de Financiamiento",
+        text: "I. Detalle de Gastos de Fuentes de Financiamiento",
         style: "subTitle",
         decoration: "underline",
       },
@@ -274,7 +274,7 @@ log('values', values);
       },
 
       {
-        text: "III Detalle de Registro de Gasto",
+        text: "II Detalle de Registro de Gasto",
         style: "subTitle",
         decoration: "underline",
       },
@@ -390,7 +390,7 @@ log('values', values);
         },
       },
       {
-        text: "IV. Detalle Gasto por Categorìa Programática",
+        text: "III. Detalle Gasto por Categorìa Programática",
         style: "subTitle",
         decoration: "underline",
       },

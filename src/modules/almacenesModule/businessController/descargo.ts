@@ -127,39 +127,10 @@ class Bussdescargo {
     }
 
      // Imprime detalle descargo
-    public async printDescargoGasto(id: string, user: any) {
-      const descargo: any = await descargoModule
-        .findOne({ _id: id })
-        .populate("beneficiario")
-        .populate({
-          path: "gastos",
-          model: "alm_gasto",
-          populate: [
-            {
-              path: "idPartida",
-              model: "partidas",
-            },
-            {
-              path: "idCombustible",
-              model: "alm_vale",
-            },
-          ],
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "beneficiario", model: "User" },
-        });
-        //console.log('Desem', descargo, user);
-        
-      let docDefinition;
+    public async printDescargoGasto(data:any) {
 
-        docDefinition = printDescargoGasto(descargo,);
+      // console.log("printDescargoGasto", data);
+       const docDefinition = printDescargoGasto(data);
 
       const doc = this.printerService.createPdf(docDefinition);
       return doc;

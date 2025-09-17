@@ -4708,7 +4708,80 @@ class RoutesController {
     const descargo: Bussdescargo = new Bussdescargo();
     let id: string = request.params.id;
     let user: string = request.body.user;
-    const pdfDoc = await descargo.printDescargoGasto(id, user);
+    const descargoData: any = await descargo.readDescargo(id);
+    
+     // 🔹 Resumen por fuente
+      const resumenPorFuente = await gastoModule.aggregate([
+        //  { $match: { idDescargo: id } },
+        {
+          $group: {
+            _id: "$fuente", // "41-113"
+            idFuente: { $first: "$idFuente" }, // actualmente string
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        // 🔹 Convertir a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+        {
+          $lookup: {
+            from: "alm_fuentes", // nombre real de la colección
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: "$fuenteData" },
+        {
+          $project: {
+            _id: 1,
+            idFuente: 1,
+            totalMonto: 1,
+            count: 1,
+            denominacion: "$fuenteData.denominacion",
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+      const resumenPorCatProgra = await gastoModule.aggregate([
+        // { $match: { idDescargo: id } },
+        {
+          $group: {
+            _id: "$catProgra",
+            nameCatProg: { $first: "$nameCatProg" },
+            fuente: { $first: "$fuente" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+
+      // 🔹 Monto total de todos los gastos
+      const montoTotalResult = await gastoModule.aggregate([
+        // { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+          },
+        },
+      ]);
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+      const data = {
+        user,
+        descargoData,
+        resumenPorFuente,
+        resumenPorCatProgra,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+      };
+      const pdfDoc = await descargo.printDescargoGasto(data);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Detalle de Gasto de Desembolso";
     pdfDoc.pipe(response);

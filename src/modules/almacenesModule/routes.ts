@@ -526,6 +526,9 @@ class Routes {
     app
       .route(`${this.routeparent}/gasto`)
       .patch(this.routesController.updateGasto);
+       app
+      .route(`${this.routeparent}/gasto/:id`)
+      .patch(this.routesController.updateGastoId);
     app
       .route(`${this.routeparent}/gasto/:id`)
       .delete(this.routesController.removeGasto);

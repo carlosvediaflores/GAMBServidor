@@ -226,7 +226,7 @@ export const printDescargoGasto = (
               {
                 text: desemFuente.denominacion,
                 style: "tableBody2",
-                alignment: "center",
+               
               },           
               {
                 text: CurrencyFormatter.formatCurrency(desemFuente.totalMonto),

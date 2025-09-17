@@ -89,8 +89,10 @@ class BussGasto {
     let result = await gastoModule.updateMany(
       { $set: Gasto }
     );
-    return result;
+    return 
+    result;
   }
+  
   public async deleteGasto(id: string) {
     let result = await gastoModule.deleteOne({ _id: id });
     return result;

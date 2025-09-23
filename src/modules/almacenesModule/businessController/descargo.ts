@@ -24,7 +24,15 @@ class Bussdescargo {
       var result: Idescargo = await descargoModule
         .findOne({ _id: params1 })
         .populate("encargado")
-        .populate("gastos")
+        .populate({
+          path: "gastos",
+          model: "alm_gasto",
+          
+          populate: [
+            { path: "idPartida", model: "partidas" },
+            { path: "idCombustible", model: "alm_vale" },
+          ],
+        });
       return result;
     } else if (params1) {
       let skip = params2;

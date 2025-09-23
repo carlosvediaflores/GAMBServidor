@@ -1,9 +1,12 @@
 import PrinterService from "../../../printer";
-import { printDesemFuente, printDetailDesemGasto } from "../../../reports/almacenes";
+import {
+  printDesemFuente,
+  printDetailDesemGasto,
+} from "../../../reports/almacenes";
 import desembolsoModule, { Idesembolso } from "../models/desembolso";
 class BussDesembolso {
   constructor(
-     private readonly printerService: PrinterService = new PrinterService()
+    private readonly printerService: PrinterService = new PrinterService()
   ) {}
   public async readDesembolso(): Promise<Array<Idesembolso>>;
   public async readDesembolso(id: string): Promise<Idesembolso>;
@@ -70,7 +73,7 @@ class BussDesembolso {
       return err;
     }
   }
-  
+
   public async getDesembolso() {
     const resp = await desembolsoModule
       .find()
@@ -102,6 +105,11 @@ class BussDesembolso {
       gestion,
     });
   }
+public async findAllByTipo(idTipo: string) {
+    return await desembolsoModule
+      .find({ idTipoDesembolso: idTipo })
+      .sort({ fechaDesembolso: 1 });
+  }
 
   // ✅ Obtiene el siguiente número disponible para un tipo y gestión
   public async getNextNumero(
@@ -117,67 +125,69 @@ class BussDesembolso {
   }
 
   // Imprime detalle desembolso
-    public async printDesemFuente(id: string, user: any) {
-      const desembolso: any = await desembolsoModule
-        .findOne({ _id: id })
-        .populate("beneficiario")
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "beneficiario", model: "User" },
-        });
-      //  console.log('Desem', desembolso, user);
-        
-      let docDefinition;
-     
-        docDefinition = printDesemFuente(desembolso, user); 
-     
-      const doc = this.printerService.createPdf(docDefinition);
-      return doc;
-    }
+  public async printDesemFuente(id: string, user: any) {
+    const desembolso: any = await desembolsoModule
+      .findOne({ _id: id })
+      .populate("beneficiario")
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "idFuente", model: "alm_fuente" },
+      })
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "beneficiario", model: "User" },
+      });
+    //  console.log('Desem', desembolso, user);
 
-     // Imprime detalle desembolso
-    public async printDetailDesemGasto(id: string, user: any) {
-      const desembolso: any = await desembolsoModule
-        .findOne({ _id: id })
-        .populate("beneficiario")
-        .populate({
-          path: "gastos",
-          model: "alm_gasto",
-          populate: [
-            {
-              path: "idPartida",
-              model: "partidas",
-            },
-            {
-              path: "idCombustible",
-              model: "alm_vale",
-            },
-          ],
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "beneficiario", model: "User" },
-        });
-        //console.log('Desem', desembolso, user);
-        
-      let docDefinition;
+    let docDefinition;
 
-        docDefinition = printDetailDesemGasto(desembolso, user);
+    docDefinition = printDesemFuente(desembolso, user);
 
-      const doc = this.printerService.createPdf(docDefinition);
-      return doc;
-    }
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+
+  // Imprime detalle desembolso
+  public async printDetailDesemGasto(id: string, user: any) {
+    const desembolso: any = await desembolsoModule
+      .findOne({ _id: id })
+      .populate("beneficiario")
+      .populate({
+        path: "gastos",
+        model: "alm_gasto",
+        populate: [
+          {
+            path: "idPartida",
+            model: "partidas",
+          },
+          {
+            path: "idCombustible",
+            model: "alm_vale",
+          },
+        ],
+      })
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "idFuente", model: "alm_fuente" },
+      })
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "beneficiario", model: "User" },
+      });
+    //console.log('Desem', desembolso, user);
+
+    let docDefinition;
+
+    docDefinition = printDetailDesemGasto(desembolso, user);
+
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+
+  
 }
 export default BussDesembolso;

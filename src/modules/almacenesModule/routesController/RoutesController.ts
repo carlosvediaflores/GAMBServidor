@@ -3139,12 +3139,30 @@ class RoutesController {
     response.status(200).json(repres);
   }
 
+  // public async updateTipoDesem(request: Request, response: Response) {
+  //   var tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+  //   let id: string = request.params.id;
+  //   var params = request.body;
+  //   var result = await tipoDesem.updateTipoDesem(id, params);
+  //   response.status(200).json(result);
+  // }
+
   public async updateTipoDesem(request: Request, response: Response) {
-    var tipoDesem: BussTipoDesembols = new BussTipoDesembols();
-    let id: string = request.params.id;
-    var params = request.body;
-    var result = await tipoDesem.updateTipoDesem(id, params);
-    response.status(200).json(result);
+    try {
+      const tipoDesem = new BussTipoDesembols();
+      const id: string = request.params.id;
+      const params: any = request.body;
+
+      // ⚡ si quieres permitir modo incremento, puedes pasar un flag opcional:
+      const inc: boolean = params.inc === true;
+      delete params.inc; // evitar que se guarde como campo
+
+      const result = await tipoDesem.updateTipoDesem(id, params, { inc });
+      response.status(200).json(result);
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ message: "Error al actualizar TipoDesem" });
+    }
   }
 
   public async removeTipoDesem(request: Request, response: Response) {
@@ -3233,94 +3251,203 @@ class RoutesController {
     response.status(200).json({ serverResponse: "Se elimino la fuente" });
   }
   //-----------desembolso----------
+  // public async createDesembolso(
+  //   request: Request,
+  //   response: Response
+  // ): Promise<void> {
+  //   try {
+  //     const ordinales = [
+  //       "mo",
+  //       "er",
+  //       "do",
+  //       "er",
+  //       "to",
+  //       "to",
+  //       "to",
+  //       "mo",
+  //       "vo",
+  //       "no",
+  //     ];
+
+  //     const desembolsoData = request.body;
+  //     const user: any = request.body.user;
+
+  //     // Extraer el año de la fecha y asignarlo a 'gestion'
+  //     const fecha = new Date(desembolsoData.fechaDesembolso);
+  //     const gestion = fecha.getFullYear();
+  //     desembolsoData.gestion = gestion;
+
+  //     const { numero, idTipoDesembolso } = desembolsoData;
+
+  //     const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+  //     const desembolso: BussDesembolso = new BussDesembolso();
+
+  //     const tipoDesembolsoData = await tipoDesem.readTipoDesem(
+  //       idTipoDesembolso
+  //     );
+
+  //     const tipoDesembolso = tipoDesembolsoData.denominacion;
+  //     desembolsoData.tipoDesembolso = tipoDesembolso;
+
+  //     // Buscar si ya existe el número para ese tipo y gestión
+  //     const yaExiste = await desembolso.findByNumeroTipoGestion(
+  //       numero,
+  //       tipoDesembolso,
+  //       gestion
+  //     );
+
+  //     if (yaExiste) {
+  //       if (numero) {
+  //         // Si vino un número en el body, dar mensaje de error
+  //         response.status(409).json({
+  //           message: `Ya existe un desembolso con número ${numero}, tipo ${tipoDesembolso} en gestión ${gestion}`,
+  //         });
+  //         return;
+  //       } else {
+  //         // Si no vino número, buscar el siguiente número disponible
+  //         const nuevoNumero = await desembolso.getNextNumero(
+  //           tipoDesembolso,
+  //           gestion
+  //         );
+  //         desembolsoData.numero = nuevoNumero;
+  //       }
+  //     }
+
+  //     if (desembolsoData.numero === 11 || desembolsoData.numero === 12) {
+  //       desembolsoData.numDesembolso = `${desembolsoData.numero}ma Desembolso`;
+  //     } else {
+  //       let num = desembolsoData.numero % 10;
+  //       let ordinal = ordinales[num];
+  //       desembolsoData.numDesembolso = `${desembolsoData.numero}${ordinal} Desembolso`;
+  //     }
+  //     desembolsoData.idUserRegister = user._id;
+  //     const result = await desembolso.addDesembolso(desembolsoData);
+  //     // ✅ Agregar la fuente y actualizar monto asignado
+  //     (tipoDesembolsoData as any).desembolsos.push(result._id);
+  //     const monto = tipoDesembolsoData.montoAcumulado || 0;
+  //     const montoAnterior = result.montoTotal || 0;
+  //     tipoDesembolsoData.montoAcumulado = montoAnterior + monto;
+  //     await tipoDesembolsoData.save();
+  //     log("desembolsoData", result);
+
+  //     response.status(201).json({ serverResponse: result });
+  //   } catch (error) {
+  //     console.error("Error al crear el desembolso:", error);
+  //     response.status(500).json({
+  //       message: "Error interno del servidor al crear el desembolso",
+  //       error: error instanceof Error ? error.message : error,
+  //     });
+  //   }
+  // }
+
   public async createDesembolso(
-    request: Request,
-    response: Response
-  ): Promise<void> {
-    try {
-      const ordinales = [
-        "mo",
-        "er",
-        "do",
-        "er",
-        "to",
-        "to",
-        "to",
-        "mo",
-        "vo",
-        "no",
-      ];
+  request: Request,
+  response: Response
+): Promise<void> {
+  try {
+    const ordinales = ["mo","er","do","er","to","to","to","mo","vo","no"];
 
-      const desembolsoData = request.body;
-      const user: any = request.body.user;
+    const desembolsoData = request.body;
+    const user: any = request.body.user;
 
-      // Extraer el año de la fecha y asignarlo a 'gestion'
-      const fecha = new Date(desembolsoData.fechaDesembolso);
-      const gestion = fecha.getFullYear();
-      desembolsoData.gestion = gestion;
+    // 🔹 Extraer gestión
+    const fecha = new Date(desembolsoData.fechaDesembolso);
+    desembolsoData.gestion = fecha.getFullYear();
 
-      const { numero, idTipoDesembolso } = desembolsoData;
+    const { numero, idTipoDesembolso } = desembolsoData;
+    const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+    const desembolso: BussDesembolso = new BussDesembolso();
 
-      const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
-      const desembolso: BussDesembolso = new BussDesembolso();
-
-      const tipoDesembolsoData = await tipoDesem.readTipoDesem(
-        idTipoDesembolso
-      );
-
-      const tipoDesembolso = tipoDesembolsoData.denominacion;
-      desembolsoData.tipoDesembolso = tipoDesembolso;
-
-      // Buscar si ya existe el número para ese tipo y gestión
-      const yaExiste = await desembolso.findByNumeroTipoGestion(
-        numero,
-        tipoDesembolso,
-        gestion
-      );
-
-      if (yaExiste) {
-        if (numero) {
-          // Si vino un número en el body, dar mensaje de error
-          response.status(409).json({
-            message: `Ya existe un desembolso con número ${numero}, tipo ${tipoDesembolso} en gestión ${gestion}`,
-          });
-          return;
-        } else {
-          // Si no vino número, buscar el siguiente número disponible
-          const nuevoNumero = await desembolso.getNextNumero(
-            tipoDesembolso,
-            gestion
-          );
-          desembolsoData.numero = nuevoNumero;
-        }
-      }
-
-      if (desembolsoData.numero === 11 || desembolsoData.numero === 12) {
-        desembolsoData.numDesembolso = `${desembolsoData.numero}ma Desembolso`;
-      } else {
-        let num = desembolsoData.numero % 10;
-        let ordinal = ordinales[num];
-        desembolsoData.numDesembolso = `${desembolsoData.numero}${ordinal} Desembolso`;
-      }
-      desembolsoData.idUserRegister = user._id;
-      const result = await desembolso.addDesembolso(desembolsoData);
-      // ✅ Agregar la fuente y actualizar monto asignado
-      (tipoDesembolsoData as any).desembolsos.push(result._id);
-      const monto = tipoDesembolsoData.montoAcumulado || 0;
-      const montoAnterior = result.montoTotal || 0;
-      tipoDesembolsoData.montoAcumulado = montoAnterior + monto;
-      await tipoDesembolsoData.save();
-      log("desembolsoData", result);
-
-      response.status(201).json({ serverResponse: result });
-    } catch (error) {
-      console.error("Error al crear el desembolso:", error);
-      response.status(500).json({
-        message: "Error interno del servidor al crear el desembolso",
-        error: error instanceof Error ? error.message : error,
-      });
+    // 🔹 Obtener tipo de desembolso
+    const tipoDesembolsoData = await tipoDesem.readTipoDesem(idTipoDesembolso);
+    if (!tipoDesembolsoData) {
+      response.status(404).json({ message: "Tipo de desembolso no encontrado" });
+      return;
     }
+    const tipoDesembolso = tipoDesembolsoData.denominacion;
+    desembolsoData.tipoDesembolso = tipoDesembolso;
+
+    // 🔹 Validar número
+    const yaExiste = await desembolso.findByNumeroTipoGestion(
+      numero,
+      tipoDesembolso,
+      desembolsoData.gestion
+    );
+    if (yaExiste) {
+      if (numero) {
+        response.status(409).json({
+          message: `Ya existe un desembolso con número ${numero}, tipo ${tipoDesembolso} en gestión ${desembolsoData.gestion}`,
+        });
+        return;
+      } else {
+        const nuevoNumero = await desembolso.getNextNumero(
+          tipoDesembolso,
+          desembolsoData.gestion
+        );
+        desembolsoData.numero = nuevoNumero;
+      }
+    }
+
+    // 🔹 Crear nombre ordinal
+    if (desembolsoData.numero === 11 || desembolsoData.numero === 12) {
+      desembolsoData.numDesembolso = `${desembolsoData.numero}ma Desembolso`;
+    } else {
+      const num = desembolsoData.numero % 10;
+      const ordinal = ordinales[num];
+      desembolsoData.numDesembolso = `${desembolsoData.numero}${ordinal} Desembolso`;
+    }
+
+    desembolsoData.idUserRegister = user._id;
+
+    // ========================================================
+    // ✅ AJUSTAR DESEMBOLSOS ANTERIORES
+    // ========================================================
+    const anteriores = await desembolso.findAllByTipo(idTipoDesembolso);
+    let excedenteTotal = 0;
+
+    for (const ant of anteriores) {
+      if (ant.montoGasto > ant.montoTotal) {
+        const excedente = ant.montoGasto - ant.montoTotal;
+
+        // Ajustar campos
+        ant.montoGasto = ant.montoTotal;
+        ant.isClosed = true;
+        await ant.save();
+
+        // Acumular excedente para el nuevo
+        excedenteTotal += excedente;
+      }
+    }
+
+    // 🔹 Si hay excedentes, sumarlos al nuevo registro
+    if (excedenteTotal > 0) {
+      desembolsoData.montoGasto =
+        (desembolsoData.montoGasto || 0) + excedenteTotal;
+    }
+
+    // ========================================================
+    // ✅ CREAR EL NUEVO DESEMBOLSO
+    // ========================================================
+    const result = await desembolso.addDesembolso(desembolsoData);
+
+    // 🔹 Relacionar en tipoDesembolso
+    (tipoDesembolsoData as any).desembolsos.push(result._id);
+
+    // Actualizar montoAcumulado
+    const montoActual = tipoDesembolsoData.montoAcumulado || 0;
+    const montoNuevo = result.montoTotal || 0;
+    tipoDesembolsoData.montoAcumulado = montoActual + montoNuevo;
+    await tipoDesembolsoData.save();
+
+    response.status(201).json({ serverResponse: result });
+  } catch (error) {
+    console.error("Error al crear el desembolso:", error);
+    response.status(500).json({
+      message: "Error interno del servidor al crear el desembolso",
+      error: error instanceof Error ? error.message : error,
+    });
   }
+}
 
   //Imprimir Desembolso
   public async printDesemFuente(request: Request, response: Response) {
@@ -3461,81 +3588,192 @@ class RoutesController {
     }
   }
   //-----------Desembolso----------Fuente
+  // public async createDesemFuente(
+  //   request: Request,
+  //   response: Response
+  // ): Promise<void> {
+  //   try {
+  //     const desembolsoFuenteData = request.body;
+  //     const user: any = request.body.user;
+  //     const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+  //     const bussDesembolso: BussDesembolso = new BussDesembolso();
+  //     const fuente: BussFuente = new BussFuente();
+  //     let fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
+
+  //     // 1. Obtener el desembolso original
+  //     const desembolso = await bussDesembolso.readDesembolso(
+  //       desembolsoFuenteData.idDesembolso
+  //     );
+  //     if (!desembolso) {
+  //       response.status(404).json({ message: "Desembolso no encontrado" });
+  //     }
+
+  //     const monto = desembolsoFuenteData.montoTotal || 0;
+  //     const idFuente = desembolsoFuenteData.idFuente;
+
+  //     // Asegurar que `fuentes` es un array
+  //     if (!Array.isArray((desembolso as any).idFuentes)) {
+  //       (desembolso as any).idFuentes = [];
+  //     }
+
+  //     // Verificar si ya hay un desemFuente con ese idFuente
+  //     const fuenteYaRegistrada = (desembolso as any).idFuentes.some(
+  //       (df: any) => {
+  //         if (!df.idFuente) return false;
+  //         const actualId =
+  //           typeof df.idFuente === "object"
+  //             ? df.idFuente._id?.toString()
+  //             : df.idFuente.toString();
+  //         return actualId === idFuente.toString();
+  //       }
+  //     );
+
+  //     if (fuenteYaRegistrada) {
+  //       response.status(409).json({
+  //         message: "Este F.F.- O.F. ya fue registrado para este desembolso",
+  //       });
+  //       return;
+  //     }
+  //     desembolsoFuenteData.idUserRegister = user._id;
+  //     desembolsoFuenteData.gestion = new Date().getFullYear();
+  //     desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
+  //     desembolsoFuenteData.fuente = fuenteData.ffof;
+  //     desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
+  //     const result = await desembolsoFuente.addDesemFuente(
+  //       desembolsoFuenteData
+  //     );
+  //     // ✅ Agregar la fuente y actualizar monto asignado
+  //     (desembolso as any).idFuentes.push(result._id);
+  //     const montoAnterior = (desembolso as any).montoAsignado || 0;
+  //     (desembolso as any).montoAsignado = montoAnterior + monto;
+
+  //     // 2. Registrar la fuente
+  //     await desembolso.save();
+
+  //     // Respuesta final
+  //     response.status(201).json({
+  //       serverResponse: result,
+  //       message: "Fuente registrada y desembolso actualizado correctamente",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error al crear el desembolso fuente:", error);
+  //     response.status(500).json({
+  //       message: "Error interno del servidor al crear el desembolso fuente",
+  //       error: error instanceof Error ? error.message : error,
+  //     });
+  //   }
+  // }
+
   public async createDesemFuente(
-    request: Request,
-    response: Response
-  ): Promise<void> {
-    try {
-      const desembolsoFuenteData = request.body;
-      const user: any = request.body.user;
-      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
-      const bussDesembolso: BussDesembolso = new BussDesembolso();
-      const fuente: BussFuente = new BussFuente();
-      let fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
+  request: Request,
+  response: Response
+): Promise<void> {
+  try {
+    const desembolsoFuenteData = request.body;
+    const user: any = request.body.user;
 
-      // 1. Obtener el desembolso original
-      const desembolso = await bussDesembolso.readDesembolso(
-        desembolsoFuenteData.idDesembolso
-      );
-      if (!desembolso) {
-        response.status(404).json({ message: "Desembolso no encontrado" });
-      }
+    const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+    const bussDesembolso: BussDesembolso = new BussDesembolso();
+    const fuente: BussFuente = new BussFuente();
 
-      const monto = desembolsoFuenteData.montoTotal || 0;
-      const idFuente = desembolsoFuenteData.idFuente;
-
-      // Asegurar que `fuentes` es un array
-      if (!Array.isArray((desembolso as any).idFuentes)) {
-        (desembolso as any).idFuentes = [];
-      }
-
-      // Verificar si ya hay un desemFuente con ese idFuente
-      const fuenteYaRegistrada = (desembolso as any).idFuentes.some(
-        (df: any) => {
-          if (!df.idFuente) return false;
-          const actualId =
-            typeof df.idFuente === "object"
-              ? df.idFuente._id?.toString()
-              : df.idFuente.toString();
-          return actualId === idFuente.toString();
-        }
-      );
-
-      if (fuenteYaRegistrada) {
-        response.status(409).json({
-          message: "Este F.F.- O.F. ya fue registrado para este desembolso",
-        });
-        return;
-      }
-      desembolsoFuenteData.idUserRegister = user._id;
-      desembolsoFuenteData.gestion = new Date().getFullYear();
-      desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
-      desembolsoFuenteData.fuente = fuenteData.ffof;
-      desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
-      const result = await desembolsoFuente.addDesemFuente(
-        desembolsoFuenteData
-      );
-      // ✅ Agregar la fuente y actualizar monto asignado
-      (desembolso as any).idFuentes.push(result._id);
-      const montoAnterior = (desembolso as any).montoAsignado || 0;
-      (desembolso as any).montoAsignado = montoAnterior + monto;
-
-      // 2. Registrar la fuente
-      await desembolso.save();
-
-      // Respuesta final
-      response.status(201).json({
-        serverResponse: result,
-        message: "Fuente registrada y desembolso actualizado correctamente",
-      });
-    } catch (error) {
-      console.error("Error al crear el desembolso fuente:", error);
-      response.status(500).json({
-        message: "Error interno del servidor al crear el desembolso fuente",
-        error: error instanceof Error ? error.message : error,
-      });
+    const fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
+    if (!fuenteData) {
+      response.status(404).json({ message: "Fuente no encontrada" });
+      return;
     }
+
+    // 1️⃣ Obtener el desembolso original
+    const desembolso = await bussDesembolso.readDesembolso(
+      desembolsoFuenteData.idDesembolso
+    );
+    if (!desembolso) {
+      response.status(404).json({ message: "Desembolso no encontrado" });
+      return;
+    }
+
+    const idFuente = desembolsoFuenteData.idFuente;
+    const montoNuevo = desembolsoFuenteData.montoTotal || 0;
+
+    // 2️⃣ Validar que `idFuentes` sea array
+    if (!Array.isArray((desembolso as any).idFuentes)) {
+      (desembolso as any).idFuentes = [];
+    }
+
+    // 3️⃣ Verificar si ya existe esta fuente en el desembolso
+    const fuenteYaRegistrada = (desembolso as any).idFuentes.some((df: any) => {
+      if (!df.idFuente) return false;
+      const actualId =
+        typeof df.idFuente === "object"
+          ? df.idFuente._id?.toString()
+          : df.idFuente.toString();
+      return actualId === idFuente.toString();
+    });
+
+    if (fuenteYaRegistrada) {
+      response.status(409).json({
+        message: "Este F.F.- O.F. ya fue registrado para este desembolso",
+      });
+      return;
+    }
+
+    // 4️⃣ Buscar TODOS los desembolsoFuente previos de esta fuente
+    const previos = (await desembolsoFuente.readDesemFuente(
+      { idFuente },
+      0,
+      0,
+      {}
+    )) as any[];
+
+    let excedenteGlobal = 0;
+
+    // Recorremos los registros anteriores
+    for (const reg of previos) {
+      if (reg.montoGasto > reg.montoTotal) {
+        const excedente = reg.montoGasto - reg.montoTotal;
+        excedenteGlobal += excedente;
+
+        // Ajustar montoGasto = montoTotal
+        await desembolsoFuente.updateDesemFuente(reg._id, {
+          montoGasto: reg.montoTotal,
+        });
+      }
+    }
+
+    // 5️⃣ Preparar datos para el nuevo registro
+    desembolsoFuenteData.idUserRegister = user._id;
+    desembolsoFuenteData.gestion = new Date().getFullYear();
+    desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
+    desembolsoFuenteData.fuente = fuenteData.ffof;
+    desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
+
+    // 👉 El montoGasto del nuevo registro incluirá el excedente acumulado
+    desembolsoFuenteData.montoGasto =
+      (desembolsoFuenteData.montoGasto || 0) + excedenteGlobal;
+
+    // 6️⃣ Crear el nuevo desembolsoFuente
+    const result = await desembolsoFuente.addDesemFuente(desembolsoFuenteData);
+
+    // 7️⃣ Actualizar el desembolso padre
+    (desembolso as any).idFuentes.push(result._id);
+    const montoAnterior = (desembolso as any).montoAsignado || 0;
+    (desembolso as any).montoAsignado = montoAnterior + montoNuevo;
+    await desembolso.save();
+
+    // ✅ Respuesta final
+    response.status(201).json({
+      serverResponse: result,
+      excedenteAcumulado: excedenteGlobal,
+      message:
+        "Fuente registrada y desembolso actualizado correctamente. Excedente ajustado en registros previos.",
+    });
+  } catch (error) {
+    console.error("Error al crear el desembolso fuente:", error);
+    response.status(500).json({
+      message: "Error interno del servidor al crear el desembolso fuente",
+      error: error instanceof Error ? error.message : error,
+    });
   }
+}
   public async getDesemFuentes(request: Request, response: Response) {
     try {
       const desembolsoFuente = new BussDesemFuente();
@@ -4143,25 +4381,6 @@ class RoutesController {
         },
         { $sort: { totalMonto: -1 } },
       ]);
-      // const resumenPorFuente = gastos.reduce((acc: { [key: string]: { idFuente: any; denominacion: string; ffof: string; totalMonto: number; count: number } }, gasto) => {
-      //   const fuente = gasto.idFuente as any;
-      //   const key = fuente._id.toString();
-
-      //   if (!acc[key]) {
-      //     acc[key] = {
-      //       idFuente: fuente._id,
-      //       denominacion: fuente.denominacion,
-      //       ffof: fuente.ffof,
-      //       totalMonto: 0,
-      //       count: 0,
-      //     };
-      //   }
-
-      //   acc[key].totalMonto += gasto.montoGasto;
-      //   acc[key].count++;
-
-      //   return acc;
-      // }, {} as { [key: string]: { idFuente: any; denominacion: string; ffof: string; totalMonto: number; count: number } });
 
       // 🔹 Resumen por catProgra
       const resumenPorCatProgra = await gastoModule.aggregate([
@@ -4228,7 +4447,7 @@ class RoutesController {
     });
     response.status(200).json(result);
   }
-   public async updateGastoId(request: Request, response: Response) {
+  public async updateGastoId(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();
     let id: string = request.params.id;
     var params = request.body;
@@ -4474,6 +4693,174 @@ class RoutesController {
   //     });
   //   }
   // }
+  // public async createDescargo(
+  //   request: Request,
+  //   response: Response
+  // ): Promise<void> {
+  //   try {
+  //     const ordinales = [
+  //       "mo",
+  //       "er",
+  //       "do",
+  //       "er",
+  //       "to",
+  //       "to",
+  //       "to",
+  //       "mo",
+  //       "vo",
+  //       "no",
+  //     ];
+
+  //     const descargoData = request.body;
+  //     const user: any = request.body.user;
+
+  //     // Extraer el año de la fecha y asignarlo a 'gestion'
+  //     const fecha = new Date(descargoData.fechaDescargo);
+  //     const gestion = fecha.getFullYear();
+
+  //     const { numero, idTipoDesembolso } = descargoData;
+
+  //     const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+  //     const descargo: Bussdescargo = new Bussdescargo();
+  //     const desembolso: BussDesembolso = new BussDesembolso();
+  //     const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+  //     const gasto: BussGasto = new BussGasto();
+
+  //     const tipoDesembolsoData: any = await tipoDesem.readTipoDesem(
+  //       idTipoDesembolso
+  //     );
+
+  //     const tipoDesembolso = tipoDesembolsoData.denominacion;
+  //     descargoData.tipoDesembolso = tipoDesembolso;
+
+  //     // Validar número único
+  //     const yaExiste = await descargo.findByNumeroTipoGestion(
+  //       numero,
+  //       tipoDesembolso,
+  //       gestion
+  //     );
+  //     if (yaExiste) {
+  //       if (numero) {
+  //         response.status(409).json({
+  //           message: `Ya existe un descargo con número ${numero}, tipo ${tipoDesembolso} en gestión ${gestion}`,
+  //         });
+  //         return;
+  //       } else {
+  //         const nuevoNumero = await descargo.getNextNumero(
+  //           tipoDesembolso,
+  //           gestion
+  //         );
+  //         descargoData.numero = nuevoNumero;
+  //       }
+  //     }
+
+  //     // Asignar numDescargo
+  //     if (descargoData.numero === 11 || descargoData.numero === 12) {
+  //       descargoData.numDescargo = `${descargoData.numero}mo Descargo`;
+  //     } else {
+  //       let num = descargoData.numero % 10;
+  //       let ordinal = ordinales[num];
+  //       descargoData.numDescargo = `${descargoData.numero}${ordinal} Descargo`;
+  //     }
+  //     descargoData.idUserRegister = user._id;
+  //     descargoData.gestion = gestion;
+
+  //     const gastosData = descargoData.gastos;
+  //     if (gastosData.length < 1) {
+  //       response.status(201).json({
+  //         serverResponse: "Debe existir al menos un gasto registrado",
+  //       });
+  //       return;
+  //     }
+
+  //     // Crear descargo
+  //     const result = await descargo.addDescargo(descargoData);
+
+  //     // Procesar cada gasto
+  //     for (let i = 0; i < gastosData.length; i++) {
+  //       let dataSimple: any = gastosData[i];
+  //       let data: any = await gasto.readGasto(dataSimple);
+  //       data.idDescargo = result._id;
+  //       data.estado = "DESCARGO";
+
+  //       // Recuperar desembolsos ordenados por fecha
+  //       const tipoDesembolsoDataAc: any = await tipoDesem.readTipoDesem(
+  //         idTipoDesembolso
+  //       );
+  //       let desembolsos: any[] = tipoDesembolsoDataAc.desembolsos;
+  //       desembolsos.sort(
+  //         (a, b) =>
+  //           new Date(a.fechaDesembolso).getTime() -
+  //           new Date(b.fechaDesembolso).getTime()
+  //       );
+
+  //       let montoPendiente = data.montoGasto;
+
+  //       for (let j = 0; j < desembolsos.length; j++) {
+  //         let d = desembolsos[j];
+  //         log('tipoDes', d.idTipoDesembolso, 'bene:', d.beneficiario, 'montoG', d.montoGasto, 'montoT', d.montoTotal);
+  //         if (montoPendiente <= 0) break;
+
+  //         if (String(d.beneficiario) === String(descargoData.encargado)) {
+  //           let fuente = d.idFuentes.find(
+  //             (f: any) => String(f.idFuente) === String(data.idFuente._id)
+  //           );
+  //           if (!fuente) continue;
+
+  //           // Si no es el último desembolso → usar saldo disponible
+  //           if (j < desembolsos.length - 1) {
+  //             let disponible = fuente.montoTotal - fuente.montoGasto;
+  //             if (disponible > 0) {
+  //               let usar = Math.min(disponible, montoPendiente);
+
+  //               fuente.montoGasto += usar;
+  //               d.montoGasto += usar;
+  //               montoPendiente -= usar;
+
+  //               await desembolsoFuente.updateDesemFuente(fuente._id, {
+  //                 montoGasto: fuente.montoGasto,
+  //               });
+  //               await desembolso.updateDesembolso(d._id, {
+  //                 montoGasto: d.montoGasto,
+  //               });
+  //                await tipoDesem.updateTipoDesem(d.idTipoDesembolso, {
+  //                 montoEjecutado: d.montoGasto,
+  //               });
+  //             }
+  //           } else {
+  //             // 👉 Último desembolso: sumar todo el monto pendiente (aunque supere el total)
+  //             fuente.montoGasto += montoPendiente;
+  //             d.montoGasto += montoPendiente;
+
+  //             await desembolsoFuente.updateDesemFuente(fuente._id, {
+  //               montoGasto: fuente.montoGasto,
+  //             });
+  //             await desembolso.updateDesembolso(d._id, {
+  //               montoGasto: d.montoGasto,
+  //             });
+
+  //             montoPendiente = 0;
+  //           }
+  //         }
+  //       }
+
+  //       // Guardar cambios en el gasto
+  //       await gasto.updateGasto(data._id, {
+  //         estado: data.estado,
+  //         numDescargo: result.numDescargo,
+  //       });
+  //     }
+
+  //     response.status(201).json({ serverResponse: result });
+  //   } catch (error) {
+  //     console.error("Error al crear el descargo:", error);
+  //     response.status(500).json({
+  //       message: "Error interno del servidor al crear el descargo",
+  //       error: error instanceof Error ? error.message : error,
+  //     });
+  //   }
+  // }
+
   public async createDescargo(
     request: Request,
     response: Response
@@ -4491,11 +4878,10 @@ class RoutesController {
         "vo",
         "no",
       ];
-
       const descargoData = request.body;
       const user: any = request.body.user;
 
-      // Extraer el año de la fecha y asignarlo a 'gestion'
+      // ✅ Gestion a partir de la fecha del descargo
       const fecha = new Date(descargoData.fechaDescargo);
       const gestion = fecha.getFullYear();
 
@@ -4507,14 +4893,14 @@ class RoutesController {
       const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
       const gasto: BussGasto = new BussGasto();
 
+      // ✅ Traer el tipo de desembolso
       const tipoDesembolsoData: any = await tipoDesem.readTipoDesem(
         idTipoDesembolso
       );
-
       const tipoDesembolso = tipoDesembolsoData.denominacion;
       descargoData.tipoDesembolso = tipoDesembolso;
 
-      // Validar número único
+      // ✅ Validar número único
       const yaExiste = await descargo.findByNumeroTipoGestion(
         numero,
         tipoDesembolso,
@@ -4535,7 +4921,7 @@ class RoutesController {
         }
       }
 
-      // Asignar numDescargo
+      // ✅ Formato numDescargo
       if (descargoData.numero === 11 || descargoData.numero === 12) {
         descargoData.numDescargo = `${descargoData.numero}mo Descargo`;
       } else {
@@ -4543,6 +4929,7 @@ class RoutesController {
         let ordinal = ordinales[num];
         descargoData.numDescargo = `${descargoData.numero}${ordinal} Descargo`;
       }
+
       descargoData.idUserRegister = user._id;
       descargoData.gestion = gestion;
 
@@ -4554,17 +4941,17 @@ class RoutesController {
         return;
       }
 
-      // Crear descargo
+      // ✅ Crear el descargo principal
       const result = await descargo.addDescargo(descargoData);
 
-      // Procesar cada gasto
+      // ✅ Procesar cada gasto
       for (let i = 0; i < gastosData.length; i++) {
         let dataSimple: any = gastosData[i];
         let data: any = await gasto.readGasto(dataSimple);
         data.idDescargo = result._id;
         data.estado = "DESCARGO";
 
-        // Recuperar desembolsos ordenados por fecha
+        // 🔹 Traer desembolsos ordenados por fecha (FIFO)
         const tipoDesembolsoDataAc: any = await tipoDesem.readTipoDesem(
           idTipoDesembolso
         );
@@ -4578,17 +4965,20 @@ class RoutesController {
         let montoPendiente = data.montoGasto;
 
         for (let j = 0; j < desembolsos.length; j++) {
-          let d = desembolsos[j];
           if (montoPendiente <= 0) break;
 
+          let d = desembolsos[j];
+
+          // Solo desembolsos del mismo beneficiario
           if (String(d.beneficiario) === String(descargoData.encargado)) {
+            // Buscar la fuente correspondiente
             let fuente = d.idFuentes.find(
               (f: any) => String(f.idFuente) === String(data.idFuente._id)
             );
             if (!fuente) continue;
 
-            // Si no es el último desembolso → usar saldo disponible
             if (j < desembolsos.length - 1) {
+              // 👉 Desembolso intermedio: solo hasta su saldo
               let disponible = fuente.montoTotal - fuente.montoGasto;
               if (disponible > 0) {
                 let usar = Math.min(disponible, montoPendiente);
@@ -4597,15 +4987,22 @@ class RoutesController {
                 d.montoGasto += usar;
                 montoPendiente -= usar;
 
+                // Guardar cambios
                 await desembolsoFuente.updateDesemFuente(fuente._id, {
                   montoGasto: fuente.montoGasto,
                 });
                 await desembolso.updateDesembolso(d._id, {
                   montoGasto: d.montoGasto,
                 });
+                // Incremento atómico solo de montoEjecutado
+                await tipoDesem.updateTipoDesem(
+                  d.idTipoDesembolso,
+                  { montoEjecutado: usar },
+                  { inc: true }
+                );
               }
             } else {
-              // 👉 Último desembolso: sumar todo el monto pendiente (aunque supere el total)
+              // 👉 Último desembolso: se suma TODO lo pendiente (aunque supere el total)
               fuente.montoGasto += montoPendiente;
               d.montoGasto += montoPendiente;
 
@@ -4615,18 +5012,30 @@ class RoutesController {
               await desembolso.updateDesembolso(d._id, {
                 montoGasto: d.montoGasto,
               });
+              // Incrementar montoEjecutado
+              await tipoDesem.updateTipoDesem(
+                d.idTipoDesembolso,
+                { montoEjecutado: montoPendiente },
+                { inc: true }
+              );
 
-              montoPendiente = 0;
+              montoPendiente = 0; // Ya consumido
             }
           }
         }
 
-        // Guardar cambios en el gasto
+        // ✅ Actualizar gasto
         await gasto.updateGasto(data._id, {
           estado: data.estado,
           numDescargo: result.numDescargo,
         });
       }
+       // Agregar id de descargo al array
+        await tipoDesem.updateTipoDesem(
+          idTipoDesembolso,
+          { descargos: result._id },
+          { push: true }
+        );
 
       response.status(201).json({ serverResponse: result });
     } catch (error) {
@@ -4637,6 +5046,7 @@ class RoutesController {
       });
     }
   }
+
   public async getDescargos(request: Request, response: Response) {
     var descargo: Bussdescargo = new Bussdescargo();
     let resp = await descargo.readDescargo();
@@ -4709,79 +5119,77 @@ class RoutesController {
     let id: string = request.params.id;
     let user: string = request.body.user;
     const descargoData: any = await descargo.readDescargo(id);
-    
-     // 🔹 Resumen por fuente
-      const resumenPorFuente = await gastoModule.aggregate([
-        //  { $match: { idDescargo: id } },
-        {
-          $group: {
-            _id: "$fuente", // "41-113"
-            idFuente: { $first: "$idFuente" }, // actualmente string
-            totalMonto: { $sum: "$montoGasto" },
-            count: { $sum: 1 },
-          },
-        },
-        // 🔹 Convertir a ObjectId
-        {
-          $addFields: {
-            idFuente: { $toObjectId: "$idFuente" },
-          },
-        },
-        {
-          $lookup: {
-            from: "alm_fuentes", // nombre real de la colección
-            localField: "idFuente",
-            foreignField: "_id",
-            as: "fuenteData",
-          },
-        },
-        { $unwind: "$fuenteData" },
-        {
-          $project: {
-            _id: 1,
-            idFuente: 1,
-            totalMonto: 1,
-            count: 1,
-            denominacion: "$fuenteData.denominacion",
-          },
-        },
-        { $sort: { totalMonto: -1 } },
-      ]);
-      const resumenPorCatProgra = await gastoModule.aggregate([
-        // { $match: { idDescargo: id } },
-        {
-          $group: {
-            _id: "$catProgra",
-            nameCatProg: { $first: "$nameCatProg" },
-            fuente: { $first: "$fuente" },
-            totalMonto: { $sum: "$montoGasto" },
-            count: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]);
 
-      // 🔹 Monto total de todos los gastos
-      const montoTotalResult = await gastoModule.aggregate([
-        // { $match: filter },
-        {
-          $group: {
-            _id: null,
-            montoTotalGasto: { $sum: "$montoGasto" },
-          },
-        },
-      ]);
-      const montoTotalGasto =
-        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+    // 🔹 Obtener los _id de los gastos (aunque estén populados)
+    const gastoIds = descargoData.gastos.map((g: any) =>
+      typeof g === "object" ? g._id : g
+    );
 
-      const data = {
-        user,
-        descargoData,
-        resumenPorFuente,
-        resumenPorCatProgra,
-        montoTotalGasto, // ✅ aquí ya lo tienes
-      };
-      const pdfDoc = await descargo.printDescargoGasto(data);
+    // 🔹 Resumen por fuente
+    const resumenPorFuente = await gastoModule.aggregate([
+      { $match: { _id: { $in: gastoIds } } },
+      {
+        $group: {
+          _id: "$fuente",
+          idFuente: { $first: "$idFuente" },
+          totalMonto: { $sum: "$montoGasto" },
+          count: { $sum: 1 },
+        },
+      },
+      { $addFields: { idFuente: { $toObjectId: "$idFuente" } } },
+      {
+        $lookup: {
+          from: "alm_fuentes",
+          localField: "idFuente",
+          foreignField: "_id",
+          as: "fuenteData",
+        },
+      },
+      { $unwind: "$fuenteData" },
+      {
+        $project: {
+          _id: 1,
+          idFuente: 1,
+          totalMonto: 1,
+          count: 1,
+          denominacion: "$fuenteData.denominacion",
+        },
+      },
+      { $sort: { totalMonto: -1 } },
+    ]);
+
+    // 🔹 Resumen por catProgra
+    const resumenPorCatProgra = await gastoModule.aggregate([
+      { $match: { _id: { $in: gastoIds } } },
+      {
+        $group: {
+          _id: "$catProgra",
+          nameCatProg: { $first: "$nameCatProg" },
+          fuente: { $first: "$fuente" },
+          totalMonto: { $sum: "$montoGasto" },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    // 🔹 Monto total
+    const montoTotalResult = await gastoModule.aggregate([
+      { $match: { _id: { $in: gastoIds } } },
+      { $group: { _id: null, montoTotalGasto: { $sum: "$montoGasto" } } },
+    ]);
+
+    const montoTotalGasto =
+      montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+    const data = {
+      user,
+      descargoData,
+      resumenPorFuente,
+      resumenPorCatProgra,
+      montoTotalGasto, // ✅ aquí ya lo tienes
+    };
+    const pdfDoc = await descargo.printDescargoGasto(data);
     response.setHeader("Content-Type", "application/pdf");
     pdfDoc.info.Title = "Detalle de Gasto de Desembolso";
     pdfDoc.pipe(response);

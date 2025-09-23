@@ -83,10 +83,10 @@ const styles: StyleDictionary = {
     color: "black",
   },
 };
-export const printDescargoGasto = (options: any,): TDocumentDefinitions => {
+export const printDescargoGasto = (options: any): TDocumentDefinitions => {
   const values = options;
   const user = values.user;
-log('values', values);
+  // log("values", values);
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.descargoData.gastos || [];
   const resumenPorFuente = values.resumenPorFuente || [];
@@ -141,28 +141,42 @@ log('values', values);
       fontSize: 10,
     },
 
-    // ✅ Marca de agua en diagonal
-  watermark: {
-    text: "NO VÁLIDO",
-    color: "#d00000",
-    opacity: 0.1,
-    bold: true,
-    fontSize: 150,
-    angle: -60    // 🔹 Rotación en grados (positivo = antihorario)
-  },
+    //   // ✅ Marca de agua en diagonal
+    // watermark: {
+    //   text: "NO VÁLIDO",
+    //   color: "#d00000",
+    //   opacity: 0.1,
+    //   bold: true,
+    //   fontSize: 150,
+    //   angle: -60    // 🔹 Rotación en grados (positivo = antihorario)
+    // },
     header: [
       {
         columns: [
           logoGamb,
           {
-            text: `REPORTE DETALLADO DEL GASTO`,
-            alignment: "center",
-            margin: [0, 30, 0, 0],
-            style: {
-              bold: true,
-              fontSize: 13,
-              color: "#0e78d1",
-            },
+            stack: [
+              {
+                text: `REPORTE DETALLADO DEL ${values.descargoData.numDescargo.toUpperCase()}`,
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 13,
+                  color: "#0e78d1",
+                },
+              },
+              {
+                text: `(Expresado en bolivianos) `,
+                alignment: "center",
+                margin: [0, 0, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 10,
+                  color: "#6fb5ee",
+                },
+              },
+            ],
           },
           sisal,
         ],
@@ -184,25 +198,37 @@ log('values', values);
       },
     ],
     footer: footerSectionLan,
-    
-    content: [
-      // Detalles del Vale
 
-      /*  // Horizontal Line
+    content: [
       {
-        margin: [0, 0, 0, 0],
-        canvas: [
+        text: "I. Detalle General del Descargo",
+        style: "subTitle",
+        decoration: "underline",
+      },
+      {
+        text: [
+          { text: `Número de Descargo: `, bold: true },
+          { text: `${values.descargoData.numDescargo}` },
+          { text: `                 Fecha de Descargo: `, bold: true },
           {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 550,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#3Ae546",
+            text: `${DateFormatterSimple.getDDMMYYYY(
+              new Date(values.descargoData.fechaDescargo)
+            )}`,
           },
+          { text: `                  Monto Total de Descargo: `, bold: true },
+          {
+            text: `${CurrencyFormatter.formatCurrency(
+              values.descargoData.montoDescargo
+            )}`,
+          },
+          { text: `     A cargo de: `, bold: true },
+          { text: `${capitalize(
+                  values.descargoData.encargado.username
+                )} ${capitalize(values.descargoData.encargado.surnames)} ` },
+          { text: `                 Tipo de Fondo: `, bold: true },
+          { text: `${values.descargoData.tipoDesembolso}` },
         ],
-      }, */
+      },
       {
         text: "II. Detalle de Gastos de Fuentes de Financiamiento",
         style: "subTitle",
@@ -215,7 +241,7 @@ log('values', values);
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
           headerRows: 1,
-          widths: [18, 80, 320, 95],
+          widths: [18, 80, 320, 104],
 
           body: [
             [
@@ -285,7 +311,7 @@ log('values', values);
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
           headerRows: 1,
-          widths: [10, 30, 60, 30, 80, 20, 25, 80, 38, 20, 25],
+          widths: [10, 30, 60, 30, 90, 20, 25, 80, 40, 20, 25],
 
           body: [
             [
@@ -401,7 +427,7 @@ log('values', values);
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
           headerRows: 1,
-          widths: [18, 80, 300, 30, 70],
+          widths: [18, 80, 314, 30, 70],
 
           body: [
             [
@@ -415,7 +441,7 @@ log('values', values);
               { text: indice + 1, style: "tableBody", alignment: "center" },
               {
                 text: catProg._id,
-                style: "tableBody",
+                style: "tableBody2",
                 alignment: "center",
               },
               {
@@ -458,7 +484,7 @@ log('values', values);
       },
 
       {
-        margin: [10, 120, 0, 5],
+        margin: [10, 90, 0, 5],
         layout: "noBorders", // 'lightHorizontalLines', // optional
         table: {
           headerRows: 1,

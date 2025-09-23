@@ -28,7 +28,8 @@ class App {
     mongoose.connect(connectionString, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
+      // useCreateIndex: true,
+      useFindAndModify: false,
     });
     //Eventos
     mongoose.connection.on("error", (err) => {

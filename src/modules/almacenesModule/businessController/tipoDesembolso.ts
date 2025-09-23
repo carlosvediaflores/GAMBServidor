@@ -58,12 +58,41 @@ class BussTipoDesembols {
       return err;
     }
   }
-  public async updateTipoDesem(id: string, tipoDes: any) {
-    let result = await tipoDesemdModel.updateOne(
-      { _id: id },
-      { $set: tipoDes }
-    );
-    return result;
+  // public async updateTipoDesem(id: string, tipoDes: any) {
+  //   let result = await tipoDesemdModel.updateOne(
+  //     { _id: id },
+  //     { $set: tipoDes }
+  //   );
+  //   return result;
+  // }
+
+  public async updateTipoDesem(
+    id: string,
+    data: any,
+    options: { inc?: boolean; push?: boolean } = {}
+  ) {
+    if (options.inc) {
+      // Incremento atómico para campos numéricos
+      return await tipoDesemdModel.findOneAndUpdate(
+        { _id: id },
+        { $inc: data },
+        { new: true }
+      );
+    } else if (options.push) {
+      // Agregar elementos a arrays
+      return await tipoDesemdModel.findOneAndUpdate(
+        { _id: id },
+        { $push: data },
+        { new: true }
+      );
+    } else {
+      // Actualización normal
+      return await tipoDesemdModel.findOneAndUpdate(
+        { _id: id },
+        { $set: data },
+        { new: true }
+      );
+    }
   }
   public async deleteTipoDesem(id: string) {
     let result = await tipoDesemdModel.deleteOne({ _id: id });

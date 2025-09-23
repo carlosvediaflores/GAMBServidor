@@ -141,15 +141,15 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
       fontSize: 10,
     },
 
-  //   // ✅ Marca de agua en diagonal
-  // watermark: {
-  //   text: "NO VÁLIDO",
-  //   color: "#d00000",
-  //   opacity: 0.1,
-  //   bold: true,
-  //   fontSize: 150,
-  //   angle: -60    // 🔹 Rotación en grados (positivo = antihorario)
-  // },
+    // ✅ Marca de agua en diagonal
+    watermark: {
+      text: "NO VÁLIDO",
+      color: "#d00000",
+      opacity: 0.1,
+      bold: true,
+      fontSize: 150,
+      angle: -60, // 🔹 Rotación en grados (positivo = antihorario)
+    },
     header: [
       {
         columns: [
@@ -184,7 +184,7 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
       },
     ],
     footer: footerSectionLan,
-    
+
     content: [
       // Detalles del Vale
 

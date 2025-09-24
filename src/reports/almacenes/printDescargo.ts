@@ -209,19 +209,19 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
         text: [
           { text: `Número de Descargo: `, bold: true },
           { text: `${values.descargoData.numDescargo}` },
-          { text: `                 Fecha de Descargo: `, bold: true },
+          { text: `             Fecha de Descargo: `, bold: true },
           {
             text: `${DateFormatterSimple.getDDMMYYYY(
               new Date(values.descargoData.fechaDescargo)
             )}`,
           },
-          { text: `                  Monto Total de Descargo: `, bold: true },
+          { text: `              Monto Total del Descargo: `, bold: true },
           {
             text: `${CurrencyFormatter.formatCurrency(
               values.descargoData.montoDescargo
             )}`,
           },
-          { text: `     A cargo de: `, bold: true },
+          { text: `\n A cargo de: `, bold: true },
           { text: `${capitalize(
                   values.descargoData.encargado.username
                 )} ${capitalize(values.descargoData.encargado.surnames)} ` },
@@ -483,84 +483,84 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
         },
       },
 
-      {
-        margin: [10, 90, 0, 5],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
+      // {
+      //   margin: [10, 90, 0, 5],
+      //   layout: "noBorders", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     headerRows: 1,
+      //     widths: [120, 120, 140, 140],
 
-          body: [
-            [
-              {
-                text: "Entrgue Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-              {
-                // text: "Responsable Almacen",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                // text: "Autorizado por:",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                text: "Recibí Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-            ],
-          ],
-        },
-      },
-      {
-        margin: [0, -5, 0, 0],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
+      //     body: [
+      //       [
+      //         {
+      //           text: "Entrgue Conforme ",
+      //           style: "tableHeader",
+      //           alignment: "center",
+      //         },
+      //         {
+      //           // text: "Responsable Almacen",
+      //           // style: "tableHeader",
+      //           // alignment: "center",
+      //         },
+      //         {
+      //           // text: "Autorizado por:",
+      //           // style: "tableHeader",
+      //           // alignment: "center",
+      //         },
+      //         {
+      //           text: "Recibí Conforme ",
+      //           style: "tableHeader",
+      //           alignment: "center",
+      //         },
+      //       ],
+      //     ],
+      //   },
+      // },
+      // {
+      //   margin: [0, -5, 0, 0],
+      //   layout: "noBorders", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     headerRows: 1,
+      //     widths: [120, 120, 140, 140],
 
-          body: [
-            [
-              {
-                text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
-                  new Date()
-                )}`,
-                style: "footer",
-                alignment: "left",
-                colSpan: 2,
-              },
-              {},
-              {
-                text: `Impreso por: ${capitalize(user.username)} ${capitalize(
-                  user.surnames
-                )}`,
-                style: "footer",
-                alignment: "right",
-                colSpan: 2,
-              },
-              {},
-            ],
-          ],
-        },
-      },
-      {
-        margin: [0, -5, 0, 30],
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 550,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#3Ae546",
-          },
-        ],
-      },
+      //     body: [
+      //       [
+      //         {
+      //           text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
+      //             new Date()
+      //           )}`,
+      //           style: "footer",
+      //           alignment: "left",
+      //           colSpan: 2,
+      //         },
+      //         {},
+      //         {
+      //           text: `Impreso por: ${capitalize(user.username)} ${capitalize(
+      //             user.surnames
+      //           )}`,
+      //           style: "footer",
+      //           alignment: "right",
+      //           colSpan: 2,
+      //         },
+      //         {},
+      //       ],
+      //     ],
+      //   },
+      // },
+      // {
+      //   margin: [0, -5, 0, 30],
+      //   canvas: [
+      //     {
+      //       type: "line",
+      //       x1: 0,
+      //       y1: 5,
+      //       x2: 550,
+      //       y2: 5,
+      //       lineWidth: 1,
+      //       lineColor: "#3Ae546",
+      //     },
+      //   ],
+      // },
     ],
   };
 

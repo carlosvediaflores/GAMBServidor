@@ -2664,7 +2664,8 @@ class RoutesController {
     const egresoAdd = await Ingreso.addEgresos(resultIngreso, resultEgreso._id);
     //console.log('resultEgreso',resultEgreso);
     for (let i = 0; i < resp.length; i++) {
-      let data: any = resp[i];
+      let valeId: any = resp[i];
+      let data: any = await Vale.readVale(valeId);
       compraData.cantidadCompra = data.cantidad;
       compraData.estadoCompra = "AGOTADO";
       compraData.idEntrada = resultIngreso._id;

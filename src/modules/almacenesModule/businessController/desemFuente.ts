@@ -1,6 +1,11 @@
+import { printQueryFuente } from "../../../reports/almacenes";
+import PrinterService from "../../../printer";
 import desemFuenteModule, { IdesemFuente } from "../models/desemFuente";
+
 class BussDeseFuente {
-  constructor() {}
+  constructor(
+    private readonly printerService: PrinterService = new PrinterService()
+  ) {}
   public async readDesemFuente(): Promise<Array<IdesemFuente>>;
   public async readDesemFuente(id: string): Promise<IdesemFuente>;
   public async readDesemFuente(
@@ -20,8 +25,8 @@ class BussDeseFuente {
       var result: IdesemFuente = await desemFuenteModule
         .findOne({ _id: params1 })
         .populate("beneficiario")
-         .populate({path:"idDesembolso", model:"alm_desembolso"})
-        .populate({path:"idFuente", model:"alm_fuente"});
+        .populate({ path: "idDesembolso", model: "alm_desembolso" })
+        .populate({ path: "idFuente", model: "alm_fuente" });
       return result;
     } else if (params1) {
       let skip = params2;
@@ -29,8 +34,8 @@ class BussDeseFuente {
       let desembolso: Array<IdesemFuente> = await desemFuenteModule
         .find(params1)
         .populate("beneficiario")
-        .populate({path:"idDesembolso", model:"alm_desembolso"})
-        .populate({path:"idFuente", model:"alm_fuente"})
+        .populate({ path: "idDesembolso", model: "alm_desembolso" })
+        .populate({ path: "idFuente", model: "alm_fuente" })
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -40,8 +45,8 @@ class BussDeseFuente {
       let desembolso: Array<IdesemFuente> = await desemFuenteModule
         .find()
         .populate("beneficiario")
-        .populate({path:"idDesembolso", model:"alm_desembolso"})
-        .populate({path:"idFuente", model:"alm_fuente"})
+        .populate({ path: "idDesembolso", model: "alm_desembolso" })
+        .populate({ path: "idFuente", model: "alm_fuente" });
       return desembolso;
     }
   }
@@ -65,6 +70,26 @@ class BussDeseFuente {
   public async deleteDesemFuente(id: string) {
     let result = await desemFuenteModule.deleteOne({ _id: id });
     return result;
+  }
+  public async printQueryFuente(data?: any) {
+    // const listGasto: any = await gastoModule
+    //   .find(filter)
+    //   .populate("idSolicitante")
+    //   .populate("idCombustible")
+    //   .populate("idPartida")
+    //   .populate("idVehiculo")
+    //   .populate("idTipoDesembolso")
+    //   .populate({
+    //     path: "idFuentes",
+    //     model: "alm_desemFuente",
+    //     populate: { path: "idFuente", model: "alm_fuente" },
+    //   })
+    //   .sort({ fecha: -1 });
+    // console.log("listGasto", data);
+
+    const docDefinition = printQueryFuente(data);
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
   }
   // ✅ Verifica si ya existe un número + tipo + gestión
   // public async findByNumeroTipoGestion(

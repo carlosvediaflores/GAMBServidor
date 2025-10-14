@@ -1,5 +1,5 @@
 import PrinterService from "../../../printer";
-import { printDesemFuente, printQueryGasto } from "../../../reports/almacenes";
+import { printDesemFuente, printQueryGasto, printQueryGastos } from "../../../reports/almacenes";
 import gastoModule, { Igastos } from "../models/gastos";
 class BussGasto {
   constructor(
@@ -148,8 +148,13 @@ class BussGasto {
         //   })
         //   .sort({ fecha: -1 });
         // console.log("listGasto", data);
-
-        const docDefinition = printQueryGasto(data);
+        let docDefinition;
+        if(data.borrador.borradorData){       
+          console.log("filter", data.borrador);
+           docDefinition = printQueryGasto(data);
+        }else{
+          docDefinition = printQueryGastos(data);
+        }
         const doc = this.printerService.createPdf(docDefinition);
         return doc;
       }

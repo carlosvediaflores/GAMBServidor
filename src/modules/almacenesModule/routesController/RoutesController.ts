@@ -3906,57 +3906,6 @@ class RoutesController {
           },
         },
       ]);
-      // const resumenPorBeneficiario = await desemFuente.aggregate([
-      //   { $match: filter },
-
-      //   {
-      //     $group: {
-      //       _id: {
-      //         beneficiario: "$beneficiario",
-      //         surnames: "$surnames",
-      //         fuente: "$fuente",
-      //       },
-      //       denominacionFuente: { $first: "$denominacionFuente" }, // 👈 guardamos descripción
-      //       totalMonto: { $sum: "$montoTotal" },
-      //       totalGasto: { $sum: "$montoGasto" },
-      //       count: { $sum: 1 },
-      //     },
-      //   },
-
-      //   {
-      //     $group: {
-      //       _id: {
-      //         beneficiario: "$_id.beneficiario",
-      //         surnames: "$_id.surnames",
-      //       },
-      //       fuentes: {
-      //         $push: {
-      //           _id: "$_id.fuente",
-      //           denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
-      //           totalMonto: "$totalMonto",
-      //           totalGasto: "$totalGasto",
-      //           count: "$count",
-      //         },
-      //       },
-      //       sumaTotalMonto: { $sum: "$totalMonto" },
-      //       sumaTotalGasto: { $sum: "$totalGasto" },
-      //       sumaTotalCount: { $sum: "$count" },
-      //     },
-      //   },
-
-      //   {
-      //     $project: {
-      //       _id: 0,
-      //       beneficiario: "$_id.beneficiario",
-      //       surnames: "$_id.surnames",
-      //       fuentes: 1,
-      //       sumaTotalMonto: 1,
-      //       sumaTotalGasto: 1,
-      //       sumaTotalCount: 1,
-      //     },
-      //   },
-      // ]);
-
       // 🔹 Resumen por tipo fondo
 
       const resumenPorTipoFondo = await desemFuente.aggregate([
@@ -4034,6 +3983,215 @@ class RoutesController {
       console.error("❌ Error en queryGastos:", error);
       return response.status(500).json({
         message: "Error consultando gastos",
+        error,
+      });
+    }
+  }
+  public async printQueryFuente(request: Request, response: Response) {
+     try {
+      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+      const params: any = request.query;
+      let user: string = request.body.user;
+
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.beneficiario)
+        filter.beneficiario = new mongoose.Types.ObjectId(params.beneficiario);
+      if (params.denominacionFuente)
+        filter.denominacionFuente = new RegExp(params.denominacionFuente, "i");
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit ? parseInt(params.limit, 10) : 20;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+
+      // 🔹 Listado de gastos
+      const desembolsoFuentes = await desembolsoFuente.readDesemFuente(
+        filter,
+        skip,
+        limit,
+        order
+      );
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await desemFuente.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente",
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por beneficiario
+
+      const resumenPorBeneficiario = await desemFuente.aggregate([
+        { $match: filter },
+
+        // 1) Agrupamos por beneficiario + fuente
+        {
+          $group: {
+            _id: {
+              beneficiario: "$beneficiario",
+              fuente: "$fuente",
+            },
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+
+        // 2) Agrupamos otra vez solo por beneficiario
+        {
+          $group: {
+            _id: "$_id.beneficiario",
+            fuentes: {
+              $push: {
+                _id: "$_id.fuente",
+                denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+                totalMonto: "$totalMonto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalMonto: { $sum: "$totalMonto" },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+          },
+        },
+
+        // 3) Hacemos lookup a la colección de usuarios
+        {
+          $lookup: {
+            from: "users", // 👈 nombre de la colección de usuarios en tu DB
+            localField: "_id", // beneficiario _id
+            foreignField: "_id", // id en la colección users
+            as: "beneficiarioData",
+          },
+        },
+
+        // 4) Proyectamos los campos que necesitamos
+        {
+          $project: {
+            _id: 0,
+            beneficiario: {
+              $ifNull: [
+                { $arrayElemAt: ["$beneficiarioData.username", 0] },
+                "SIN BENEFICIARIO",
+              ],
+            },
+            surnames: { $arrayElemAt: ["$beneficiarioData.surnames", 0] },
+            fuentes: 1,
+            sumaTotalMonto: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+      ]);
+      // 🔹 Resumen por tipo fondo
+
+      const resumenPorTipoFondo = await desemFuente.aggregate([
+        { $match: filter },
+
+        {
+          $group: {
+            _id: {
+              tipoFondo: "$tipoFondo",
+              fuente: "$fuente",
+            },
+            denominacionFuente: { $first: "$denominacionFuente" },
+            totalMonto: { $sum: "$montoTotal" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+
+        {
+          $group: {
+            _id: "$_id.tipoFondo",
+            fuentes: {
+              $push: {
+                _id: "$_id.fuente",
+                denominacionFuente: "$denominacionFuente", // 👈 lo incluimos aquí
+                totalMonto: "$totalMonto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalMonto: { $sum: "$totalMonto" },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+          },
+        },
+
+        {
+          $project: {
+            _id: 0,
+            tipoFondo: "$_id",
+            fuentes: 1,
+            sumaTotalMonto: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+      ]);
+
+      // 🔹 Monto total de todos los Desembolsos Fuemnes
+      const montoTotalResult = await desemFuente.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+            montoTotal: { $sum: "$montoTotal" },
+          },
+        },
+      ]);
+
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+      const montoTotal =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotal : 0;
+
+      const data = {
+        user,
+        desembolsoFuentes,
+        resumenPorFuente,
+        resumenPorBeneficiario,
+        resumenPorTipoFondo,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+        montoTotal, // ✅ aquí ya lo tienes
+      };
+      // log("data", data);
+
+      const pdfDoc = await desembolsoFuente.printQueryFuente(data);
+      response.setHeader("Content-Type", "application/pdf");
+      pdfDoc.info.Title = "Resumen de gastos por fuente";
+      pdfDoc.pipe(response);
+      pdfDoc.end();
+      return;
+    } catch (error) {
+      console.error("❌ Error en queryFuente:", error);
+      return response.status(500).json({
+        message: "Error consultando fuentes",
         error,
       });
     }
@@ -4289,6 +4447,7 @@ class RoutesController {
         montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
 
       return response.status(200).json({
+        filter,
         gastos,
         resumenPorFuente,
         resumenPorCatProgra,
@@ -4330,17 +4489,22 @@ class RoutesController {
       if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
       if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
       if (params.fuente) filter.fuente = params.fuente;
+      if (params.borrador) filter.borrador = params.borrador;
       if (params.partida) filter.partida = params.partida;
       if (params.catProgra) filter.catProgra = params.catProgra;
       if (params.solicitante)
         filter.solicitante = new RegExp(params.solicitante, "i");
-      if (params.numDescargo)
-        filter.numDescargo = new RegExp(params.numDescargo, "i");
+      if (params.numDescargo) filter.numDescargo = params.numDescargo;
 
       // 🔹 Orden y paginación
       const order: any = { fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
+      let borrador: any = {};
+      if (params.borrador) {
+        borrador.borradorData = params.borrador;
+        delete filter.borrador;
+      } 
 
       // 🔹 Listado de gastos
       const gastos = await gasto.readGasto(filter, skip, limit, order);
@@ -4412,6 +4576,8 @@ class RoutesController {
         montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
 
       const data = {
+        borrador,
+        filter,
         user,
         gastos,
         resumenPorFuente,
@@ -4422,7 +4588,7 @@ class RoutesController {
 
       const pdfDoc = await gasto.printQueryGastos(data);
       response.setHeader("Content-Type", "application/pdf");
-      pdfDoc.info.Title = "Ingresos Total Compras";
+      pdfDoc.info.Title = "Reporte de gastos";
       pdfDoc.pipe(response);
       pdfDoc.end();
       return;

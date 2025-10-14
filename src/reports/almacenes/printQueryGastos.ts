@@ -83,10 +83,11 @@ const styles: StyleDictionary = {
     color: "black",
   },
 };
-export const printQueryGasto = (options: any): TDocumentDefinitions => {
+export const printQueryGastos = (options: any): TDocumentDefinitions => {
   const values = options;
-  // log("values", values.filter);
   const user = values.user;
+  const filter = values.filter;
+  // log("values", values.filter);
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.gastos || [];
   const resumenPorFuente = values.resumenPorFuente || [];
@@ -141,28 +142,42 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
       fontSize: 10,
     },
 
-    // ✅ Marca de agua en diagonal
-    watermark: {
-      text: "BORRADOR",
-      color: "#d00000",
-      opacity: 0.2,
-      bold: true,
-      fontSize: 150,
-      angle: -60, // 🔹 Rotación en grados (positivo = antihorario)
-    },
+    //  // ✅ Marca de agua en diagonal
+    //    watermark: {
+    //     text: "NO VÁLIDO",
+    //     color: "#d00000",
+    //     opacity: 0.1,
+    //     bold: true,
+    //     fontSize: 150,
+    //     angle: -60, // 🔹 Rotación en grados (positivo = antihorario)
+    //   },
     header: [
       {
         columns: [
           logoGamb,
           {
-            text: `REPORTE DETALLADO DEL GASTO`,
-            alignment: "center",
-            margin: [0, 30, 0, 0],
-            style: {
-              bold: true,
-              fontSize: 13,
-              color: "#0e78d1",
-            },
+            stack: [
+              {
+                text: `REPORTE DETALLADO DEL GASTO`,
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 13,
+                  color: "#0e78d1",
+                },
+              },
+               {
+                text: `(Expresado en bolivianos) `,
+                alignment: "center",
+                margin: [0, 0, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 10,
+                  color: "#6fb5ee",
+                },
+              },
+            ],
           },
           sisal,
         ],
@@ -204,7 +219,53 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
         ],
       }, */
       {
-        text: "I. Detalle de Gastos de Fuentes de Financiamiento",
+        text: "I. Detalle General del Reporte de Gasto",
+        style: "subTitle",
+        decoration: "underline",
+      },
+      {
+        text: [
+          { text: `${filter.tipoGasto ? "Tipo de Gasto: " : ""}`, bold: true },
+          { text: `${filter?.tipoGasto ?? ""}` },
+          {
+            text: `${filter.tipoFondo ? "    Tipo de Fondo: " : ""}`,
+            bold: true,
+          },
+          { text: `${filter?.tipoFondo ?? ""}` },
+          { text: `${filter?.numDescargo ? "    Descargo: " : ""}`, bold: true },
+          { text: `${filter?.numDescargo ?? ""}` },
+          { text: `${filter?.fuente ? "    FF-OF: " : ""}`, bold: true },
+          { text: `${filter?.fuente ?? ""}` },
+          { text: `${filter?.catProgra ? "    Categoría Programática: " : ""}`, bold: true },
+          { text: `${filter?.catProgra ?? ""}` },
+          
+          { text: `${filter?.fechaRegistro?.$gte ? "    de Fecha: " : ""}`, bold: true },
+          { text: `${DateFormatterSimple.getDDMMYYYY(new Date(filter?.fechaRegistro?.$gte)) ?? ""}` },
+          
+          { text: `${filter?.fechaRegistro?.$lte ? "    al Fecha: " : ""}`, bold: true },
+          { text: `${DateFormatterSimple.getDDMMYYYY(new Date(filter?.fechaRegistro?.$lte)) ?? ""}` },
+          { text: `${filter?.estado ? "    Estado: " : ""}`, bold: true },
+          { text: `${filter?.estado ?? ""}` },
+          // { text: `             Fecha de Descargo: `, bold: true },
+          // {
+          //   text: `${DateFormatterSimple.getDDMMYYYY(new Date(values.descargoData.fechaDescargo))}`,
+          // },
+          // { text: `              Monto Total del Descargo: `, bold: true },
+          // {
+          //   text: `${CurrencyFormatter.formatCurrency(
+          //     values.descargoData.montoDescargo
+          //   )}`,
+          // },
+          // { text: `\n A cargo de: `, bold: true },
+          // { text: `${capitalize(
+          //         values.descargoData.encargado.username
+          //       )} ${capitalize(values.descargoData.encargado.surnames)} ` },
+          // { text: `                 Tipo de Fondo: `, bold: true },
+          // { text: `${values.descargoData.tipoDesembolso}` },
+        ],
+      },
+      {
+        text: "II. Detalle de Gastos de Fuentes de Financiamiento",
         style: "subTitle",
         decoration: "underline",
       },
@@ -274,7 +335,7 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
       },
 
       {
-        text: "II Detalle de Registro de Gasto",
+        text: "III Detalle de Registro de Gasto",
         style: "subTitle",
         decoration: "underline",
       },
@@ -457,84 +518,84 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
         },
       },
 
-      {
-        margin: [10, 120, 0, 5],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
+      // {
+      //   margin: [10, 120, 0, 5],
+      //   layout: "noBorders", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     headerRows: 1,
+      //     widths: [120, 120, 140, 140],
 
-          body: [
-            [
-              {
-                text: "Entrgue Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-              {
-                // text: "Responsable Almacen",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                // text: "Autorizado por:",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                text: "Recibí Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-            ],
-          ],
-        },
-      },
-      {
-        margin: [0, -5, 0, 0],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
+      //     body: [
+      //       [
+      //         {
+      //           text: "Entrgue Conforme ",
+      //           style: "tableHeader",
+      //           alignment: "center",
+      //         },
+      //         {
+      //           // text: "Responsable Almacen",
+      //           // style: "tableHeader",
+      //           // alignment: "center",
+      //         },
+      //         {
+      //           // text: "Autorizado por:",
+      //           // style: "tableHeader",
+      //           // alignment: "center",
+      //         },
+      //         {
+      //           text: "Recibí Conforme ",
+      //           style: "tableHeader",
+      //           alignment: "center",
+      //         },
+      //       ],
+      //     ],
+      //   },
+      // },
+      // {
+      //   margin: [0, -5, 0, 0],
+      //   layout: "noBorders", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     headerRows: 1,
+      //     widths: [120, 120, 140, 140],
 
-          body: [
-            [
-              {
-                text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
-                  new Date()
-                )}`,
-                style: "footer",
-                alignment: "left",
-                colSpan: 2,
-              },
-              {},
-              {
-                text: `Impreso por: ${capitalize(user.username)} ${capitalize(
-                  user.surnames
-                )}`,
-                style: "footer",
-                alignment: "right",
-                colSpan: 2,
-              },
-              {},
-            ],
-          ],
-        },
-      },
-      {
-        margin: [0, -5, 0, 30],
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 550,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#3Ae546",
-          },
-        ],
-      },
+      //     body: [
+      //       [
+      //         {
+      //           text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
+      //             new Date()
+      //           )}`,
+      //           style: "footer",
+      //           alignment: "left",
+      //           colSpan: 2,
+      //         },
+      //         {},
+      //         {
+      //           text: `Impreso por: ${capitalize(user.username)} ${capitalize(
+      //             user.surnames
+      //           )}`,
+      //           style: "footer",
+      //           alignment: "right",
+      //           colSpan: 2,
+      //         },
+      //         {},
+      //       ],
+      //     ],
+      //   },
+      // },
+      // {
+      //   margin: [0, -5, 0, 30],
+      //   canvas: [
+      //     {
+      //       type: "line",
+      //       x1: 0,
+      //       y1: 5,
+      //       x2: 550,
+      //       y2: 5,
+      //       lineWidth: 1,
+      //       lineColor: "#3Ae546",
+      //     },
+      //   ],
+      // },
     ],
   };
 

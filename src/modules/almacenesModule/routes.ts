@@ -120,7 +120,7 @@ class Routes {
     app
       .route(`${this.routeparent}/searchProy/:search`)
       .get(this.routesController.searchProy);
-    
+
     //--------------CSV--------------//
     app
       .route(`${this.routeparent}/excel`)
@@ -140,7 +140,7 @@ class Routes {
     app
       .route(`${this.routeparent}/searchSegPoa/:search`)
       .get(this.routesController.searchSegPoa);
-       app
+    app
       .route(`${this.routeparent}/catProgCod/:cod`)
       .get(this.routesController.searchSegPoaCod);
     //-------ARTICULOS--//
@@ -272,7 +272,7 @@ class Routes {
     app
       .route(`${this.routeparent}/searchCompra/:search?`)
       .get(this.routesController.searchCompra);
-      app
+    app
       .route(`${this.routeparent}/searchCombustible/:articulo?/:catProgra?`)
       .get(this.routesController.searchCombustible);
     app
@@ -335,38 +335,35 @@ class Routes {
     app
       .route(`${this.routeparent}/searchVehiculo/:search?`)
       .get(this.routesController.searchVehiculo);
- 
 
     //-------Vales--//
     //crear
     app
       .route(`${this.routeparent}/vale`)
       .post(jsonwebtokenSecurity, this.routesController.createVale);
-      //listar
-    app
-      .route(`${this.routeparent}/vales`)
-      .get(this.routesController.getVales);
+    //listar
+    app.route(`${this.routeparent}/vales`).get(this.routesController.getVales);
 
-     //listar
+    //listar
     app
-     .route(`${this.routeparent}/valesReport`)
-     .get(this.routesController.getValesReport);
-       //listar
+      .route(`${this.routeparent}/valesReport`)
+      .get(this.routesController.getValesReport);
+    //listar
     app
-    .route(`${this.routeparent}/valesAll`)
-    .get(this.routesController.getValesAll);
-      //buscar vale por ID
+      .route(`${this.routeparent}/valesAll`)
+      .get(this.routesController.getValesAll);
+    //buscar vale por ID
     app
       .route(`${this.routeparent}/finalizarVales`)
       .post(this.routesController.setVales);
     app
       .route(`${this.routeparent}/vale/:id`)
       .get(this.routesController.getVale);
-       //editar vale por ID
+    //editar vale por ID
     app
       .route(`${this.routeparent}/vale/:id`)
       .put(this.routesController.updateVale);
-      //eliminar vale por ID
+    //eliminar vale por ID
     app
       .route(`${this.routeparent}/vale/:id`)
       .delete(this.routesController.deleteVale);
@@ -376,41 +373,41 @@ class Routes {
       .put(this.routesController.addFactura);
     //listar facturas
     app
-    .route(`${this.routeparent}/facturas`)
-    .get(this.routesController.getFacturas);
+      .route(`${this.routeparent}/facturas`)
+      .get(this.routesController.getFacturas);
     app
-    .route(`${this.routeparent}/reportsIngresosTotalCompras`)
-    .get(this.routesController.getReportsIngresosTotalCompras);
+      .route(`${this.routeparent}/reportsIngresosTotalCompras`)
+      .get(this.routesController.getReportsIngresosTotalCompras);
     app
-    .route(`${this.routeparent}/getReportsLubricantes`)
-    .get(this.routesController.getReportsLubricantes);
+      .route(`${this.routeparent}/getReportsLubricantes`)
+      .get(this.routesController.getReportsLubricantes);
     app
-    .route(`${this.routeparent}/printVale/:id`)
-    .get(jsonwebtokenSecurity, this.routesController.printVale);
-     app
-    .route(`${this.routeparent}/printDetailFact/:id`)
-    .get(jsonwebtokenSecurity, this.routesController.printDetalleFactura);
+      .route(`${this.routeparent}/printVale/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printVale);
+    app
+      .route(`${this.routeparent}/printDetailFact/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printDetalleFactura);
 
-     //-------PEDIDOS--//
-     app
-     .route(`${this.routeparent}/pedido`)
-     .post(this.routesController.createPedido);
-   app
-     .route(`${this.routeparent}/pedidos`)
-     .get(this.routesController.getPedidos);
-  //  app
-  //    .route(`${this.routeparent}/egreso/:id`)
-  //    .get(this.routesController.getEgreso);
-  //  app
-  //    .route(`${this.routeparent}/egreso/:id`)
-  //    .put(this.routesController.updateEgreso);
-  //  app
-  //    .route(`${this.routeparent}/egreso/:id`)
-  //    .delete(this.routesController.removeEgreso);
-  //  app
-  //    .route(`${this.routeparent}/searchegreso/:search`)
-  //    .get(this.routesController.searchEgreso);
-  //-------Desembolso--//
+    //-------PEDIDOS--//
+    app
+      .route(`${this.routeparent}/pedido`)
+      .post(this.routesController.createPedido);
+    app
+      .route(`${this.routeparent}/pedidos`)
+      .get(this.routesController.getPedidos);
+    //  app
+    //    .route(`${this.routeparent}/egreso/:id`)
+    //    .get(this.routesController.getEgreso);
+    //  app
+    //    .route(`${this.routeparent}/egreso/:id`)
+    //    .put(this.routesController.updateEgreso);
+    //  app
+    //    .route(`${this.routeparent}/egreso/:id`)
+    //    .delete(this.routesController.removeEgreso);
+    //  app
+    //    .route(`${this.routeparent}/searchegreso/:search`)
+    //    .get(this.routesController.searchEgreso);
+    //-------Desembolso--//
     app
       .route(`${this.routeparent}/tipoDesembolso`)
       .post(this.routesController.createTipoDesem);
@@ -427,7 +424,7 @@ class Routes {
       .route(`${this.routeparent}/tipoDesembolso/:id`)
       .delete(this.routesController.removeTipoDesem);
 
-      //-------gasto fondo--//
+    //-------gasto fondo--//
     app
       .route(`${this.routeparent}/gastoFondo`)
       .post(this.routesController.createGastoFondo);
@@ -442,8 +439,8 @@ class Routes {
       .patch(this.routesController.updateGastoFondo);
     app
       .route(`${this.routeparent}/gastoFondo/:id`)
-      .delete(this.routesController.removeGastoFondo);    
-   
+      .delete(this.routesController.removeGastoFondo);
+
     //-------fuentes--//
     app
       .route(`${this.routeparent}/fuente`)
@@ -460,14 +457,14 @@ class Routes {
     app
       .route(`${this.routeparent}/fuente/:id`)
       .delete(this.routesController.removeFuente);
-   //-------desembolso-------//
+    //-------desembolso-------//
     app
       .route(`${this.routeparent}/desembolso`)
       .post(jsonwebtokenSecurity, this.routesController.createDesembolso);
     app
       .route(`${this.routeparent}/desembolsos`)
       .get(this.routesController.getDesembolsos);
-      app
+    app
       .route(`${this.routeparent}/queryDesembolsos`)
       .get(this.routesController.queryDesembolsos);
     app
@@ -480,12 +477,13 @@ class Routes {
       .route(`${this.routeparent}/desembolso/:id`)
       .delete(this.routesController.removeDesembolso);
 
-      app.route(`${this.routeparent}/printDesembolso/:id`)
-    .get(jsonwebtokenSecurity, this.routesController.printDesemFuente);
+    app
+      .route(`${this.routeparent}/printDesembolso/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printDesemFuente);
 
-    app.route(`${this.routeparent}/printDesemGasto/:id`)
-    .get(jsonwebtokenSecurity, this.routesController.printDetailDesemGasto);
-
+    app
+      .route(`${this.routeparent}/printDesemGasto/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printDetailDesemGasto);
 
     // //-------desemFuente-------//
     app
@@ -494,7 +492,7 @@ class Routes {
     app
       .route(`${this.routeparent}/desemFuentes`)
       .get(this.routesController.getDesemFuentes);
-       app
+    app
       .route(`${this.routeparent}/queryDesemFuente`)
       .get(this.routesController.queryDesemFuente);
     app
@@ -506,9 +504,11 @@ class Routes {
     app
       .route(`${this.routeparent}/desemFuente/:id`)
       .delete(this.routesController.removeDesemFuente);
+      app
+      .route(`${this.routeparent}/printQueryFuente`)
+      .get(jsonwebtokenSecurity, this.routesController.printQueryFuente);
 
-
-      //gastos
+    //gastos
 
     app
       .route(`${this.routeparent}/gasto`)
@@ -517,7 +517,7 @@ class Routes {
       .route(`${this.routeparent}/gastos`)
       .get(this.routesController.getGastos);
 
-      app
+    app
       .route(`${this.routeparent}/queryGastos`)
       .get(this.routesController.queryGastos);
     app
@@ -526,17 +526,17 @@ class Routes {
     app
       .route(`${this.routeparent}/gasto`)
       .patch(this.routesController.updateGasto);
-       app
+    app
       .route(`${this.routeparent}/gasto/:id`)
       .patch(this.routesController.updateGastoId);
     app
       .route(`${this.routeparent}/gasto/:id`)
       .delete(this.routesController.removeGasto);
-       app
+    app
       .route(`${this.routeparent}/printQueryGastos`)
       .get(jsonwebtokenSecurity, this.routesController.printQueryGastos);
 
-       //Organismo Financiador
+    //Organismo Financiador
 
     app
       .route(`${this.routeparent}/organismoFinanc`)
@@ -548,7 +548,7 @@ class Routes {
       .route(`${this.routeparent}/organismoFinanc/:id`)
       .get(this.routesController.getOrgFinanciamiento);
 
-      //  Fuente Financiamiento
+    //  Fuente Financiamiento
 
     app
       .route(`${this.routeparent}/fuenteFinanc`)
@@ -567,7 +567,7 @@ class Routes {
     app
       .route(`${this.routeparent}/descargos`)
       .get(this.routesController.getDescargos);
-       app
+    app
       .route(`${this.routeparent}/queryDescargos`)
       .get(this.routesController.queryDescargos);
     app
@@ -580,11 +580,9 @@ class Routes {
       .route(`${this.routeparent}/descargo/:id`)
       .delete(this.routesController.removeDescargo);
 
-    app.route(`${this.routeparent}/printDescargo/:id`)
-    .get(jsonwebtokenSecurity, this.routesController.printDescargoGasto);
-
+    app
+      .route(`${this.routeparent}/printDescargo/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printDescargoGasto);
   }
-  
-  
 }
 export default Routes;

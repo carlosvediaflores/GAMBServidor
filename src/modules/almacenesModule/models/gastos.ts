@@ -29,11 +29,12 @@ export interface Igastos extends Document {
   idUserRegister: string;
   idTipoDesembolso: string;
   nameCatProg: string;
-  isReposicion: boolean;
   idVehiculo?: string;
   descripcion?: string;
   proveedor?: string;
   facturas?: string[];
+  encargado?: string;
+  idEncargado?: string;
 }
 const gastoSchema: Schema = new Schema(
   {
@@ -49,7 +50,6 @@ const gastoSchema: Schema = new Schema(
     nameCatProg: { type: String },
     solicitante: { type: String },
     numDescargo: { type: String },
-    isReposicion: { type: Boolean, default: false },
     idSolicitante: { type: Schema.Types.ObjectId, ref: "User" },
     idPartida: { type: Schema.Types.ObjectId, ref: "partidas" },
     idFuente: { type: Schema.Types.ObjectId, ref: "alm_fuente" },
@@ -66,6 +66,8 @@ const gastoSchema: Schema = new Schema(
     descripcion: { type: String },
     proveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
     facturas: [{ type: Schema.Types.ObjectId, ref: "alm_facturas" }],
+    encargado: { type: String },
+    idEncargado: { type: Schema.Types.ObjectId, ref: "User" },
   },
   {
     timestamps: true,

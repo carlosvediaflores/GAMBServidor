@@ -87,7 +87,7 @@ export const printQueryFuente = (options: any): TDocumentDefinitions => {
   const values = options;
   const user = values.user;
   log("printDescargoGasto", user);
-  log("resumenPorFuente", values.resumenPorFuente);
+  log("filter1", values.filter);
   const desemFuentes = values.desembolsoFuentes || [];
   const resumenPorTipoFondo = values.resumenPorTipoFondo || [];
   const resumenPorFuente = values.resumenPorFuente || [];
@@ -143,14 +143,14 @@ export const printQueryFuente = (options: any): TDocumentDefinitions => {
     },
 
     // ✅ Marca de agua en diagonal
-    watermark: {
-      text: "BORRADOR",
-      color: "#d00000",
-      opacity: 0.1,
-      bold: true,
-      fontSize: 150,
-      angle: -60, // 🔹 Rotación en grados (positivo = antihorario)
-    },
+    // watermark: {
+    //   text: "BORRADOR",
+    //   color: "#d00000",
+    //   opacity: 0.1,
+    //   bold: true,
+    //   fontSize: 150,
+    //   angle: -60, // 🔹 Rotación en grados (positivo = antihorario)
+    // },
     header: [
       {
         columns: [
@@ -536,7 +536,7 @@ export const printQueryFuente = (options: any): TDocumentDefinitions => {
       {
         layout: "customLayout04",
         table: {
-          widths: [372, 60, 60, 40, 40],
+          widths: [300, 60, 60, 40, 40],
           body: [
             [
               {

@@ -85,7 +85,7 @@ const styles: StyleDictionary = {
 };
 export const printQueryGasto = (options: any): TDocumentDefinitions => {
   const values = options;
-  // log("values", values.filter);
+   log("values", values.filter);
   const user = values.user;
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.gastos || [];

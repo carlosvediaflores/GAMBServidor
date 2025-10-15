@@ -2499,6 +2499,8 @@ class RoutesController {
       gastoData.idTipoDesembolso = tipoDes._id;
       gastoData.idVehiculo = resultDataSimple.vehiculo._id;
       gastoData.idUserRegister = user._id;
+      gastoData.encargado = valeData.encargado;
+      gastoData.idEncargado = valeData.idEncargado;
 
       const resultGasto = await gasto.addGasto(gastoData);
 
@@ -3997,11 +3999,11 @@ class RoutesController {
       const filter: any = {};
 
       if (params.deFecha || params.alFecha) {
-        filter.fechaRegistro = {};
+        filter.createdAt = {};
         if (params.deFecha)
-          filter.fechaRegistro.$gte = new Date(params.deFecha);
+          filter.createdAt.$gte = new Date(params.deFecha);
         if (params.alFecha)
-          filter.fechaRegistro.$lte = new Date(params.alFecha);
+          filter.createdAt.$lte = new Date(params.alFecha);
       }
       if (params.gestion) filter.gestion = params.gestion;
       if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
@@ -4013,10 +4015,10 @@ class RoutesController {
         filter.denominacionFuente = new RegExp(params.denominacionFuente, "i");
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = { createdAt: -1, _id: -1 };
       const limit = params.limit ? parseInt(params.limit, 10) : 20;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
-
+      log("filter", filter);
       // 🔹 Listado de gastos
       const desembolsoFuentes = await desembolsoFuente.readDesemFuente(
         filter,
@@ -4172,6 +4174,7 @@ class RoutesController {
         montoTotalResult.length > 0 ? montoTotalResult[0].montoTotal : 0;
 
       const data = {
+        filter,
         user,
         desembolsoFuentes,
         resumenPorFuente,
@@ -4367,10 +4370,9 @@ class RoutesController {
       if (params.fuente) filter.fuente = params.fuente;
       if (params.partida) filter.partida = params.partida;
       if (params.catProgra) filter.catProgra = params.catProgra;
-      if (params.solicitante)
-        filter.solicitante = new RegExp(params.solicitante, "i");
-      if (params.numDescargo)
-        filter.numDescargo = new RegExp(params.numDescargo, "i");
+      if (params.solicitante) filter.solicitante = params.solicitante;
+      if (params.encargado) filter.encargado = params.encargado;
+      if (params.numDescargo) filter.numDescargo = params.numDescargo;
 
       // 🔹 Orden y paginación
       const order: any = { fechaRegistro: -1, _id: -1 };
@@ -4492,9 +4494,9 @@ class RoutesController {
       if (params.borrador) filter.borrador = params.borrador;
       if (params.partida) filter.partida = params.partida;
       if (params.catProgra) filter.catProgra = params.catProgra;
-      if (params.solicitante)
-        filter.solicitante = new RegExp(params.solicitante, "i");
+      if (params.solicitante) filter.solicitante = params.solicitante;
       if (params.numDescargo) filter.numDescargo = params.numDescargo;
+      if (params.encargado) filter.encargado = params.encargado;
 
       // 🔹 Orden y paginación
       const order: any = { fechaRegistro: -1, _id: -1 };
@@ -4610,7 +4612,8 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await gasto.updateGastoMany({
-      idTipoDesembolso: "6866ab0ba7f78500a418421e",
+      encargado: "RENE VEDIA MAMANI",
+      idEncargado: "6253bf6900ae6f0014f7bc23",
     });
     response.status(200).json(result);
   }
@@ -5258,7 +5261,6 @@ class RoutesController {
     if (params.idTipoDesembolso) {
       filter.idTipoDesembolso = params.idTipoDesembolso;
     }
-    log(filter);
     let repres = await descargo.readDescargo(filter, skip, limit, order);
     response.status(200).json(repres);
   }

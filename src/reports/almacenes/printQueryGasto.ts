@@ -85,7 +85,7 @@ const styles: StyleDictionary = {
 };
 export const printQueryGasto = (options: any): TDocumentDefinitions => {
   const values = options;
-   log("values", values.filter);
+  log("values", values.filter);
   const user = values.user;
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.gastos || [];
@@ -104,7 +104,14 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
     0
   );
   // log("values", values.idFuentes);
-
+  const totalTipoGasto = values.resumenPorTipoGasto.reduce(
+    (acc: any, detail: { sumaTotalGasto: any }) => acc + detail.sumaTotalGasto,
+    0
+  );
+  // log("totalTipoGasto", totalTipoGasto);
+  // log("resumenPorFuente", resumenPorFuente);
+  // log("resumenPorCatProgra", resumenPorCatProgra);
+  // log("desemGast", desemGast);
   const currentDate: Content = {
     text: `Fecha: ${DateFormatter.getDDMMYYYY(new Date())}`,
     alignment: "left",
@@ -458,82 +465,78 @@ export const printQueryGasto = (options: any): TDocumentDefinitions => {
       },
 
       {
-        margin: [10, 120, 0, 5],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
-
-          body: [
-            [
-              {
-                text: "Entrgue Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-              {
-                // text: "Responsable Almacen",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                // text: "Autorizado por:",
-                // style: "tableHeader",
-                // alignment: "center",
-              },
-              {
-                text: "Recibí Conforme ",
-                style: "tableHeader",
-                alignment: "center",
-              },
-            ],
-          ],
-        },
+        text: "IV. Detalle Gasto por tipo de Gasto",
+        style: "subTitle",
+        decoration: "underline",
       },
-      {
-        margin: [0, -5, 0, 0],
-        layout: "noBorders", // 'lightHorizontalLines', // optional
-        table: {
-          headerRows: 1,
-          widths: [120, 120, 140, 140],
 
-          body: [
-            [
-              {
-                text: `Fecha de impresión: ${DateFormatter.getDDMMYYYY(
-                  new Date()
-                )}`,
-                style: "footer",
-                alignment: "left",
-                colSpan: 2,
-              },
-              {},
-              {
-                text: `Impreso por: ${capitalize(user.username)} ${capitalize(
-                  user.surnames
-                )}`,
-                style: "footer",
-                alignment: "right",
-                colSpan: 2,
-              },
-              {},
-            ],
-          ],
-        },
-      },
-      {
-        margin: [0, -5, 0, 30],
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 5,
-            x2: 550,
-            y2: 5,
-            lineWidth: 1,
-            lineColor: "#3Ae546",
-          },
-        ],
+      // 🔹 Generar una tabla por cada fuente en resumenPorTipoGasto
+      ...values.resumenPorTipoGasto.flatMap(
+        (tipoFuente: any, index: number) => {
+          // Calcular total por fuente
+          const totalFuente = tipoFuente.sumaTotalGasto || 0;
+
+          // Construir tabla de tipos de gasto
+          const tablaTipos: Content = {
+            layout: "customLayout05",
+            margin: [60, 0, 0, 0],
+            table: {
+              headerRows: 1,
+              widths: [20, 200, 100],
+
+              body: [
+                [
+                  { text: "Nº", style: "tableHeader" },
+                  { text: "Tipo de Gasto", style: "tableHeader" },
+                  { text: "Monto Ejecutado", style: "tableHeader" },
+                 
+                ],
+                ...tipoFuente.fuentes.map((f: any, i: number) => [
+                  { text: i + 1, style: "tableBody", alignment: "center" },
+                  { text: f._id, style: "tableBody" },
+                  {
+                    text: CurrencyFormatter.formatCurrency(f.totalGasto),
+                    style: "tableBody",
+                    alignment: "right",
+                  },
+                 
+                ]),
+                ["", "", ""],
+                [
+                  { text: "TOTAL", colSpan: 2, bold: true },
+                  "",
+                  {
+                    text: CurrencyFormatter.formatCurrency(totalFuente),
+                    style: "tableBody",
+                    alignment: "right",
+                    bold: true,
+                  },
+                 
+                ],
+              ],
+            },
+          };
+
+          return [
+            {
+              text: `${index + 1}. Fuente: ${tipoFuente.tipoGasto} - ${
+                tipoFuente.denominacionFuente
+              }`,
+              bold: true,
+              margin: [0, 10, 0, 5],
+            },
+            tablaTipos,
+          ];
+        }
+        
+      ),
+      { text: `TOTAL GENERAL DEL GASTO: ${CurrencyFormatter.formatCurrency(
+        totalTipoGasto
+      )}`,
+        decoration: "underline",
+        margin: [0, 5, 0, 0],
+        alignment: "right",
+        bold: true
       },
     ],
   };

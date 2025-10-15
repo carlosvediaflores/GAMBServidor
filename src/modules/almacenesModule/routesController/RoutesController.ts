@@ -3344,113 +3344,128 @@ class RoutesController {
   // }
 
   public async createDesembolso(
-  request: Request,
-  response: Response
-): Promise<void> {
-  try {
-    const ordinales = ["mo","er","do","er","to","to","to","mo","vo","no"];
+    request: Request,
+    response: Response
+  ): Promise<void> {
+    try {
+      const ordinales = [
+        "mo",
+        "er",
+        "do",
+        "er",
+        "to",
+        "to",
+        "to",
+        "mo",
+        "vo",
+        "no",
+      ];
 
-    const desembolsoData = request.body;
-    const user: any = request.body.user;
+      const desembolsoData = request.body;
+      const user: any = request.body.user;
 
-    // 🔹 Extraer gestión
-    const fecha = new Date(desembolsoData.fechaDesembolso);
-    desembolsoData.gestion = fecha.getFullYear();
+      // 🔹 Extraer gestión
+      const fecha = new Date(desembolsoData.fechaDesembolso);
+      desembolsoData.gestion = fecha.getFullYear();
 
-    const { numero, idTipoDesembolso } = desembolsoData;
-    const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
-    const desembolso: BussDesembolso = new BussDesembolso();
+      const { numero, idTipoDesembolso } = desembolsoData;
+      const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
+      const desembolso: BussDesembolso = new BussDesembolso();
 
-    // 🔹 Obtener tipo de desembolso
-    const tipoDesembolsoData = await tipoDesem.readTipoDesem(idTipoDesembolso);
-    if (!tipoDesembolsoData) {
-      response.status(404).json({ message: "Tipo de desembolso no encontrado" });
-      return;
-    }
-    const tipoDesembolso = tipoDesembolsoData.denominacion;
-    desembolsoData.tipoDesembolso = tipoDesembolso;
-
-    // 🔹 Validar número
-    const yaExiste = await desembolso.findByNumeroTipoGestion(
-      numero,
-      tipoDesembolso,
-      desembolsoData.gestion
-    );
-    if (yaExiste) {
-      if (numero) {
-        response.status(409).json({
-          message: `Ya existe un desembolso con número ${numero}, tipo ${tipoDesembolso} en gestión ${desembolsoData.gestion}`,
-        });
+      // 🔹 Obtener tipo de desembolso
+      const tipoDesembolsoData = await tipoDesem.readTipoDesem(
+        idTipoDesembolso
+      );
+      if (!tipoDesembolsoData) {
+        response
+          .status(404)
+          .json({ message: "Tipo de desembolso no encontrado" });
         return;
+      }
+      const tipoDesembolso = tipoDesembolsoData.denominacion;
+      desembolsoData.tipoDesembolso = tipoDesembolso;
+
+      // 🔹 Validar número
+      const yaExiste = await desembolso.findByNumeroTipoGestion(
+        numero,
+        tipoDesembolso,
+        desembolsoData.gestion
+      );
+      if (yaExiste) {
+        if (numero) {
+          response.status(409).json({
+            message: `Ya existe un desembolso con número ${numero}, tipo ${tipoDesembolso} en gestión ${desembolsoData.gestion}`,
+          });
+          return;
+        } else {
+          const nuevoNumero = await desembolso.getNextNumero(
+            tipoDesembolso,
+            desembolsoData.gestion
+          );
+          desembolsoData.numero = nuevoNumero;
+        }
+      }
+
+      // 🔹 Crear nombre ordinal
+      if (desembolsoData.numero === 11 || desembolsoData.numero === 12) {
+        desembolsoData.numDesembolso = `${desembolsoData.numero}ma Desembolso`;
       } else {
-        const nuevoNumero = await desembolso.getNextNumero(
-          tipoDesembolso,
-          desembolsoData.gestion
-        );
-        desembolsoData.numero = nuevoNumero;
+        const num = desembolsoData.numero % 10;
+        const ordinal = ordinales[num];
+        desembolsoData.numDesembolso = `${desembolsoData.numero}${ordinal} Desembolso`;
       }
-    }
 
-    // 🔹 Crear nombre ordinal
-    if (desembolsoData.numero === 11 || desembolsoData.numero === 12) {
-      desembolsoData.numDesembolso = `${desembolsoData.numero}ma Desembolso`;
-    } else {
-      const num = desembolsoData.numero % 10;
-      const ordinal = ordinales[num];
-      desembolsoData.numDesembolso = `${desembolsoData.numero}${ordinal} Desembolso`;
-    }
+      desembolsoData.idUserRegister = user._id;
 
-    desembolsoData.idUserRegister = user._id;
+      // ========================================================
+      // ✅ AJUSTAR DESEMBOLSOS ANTERIORES
+      // ========================================================
+      const anteriores = await desembolso.findAllByTipo(idTipoDesembolso);
+      let excedenteTotal = 0;
 
-    // ========================================================
-    // ✅ AJUSTAR DESEMBOLSOS ANTERIORES
-    // ========================================================
-    const anteriores = await desembolso.findAllByTipo(idTipoDesembolso);
-    let excedenteTotal = 0;
+      for (const ant of anteriores) {
+        if (ant.montoGasto > ant.montoTotal) {
+          const excedente = ant.montoGasto - ant.montoTotal;
 
-    for (const ant of anteriores) {
-      if (ant.montoGasto > ant.montoTotal) {
-        const excedente = ant.montoGasto - ant.montoTotal;
+          // Ajustar campos
+          ant.montoGasto = ant.montoTotal;
+          ant.isClosed = true;
+          await ant.save();
 
-        // Ajustar campos
-        ant.montoGasto = ant.montoTotal;
-        ant.isClosed = true;
-        await ant.save();
-
-        // Acumular excedente para el nuevo
-        excedenteTotal += excedente;
+          // Acumular excedente para el nuevo
+          excedenteTotal += excedente;
+        }
       }
+
+      // 🔹 Si hay excedentes, sumarlos al nuevo registro
+      if (excedenteTotal > 0) {
+        desembolsoData.montoGasto =
+          (desembolsoData.montoGasto || 0) + excedenteTotal;
+      }
+
+      // ========================================================
+      // ✅ CREAR EL NUEVO DESEMBOLSO
+      // ========================================================
+      const result = await desembolso.addDesembolso(desembolsoData);
+
+      // 🔹 Relacionar en tipoDesembolso
+      (tipoDesembolsoData as any).desembolsos.push(result._id);
+
+      // Actualizar montoAcumulado
+      const montoActual = tipoDesembolsoData.montoAcumulado || 0;
+      const montoNuevo = result.montoTotal || 0;
+      tipoDesembolsoData.montoAcumulado = montoActual + montoNuevo;
+      await tipoDesembolsoData.save();
+
+      response.status(201).json({ serverResponse: result });
+    } catch (error) {
+      console.error("Error al crear el desembolso:", error);
+      response.status(500).json({
+        message: "Error interno del servidor al crear el desembolso",
+        error: error instanceof Error ? error.message : error,
+      });
     }
-
-    // 🔹 Si hay excedentes, sumarlos al nuevo registro
-    if (excedenteTotal > 0) {
-      desembolsoData.montoGasto =
-        (desembolsoData.montoGasto || 0) + excedenteTotal;
-    }
-
-    // ========================================================
-    // ✅ CREAR EL NUEVO DESEMBOLSO
-    // ========================================================
-    const result = await desembolso.addDesembolso(desembolsoData);
-
-    // 🔹 Relacionar en tipoDesembolso
-    (tipoDesembolsoData as any).desembolsos.push(result._id);
-
-    // Actualizar montoAcumulado
-    const montoActual = tipoDesembolsoData.montoAcumulado || 0;
-    const montoNuevo = result.montoTotal || 0;
-    tipoDesembolsoData.montoAcumulado = montoActual + montoNuevo;
-    await tipoDesembolsoData.save();
-
-    response.status(201).json({ serverResponse: result });
-  } catch (error) {
-    console.error("Error al crear el desembolso:", error);
-    response.status(500).json({
-      message: "Error interno del servidor al crear el desembolso",
-      error: error instanceof Error ? error.message : error,
-    });
   }
-}
 
   //Imprimir Desembolso
   public async printDesemFuente(request: Request, response: Response) {
@@ -3668,115 +3683,119 @@ class RoutesController {
   // }
 
   public async createDesemFuente(
-  request: Request,
-  response: Response
-): Promise<void> {
-  try {
-    const desembolsoFuenteData = request.body;
-    const user: any = request.body.user;
+    request: Request,
+    response: Response
+  ): Promise<void> {
+    try {
+      const desembolsoFuenteData = request.body;
+      const user: any = request.body.user;
 
-    const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
-    const bussDesembolso: BussDesembolso = new BussDesembolso();
-    const fuente: BussFuente = new BussFuente();
+      const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
+      const bussDesembolso: BussDesembolso = new BussDesembolso();
+      const fuente: BussFuente = new BussFuente();
 
-    const fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
-    if (!fuenteData) {
-      response.status(404).json({ message: "Fuente no encontrada" });
-      return;
-    }
-
-    // 1️⃣ Obtener el desembolso original
-    const desembolso = await bussDesembolso.readDesembolso(
-      desembolsoFuenteData.idDesembolso
-    );
-    if (!desembolso) {
-      response.status(404).json({ message: "Desembolso no encontrado" });
-      return;
-    }
-
-    const idFuente = desembolsoFuenteData.idFuente;
-    const montoNuevo = desembolsoFuenteData.montoTotal || 0;
-
-    // 2️⃣ Validar que `idFuentes` sea array
-    if (!Array.isArray((desembolso as any).idFuentes)) {
-      (desembolso as any).idFuentes = [];
-    }
-
-    // 3️⃣ Verificar si ya existe esta fuente en el desembolso
-    const fuenteYaRegistrada = (desembolso as any).idFuentes.some((df: any) => {
-      if (!df.idFuente) return false;
-      const actualId =
-        typeof df.idFuente === "object"
-          ? df.idFuente._id?.toString()
-          : df.idFuente.toString();
-      return actualId === idFuente.toString();
-    });
-
-    if (fuenteYaRegistrada) {
-      response.status(409).json({
-        message: "Este F.F.- O.F. ya fue registrado para este desembolso",
-      });
-      return;
-    }
-
-    // 4️⃣ Buscar TODOS los desembolsoFuente previos de esta fuente
-    const previos = (await desembolsoFuente.readDesemFuente(
-      { idFuente },
-      0,
-      0,
-      {}
-    )) as any[];
-
-    let excedenteGlobal = 0;
-
-    // Recorremos los registros anteriores
-    for (const reg of previos) {
-      if (reg.montoGasto > reg.montoTotal) {
-        const excedente = reg.montoGasto - reg.montoTotal;
-        excedenteGlobal += excedente;
-
-        // Ajustar montoGasto = montoTotal
-        await desembolsoFuente.updateDesemFuente(reg._id, {
-          montoGasto: reg.montoTotal,
-        });
+      const fuenteData = await fuente.readFuente(desembolsoFuenteData.idFuente);
+      if (!fuenteData) {
+        response.status(404).json({ message: "Fuente no encontrada" });
+        return;
       }
+
+      // 1️⃣ Obtener el desembolso original
+      const desembolso = await bussDesembolso.readDesembolso(
+        desembolsoFuenteData.idDesembolso
+      );
+      if (!desembolso) {
+        response.status(404).json({ message: "Desembolso no encontrado" });
+        return;
+      }
+
+      const idFuente = desembolsoFuenteData.idFuente;
+      const montoNuevo = desembolsoFuenteData.montoTotal || 0;
+
+      // 2️⃣ Validar que `idFuentes` sea array
+      if (!Array.isArray((desembolso as any).idFuentes)) {
+        (desembolso as any).idFuentes = [];
+      }
+
+      // 3️⃣ Verificar si ya existe esta fuente en el desembolso
+      const fuenteYaRegistrada = (desembolso as any).idFuentes.some(
+        (df: any) => {
+          if (!df.idFuente) return false;
+          const actualId =
+            typeof df.idFuente === "object"
+              ? df.idFuente._id?.toString()
+              : df.idFuente.toString();
+          return actualId === idFuente.toString();
+        }
+      );
+
+      if (fuenteYaRegistrada) {
+        response.status(409).json({
+          message: "Este F.F.- O.F. ya fue registrado para este desembolso",
+        });
+        return;
+      }
+
+      // 4️⃣ Buscar TODOS los desembolsoFuente previos de esta fuente
+      const previos = (await desembolsoFuente.readDesemFuente(
+        { idFuente },
+        0,
+        0,
+        {}
+      )) as any[];
+
+      let excedenteGlobal = 0;
+
+      // Recorremos los registros anteriores
+      for (const reg of previos) {
+        if (reg.montoGasto > reg.montoTotal) {
+          const excedente = reg.montoGasto - reg.montoTotal;
+          excedenteGlobal += excedente;
+
+          // Ajustar montoGasto = montoTotal
+          await desembolsoFuente.updateDesemFuente(reg._id, {
+            montoGasto: reg.montoTotal,
+          });
+        }
+      }
+
+      // 5️⃣ Preparar datos para el nuevo registro
+      desembolsoFuenteData.idUserRegister = user._id;
+      desembolsoFuenteData.gestion = new Date().getFullYear();
+      desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
+      desembolsoFuenteData.fuente = fuenteData.ffof;
+      desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
+
+      // 👉 El montoGasto del nuevo registro incluirá el excedente acumulado
+      desembolsoFuenteData.montoGasto =
+        (desembolsoFuenteData.montoGasto || 0) + excedenteGlobal;
+
+      // 6️⃣ Crear el nuevo desembolsoFuente
+      const result = await desembolsoFuente.addDesemFuente(
+        desembolsoFuenteData
+      );
+
+      // 7️⃣ Actualizar el desembolso padre
+      (desembolso as any).idFuentes.push(result._id);
+      const montoAnterior = (desembolso as any).montoAsignado || 0;
+      (desembolso as any).montoAsignado = montoAnterior + montoNuevo;
+      await desembolso.save();
+
+      // ✅ Respuesta final
+      response.status(201).json({
+        serverResponse: result,
+        excedenteAcumulado: excedenteGlobal,
+        message:
+          "Fuente registrada y desembolso actualizado correctamente. Excedente ajustado en registros previos.",
+      });
+    } catch (error) {
+      console.error("Error al crear el desembolso fuente:", error);
+      response.status(500).json({
+        message: "Error interno del servidor al crear el desembolso fuente",
+        error: error instanceof Error ? error.message : error,
+      });
     }
-
-    // 5️⃣ Preparar datos para el nuevo registro
-    desembolsoFuenteData.idUserRegister = user._id;
-    desembolsoFuenteData.gestion = new Date().getFullYear();
-    desembolsoFuenteData.tipoFondo = desembolso.tipoDesembolso;
-    desembolsoFuenteData.fuente = fuenteData.ffof;
-    desembolsoFuenteData.denominacionFuente = fuenteData.denominacion;
-
-    // 👉 El montoGasto del nuevo registro incluirá el excedente acumulado
-    desembolsoFuenteData.montoGasto =
-      (desembolsoFuenteData.montoGasto || 0) + excedenteGlobal;
-
-    // 6️⃣ Crear el nuevo desembolsoFuente
-    const result = await desembolsoFuente.addDesemFuente(desembolsoFuenteData);
-
-    // 7️⃣ Actualizar el desembolso padre
-    (desembolso as any).idFuentes.push(result._id);
-    const montoAnterior = (desembolso as any).montoAsignado || 0;
-    (desembolso as any).montoAsignado = montoAnterior + montoNuevo;
-    await desembolso.save();
-
-    // ✅ Respuesta final
-    response.status(201).json({
-      serverResponse: result,
-      excedenteAcumulado: excedenteGlobal,
-      message:
-        "Fuente registrada y desembolso actualizado correctamente. Excedente ajustado en registros previos.",
-    });
-  } catch (error) {
-    console.error("Error al crear el desembolso fuente:", error);
-    response.status(500).json({
-      message: "Error interno del servidor al crear el desembolso fuente",
-      error: error instanceof Error ? error.message : error,
-    });
   }
-}
   public async getDesemFuentes(request: Request, response: Response) {
     try {
       const desembolsoFuente = new BussDesemFuente();
@@ -3990,7 +4009,7 @@ class RoutesController {
     }
   }
   public async printQueryFuente(request: Request, response: Response) {
-     try {
+    try {
       const desembolsoFuente: BussDesemFuente = new BussDesemFuente();
       const params: any = request.query;
       let user: string = request.body.user;
@@ -4000,10 +4019,8 @@ class RoutesController {
 
       if (params.deFecha || params.alFecha) {
         filter.createdAt = {};
-        if (params.deFecha)
-          filter.createdAt.$gte = new Date(params.deFecha);
-        if (params.alFecha)
-          filter.createdAt.$lte = new Date(params.alFecha);
+        if (params.deFecha) filter.createdAt.$gte = new Date(params.deFecha);
+        if (params.alFecha) filter.createdAt.$lte = new Date(params.alFecha);
       }
       if (params.gestion) filter.gestion = params.gestion;
       if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
@@ -4378,7 +4395,7 @@ class RoutesController {
       const order: any = { fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
-
+      log("filter", filter);
       // 🔹 Listado de gastos
       const gastos = await gasto.readGasto(filter, skip, limit, order);
 
@@ -4445,6 +4462,69 @@ class RoutesController {
           },
         },
       ]);
+      const resumenPorTipoGasto = await gastoModule.aggregate([
+        { $match: filter },
+
+        // 🔹 Agrupar primero por fuente + tipoGasto
+        {
+          $group: {
+            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Reagrupar por fuente
+        {
+          $group: {
+            _id: "$_id.fuente",
+            fuentes: {
+              $push: {
+                _id: "$_id.tipoGasto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Convertir idFuente a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+
+        // 🔹 Traer denominación desde alm_fuentes
+        {
+          $lookup: {
+            from: "alm_fuentes",
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+        // 🔹 Proyección final
+        {
+          $project: {
+            tipoGasto: "$_id",
+            _id: 0,
+            denominacionFuente: "$fuenteData.denominacion",
+            fuentes: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+
+        // 🔹 Ordenar por monto total
+        { $sort: { sumaTotalGasto: -1 } },
+      ]);
       const montoTotalGasto =
         montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
 
@@ -4453,6 +4533,7 @@ class RoutesController {
         gastos,
         resumenPorFuente,
         resumenPorCatProgra,
+        resumenPorTipoGasto,
         montoTotalGasto, // ✅ aquí ya lo tienes
       });
     } catch (error) {
@@ -4506,7 +4587,7 @@ class RoutesController {
       if (params.borrador) {
         borrador.borradorData = params.borrador;
         delete filter.borrador;
-      } 
+      }
 
       // 🔹 Listado de gastos
       const gastos = await gasto.readGasto(filter, skip, limit, order);
@@ -4563,6 +4644,69 @@ class RoutesController {
         },
         { $sort: { _id: 1 } },
       ]);
+      const resumenPorTipoGasto = await gastoModule.aggregate([
+        { $match: filter },
+
+        // 🔹 Agrupar primero por fuente + tipoGasto
+        {
+          $group: {
+            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Reagrupar por fuente
+        {
+          $group: {
+            _id: "$_id.fuente",
+            fuentes: {
+              $push: {
+                _id: "$_id.tipoGasto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Convertir idFuente a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+
+        // 🔹 Traer denominación desde alm_fuentes
+        {
+          $lookup: {
+            from: "alm_fuentes",
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+        // 🔹 Proyección final
+        {
+          $project: {
+            tipoGasto: "$_id",
+            _id: 0,
+            denominacionFuente: "$fuenteData.denominacion",
+            fuentes: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+
+        // 🔹 Ordenar por monto total
+        { $sort: { sumaTotalGasto: -1 } },
+      ]);
 
       // 🔹 Monto total de todos los gastos
       const montoTotalResult = await gastoModule.aggregate([
@@ -4584,6 +4728,7 @@ class RoutesController {
         gastos,
         resumenPorFuente,
         resumenPorCatProgra,
+        resumenPorTipoGasto,
         montoTotalGasto, // ✅ aquí ya lo tienes
       };
       // log("data", data);
@@ -5200,12 +5345,12 @@ class RoutesController {
           numDescargo: result.numDescargo,
         });
       }
-       // Agregar id de descargo al array
-        await tipoDesem.updateTipoDesem(
-          idTipoDesembolso,
-          { descargos: result._id },
-          { push: true }
-        );
+      // Agregar id de descargo al array
+      await tipoDesem.updateTipoDesem(
+        idTipoDesembolso,
+        { descargos: result._id },
+        { push: true }
+      );
 
       response.status(201).json({ serverResponse: result });
     } catch (error) {
@@ -5342,6 +5487,69 @@ class RoutesController {
       { $sort: { _id: 1 } },
     ]);
 
+     const resumenPorTipoGasto = await gastoModule.aggregate([
+        { $match: { _id: { $in: gastoIds } }  },
+
+        // 🔹 Agrupar primero por fuente + tipoGasto
+        {
+          $group: {
+            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Reagrupar por fuente
+        {
+          $group: {
+            _id: "$_id.fuente",
+            fuentes: {
+              $push: {
+                _id: "$_id.tipoGasto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Convertir idFuente a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+
+        // 🔹 Traer denominación desde alm_fuentes
+        {
+          $lookup: {
+            from: "alm_fuentes",
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+        // 🔹 Proyección final
+        {
+          $project: {
+            tipoGasto: "$_id",
+            _id: 0,
+            denominacionFuente: "$fuenteData.denominacion",
+            fuentes: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+
+        // 🔹 Ordenar por monto total
+        { $sort: { sumaTotalGasto: -1 } },
+      ]);
     // 🔹 Monto total
     const montoTotalResult = await gastoModule.aggregate([
       { $match: { _id: { $in: gastoIds } } },
@@ -5356,6 +5564,7 @@ class RoutesController {
       descargoData,
       resumenPorFuente,
       resumenPorCatProgra,
+      resumenPorTipoGasto,
       montoTotalGasto, // ✅ aquí ya lo tienes
     };
     const pdfDoc = await descargo.printDescargoGasto(data);

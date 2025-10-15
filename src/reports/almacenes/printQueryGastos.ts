@@ -87,7 +87,7 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
   const values = options;
   const user = values.user;
   const filter = values.filter;
-  // log("values", values.filter);
+  log("values", values.filter);
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.gastos || [];
   const resumenPorFuente = values.resumenPorFuente || [];
@@ -102,6 +102,10 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
   );
   const totalGastoCatPro = resumenPorCatProgra.reduce(
     (acc: any, detail: { totalMonto: any }) => acc + detail.totalMonto,
+    0
+  );
+  const totalTipoGasto = values.resumenPorTipoGasto.reduce(
+    (acc: any, detail: { sumaTotalGasto: any }) => acc + detail.sumaTotalGasto,
     0
   );
   // log("values", values.idFuentes);
@@ -167,7 +171,7 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
                   color: "#0e78d1",
                 },
               },
-               {
+              {
                 text: `(Expresado en bolivianos) `,
                 alignment: "center",
                 margin: [0, 0, 0, 0],
@@ -225,43 +229,70 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
       },
       {
         text: [
-          { text: `${filter.tipoGasto ? "Tipo de Gasto: " : ""}`, bold: true },
+          { text: `${filter.encargado ? "Encargado: " : ""}`, bold: true },
+          { text: `${filter?.encargado ?? ""}` },
+
+          {
+            text: `${filter.tipoGasto ? "    Tipo de Gasto: " : ""}`,
+            bold: true,
+          },
           { text: `${filter?.tipoGasto ?? ""}` },
           {
             text: `${filter.tipoFondo ? "    Tipo de Fondo: " : ""}`,
             bold: true,
           },
           { text: `${filter?.tipoFondo ?? ""}` },
-          { text: `${filter?.numDescargo ? "    Descargo: " : ""}`, bold: true },
+          {
+            text: `${filter?.numDescargo ? "    Descargo: " : ""}`,
+            bold: true,
+          },
           { text: `${filter?.numDescargo ?? ""}` },
           { text: `${filter?.fuente ? "    FF-OF: " : ""}`, bold: true },
           { text: `${filter?.fuente ?? ""}` },
-          { text: `${filter?.catProgra ? "    Categoría Programática: " : ""}`, bold: true },
+          {
+            text: `${filter?.catProgra ? "    Categoría Programática: " : ""}`,
+            bold: true,
+          },
           { text: `${filter?.catProgra ?? ""}` },
-          
-          { text: `${filter?.fechaRegistro?.$gte ? "    de Fecha: " : ""}`, bold: true },
-          { text: `${DateFormatterSimple.getDDMMYYYY(new Date(filter?.fechaRegistro?.$gte)) ?? ""}` },
-          
-          { text: `${filter?.fechaRegistro?.$lte ? "    al Fecha: " : ""}`, bold: true },
-          { text: `${DateFormatterSimple.getDDMMYYYY(new Date(filter?.fechaRegistro?.$lte)) ?? ""}` },
+
+          {
+            text: `${filter?.fechaRegistro?.$gte ? "    de Fecha: " : ""}`,
+            bold: true,
+          },
+          {
+            text: `${
+              DateFormatterSimple.getDDMMYYYY(
+                new Date(filter?.fechaRegistro?.$gte)
+              ) ?? ""
+            }`,
+          },
+
+          {
+            text: `${filter?.fechaRegistro?.$lte ? "    al Fecha: " : ""}`,
+            bold: true,
+          },
+          {
+            text: `${
+              DateFormatterSimple.getDDMMYYYY(
+                new Date(filter?.fechaRegistro?.$lte)
+              ) ?? ""
+            }`,
+          },
           { text: `${filter?.estado ? "    Estado: " : ""}`, bold: true },
           { text: `${filter?.estado ?? ""}` },
-          // { text: `             Fecha de Descargo: `, bold: true },
-          // {
-          //   text: `${DateFormatterSimple.getDDMMYYYY(new Date(values.descargoData.fechaDescargo))}`,
-          // },
+          { text: `${filter?.partida ? "    Partida: " : ""}`, bold: true },
+          { text: `${filter?.partida ?? ""}` },
+          {
+            text: `${filter?.solicitante ? "    Solicitante: " : ""}`,
+            bold: true,
+          },
+          { text: `${filter?.solicitante ?? ""}` },
           // { text: `              Monto Total del Descargo: `, bold: true },
           // {
           //   text: `${CurrencyFormatter.formatCurrency(
           //     values.descargoData.montoDescargo
           //   )}`,
           // },
-          // { text: `\n A cargo de: `, bold: true },
-          // { text: `${capitalize(
-          //         values.descargoData.encargado.username
-          //       )} ${capitalize(values.descargoData.encargado.surnames)} ` },
-          // { text: `                 Tipo de Fondo: `, bold: true },
-          // { text: `${values.descargoData.tipoDesembolso}` },
         ],
       },
       {
@@ -516,6 +547,78 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
             ],
           ],
         },
+      },
+
+      {
+        text: "IV. Detalle Gasto por tipo de Gasto",
+        style: "subTitle",
+        decoration: "underline",
+      },
+
+      // 🔹 Generar una tabla por cada fuente en resumenPorTipoGasto
+      ...values.resumenPorTipoGasto.flatMap(
+        (tipoFuente: any, index: number) => {
+          // Calcular total por fuente
+          const totalFuente = tipoFuente.sumaTotalGasto || 0;
+
+          // Construir tabla de tipos de gasto
+          const tablaTipos: Content = {
+            layout: "customLayout05",
+            margin: [60, 0, 0, 0],
+            table: {
+              headerRows: 1,
+              widths: [20, 200, 100],
+
+              body: [
+                [
+                  { text: "Nº", style: "tableHeader" },
+                  { text: "Tipo de Gasto", style: "tableHeader" },
+                  { text: "Monto Ejecutado", style: "tableHeader" },
+                ],
+                ...tipoFuente.fuentes.map((f: any, i: number) => [
+                  { text: i + 1, style: "tableBody", alignment: "center" },
+                  { text: f._id, style: "tableBody" },
+                  {
+                    text: CurrencyFormatter.formatCurrency(f.totalGasto),
+                    style: "tableBody",
+                    alignment: "right",
+                  },
+                ]),
+                ["", "", ""],
+                [
+                  { text: "TOTAL", colSpan: 2, bold: true },
+                  "",
+                  {
+                    text: CurrencyFormatter.formatCurrency(totalFuente),
+                    style: "tableBody",
+                    alignment: "right",
+                    bold: true,
+                  },
+                ],
+              ],
+            },
+          };
+
+          return [
+            {
+              text: `${index + 1}. Fuente: ${tipoFuente.tipoGasto} - ${
+                tipoFuente.denominacionFuente
+              }`,
+              bold: true,
+              margin: [0, 10, 0, 5],
+            },
+            tablaTipos,
+          ];
+        }
+      ),
+      {
+        text: `TOTAL GENERAL DEL GASTO: ${CurrencyFormatter.formatCurrency(
+          totalTipoGasto
+        )}`,
+        decoration: "underline",
+        margin: [0, 5, 0, 0],
+        alignment: "right",
+        bold: true,
       },
 
       // {

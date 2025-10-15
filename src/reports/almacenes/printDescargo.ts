@@ -103,6 +103,10 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
     (acc: any, detail: { totalMonto: any }) => acc + detail.totalMonto,
     0
   );
+  const totalTipoGasto = values.resumenPorTipoGasto.reduce(
+    (acc: any, detail: { sumaTotalGasto: any }) => acc + detail.sumaTotalGasto,
+    0
+  );
   // log("values", values.idFuentes);
 
   const currentDate: Content = {
@@ -222,9 +226,11 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
             )}`,
           },
           { text: `\n A cargo de: `, bold: true },
-          { text: `${capitalize(
-                  values.descargoData.encargado.username
-                )} ${capitalize(values.descargoData.encargado.surnames)} ` },
+          {
+            text: `${capitalize(
+              values.descargoData.encargado.username
+            )} ${capitalize(values.descargoData.encargado.surnames)} `,
+          },
           { text: `                 Tipo de Fondo: `, bold: true },
           { text: `${values.descargoData.tipoDesembolso}` },
         ],
@@ -236,7 +242,7 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
       },
       // DETALLE DE REGISTRO de Fuentes
       {
-        layout: "customLayout04", // 'lightHorizontalLines', // optional
+        layout: "customLayout05", // 'lightHorizontalLines', // optional
         table: {
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
@@ -306,7 +312,7 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
       },
       // DETALLE DE REGISTRO de Fuentes
       {
-        layout: "customLayout04", // 'lightHorizontalLines', // optional
+        layout: "customLayout05", // 'lightHorizontalLines', // optional
         table: {
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
@@ -422,7 +428,7 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
       },
       // DETALLE DE REGISTRO de Fuentes
       {
-        layout: "customLayout04", // 'lightHorizontalLines', // optional
+        layout: "customLayout05", // 'lightHorizontalLines', // optional
         table: {
           // headers are automatically repeated if the table spans over multiple pages
           // you can declare how many rows should be treated as headers
@@ -483,6 +489,77 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
         },
       },
 
+      {
+        text: "IV. Detalle Gasto por tipo de Gasto",
+        style: "subTitle",
+        decoration: "underline",
+      },
+
+      // 🔹 Generar una tabla por cada fuente en resumenPorTipoGasto
+      ...values.resumenPorTipoGasto.flatMap(
+        (tipoFuente: any, index: number) => {
+          // Calcular total por fuente
+          const totalFuente = tipoFuente.sumaTotalGasto || 0;
+
+          // Construir tabla de tipos de gasto
+          const tablaTipos: Content = {
+            layout: "customLayout05",
+            margin: [60, 0, 0, 0],
+            table: {
+              headerRows: 1,
+              widths: [20, 200, 100],
+
+              body: [
+                [
+                  { text: "Nº", style: "tableHeader" },
+                  { text: "Tipo de Gasto", style: "tableHeader" },
+                  { text: "Monto Ejecutado", style: "tableHeader" },
+                ],
+                ...tipoFuente.fuentes.map((f: any, i: number) => [
+                  { text: i + 1, style: "tableBody", alignment: "center" },
+                  { text: f._id, style: "tableBody" },
+                  {
+                    text: CurrencyFormatter.formatCurrency(f.totalGasto),
+                    style: "tableBody",
+                    alignment: "right",
+                  },
+                ]),
+                ["", "", ""],
+                [
+                  { text: "TOTAL", colSpan: 2, bold: true },
+                  "",
+                  {
+                    text: CurrencyFormatter.formatCurrency(totalFuente),
+                    style: "tableBody",
+                    alignment: "right",
+                    bold: true,
+                  },
+                ],
+              ],
+            },
+          };
+
+          return [
+            {
+              text: `${index + 1}. Fuente: ${tipoFuente.tipoGasto} - ${
+                tipoFuente.denominacionFuente
+              }`,
+              bold: true,
+              margin: [0, 10, 0, 5],
+            },
+            tablaTipos,
+          ];
+        }
+      ),
+      {
+        text: `TOTAL GENERAL DEL GASTO: ${CurrencyFormatter.formatCurrency(
+          totalTipoGasto
+        )}`,
+        decoration: "underline",
+        margin: [0, 5, 0, 0],
+        alignment: "right",
+        bold: true,
+      },
       // {
       //   margin: [10, 90, 0, 5],
       //   layout: "noBorders", // 'lightHorizontalLines', // optional

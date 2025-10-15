@@ -86,7 +86,7 @@ const styles: StyleDictionary = {
 export const printQueryFuente = (options: any): TDocumentDefinitions => {
   const values = options;
   const user = values.user;
-  log("printDescargoGasto", user);
+
   log("filter1", values.filter);
   const desemFuentes = values.desembolsoFuentes || [];
   const resumenPorTipoFondo = values.resumenPorTipoFondo || [];
@@ -156,15 +156,30 @@ export const printQueryFuente = (options: any): TDocumentDefinitions => {
         columns: [
           logoGamb,
           {
-            text: `REPORTE DETALLADO DEL GASTO`,
-            alignment: "center",
-            margin: [0, 30, 0, 0],
-            style: {
-              bold: true,
-              fontSize: 13,
-              color: "#0e78d1",
-            },
+            stack: [
+              {
+                text: `RESUMEN DE SALDOS`,
+                alignment: "center",
+                margin: [0, 30, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 13,
+                  color: "#0e78d1",
+                },
+              },
+              {
+                text: `(Expresado en bolivianos) `,
+                alignment: "center",
+                margin: [0, 0, 0, 0],
+                style: {
+                  bold: true,
+                  fontSize: 10,
+                  color: "#6fb5ee",
+                },
+              },
+            ],
           },
+
           sisal,
         ],
       },

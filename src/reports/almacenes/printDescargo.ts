@@ -490,7 +490,7 @@ export const printDescargoGasto = (options: any): TDocumentDefinitions => {
       },
 
       {
-        text: "IV. Detalle Gasto por tipo de Gasto",
+        text: "V. Detalle Gasto por tipo de Gasto",
         style: "subTitle",
         decoration: "underline",
       },

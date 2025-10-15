@@ -482,7 +482,7 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
         },
       },
       {
-        text: "III. Detalle Gasto por Categorìa Programática",
+        text: "IV. Detalle Gasto por Categorìa Programática",
         style: "subTitle",
         decoration: "underline",
       },
@@ -550,7 +550,7 @@ export const printQueryGastos = (options: any): TDocumentDefinitions => {
       },
 
       {
-        text: "IV. Detalle Gasto por tipo de Gasto",
+        text: "V. Detalle Gasto por tipo de Gasto",
         style: "subTitle",
         decoration: "underline",
       },

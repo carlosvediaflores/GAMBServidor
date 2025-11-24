@@ -528,13 +528,17 @@ class Routes {
       .patch(this.routesController.updateGasto);
     app
       .route(`${this.routeparent}/gasto/:id`)
-      .patch(this.routesController.updateGastoId);
+      .patch(jsonwebtokenSecurity, this.routesController.updateGastoId);
     app
       .route(`${this.routeparent}/gasto/:id`)
       .delete(this.routesController.removeGasto);
     app
       .route(`${this.routeparent}/printQueryGastos`)
       .get(jsonwebtokenSecurity, this.routesController.printQueryGastos);
+
+       app
+      .route(`${this.routeparent}/printDescargoRepuManteni`)
+      .get(jsonwebtokenSecurity, this.routesController.printDescargoRepuManteni);
 
     //Organismo Financiador
 

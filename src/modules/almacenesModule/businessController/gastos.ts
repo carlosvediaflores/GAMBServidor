@@ -1,9 +1,14 @@
 import PrinterService from "../../../printer";
-import { printDesemFuente, printQueryGasto, printQueryGastos } from "../../../reports/almacenes";
+import {
+  printDescargoRepuManteni,
+  printDesemFuente,
+  printQueryGasto,
+  printQueryGastos,
+} from "../../../reports/almacenes";
 import gastoModule, { Igastos } from "../models/gastos";
 class BussGasto {
   constructor(
-     private readonly printerService: PrinterService = new PrinterService()
+    private readonly printerService: PrinterService = new PrinterService()
   ) {}
   public async readGasto(): Promise<Array<Igastos>>;
   public async readGasto(id: string): Promise<Igastos>;
@@ -28,7 +33,8 @@ class BussGasto {
         .populate("idPartida")
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
-        .populate("idFuente");
+        .populate("idFuente")
+        .populate('idTipoGasto');
       return result;
     } else if (params1) {
       let skip = params2;
@@ -41,6 +47,7 @@ class BussGasto {
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
         .populate("idFuente")
+        .populate('idTipoGasto')
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -54,7 +61,8 @@ class BussGasto {
         .populate("idPartida")
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
-        .populate("idFuente");
+        .populate("idFuente")
+        .populate('idTipoGasto');
 
       return Gasto;
     }
@@ -69,7 +77,7 @@ class BussGasto {
       return err;
     }
   }
-  
+
   public async getGasto() {
     const resp = await gastoModule
       .find()
@@ -79,20 +87,15 @@ class BussGasto {
     return resp;
   }
   public async updateGasto(id: string, Gasto: any) {
-    let result = await gastoModule.updateOne(
-      { _id: id },
-      { $set: Gasto }
-    );
+    let result = await gastoModule.updateOne({ _id: id }, { $set: Gasto });
     return result;
   }
-    public async updateGastoMany( Gasto: any) {
-    let result = await gastoModule.updateMany(
-      { $set: Gasto }
-    );
-    return 
+  public async updateGastoMany(Gasto: any) {
+    let result = await gastoModule.updateMany({ $set: Gasto });
+    return;
     result;
   }
-  
+
   public async deleteGasto(id: string) {
     let result = await gastoModule.deleteOne({ _id: id });
     return result;
@@ -110,53 +113,58 @@ class BussGasto {
     });
   }
   // Imprime detalle Gasto
-    public async printDesemFuente(id: string, user: any) {
-      const Gasto: any = await gastoModule
-        .findOne({ _id: id })
-        .populate("beneficiario")
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "idFuente", model: "alm_fuente" },
-        })
-        .populate({
-          path: "idFuentes",
-          model: "alm_desemFuente",
-          populate: { path: "beneficiario", model: "User" },
-        });
-      //  console.log('Desem', Gasto, user);
-        
-      let docDefinition;
-     
-        docDefinition = printDesemFuente(Gasto, user); 
-     
-      const doc = this.printerService.createPdf(docDefinition);
-      return doc;
+  public async printDesemFuente(id: string, user: any) {
+    const Gasto: any = await gastoModule
+      .findOne({ _id: id })
+      .populate("beneficiario")
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "idFuente", model: "alm_fuente" },
+      })
+      .populate({
+        path: "idFuentes",
+        model: "alm_desemFuente",
+        populate: { path: "beneficiario", model: "User" },
+      });
+    //  console.log('Desem', Gasto, user);
+
+    let docDefinition;
+
+    docDefinition = printDesemFuente(Gasto, user);
+
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+  public async printQueryGastos(data?: any) {
+    // const listGasto: any = await gastoModule
+    //   .find(filter)
+    //   .populate("idSolicitante")
+    //   .populate("idCombustible")
+    //   .populate("idPartida")
+    //   .populate("idVehiculo")
+    //   .populate("idTipoDesembolso")
+    //   .populate({
+    //     path: "idFuentes",
+    //     model: "alm_desemFuente",
+    //     populate: { path: "idFuente", model: "alm_fuente" },
+    //   })
+    //   .sort({ fecha: -1 });
+    // console.log("listGasto", data);
+    let docDefinition;
+    if (data.borrador.borradorData) {
+      docDefinition = printQueryGasto(data);
+    } else {
+      docDefinition = printQueryGastos(data);
     }
-     public async printQueryGastos(data?: any) {
-        // const listGasto: any = await gastoModule
-        //   .find(filter)
-        //   .populate("idSolicitante")
-        //   .populate("idCombustible")
-        //   .populate("idPartida")
-        //   .populate("idVehiculo")
-        //   .populate("idTipoDesembolso")
-        //   .populate({
-        //     path: "idFuentes",
-        //     model: "alm_desemFuente",
-        //     populate: { path: "idFuente", model: "alm_fuente" },
-        //   })
-        //   .sort({ fecha: -1 });
-        // console.log("listGasto", data);
-        let docDefinition;
-        if(data.borrador.borradorData){       
-          console.log("filter", data.borrador);
-           docDefinition = printQueryGasto(data);
-        }else{
-          docDefinition = printQueryGastos(data);
-        }
-        const doc = this.printerService.createPdf(docDefinition);
-        return doc;
-      }
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+  public async printDescargoRepuManteni(data?: any) {
+    let docDefinition = printDescargoRepuManteni(data);
+
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
 }
 export default BussGasto;

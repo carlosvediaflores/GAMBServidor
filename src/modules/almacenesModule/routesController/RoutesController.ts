@@ -4752,6 +4752,199 @@ class RoutesController {
     let resp = await gasto.readGasto(request.params.id);
     response.status(200).json(resp);
   }
+  public async printDescargoRepuManteni(request: Request, response: Response) {
+    try {
+      const gasto: BussGasto = new BussGasto();
+      const params: any = request.query;
+      let id: string = request.params.id;
+      let user: string = request.body.user;
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+      // filtrar por cualquiera de los dos tipos de gasto
+      params.tipoGasto = { $in: ["Repuestos", "Mantenimiento"] };
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+
+      filter.tipoGasto  = params.tipoGasto;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.numDescargo) filter.numDescargo = params.numDescargo;
+      if (params.encargado) filter.encargado = params.encargado;
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+      let borrador: any = {};
+      if (params.borrador) {
+        borrador.borradorData = params.borrador;
+        delete filter.borrador;
+      }
+      log("filter", filter);
+      // 🔹 Listado de gastos
+      const gastos = await gasto.readGasto(filter, skip, limit, order);
+      // log("gastos", gastos);
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente", // "41-113"
+            idFuente: { $first: "$idFuente" }, // actualmente string
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        // 🔹 Convertir a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+        {
+          $lookup: {
+            from: "alm_fuentes", // nombre real de la colección
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: "$fuenteData" },
+        {
+          $project: {
+            _id: 1,
+            idFuente: 1,
+            totalMonto: 1,
+            count: 1,
+            denominacion: "$fuenteData.denominacion",
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por catProgra
+      const resumenPorCatProgra = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$catProgra",
+            nameCatProg: { $first: "$nameCatProg" },
+            fuente: { $first: "$fuente" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      const resumenPorTipoGasto = await gastoModule.aggregate([
+        { $match: filter },
+
+        // 🔹 Agrupar primero por fuente + tipoGasto
+        {
+          $group: {
+            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Reagrupar por fuente
+        {
+          $group: {
+            _id: "$_id.fuente",
+            fuentes: {
+              $push: {
+                _id: "$_id.tipoGasto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Convertir idFuente a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+
+        // 🔹 Traer denominación desde alm_fuentes
+        {
+          $lookup: {
+            from: "alm_fuentes",
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+        // 🔹 Proyección final
+        {
+          $project: {
+            tipoGasto: "$_id",
+            _id: 0,
+            denominacionFuente: "$fuenteData.denominacion",
+            fuentes: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+
+        // 🔹 Ordenar por monto total
+        { $sort: { sumaTotalGasto: -1 } },
+      ]);
+
+      // 🔹 Monto total de todos los gastos
+      const montoTotalResult = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+          },
+        },
+      ]);
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+      const data = {
+        borrador,
+        filter,
+        user,
+        gastos,
+        resumenPorFuente,
+        resumenPorCatProgra,
+        resumenPorTipoGasto,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+      };
+      // log("data", data);
+
+      const pdfDoc = await gasto.printDescargoRepuManteni(data);
+      response.setHeader("Content-Type", "application/pdf");
+      pdfDoc.info.Title = "Reporte de gastos";
+      pdfDoc.pipe(response);
+      pdfDoc.end();
+      return;
+    } catch (error) {
+      console.error("❌ Error en queryGastos:", error);
+      return response.status(500).json({
+        message: "Error consultando gastos",
+        error,
+      });
+    }
+  }
   public async updateGasto(request: Request, response: Response) {
     var gasto: BussGasto = new BussGasto();
     let id: string = request.params.id;
@@ -4763,10 +4956,68 @@ class RoutesController {
     response.status(200).json(result);
   }
   public async updateGastoId(request: Request, response: Response) {
-    var gasto: BussGasto = new BussGasto();
+    const desembolso = new BussDesembolso();
+    const desembolsoFuente = new BussDesemFuente();
+    const gastoFondo = new BussGastoFondo();
+    const gasto = new BussGasto();
+    const categoria = new BussSegPoa();
+    const solicitador = new BusinessUser();
+    const fuente: BussFuente = new BussFuente();
+    const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
     let id: string = request.params.id;
-    var params = request.body;
-    var result = await gasto.updateGasto(id, params);
+    var gastoData = request.body;
+    let user: any = request.body.user;
+    const desemFuente: any = await desembolsoFuente.readDesemFuente(
+      gastoData.idDesemFuente
+    );
+    const gastoFond: any = await gastoFondo.readGastoFondo(
+      gastoData.idTipoGasto
+    );
+    const fuenteData = await fuente.readFuente(gastoData.idFuente);
+    let tipoDes = await tipoDesem.readTipoDesem(gastoData.idTipoDesembolso);
+    const solicitante: any = await solicitador.readUsers(gastoData.idSolicitante);
+    const catPro: any = await categoria.searchSegPoa(gastoData.catProgra);
+    const catProSimple = catPro[0];
+    const numPrecio = +gastoData.precio;
+    const sumMonto = numPrecio + desemFuente.montoGasto;
+     if (sumMonto > desemFuente.montoTotal) {
+      response.status(300).json({
+        serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
+           Saldo disponible es de : ${
+             desemFuente.montoTotal - desemFuente.montoGasto
+           } Bs., 
+           Intentas pagar: ${gastoData.precio} Bs.`,
+      });
+      return;
+    }
+    const fechaGasto = new Date(gastoData.fecha);
+    const gestionGasto = fechaGasto.getFullYear();
+     gastoData.fechaRegistro = gastoData.fecha;
+    gastoData.gestion = gestionGasto;
+    gastoData.montoGasto = gastoData.montoGasto;
+    // gastoData.tipoFondo = tipoDes.denominacion;
+    gastoData.tipoGasto = gastoFond.denominacion;
+    gastoData.idTipoGasto = gastoFond._id;
+    gastoData.fuente = fuenteData.ffof;
+    gastoData.idFuente = fuenteData._id;
+    gastoData.partida = gastoFond.idPartida.codigo;
+    gastoData.idPartida = gastoFond.idPartida._id;
+    gastoData.catProgra = gastoData.catProgra;
+    gastoData.idCatProgra = catProSimple._id;
+    gastoData.nameCatProg = catProSimple.proyect_acti;
+    gastoData.solicitante = `${solicitante.username} ${solicitante.surnames} `;
+    gastoData.idSolicitante = gastoData.idSolicitante;
+    gastoData.idDesemFondo = desemFuente._id;
+    // gastoData.numDesembolso = desembolsoData.numDesembolso;
+    // gastoData.idDesembolso = desembolsoData._id;
+    // gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
+    gastoData.idVehiculo = gastoData.idVehiculo;
+    gastoData.idUserEdit = user._id;
+    // gastoData.estado = "EJECUTADO";
+    // log("id", user);
+    log("gastoData", gastoData);
+    var result = await gasto.updateGasto(id, gastoData);
+    log("result", result);
     response.status(200).json(result);
   }
   public async removeGasto(request: Request, response: Response) {
@@ -5574,5 +5825,152 @@ class RoutesController {
     pdfDoc.end();
     return;
   }
+    //Imprimir Descargo
+  // public async printDescargoRepuManteni(request: Request, response: Response) {
+  //   const descargo: Bussdescargo = new Bussdescargo();
+  //   let id: string = request.params.id;
+  //   let user: string = request.body.user;
+  //   const descargoData: any = await descargo.readDescargo(id);
+
+  //   // 🔹 Obtener los _id de los gastos (aunque estén populados)
+  //   const gastoIds = descargoData.gastos.map((g: any) =>
+  //     typeof g === "object" ? g._id : g
+  //   );
+
+  //   // 🔹 Resumen por fuente
+  //   const resumenPorFuente = await gastoModule.aggregate([
+  //     { $match: { _id: { $in: gastoIds } } },
+  //     {
+  //       $group: {
+  //         _id: "$fuente",
+  //         idFuente: { $first: "$idFuente" },
+  //         totalMonto: { $sum: "$montoGasto" },
+  //         count: { $sum: 1 },
+  //       },
+  //     },
+  //     { $addFields: { idFuente: { $toObjectId: "$idFuente" } } },
+  //     {
+  //       $lookup: {
+  //         from: "alm_fuentes",
+  //         localField: "idFuente",
+  //         foreignField: "_id",
+  //         as: "fuenteData",
+  //       },
+  //     },
+  //     { $unwind: "$fuenteData" },
+  //     {
+  //       $project: {
+  //         _id: 1,
+  //         idFuente: 1,
+  //         totalMonto: 1,
+  //         count: 1,
+  //         denominacion: "$fuenteData.denominacion",
+  //       },
+  //     },
+  //     { $sort: { totalMonto: -1 } },
+  //   ]);
+
+  //   // 🔹 Resumen por catProgra
+  //   const resumenPorCatProgra = await gastoModule.aggregate([
+  //     { $match: { _id: { $in: gastoIds } } },
+  //     {
+  //       $group: {
+  //         _id: "$catProgra",
+  //         nameCatProg: { $first: "$nameCatProg" },
+  //         fuente: { $first: "$fuente" },
+  //         totalMonto: { $sum: "$montoGasto" },
+  //         count: { $sum: 1 },
+  //       },
+  //     },
+  //     { $sort: { _id: 1 } },
+  //   ]);
+
+  //    const resumenPorTipoGasto = await gastoModule.aggregate([
+  //       { $match: { _id: { $in: gastoIds } }  },
+
+  //       // 🔹 Agrupar primero por fuente + tipoGasto
+  //       {
+  //         $group: {
+  //           _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+  //           totalGasto: { $sum: "$montoGasto" },
+  //           count: { $sum: 1 },
+  //           idFuente: { $first: "$idFuente" },
+  //         },
+  //       },
+
+  //       // 🔹 Reagrupar por fuente
+  //       {
+  //         $group: {
+  //           _id: "$_id.fuente",
+  //           fuentes: {
+  //             $push: {
+  //               _id: "$_id.tipoGasto",
+  //               totalGasto: "$totalGasto",
+  //               count: "$count",
+  //             },
+  //           },
+  //           sumaTotalGasto: { $sum: "$totalGasto" },
+  //           sumaTotalCount: { $sum: "$count" },
+  //           idFuente: { $first: "$idFuente" },
+  //         },
+  //       },
+
+  //       // 🔹 Convertir idFuente a ObjectId
+  //       {
+  //         $addFields: {
+  //           idFuente: { $toObjectId: "$idFuente" },
+  //         },
+  //       },
+
+  //       // 🔹 Traer denominación desde alm_fuentes
+  //       {
+  //         $lookup: {
+  //           from: "alm_fuentes",
+  //           localField: "idFuente",
+  //           foreignField: "_id",
+  //           as: "fuenteData",
+  //         },
+  //       },
+  //       { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+  //       // 🔹 Proyección final
+  //       {
+  //         $project: {
+  //           tipoGasto: "$_id",
+  //           _id: 0,
+  //           denominacionFuente: "$fuenteData.denominacion",
+  //           fuentes: 1,
+  //           sumaTotalGasto: 1,
+  //           sumaTotalCount: 1,
+  //         },
+  //       },
+
+  //       // 🔹 Ordenar por monto total
+  //       { $sort: { sumaTotalGasto: -1 } },
+  //     ]);
+  //   // 🔹 Monto total
+  //   const montoTotalResult = await gastoModule.aggregate([
+  //     { $match: { _id: { $in: gastoIds } } },
+  //     { $group: { _id: null, montoTotalGasto: { $sum: "$montoGasto" } } },
+  //   ]);
+
+  //   const montoTotalGasto =
+  //     montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+  //   const data = {
+  //     user,
+  //     descargoData,
+  //     resumenPorFuente,
+  //     resumenPorCatProgra,
+  //     resumenPorTipoGasto,
+  //     montoTotalGasto, // ✅ aquí ya lo tienes
+  //   };
+  //   const pdfDoc = await descargo.printDescargoGasto(data);
+  //   response.setHeader("Content-Type", "application/pdf");
+  //   pdfDoc.info.Title = "Detalle de Gasto de Desembolso";
+  //   pdfDoc.pipe(response);
+  //   pdfDoc.end();
+  //   return;
+  // }
 }
 export default RoutesController;

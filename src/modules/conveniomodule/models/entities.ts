@@ -9,6 +9,8 @@ export interface IEntity extends Document {
   nit: number;
   cuenta: number;
   isActive?: boolean;
+  estado?: boolean;
+  tipoEntidad?: string;
 }
 const entitySchema: Schema = new Schema(
   {
@@ -20,6 +22,8 @@ const entitySchema: Schema = new Schema(
     nit: { type: Number },
     cuenta: { type: Number },
     isActive: { type: Boolean, default: true }, // New field to indicate if the entity is active
+    estado: { type: Boolean, default: true }, // New field to indicate the estado of the entity
+    tipoEntidad: { type: String },
   },
   {
     timestamps: true,

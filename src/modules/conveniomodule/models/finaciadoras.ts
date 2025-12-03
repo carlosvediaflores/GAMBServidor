@@ -9,7 +9,7 @@ const FileSchema = new Schema({
     idcv: { type: Schema.Types.ObjectId, ref: 'cvconvenio'},
     tipo: { type: String},
     monto: { type: String},
-    entidad: { type: Schema.Types.ObjectId, ref: 'cvendidades'},
+    entidad: { type: Schema.Types.ObjectId, ref: 'entities'},
 },{
     timestamps: true,
     versionKey: false,

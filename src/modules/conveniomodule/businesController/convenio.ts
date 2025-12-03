@@ -29,7 +29,7 @@ class BussConvenio {
       .populate({
         path: "financiadoras",
         model: "cvfinanciadoras",
-        populate: { path: "entidad", model: "cventidades" },
+        populate: { path: "entidad", model: "entities" },
       });
       return result;
     } else if (params1) {
@@ -42,7 +42,7 @@ class BussConvenio {
         .populate({
           path: "financiadoras",
           model: "cvfinanciadoras",
-          populate: { path: "entidad", model: "cventidades" },
+          populate: { path: "entidad", model: "entities" },
         })
         .populate("transferencia")
         .populate("entidadejecutora")
@@ -53,7 +53,7 @@ class BussConvenio {
       let listConvenio: Array<IConvenio> = await ConvenioModule.find()
         .populate({
           path: "entidad",
-          model: "cventidades",
+          model: "entities",
           populate: { path: "representante", model: "cvrepresentantes" },
         })
         .populate("entidadejecutora")

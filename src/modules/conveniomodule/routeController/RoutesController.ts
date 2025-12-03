@@ -25,6 +25,7 @@ import BussPartida from "../businesController/partidasg";
 import { IPartidas } from "../models/partidasg";
 import BussRubro from "../businesController/rubros";
 import { IRubros } from "../models/rubros";
+import { log } from "console";
 class RoutesController {
   //*--------------Entidad------------------- *//
   public async createEntidad(request: Request, response: Response) {
@@ -67,7 +68,7 @@ class RoutesController {
         .json({ serverResponse: "El id es necesario para crear subdir" });
       return;
     }
-    var ruta: BussEntidad = new BussEntidad();
+    var entity: BussEntity = new BussEntity();
     //var userResult: IUser = await orgToUpdate.save();
     let repres: BussRepres = new BussRepres();
     var represData: any = request.body;
@@ -75,7 +76,7 @@ class RoutesController {
     console.log(represData);
     var result1 = await repres.addRepres(represData);
     let idSegui = result1._id;
-    var result = await ruta.addRepres(identi, idSegui);
+    var result = await entity.addRepres(identi, idSegui);
     //console.log(result + "esto es el resultado");
     if (result1 == null) {
       response.status(300).json({ serverResponse: "no se pudo guardar..." });
@@ -120,6 +121,7 @@ class RoutesController {
   public async createConvenio(request: Request, response: Response) {
     var convenio: BussConvenio = new BussConvenio();
     var entidadData = request.body;
+    console.log(entidadData);
     let result = await convenio.addConvenio(entidadData);
     response.status(201).json({ serverResponse: result });
   }
@@ -316,9 +318,8 @@ class RoutesController {
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
-      var newname: string = `${"GAMB"}_${filehash}_${
-        filData.typefile
-      }.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filehash}_${filData.typefile
+        }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       var hojaResult: IConvenio = await convenioToUpdate.save();
@@ -399,9 +400,8 @@ class RoutesController {
       var filehash: string = sha1(new Date().toString()).substr(0, 5);
       var nombreCortado = file.name.split(".");
       var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-      var newname: string = `${"GAMB"}_${filehash}_${
-        trsnfToUpdate.codigo
-      }.${extensionArchivo}`;
+      var newname: string = `${"GAMB"}_${filehash}_${trsnfToUpdate.codigo
+        }.${extensionArchivo}`;
       var totalpath = `${absolutepath}/${newname}`;
       await copyDirectory(totalpath, file);
       var hojaResult: IConvenio = await trsnfToUpdate.save();
@@ -524,6 +524,54 @@ class RoutesController {
     let repres = await entity.readEntityCod(codigo);
     response.status(200).json(repres);
   }
+  public async queryEntidades(request: Request, response: Response) {
+    try {
+      const entity: BussEntity = new BussEntity();
+      const params: any = request.query;
+
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+
+      if (params.estado) filter.estado = params.estado;
+      if (params.isReposicion) filter.isReposicion = params.isReposicion;
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.partida) filter.partida = params.partida;
+      if (params.catProgra) filter.catProgra = params.catProgra;
+      if (params.solicitante) filter.solicitante = params.solicitante;
+      if (params.encargado) filter.encargado = params.encargado;
+      if (params.numDescargo) filter.numDescargo = params.numDescargo;
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+      log("filter", filter);
+      // 🔹 Listado de entidades
+      const entidades = await entity.readEntity(filter, skip, limit, order);
+      return response.status(200).json({
+        filter,
+        entidades,
+      });
+    } catch (error) {
+      console.error("❌ Error en queryEntidades:", error);
+      return response.status(500).json({
+        message: "Error consultando entidades",
+        error,
+      });
+    }
+  }
+
   public async updateEntity(request: Request, response: Response) {
     var entity: BussEntity = new BussEntity();
     let id: string = request.params.id;

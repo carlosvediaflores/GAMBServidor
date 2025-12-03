@@ -22,31 +22,34 @@ export interface IConvenio extends Document {
     empresaecutota:string;
     desembolso: string;
     estadomonto: string;
-    tipo: number;
-    user: number;
+    tipo: string;
+    user: string;
     files: Array<IFilescv>;
     transferencia: Array<ITransferencia>
+    financiamiento: boolean;
+    convenio: string;
   }
   const convenioSchema: Schema = new Schema({
-    codigo:{ type: String, required: true },
+    convenio: { type: String },
+    codigo:{ type: String},
     nombre:{type:String},
     objeto: { type: String },
-    //entidades:  [{ type: Schema.Types.ObjectId, ref: "cvfinanciadoras"}],
     financiadoras:  [{ type: Schema.Types.ObjectId, ref: "cvfinanciadoras"}],
     entidades: {type: [Schema.Types.ObjectId], ref: "cvfiles"},
     firma: {type: Date},
     fechafin: {type: Date},
     plazo: { type: Number},
     estado:{type: String, default: "REGISTRADO"},
-    montototal:{type:String,default:"0"},
+    montototal:{type:String,default:0},
     montototaltrans:{type:Number},
-    saldo:{type:String, default: "0"},
-    entidadejecutora: {type: Schema.Types.ObjectId, ref: 'cventidades'},
+    saldo:{type:String, default: 0},
+    entidadejecutora: {type: Schema.Types.ObjectId, ref: 'entities'},
     empresaejecutora: {type: Schema.Types.ObjectId, ref: 'cvempresa'},
     tipo: {type: String},
     files:{type: [Schema.Types.ObjectId], ref: "cvfiles"},
     transferencia:{type: [Schema.Types.ObjectId], ref: "cvtransferencia"},
-    //user: {type: Schema.Types.ObjectId, ref: 'User'}
+    user: {type: Schema.Types.ObjectId, ref: 'User'},
+    financiamiento: {type: Boolean, default: false},
     
   },
   {

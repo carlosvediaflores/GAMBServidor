@@ -130,6 +130,9 @@ class Routes {
     app
       .route(`${this.routeparent}/entityCod/:codigo`)
       .get(this.routesController.getEntityCod);
+       app
+      .route(`${this.routeparent}/queryEntidades`)
+      .get(this.routesController.queryEntidades);
     app
       .route(`${this.routeparent}/entity/:id`)
       .put(this.routesController.updateEntity);

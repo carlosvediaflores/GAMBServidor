@@ -28,6 +28,7 @@ export interface IConvenio extends Document {
     transferencia: Array<ITransferencia>
     financiamiento: boolean;
     convenio: string;
+    conclusion:boolean;
   }
   const convenioSchema: Schema = new Schema({
     convenio: { type: String },
@@ -50,6 +51,7 @@ export interface IConvenio extends Document {
     transferencia:{type: [Schema.Types.ObjectId], ref: "cvtransferencia"},
     user: {type: Schema.Types.ObjectId, ref: 'User'},
     financiamiento: {type: Boolean, default: false},
+    conclusion: {type: Boolean, default: false},
     
   },
   {

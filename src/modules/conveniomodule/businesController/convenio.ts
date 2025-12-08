@@ -26,6 +26,9 @@ class BussConvenio {
         _id: params1,
       })
       .populate("transferencia")
+      .populate("entidadejecutora")
+      .populate("user")
+      .populate("files")
       .populate({
         path: "financiadoras",
         model: "cvfinanciadoras",

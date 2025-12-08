@@ -275,68 +275,177 @@ class RoutesController {
     let result = await convenio.deleteConvenio(id);
     response.status(200).json({ serverResponse: "Se elimino el Convenio" });
   }
+  // public async uploadConvenio(request: Request, response: Response) {
+  //   var id: string = request.params.id;
+  //   if (!id) {
+  //     response
+  //       .status(300)
+  //       .json({ serverResponse: "El id es necesario para subir un archivo" });
+  //     return;
+  //   }
+  //   var convenio: BussConvenio = new BussConvenio();
+  //   var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
+  //   log("convenioToUpdate", convenioToUpdate);
+  //   if (!convenioToUpdate) {
+  //     response.status(300).json({ serverResponse: "convenio no existe!" });
+  //     return;
+  //   }
+  //   if (isEmpty(request.files)) {
+  //     response
+  //       .status(300)
+  //       .json({ serverResponse: "No existe un archivo adjunto" });
+  //     return;
+  //   }
+  //   var dir = `${__dirname}/../../../../uploads/convenios/documentos`;
+  //   var absolutepath = path.resolve(dir);
+  //   var files: any = request.files;
+  //   var key: Array<string> = Object.keys(files);
+  //   var copyDirectory = (totalpath: string, file: any) => {
+  //     return new Promise((resolve, reject) => {
+  //       file.mv(totalpath, (err: any, success: any) => {
+  //         if (err) {
+  //           resolve(false);
+  //           return;
+  //         }
+  //         resolve(true);
+  //         return;
+  //       });
+  //     });
+  //   };
+  //   let fil: BussFiles = new BussFiles();
+  //   var filData: any = request.body;
+  //   for (var i = 0; i < key.length; i++) {
+  //     var file: any = files[key[i]];
+  //     var nombreCortado = file.name.split(".");
+  //     var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+  //     var filehash: string = sha1(new Date().toString()).substr(0, 5);
+  //     var newname: string = `${"GAMB"}_${filehash}_${filData.typefile
+  //       }.${extensionArchivo}`;
+  //     var totalpath = `${absolutepath}/${newname}`;
+  //     await copyDirectory(totalpath, file);
+  //     var hojaResult: IConvenio = await convenioToUpdate.save();
+  //     filData["idcv"] = id;
+  //     filData["uriconvenio"] = "getfileconvenio/" + newname;
+  //     filData["patconvenio"] = totalpath;
+  //     filData["namefile"] = newname;
+  //     var result1 = await fil.addFilecv(filData);
+  //     let idFile = result1._id;
+  //     var result = await convenio.addFiles(id, idFile);
+  //     if (result == null) {
+  //       response.status(300).json({ serverResponse: "no se pudo guardar..." });
+  //       return;
+  //     }
+  //     response.status(200).json({ serverResponse: "se subió con éxito" });
+  //   }
+  // }
   public async uploadConvenio(request: Request, response: Response) {
-    var id: string = request.params.id;
-    if (!id) {
-      response
-        .status(300)
-        .json({ serverResponse: "El id es necesario para subir un archivo" });
-      return;
-    }
-    var convenio: BussConvenio = new BussConvenio();
-    var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
-    if (!convenioToUpdate) {
-      response.status(300).json({ serverResponse: "convenio no existe!" });
-      return;
-    }
-    if (isEmpty(request.files)) {
-      response
-        .status(300)
-        .json({ serverResponse: "No existe un archivo adjunto" });
-      return;
-    }
-    var dir = `${__dirname}/../../../../uploads/convenios/documentos`;
-    var absolutepath = path.resolve(dir);
-    var files: any = request.files;
-    var key: Array<string> = Object.keys(files);
-    var copyDirectory = (totalpath: string, file: any) => {
-      return new Promise((resolve, reject) => {
-        file.mv(totalpath, (err: any, success: any) => {
-          if (err) {
-            resolve(false);
-            return;
-          }
-          resolve(true);
+  var id: string = request.params.id;
+
+  if (!id) {
+    response
+      .status(300)
+      .json({ serverResponse: "El id es necesario para subir un archivo" });
+    return;
+  }
+
+  var convenio: BussConvenio = new BussConvenio();
+  var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
+
+  if (!convenioToUpdate) {
+    response.status(300).json({ serverResponse: "convenio no existe!" });
+    return;
+  }
+
+  if (isEmpty(request.files)) {
+    response
+      .status(300)
+      .json({ serverResponse: "No existe un archivo adjunto" });
+    return;
+  }
+
+  var dir = `${__dirname}/../../../../uploads/convenios/documentos`;
+  var absolutepath = path.resolve(dir);
+
+  var files: any = request.files;
+  var key: Array<string> = Object.keys(files);
+
+  var copyDirectory = (totalpath: string, file: any) => {
+    return new Promise((resolve, reject) => {
+      file.mv(totalpath, (err: any, success: any) => {
+        if (err) {
+          resolve(false);
           return;
-        });
-      });
-    };
-    let fil: BussFiles = new BussFiles();
-    var filData: any = request.body;
-    for (var i = 0; i < key.length; i++) {
-      var file: any = files[key[i]];
-      var nombreCortado = file.name.split(".");
-      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-      var filehash: string = sha1(new Date().toString()).substr(0, 5);
-      var newname: string = `${"GAMB"}_${filehash}_${filData.typefile
-        }.${extensionArchivo}`;
-      var totalpath = `${absolutepath}/${newname}`;
-      await copyDirectory(totalpath, file);
-      var hojaResult: IConvenio = await convenioToUpdate.save();
-      filData["idcv"] = id;
-      filData["uriconvenio"] = "getfileconvenio/" + newname;
-      filData["patconvenio"] = totalpath;
-      filData["namefile"] = newname;
-      var result1 = await fil.addFilecv(filData);
-      let idFile = result1._id;
-      var result = await convenio.addFiles(id, idFile);
-      if (result == null) {
-        response.status(300).json({ serverResponse: "no se pudo guardar..." });
+        }
+        resolve(true);
         return;
+      });
+    });
+  };
+
+  let fil: BussFiles = new BussFiles();
+  var filData: any = request.body;
+
+  for (var i = 0; i < key.length; i++) {
+    var file: any = files[key[i]];
+
+    // extraer extensión
+    var nombreCortado = file.name.split(".");
+    var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+
+    // hash del nombre
+    var filehash: string = sha1(new Date().toString()).substr(0, 5);
+
+    // LÓGICA SOLO PARA Adenda Y Enmienda
+    let tiposConConteo = ["Adenda", "Enmienda"];
+    let sufijo = "";
+
+    if (tiposConConteo.includes(filData.typefile)) {
+      // contar registros previos del mismo tipo
+      let cantidad = 0;
+
+      if (convenioToUpdate.files && convenioToUpdate.files.length > 0) {
+        cantidad = convenioToUpdate.files.filter(
+          (f) => f.typefile === filData.typefile
+        ).length;
       }
-      response.status(200).json({ serverResponse: "se subió con éxito" });
+
+      // si ya existe uno o más
+      if (cantidad > 0) {
+        sufijo = "_" + (cantidad + 1); // Ejemplo: Adenda_2
+      }
+    }
+
+    // construir nombre final del archivo
+    var newname: string = `GAMB_${filehash}_${filData.typefile}${sufijo}.${extensionArchivo}`;
+    var totalpath = `${absolutepath}/${newname}`;
+
+    await copyDirectory(totalpath, file);
+
+    // guardar cambios del convenio si fuera necesario
+    await convenioToUpdate.save();
+
+    // registrar archivo
+    filData["idcv"] = id;
+    filData["uriconvenio"] = "getfileconvenio/" + newname;
+    filData["patconvenio"] = totalpath;
+    filData["namefile"] = newname;
+    filData["typefile"] = filData.typefile + sufijo; // asegurar que el tipo se guarde
+
+    var result1 = await fil.addFilecv(filData);
+    let idFile = result1._id;
+
+    // adjuntar archivo al convenio
+    var result = await convenio.addFiles(id, idFile);
+
+    if (result == null) {
+      response.status(300).json({ serverResponse: "no se pudo guardar..." });
+      return;
     }
   }
+
+  response.status(200).json({ serverResponse: "se subió con éxito" });
+}
+
   public async getFileConv(request: Request, response: Response) {
     var name: string = request.params.name;
     if (!name) {

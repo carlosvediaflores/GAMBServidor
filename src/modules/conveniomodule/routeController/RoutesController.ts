@@ -640,18 +640,10 @@ class RoutesController {
 
       // 🔹 Armamos el filtro
       const filter: any = {};
-
-      if (params.deFecha || params.alFecha) {
-        filter.fechaRegistro = {};
-        if (params.deFecha)
-          filter.fechaRegistro.$gte = new Date(params.deFecha);
-        if (params.alFecha)
-          filter.fechaRegistro.$lte = new Date(params.alFecha);
-      }
-
+      if (params.codigo) filter.codigo = params.codigo;
       if (params.estado) filter.estado = params.estado;
-      if (params.isReposicion) filter.isReposicion = params.isReposicion;
-      if (params.gestion) filter.gestion = params.gestion;
+      if (params.denominacion) filter.denominacion = params.denominacion;
+      if (params.tipoEntidad) filter.tipoEntidad = params.tipoEntidad;
       if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
       if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
       if (params.fuente) filter.fuente = params.fuente;

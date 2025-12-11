@@ -530,6 +530,9 @@ class Routes {
       .route(`${this.routeparent}/gasto/:id`)
       .patch(jsonwebtokenSecurity, this.routesController.updateGastoId);
     app
+      .route(`${this.routeparent}/gastoEstado/:id`)
+      .patch(this.routesController.updateGastoEstado);
+    app
       .route(`${this.routeparent}/gasto/:id`)
       .delete(this.routesController.removeGasto);
     app

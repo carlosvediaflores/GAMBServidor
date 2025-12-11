@@ -5015,9 +5015,15 @@ class RoutesController {
     gastoData.idUserEdit = user._id;
     // gastoData.estado = "EJECUTADO";
     // log("id", user);
-    log("gastoData", gastoData);
     var result = await gasto.updateGasto(id, gastoData);
-    log("result", result);
+    response.status(200).json(result);
+  }
+
+  public async updateGastoEstado(request: Request, response: Response) {
+    const gasto = new BussGasto();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await gasto.updateGasto(id, params);
     response.status(200).json(result);
   }
   public async removeGasto(request: Request, response: Response) {

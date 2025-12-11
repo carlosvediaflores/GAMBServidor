@@ -644,17 +644,9 @@ class RoutesController {
       if (params.estado) filter.estado = params.estado;
       if (params.denominacion) filter.denominacion = params.denominacion;
       if (params.tipoEntidad) filter.tipoEntidad = params.tipoEntidad;
-      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
-      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
-      if (params.fuente) filter.fuente = params.fuente;
-      if (params.partida) filter.partida = params.partida;
-      if (params.catProgra) filter.catProgra = params.catProgra;
-      if (params.solicitante) filter.solicitante = params.solicitante;
-      if (params.encargado) filter.encargado = params.encargado;
-      if (params.numDescargo) filter.numDescargo = params.numDescargo;
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = {_id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       log("filter", filter);
@@ -673,6 +665,52 @@ class RoutesController {
     }
   }
 
+    public async printQueryEntidades(request: Request, response: Response) {
+      try {
+        const entity: BussEntity = new BussEntity();
+        const params: any = request.query;
+        let id: string = request.params.id;
+        let user: string = request.body.user;
+  
+         // 🔹 Armamos el filtro
+      const filter: any = {};
+      if (params.codigo) filter.codigo = params.codigo;
+      if (params.estado) filter.estado = params.estado;
+      if (params.denominacion) filter.denominacion = params.denominacion;
+      if (params.tipoEntidad) filter.tipoEntidad = params.tipoEntidad;
+
+  
+        // 🔹 Orden y paginación
+        const order: any = { fechaRegistro: -1, _id: -1 };
+        const limit = params.limit;
+        const skip = params.skip ? parseInt(params.skip, 10) : 0;
+        let borrador: any = {};
+  
+        // 🔹 Listado de entidades
+       const entidades = await entity.readEntity(filter, skip, limit, order);
+
+      
+        const data = {
+          filter,
+          user,
+          entidades,
+        };
+        // log("data", data);
+  
+        const pdfDoc = await entity.printQueryEntidades(data);
+        response.setHeader("Content-Type", "application/pdf");
+        pdfDoc.info.Title = "Reporte de Entidades";
+        pdfDoc.pipe(response);
+        pdfDoc.end();
+        return;
+      } catch (error) {
+        console.error("❌ Error en queryEntidades:", error);
+        return response.status(500).json({
+          message: "Error consultando entidades",
+          error,
+        });
+      }
+    }
   public async updateEntity(request: Request, response: Response) {
     var entity: BussEntity = new BussEntity();
     let id: string = request.params.id;

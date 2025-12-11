@@ -1,7 +1,11 @@
+import { printQueryEntidades } from "../../../reports/convenios";
+import PrinterService from "../../../printer";
 import entityModel, { IEntity } from "../models/entities";
 import RepresentanteModel, { IRepresentante } from './../models/Representante';
 class BussEntity {
-    constructor() {
+    constructor(
+         private readonly printerService: PrinterService = new PrinterService()
+    ) {
 
     }
     public async readEntity(): Promise<Array<IEntity>>;
@@ -68,5 +72,12 @@ class BussEntity {
             return null;
         }
 
+        public async printQueryEntidades(data?: any) {
+  
+      const docDefinition = printQueryEntidades(data);
+      
+      const doc = this.printerService.createPdf(docDefinition);
+      return doc;
+    }
 }
 export default BussEntity;

@@ -1,6 +1,7 @@
 import { Express } from "express";
 
 import RoutesController from "./routeController/RoutesController";
+import jsonwebtokenSecurity from "../usermodule/middleware";
 class Routes {
   private routesController: RoutesController;
   private routeparent: string;
@@ -133,6 +134,9 @@ class Routes {
        app
       .route(`${this.routeparent}/queryEntidades`)
       .get(this.routesController.queryEntidades);
+    app
+      .route(`${this.routeparent}/printQueryEntidades`)
+      .get(jsonwebtokenSecurity, this.routesController.printQueryEntidades);
     app
       .route(`${this.routeparent}/entity/:id`)
       .put(this.routesController.updateEntity);

@@ -14,6 +14,7 @@ import BussConvenio from "../businesController/convenio";
 import BussTransf from "../businesController/tranferencia";
 import BussEstadoMonto from "../businesController/estadomonto";
 import { IConvenio } from "../models/convenio";
+import ConvenioModule from "../models/convenio";
 import { IFilescv } from "../models/files";
 import BussFiles from "../businesController/files";
 import BussDesem from "../businesController/tranferencia";
@@ -26,6 +27,7 @@ import { IPartidas } from "../models/partidasg";
 import BussRubro from "../businesController/rubros";
 import { IRubros } from "../models/rubros";
 import { log } from "console";
+import { Types } from "mongoose";
 class RoutesController {
   //*--------------Entidad------------------- *//
   public async createEntidad(request: Request, response: Response) {
@@ -125,70 +127,278 @@ class RoutesController {
     let result = await convenio.addConvenio(entidadData);
     response.status(201).json({ serverResponse: result });
   }
+//   public async getConvenios(request: Request, response: Response) {
+//     var segui: BussConvenio = new BussConvenio();
+//     var params: any = request.query;
+//     var limit = 0;
+//     var skip = 0;
+//     var aux: any = {};
+//     var order: any = {};
+//     var select = "";
+//     const filter: any = {};
+//     const hoy = new Date();
+
+//     if (params.vencimiento) {
+
+//       // 🔴 SOLO VENCIDOS
+//       if (params.vencimiento === 'vencido') {
+//         filter.$and = [
+//           { fechafin: { $ne: null } },
+//           { fechafin: { $lt: hoy } }
+//         ];
+//       }
+
+//       // 🟢 ACTIVOS (con fecha futura)
+//       if (params.vencimiento === 'activo') {
+//         filter.$and = [
+//           { fechafin: { $ne: null } },
+//           { fechafin: { $gt: hoy } }
+//         ];
+//       }
+
+//       // 🔵 CONCLUSION = TRUE (pero NO vencidos)
+//       if (params.vencimiento === 'true') {
+//         filter.$and = [
+//           { conclusion: true },
+//           {
+//             $or: [
+//               { fechafin: null },
+//               { fechafin: { $gt: hoy } }
+//             ]
+//           }
+//         ];
+//       }
+//     }
+
+// if (params.entidadFinan) {
+//   filter.financiadoras = new Types.ObjectId(params.entidadFinan);
+// }
+
+
+//     if (params.codigo) filter.codigo = params.codigo;
+//     if (params.estado) filter.estado = params.estado;
+//     if (params.financiamiento) filter.financiamiento = params.financiamiento;
+//     if (params.convenio) filter.convenio = params.convenio;
+//     if (params.conclusion) filter.conclusion = params.conclusion;
+//     if (params.nombre != null) {
+//       var expresion = new RegExp(params.nombre);
+//       filter["nombre"] = expresion;
+//     }
+
+//     if (params.limit) {
+//       limit = parseInt(params.limit);
+//     }
+//     if (params.dategt != null) {
+//       var gt = params.dategt;
+//       aux["$gt"] = gt;
+//     }
+//     if (params.datelt != null) {
+//       var lt = params.datelt;
+//       aux["$lt"] = lt;
+//     }
+//     if (Object.entries(aux).length > 0) {
+//       filter["firma"] = aux;
+//     }
+//     if (params.skip) {
+//       skip = parseInt(params.skip);
+//       if (skip >= 2) {
+//         skip = limit * (skip - 1);
+//       } else {
+//         skip = 0;
+//       }
+//     }
+//     if (params.order != null) {
+//       var data = params.order.split(",");
+//       var number = parseInt(data[1]);
+//       order[data[0]] = number;
+//     } else {
+//       order = { _id: -1 };
+//     }
+//     log("filter", filter);
+//     const [res, totalDocs] = await Promise.all([
+//       segui.readConvenio(filter, skip, limit, order),
+//       segui.total({}),
+//     ]);
+//     response.status(200).json({
+//       serverResponse: res,
+//       totalDocs,
+//       limit,
+//       totalpage: (number = Math.ceil(totalDocs / limit)),
+//       skip,
+//       order,
+//     });
+//     return;
+//   }
+
   public async getConvenios(request: Request, response: Response) {
-    var segui: BussConvenio = new BussConvenio();
-    var filter: any = {};
-    var params: any = request.query;
-    var limit = 0;
-    var skip = 0;
-    var aux: any = {};
-    var order: any = {};
-    var select = "";
-    if (params.nombre != null) {
-      var expresion = new RegExp(params.nombre);
-      filter["nombre"] = expresion;
+  const params: any = request.query;
+  const hoy = new Date();
+
+  const limit = params.limit ? parseInt(params.limit) : 10;
+  const page = params.skip ? parseInt(params.skip) : 1;
+  const skip = (page - 1) * limit;
+
+  let pipeline: any[] = [];
+
+  /* =========================
+     JOIN FINANCIADORAS
+  ========================== */
+  pipeline.push({
+    $lookup: {
+      from: "cvfinanciadoras",
+      localField: "financiadoras",
+      foreignField: "_id",
+      as: "financiadoras"
     }
-    if (params.codigo != null) {
-      var expresion = new RegExp(params.codigo);
-      filter["codigo"] = expresion;
+  });
+
+  /* =========================
+     FILTRO POR ENTIDAD FINANCIADORA
+  ========================== */
+  if (params.entidadFinan) {
+    pipeline.push({
+      $match: {
+        "financiadoras.entidad": new Types.ObjectId(params.entidadFinan)
+      }
+    });
+  }
+
+  /* =========================
+     FILTROS DE VENCIMIENTO
+  ========================== */
+  if (params.vencimiento === "vencido") {
+    pipeline.push({
+      $match: {
+        fechafin: { $ne: null, $lt: hoy }
+      }
+    });
+  }
+
+  if (params.vencimiento === "activo") {
+    pipeline.push({
+      $match: {
+        fechafin: { $ne: null, $gt: hoy }
+      }
+    });
+  }
+
+  if (params.vencimiento === "true") {
+    pipeline.push({
+      $match: {
+        conclusion: true,
+        $or: [
+          { fechafin: null },
+          { fechafin: { $gt: hoy } }
+        ]
+      }
+    });
+  }
+
+  /* =========================
+     FILTROS SIMPLES
+  ========================== */
+  if (params.codigo) {
+    pipeline.push({ $match: { codigo: params.codigo } });
+  }
+
+  if (params.estado) {
+    pipeline.push({ $match: { estado: params.estado } });
+  }
+
+  if (params.convenio) {
+    pipeline.push({ $match: { convenio: params.convenio } });
+  }
+
+  if (params.conclusion !== undefined) {
+    pipeline.push({
+      $match: { conclusion: params.conclusion === "true" }
+    });
+  }
+
+  if (params.nombre) {
+    pipeline.push({
+      $match: { nombre: { $regex: params.nombre, $options: "i" } }
+    });
+  }
+
+  /* =========================
+     POPULATE ENTIDAD
+  ========================== */
+  pipeline.push({
+    $lookup: {
+      from: "entities",
+      localField: "financiadoras.entidad",
+      foreignField: "_id",
+      as: "entidadesFinanciadoras"
     }
-    if (params.entidades != null) {
-      var expresion = new RegExp(params.entidades);
-      filter["entidades"] = expresion;
-    }
-    if (params.limit) {
-      limit = parseInt(params.limit);
-    }
-    if (params.dategt != null) {
-      var gt = params.dategt;
-      aux["$gt"] = gt;
-    }
-    if (params.datelt != null) {
-      var lt = params.datelt;
-      aux["$lt"] = lt;
-    }
-    if (Object.entries(aux).length > 0) {
-      filter["firma"] = aux;
-    }
-    if (params.skip) {
-      skip = parseInt(params.skip);
-      if (skip >= 2) {
-        skip = limit * (skip - 1);
-      } else {
-        skip = 0;
+  });
+
+  /* =========================
+     POPULATES EXTRAS
+  ========================== */
+  pipeline.push(
+    {
+      $lookup: {
+        from: "cvfiles",
+        localField: "files",
+        foreignField: "_id",
+        as: "files"
+      }
+    },
+    {
+      $lookup: {
+        from: "cvtransferencias",
+        localField: "transferencia",
+        foreignField: "_id",
+        as: "transferencia"
+      }
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: {
+        path: "$user",
+        preserveNullAndEmptyArrays: true
       }
     }
-    if (params.order != null) {
-      var data = params.order.split(",");
-      var number = parseInt(data[1]);
-      order[data[0]] = number;
-    } else {
-      order = { _id: -1 };
-    }
-    const [res, totalDocs] = await Promise.all([
-      segui.readConvenio(filter, skip, limit, order),
-      segui.total({}),
-    ]);
-    response.status(200).json({
-      serverResponse: res,
-      totalDocs,
-      limit,
-      totalpage: (number = Math.ceil(totalDocs / limit)),
-      skip,
-      order,
-    });
-    return;
-  }
+  );
+
+  /* =========================
+     ORDEN + PAGINACIÓN
+  ========================== */
+  pipeline.push(
+    { $sort: { _id: -1 } },
+    { $skip: skip },
+    { $limit: limit }
+  );
+
+  /* =========================
+     EJECUCIÓN
+  ========================== */
+  const [res, total] = await Promise.all([
+    ConvenioModule.aggregate(pipeline),
+    ConvenioModule.aggregate([
+      ...pipeline.filter(p => !("$skip" in p) && !("$limit" in p)),
+      { $count: "total" }
+    ])
+  ]);
+
+  const totalDocs = total[0]?.total || 0;
+
+  response.status(200).json({
+    serverResponse: res,
+    totalDocs,
+    limit,
+    totalpage: Math.ceil(totalDocs / limit),
+    skip: page
+  });
+}
   public async searchCV(request: Request, response: Response) {
     var convenio: BussConvenio = new BussConvenio();
     var searchString = request.params.search;
@@ -339,112 +549,112 @@ class RoutesController {
   //   }
   // }
   public async uploadConvenio(request: Request, response: Response) {
-  var id: string = request.params.id;
+    var id: string = request.params.id;
 
-  if (!id) {
-    response
-      .status(300)
-      .json({ serverResponse: "El id es necesario para subir un archivo" });
-    return;
-  }
-
-  var convenio: BussConvenio = new BussConvenio();
-  var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
-
-  if (!convenioToUpdate) {
-    response.status(300).json({ serverResponse: "convenio no existe!" });
-    return;
-  }
-
-  if (isEmpty(request.files)) {
-    response
-      .status(300)
-      .json({ serverResponse: "No existe un archivo adjunto" });
-    return;
-  }
-
-  var dir = `${__dirname}/../../../../uploads/convenios/documentos`;
-  var absolutepath = path.resolve(dir);
-
-  var files: any = request.files;
-  var key: Array<string> = Object.keys(files);
-
-  var copyDirectory = (totalpath: string, file: any) => {
-    return new Promise((resolve, reject) => {
-      file.mv(totalpath, (err: any, success: any) => {
-        if (err) {
-          resolve(false);
-          return;
-        }
-        resolve(true);
-        return;
-      });
-    });
-  };
-
-  let fil: BussFiles = new BussFiles();
-  var filData: any = request.body;
-
-  for (var i = 0; i < key.length; i++) {
-    var file: any = files[key[i]];
-
-    // extraer extensión
-    var nombreCortado = file.name.split(".");
-    var extensionArchivo = nombreCortado[nombreCortado.length - 1];
-
-    // hash del nombre
-    var filehash: string = sha1(new Date().toString()).substr(0, 5);
-
-    // LÓGICA SOLO PARA Adenda Y Enmienda
-    let tiposConConteo = ["Adenda", "Enmienda"];
-    let sufijo = "";
-
-    if (tiposConConteo.includes(filData.typefile)) {
-      // contar registros previos del mismo tipo
-      let cantidad = 0;
-
-      if (convenioToUpdate.files && convenioToUpdate.files.length > 0) {
-        cantidad = convenioToUpdate.files.filter(
-          (f) => f.typefile === filData.typefile
-        ).length;
-      }
-
-      // si ya existe uno o más
-      if (cantidad > 0) {
-        sufijo = "_" + (cantidad + 1); // Ejemplo: Adenda_2
-      }
-    }
-
-    // construir nombre final del archivo
-    var newname: string = `GAMB_${filehash}_${filData.typefile}${sufijo}.${extensionArchivo}`;
-    var totalpath = `${absolutepath}/${newname}`;
-
-    await copyDirectory(totalpath, file);
-
-    // guardar cambios del convenio si fuera necesario
-    await convenioToUpdate.save();
-
-    // registrar archivo
-    filData["idcv"] = id;
-    filData["uriconvenio"] = "getfileconvenio/" + newname;
-    filData["patconvenio"] = totalpath;
-    filData["namefile"] = newname;
-    filData["typefile"] = filData.typefile + sufijo; // asegurar que el tipo se guarde
-
-    var result1 = await fil.addFilecv(filData);
-    let idFile = result1._id;
-
-    // adjuntar archivo al convenio
-    var result = await convenio.addFiles(id, idFile);
-
-    if (result == null) {
-      response.status(300).json({ serverResponse: "no se pudo guardar..." });
+    if (!id) {
+      response
+        .status(300)
+        .json({ serverResponse: "El id es necesario para subir un archivo" });
       return;
     }
-  }
 
-  response.status(200).json({ serverResponse: "se subió con éxito" });
-}
+    var convenio: BussConvenio = new BussConvenio();
+    var convenioToUpdate: IConvenio = await convenio.readConvenio(id);
+
+    if (!convenioToUpdate) {
+      response.status(300).json({ serverResponse: "convenio no existe!" });
+      return;
+    }
+
+    if (isEmpty(request.files)) {
+      response
+        .status(300)
+        .json({ serverResponse: "No existe un archivo adjunto" });
+      return;
+    }
+
+    var dir = `${__dirname}/../../../../uploads/convenios/documentos`;
+    var absolutepath = path.resolve(dir);
+
+    var files: any = request.files;
+    var key: Array<string> = Object.keys(files);
+
+    var copyDirectory = (totalpath: string, file: any) => {
+      return new Promise((resolve, reject) => {
+        file.mv(totalpath, (err: any, success: any) => {
+          if (err) {
+            resolve(false);
+            return;
+          }
+          resolve(true);
+          return;
+        });
+      });
+    };
+
+    let fil: BussFiles = new BussFiles();
+    var filData: any = request.body;
+
+    for (var i = 0; i < key.length; i++) {
+      var file: any = files[key[i]];
+
+      // extraer extensión
+      var nombreCortado = file.name.split(".");
+      var extensionArchivo = nombreCortado[nombreCortado.length - 1];
+
+      // hash del nombre
+      var filehash: string = sha1(new Date().toString()).substr(0, 5);
+
+      // LÓGICA SOLO PARA Adenda Y Enmienda
+      let tiposConConteo = ["Adenda", "Enmienda"];
+      let sufijo = "";
+
+      if (tiposConConteo.includes(filData.typefile)) {
+        // contar registros previos del mismo tipo
+        let cantidad = 0;
+
+        if (convenioToUpdate.files && convenioToUpdate.files.length > 0) {
+          cantidad = convenioToUpdate.files.filter(
+            (f) => f.typefile === filData.typefile
+          ).length;
+        }
+
+        // si ya existe uno o más
+        if (cantidad > 0) {
+          sufijo = "_" + (cantidad + 1); // Ejemplo: Adenda_2
+        }
+      }
+
+      // construir nombre final del archivo
+      var newname: string = `GAMB_${filehash}_${filData.typefile}${sufijo}.${extensionArchivo}`;
+      var totalpath = `${absolutepath}/${newname}`;
+
+      await copyDirectory(totalpath, file);
+
+      // guardar cambios del convenio si fuera necesario
+      await convenioToUpdate.save();
+
+      // registrar archivo
+      filData["idcv"] = id;
+      filData["uriconvenio"] = "getfileconvenio/" + newname;
+      filData["patconvenio"] = totalpath;
+      filData["namefile"] = newname;
+      filData["typefile"] = filData.typefile + sufijo; // asegurar que el tipo se guarde
+
+      var result1 = await fil.addFilecv(filData);
+      let idFile = result1._id;
+
+      // adjuntar archivo al convenio
+      var result = await convenio.addFiles(id, idFile);
+
+      if (result == null) {
+        response.status(300).json({ serverResponse: "no se pudo guardar..." });
+        return;
+      }
+    }
+
+    response.status(200).json({ serverResponse: "se subió con éxito" });
+  }
 
   public async getFileConv(request: Request, response: Response) {
     var name: string = request.params.name;
@@ -646,10 +856,10 @@ class RoutesController {
       if (params.tipoEntidad) filter.tipoEntidad = params.tipoEntidad;
 
       // 🔹 Orden y paginación
-      const order: any = {_id: -1 };
+      const order: any = { _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
-      log("filter", filter);
+
       // 🔹 Listado de entidades
       const entidades = await entity.readEntity(filter, skip, limit, order);
       return response.status(200).json({
@@ -665,52 +875,52 @@ class RoutesController {
     }
   }
 
-    public async printQueryEntidades(request: Request, response: Response) {
-      try {
-        const entity: BussEntity = new BussEntity();
-        const params: any = request.query;
-        let id: string = request.params.id;
-        let user: string = request.body.user;
-  
-         // 🔹 Armamos el filtro
+  public async printQueryEntidades(request: Request, response: Response) {
+    try {
+      const entity: BussEntity = new BussEntity();
+      const params: any = request.query;
+      let id: string = request.params.id;
+      let user: string = request.body.user;
+
+      // 🔹 Armamos el filtro
       const filter: any = {};
       if (params.codigo) filter.codigo = params.codigo;
       if (params.estado) filter.estado = params.estado;
       if (params.denominacion) filter.denominacion = params.denominacion;
       if (params.tipoEntidad) filter.tipoEntidad = params.tipoEntidad;
 
-  
-        // 🔹 Orden y paginación
-        const order: any = { fechaRegistro: -1, _id: -1 };
-        const limit = params.limit;
-        const skip = params.skip ? parseInt(params.skip, 10) : 0;
-        let borrador: any = {};
-  
-        // 🔹 Listado de entidades
-       const entidades = await entity.readEntity(filter, skip, limit, order);
 
-      
-        const data = {
-          filter,
-          user,
-          entidades,
-        };
-        // log("data", data);
-  
-        const pdfDoc = await entity.printQueryEntidades(data);
-        response.setHeader("Content-Type", "application/pdf");
-        pdfDoc.info.Title = "Reporte de Entidades";
-        pdfDoc.pipe(response);
-        pdfDoc.end();
-        return;
-      } catch (error) {
-        console.error("❌ Error en queryEntidades:", error);
-        return response.status(500).json({
-          message: "Error consultando entidades",
-          error,
-        });
-      }
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+      let borrador: any = {};
+
+      // 🔹 Listado de entidades
+      const entidades = await entity.readEntity(filter, skip, limit, order);
+
+
+      const data = {
+        filter,
+        user,
+        entidades,
+      };
+      // log("data", data);
+
+      const pdfDoc = await entity.printQueryEntidades(data);
+      response.setHeader("Content-Type", "application/pdf");
+      pdfDoc.info.Title = "Reporte de Entidades";
+      pdfDoc.pipe(response);
+      pdfDoc.end();
+      return;
+    } catch (error) {
+      console.error("❌ Error en queryEntidades:", error);
+      return response.status(500).json({
+        message: "Error consultando entidades",
+        error,
+      });
     }
+  }
   public async updateEntity(request: Request, response: Response) {
     var entity: BussEntity = new BussEntity();
     let id: string = request.params.id;

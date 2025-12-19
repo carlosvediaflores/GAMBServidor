@@ -2416,10 +2416,10 @@ class RoutesController {
     }
     if (valeData.precio) {
       if (valeData.idProducto === "642c3e7b3b1ac20013da2571") {
-        valeData.cantidad = valeData.precio / 3.74;
+        valeData.cantidad = valeData.precio / 6.96;
       }
       if (valeData.idProducto === "6439b82156cc6b00132c9ab2") {
-        valeData.cantidad = valeData.precio / 3.72;
+        valeData.cantidad = valeData.precio / 9.80;
       }
     }
     // console.log('valeData',valeData);
@@ -2605,10 +2605,10 @@ class RoutesController {
     let valeData = await Vale.readVale(id);
     if (params.precio) {
       if (params.idProducto === "642c3e7b3b1ac20013da2571") {
-        params.cantidad = params.precio / 3.74;
+        params.cantidad = params.precio / 6.96;
       }
       if (params.idProducto === "6439b82156cc6b00132c9ab2") {
-        params.cantidad = params.precio / 3.72;
+        params.cantidad = params.precio / 9.80;
       }
     }
     console.log("params", params);
@@ -2751,10 +2751,10 @@ class RoutesController {
   //   console.log("valeData", valeData);
   //   let idProducto: string = valeData.idProducto._id;
   //   if (idProducto == "642c3e7b3b1ac20013da2571") {
-  //     params.cantidadFactura = params.montoFactura / 3.74;
+  //     params.cantidadFactura = params.montoFactura / 6.96;
   //   }
   //   if (idProducto == "6439b82156cc6b00132c9ab2") {
-  //     params.cantidadFactura = params.montoFactura / 3.72;
+  //     params.cantidadFactura = params.montoFactura / 9.80;
   //   }
   //   params.idVale = id;
   //   let filter = { idVale: id, numeroFactura: params.numeroFactura };
@@ -2797,9 +2797,9 @@ class RoutesController {
     let idProducto: string = valeData.idProducto._id.toString();
     // Conversión de litros si aplica
     if (idProducto === "642c3e7b3b1ac20013da2571") {
-      params.cantidadFactura = params.montoFactura / 3.74;
+      params.cantidadFactura = params.montoFactura / 6.96;
     } else if (idProducto === "6439b82156cc6b00132c9ab2") {
-      params.cantidadFactura = params.montoFactura / 3.72;
+      params.cantidadFactura = params.montoFactura / 9.80;
     }
 
     params.idVale = id;

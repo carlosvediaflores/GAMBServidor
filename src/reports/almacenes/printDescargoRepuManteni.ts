@@ -18,14 +18,14 @@ const logoGamb: Content = {
   width: 100,
   height: 40,
   alignment: "center",
-  margin: [0, 20, -20, 0],
+  margin: [0, 10, -20, 0],
 };
 const sisal: Content = {
   image: "src/assets/sisal.png",
   width: 100,
   height: 30,
   alignment: "center",
-  margin: [0, 30, 20, 0],
+  margin: [0, 15, 20, 0],
 };
 
 interface ReportOptions {
@@ -89,17 +89,13 @@ export const printDescargoRepuManteni = (
   const values = options;
   const gastos = values.gastos || [];
   const user = values.user;
-  log("values", values);
+  // log("values", values);
   const desemFuentes = values.idFuentes || [];
   const desemGast = values.gastos || [];
   const resumenPorFuente = values.resumenPorFuente || [];
   const resumenPorCatProgra = values.resumenPorCatProgra || [];
   const totalMonto = resumenPorFuente.reduce(
     (acc: any, detail: { totalMonto: any }) => acc + detail.totalMonto,
-    0
-  );
-  const totalGasto = desemGast.reduce(
-    (acc: any, detail: { montoGasto: any }) => acc + detail.montoGasto,
     0
   );
   const totalGastoCatPro = resumenPorCatProgra.reduce(
@@ -110,6 +106,47 @@ export const printDescargoRepuManteni = (
     (acc: any, detail: { sumaTotalGasto: any }) => acc + detail.sumaTotalGasto,
     0
   );
+
+  const totalGasto = desemGast.reduce(
+    (acc: any, detail: { montoGasto: any }) => acc + detail.montoGasto,
+    0
+  );
+  const totalImporteDesembolso = desemGast.reduce(
+    (acc: number, gasto: any) => {
+      const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
+      const importe = tieneFactura
+        ? gasto.montoGasto
+        : gasto.montoGasto / 0.84;
+
+      return acc + importe;
+    },
+    0
+  );
+
+  const totalRetencionIT = desemGast.reduce(
+    (acc: number, gasto: any) => {
+      const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
+      if (tieneFactura) return acc;
+
+      const base = gasto.montoGasto / 0.84;
+      return acc + base * 0.03;
+    },
+    0
+  );
+
+  const totalRetencionIUE = desemGast.reduce(
+    (acc: number, gasto: any) => {
+      const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
+      if (tieneFactura) return acc;
+
+      const base = gasto.montoGasto / 0.84;
+      return acc + base * 0.13;
+    },
+    0
+  );
+
+
+
   // log("values", values.idFuentes);
 
   const currentDate: Content = {
@@ -130,7 +167,7 @@ export const printDescargoRepuManteni = (
       alignment: "right",
       fontSize: 10,
       bold: true,
-      margin: [0, 0, 40, 0],
+      margin: [0, 0, 30, 0],
     };
     return [
       {
@@ -164,9 +201,9 @@ export const printDescargoRepuManteni = (
           {
             stack: [
               {
-                text: `REPORTE DETALLADO DEL `,
+                text: `REPORTE DETALLADO - FONDO ROTATORIO DE ADQUISIÓN DE REPUESTOS Y MANTENIMIENTO DEL PARQUE AUTOMOTOR`,
                 alignment: "center",
-                margin: [0, 30, 0, 0],
+                margin: [0, 20, 0, 0],
                 style: {
                   bold: true,
                   fontSize: 13,
@@ -196,7 +233,7 @@ export const printDescargoRepuManteni = (
             type: "line",
             x1: 0,
             y1: 5,
-            x2: 570,
+            x2: 965,
             y2: 5,
             lineWidth: 1,
             lineColor: "#2195ca",
@@ -207,39 +244,79 @@ export const printDescargoRepuManteni = (
     footer: footerSectionLan,
 
     content: [
+
       {
-        text: "I. Detalle General del Descargo",
+        text: "I. Detalle de Gastos de Fuentes de Financiamiento",
         style: "subTitle",
         decoration: "underline",
       },
+      // DETALLE DE REGISTRO de Fuentes
+      // {
+      //   layout: "customLayout05", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     // headers are automatically repeated if the table spans over multiple pages
+      //     // you can declare how many rows should be treated as headers
+      //     headerRows: 1,
+      //     widths: [18, 80, 320, 104],
+
+      //     body: [
+      //       [
+      //         { text: "Nº", style: "tableHeader" },
+      //         { text: "FF-OF", style: "tableHeader" },
+      //         { text: "Descripción", style: "tableHeader" },
+      //         { text: "Monto Ejecutado", style: "tableHeader" },
+      //         // { text: "%", style: "tableHeader" },
+      //       ],
+      //       ...resumenPorFuente.map((desemFuente: any, indice: number) => [
+      //         { text: indice + 1, style: "tableBody", alignment: "center" },
+      //         {
+      //           text: desemFuente._id,
+      //           style: "tableBody",
+      //           alignment: "center",
+      //         },
+      //         {
+      //           text: desemFuente.denominacion,
+      //           style: "tableBody2",
+      //         },
+      //         {
+      //           text: CurrencyFormatter.formatCurrency(desemFuente.totalMonto),
+      //           style: "tableBody",
+      //           alignment: "right",
+      //         },
+
+      //         // {
+      //         //   text: `${CurrencyFormatter.formatCurrency(
+      //         //     (desemFuente.totalMonto / desemFuente.totalMonto) * 100
+      //         //   )}%`,
+      //         //   style: "tableBody",
+      //         //   alignment: "right",
+      //         // },
+      //       ]),
+      //       ["", "", "", ""],
+      //       ["", "", "", ""],
+      //       [
+      //         {
+      //           text: `Total`,
+      //           colSpan: 2,
+      //         },
+
+      //         "",
+      //         "",
+
+      //         {
+      //           text: `${CurrencyFormatter.formatCurrency(totalMonto)}`,
+      //           style: "tableBody",
+      //           alignment: "right",
+      //           // colSpan: 4,
+      //           bold: true,
+      //         },
+      //       ],
+      //     ],
+      //   },
+      // },
+
       {
-        text: [
-          { text: `Número de Descargo: `, bold: true },
-          // { text: `${values.descargoData.numDescargo}` },
-          { text: `             Fecha de Descargo: `, bold: true },
-          // {
-          //   text: `${DateFormatterSimple.getDDMMYYYY(
-          //     new Date(values.descargoData.fechaDescargo)
-          //   )}`,
-          // },
-          { text: `              Monto Total del Descargo: `, bold: true },
-          // {
-          //   text: `${CurrencyFormatter.formatCurrency(
-          //     values.descargoData.montoDescargo
-          //   )}`,
-          // },
-          { text: `\n A cargo de: `, bold: true },
-          // {
-          //   text: `${capitalize(
-          //     values.descargoData.encargado.username
-          //   )} ${capitalize(values.descargoData.encargado.surnames)} `,
-          // },
-          { text: `                 Tipo de Fondo: `, bold: true },
-          // { text: `${values.descargoData.tipoDesembolso}` },
-        ],
-      },
-      {
-        text: "II. Detalle de Gastos de Fuentes de Financiamiento",
+        text: "II Detalle de Registro de Gasto",
         style: "subTitle",
         decoration: "underline",
       },
@@ -247,86 +324,17 @@ export const printDescargoRepuManteni = (
       {
         layout: "customLayout05", // 'lightHorizontalLines', // optional
         table: {
-          // headers are automatically repeated if the table spans over multiple pages
-          // you can declare how many rows should be treated as headers
+
           headerRows: 1,
-          widths: [18, 80, 320, 104],
-
-          body: [
-            [
-              { text: "Nº", style: "tableHeader" },
-              { text: "FF-OF", style: "tableHeader" },
-              { text: "Descripción", style: "tableHeader" },
-              { text: "Monto Ejecutado", style: "tableHeader" },
-              // { text: "%", style: "tableHeader" },
-            ],
-            ...resumenPorFuente.map((desemFuente: any, indice: number) => [
-              { text: indice + 1, style: "tableBody", alignment: "center" },
-              {
-                text: desemFuente._id,
-                style: "tableBody",
-                alignment: "center",
-              },
-              {
-                text: desemFuente.denominacion,
-                style: "tableBody2",
-              },
-              {
-                text: CurrencyFormatter.formatCurrency(desemFuente.totalMonto),
-                style: "tableBody",
-                alignment: "right",
-              },
-
-              // {
-              //   text: `${CurrencyFormatter.formatCurrency(
-              //     (desemFuente.totalMonto / desemFuente.totalMonto) * 100
-              //   )}%`,
-              //   style: "tableBody",
-              //   alignment: "right",
-              // },
-            ]),
-            ["", "", "", ""],
-            ["", "", "", ""],
-            [
-              {
-                text: `Total`,
-                colSpan: 2,
-              },
-
-              "",
-              "",
-
-              {
-                text: `${CurrencyFormatter.formatCurrency(totalMonto)}`,
-                style: "tableBody",
-                alignment: "right",
-                // colSpan: 4,
-                bold: true,
-              },
-            ],
-          ],
-        },
-      },
-
-      {
-        text: "III Detalle de Registro de Gasto",
-        style: "subTitle",
-        decoration: "underline",
-      },
-      // DETALLE DE REGISTRO de Fuentes
-      {
-        layout: "customLayout05", // 'lightHorizontalLines', // optional
-        table: {
-          // headers are automatically repeated if the table spans over multiple pages
-          // you can declare how many rows should be treated as headers
-          headerRows: 1,
-          widths: [10, 30, 32, 200, 200, 130, 100, 30, 20, 25, 25],
+          widths: [10, 25, 32, 40, 40, 80, 110, 90, 90, 30, 20, 25, 40, 35, 40, 40],
 
           body: [
             [
               { text: "Nº", style: "tableHeader2" },
               { text: "Nº de Form.", style: "tableHeader2" },
               { text: "Fecha", style: "tableHeader2" },
+              { text: "Factura", style: "tableHeader2" },
+              { text: "Fecha Factura", style: "tableHeader2" },
               { text: "Proveedor", style: "tableHeader2" },
               { text: "Descripción del Gasto", style: "tableHeader2" },
               { text: "Solicitado por:", style: "tableHeader2" },
@@ -334,7 +342,10 @@ export const printDescargoRepuManteni = (
               { text: "Ap. Prog.", style: "tableHeader2" },
               { text: "FF-OF", style: "tableHeader2" },
               { text: "Partida Gasto", style: "tableHeader2" },
-              { text: "Monto", style: "tableHeader2" },
+              { text: "Importe Desembolso", style: "tableHeader2" },
+              { text: "Retención I.T. (3%)", style: "tableHeader2" },
+              { text: "Ret. I.U.E. (5%) o RC-IVA (13%)", style: "tableHeader2" },
+              { text: "Líquido Pagable", style: "tableHeader2" },
             ],
             ...desemGast.map((desemGasto: any, indice: number) => [
               { text: indice + 1, style: "tableBody2", alignment: "center" },
@@ -350,11 +361,28 @@ export const printDescargoRepuManteni = (
                 style: "tableBody2",
                 alignment: "center",
               },
+
+              {
+                text: desemGasto.facturas
+                  ?.map((f: { numeroFactura: any; montoFactura: number; }) => `N° ${f.numeroFactura} - ${CurrencyFormatter.formatCurrency(f.montoFactura)}`)
+                  .join('\n') || '',
+                style: "tableBody2",
+              },
+              {
+                text: desemGasto.facturas
+                  ?.map((f: { fechaFactura: string | number | Date; }) =>
+                    DateFormatterSimple.getDDMMYYYY(new Date(f.fechaFactura))
+                  )
+                  .join('\n') || '',
+                style: "tableBody2",
+                alignment: "center",
+              },
+
               {
                 text: `${desemGasto.proveedor?.razon_social ?? ""} `,
                 style: "tableBody2",
               },
-              
+
               {
                 text: `${desemGasto.descripcion ?? ""} `,
                 style: "tableBody2",
@@ -369,7 +397,7 @@ export const printDescargoRepuManteni = (
                 style: "tableBody2",
                 alignment: "center",
               },
-              
+
               {
                 text: `${desemGasto.catProgra} `,
                 style: "tableBody2",
@@ -381,15 +409,34 @@ export const printDescargoRepuManteni = (
                 style: "tableBody2",
                 alignment: "center",
               },
-
               {
                 text: `${desemGasto.partida} `,
                 style: "tableBody2",
                 alignment: "center",
               },
 
+              {
+                text: desemGasto?.facturas && desemGasto.facturas.length > 0
+                  ? CurrencyFormatter.formatCurrency(desemGasto.montoGasto)
+                  : CurrencyFormatter.formatCurrency(desemGasto.montoGasto / 0.84),
+                style: "tableBody2",
+                alignment: "right",
+              },
+              {
+                text: `${desemGasto?.facturas && desemGasto.facturas.length > 0
+                  ? ""
+                  : CurrencyFormatter.formatCurrency((desemGasto.montoGasto / 0.84) * 0.03)}`,
+                style: "tableBody2",
+                alignment: "center",
+              },
 
-
+              {
+                text: `${desemGasto?.facturas && desemGasto.facturas.length > 0
+                  ? ""
+                  : CurrencyFormatter.formatCurrency((desemGasto.montoGasto / 0.84) * 0.13)}`,
+                style: "tableBody2",
+                alignment: "center",
+              },
 
               {
                 text: CurrencyFormatter.formatCurrency(desemGasto.montoGasto),
@@ -397,8 +444,8 @@ export const printDescargoRepuManteni = (
                 alignment: "right",
               },
             ]),
-            ["", "", "", "", "", "", "", "", "", "", ""],
-            ["", "", "", "", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+            ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
             [
               {
                 text: `Total`,
@@ -411,158 +458,177 @@ export const printDescargoRepuManteni = (
               "",
               "",
               "",
+              "",
+              "",
+              "",
+              "",
               {
-                text: `${CurrencyFormatter.formatCurrency(totalGasto)}`,
+                text: CurrencyFormatter.formatCurrency(totalImporteDesembolso),
                 style: "tableBody",
                 alignment: "right",
-                colSpan: 3,
                 bold: true,
               },
-              "",
-              "",
+              {
+                text: CurrencyFormatter.formatCurrency(totalRetencionIT),
+                style: "tableBody",
+                alignment: "right",
+                bold: true,
+              },
+              {
+                text: CurrencyFormatter.formatCurrency(totalRetencionIUE),
+                style: "tableBody",
+                alignment: "right",
+                bold: true,
+              },
+              {
+                text: CurrencyFormatter.formatCurrency(totalGasto),
+                style: "tableBody",
+                alignment: "right",
+                bold: true,
+              },
             ],
           ],
         },
       },
-      {
-        text: "IV. Detalle Gasto por Categorìa Programática",
-        style: "subTitle",
-        decoration: "underline",
-      },
+
+      // {
+      //   text: "III. Detalle Gasto por Categorìa Programática",
+      //   style: "subTitle",
+      //   decoration: "underline",
+      // },
       // DETALLE DE REGISTRO de Fuentes
-      {
-        layout: "customLayout05", // 'lightHorizontalLines', // optional
-        table: {
-          // headers are automatically repeated if the table spans over multiple pages
-          // you can declare how many rows should be treated as headers
-          headerRows: 1,
-          widths: [18, 80, 314, 30, 70],
+      // {
+      //   layout: "customLayout05", // 'lightHorizontalLines', // optional
+      //   table: {
+      //     // headers are automatically repeated if the table spans over multiple pages
+      //     // you can declare how many rows should be treated as headers
+      //     headerRows: 1,
+      //     widths: [18, 80, 314, 30, 70],
 
-          body: [
-            [
-              { text: "Nº", style: "tableHeader" },
-              { text: "Cat. Prog.", style: "tableHeader" },
-              { text: "Descripción", style: "tableHeader" },
-              { text: "FF-OF", style: "tableHeader" },
-              { text: "Monto Ejecutado", style: "tableHeader" },
-            ],
-            ...resumenPorCatProgra.map((catProg: any, indice: number) => [
-              { text: indice + 1, style: "tableBody", alignment: "center" },
-              {
-                text: catProg._id,
-                style: "tableBody2",
-                alignment: "center",
-              },
-              {
-                text: catProg.nameCatProg,
-                style: "tableBody2",
-              },
-              {
-                text: catProg.fuente,
-                style: "tableBody",
-                alignment: "center",
-              },
-              {
-                text: CurrencyFormatter.formatCurrency(catProg.totalMonto),
-                style: "tableBody",
-                alignment: "right",
-              },
-            ]),
-            ["", "", "", "", ""],
-            ["", "", "", "", ""],
-            [
-              {
-                text: `Total`,
-                colSpan: 3,
-              },
+      //     body: [
+      //       [
+      //         { text: "Nº", style: "tableHeader" },
+      //         { text: "Cat. Prog.", style: "tableHeader" },
+      //         { text: "Descripción", style: "tableHeader" },
+      //         { text: "FF-OF", style: "tableHeader" },
+      //         { text: "Monto Ejecutado", style: "tableHeader" },
+      //       ],
+      //       ...resumenPorCatProgra.map((catProg: any, indice: number) => [
+      //         { text: indice + 1, style: "tableBody", alignment: "center" },
+      //         {
+      //           text: catProg._id,
+      //           style: "tableBody2",
+      //           alignment: "center",
+      //         },
+      //         {
+      //           text: catProg.nameCatProg,
+      //           style: "tableBody2",
+      //         },
+      //         {
+      //           text: catProg.fuente,
+      //           style: "tableBody",
+      //           alignment: "center",
+      //         },
+      //         {
+      //           text: CurrencyFormatter.formatCurrency(catProg.totalMonto),
+      //           style: "tableBody",
+      //           alignment: "right",
+      //         },
+      //       ]),
+      //       ["", "", "", "", ""],
+      //       ["", "", "", "", ""],
+      //       [
+      //         {
+      //           text: `Total`,
+      //           colSpan: 3,
+      //         },
 
-              "",
-              "",
-              "",
+      //         "",
+      //         "",
+      //         "",
 
-              {
-                text: `${CurrencyFormatter.formatCurrency(totalGastoCatPro)}`,
-                style: "tableBody",
-                alignment: "right",
-                // colSpan: 4,
-                bold: true,
-              },
-            ],
-          ],
-        },
-      },
+      //         {
+      //           text: `${CurrencyFormatter.formatCurrency(totalGastoCatPro)}`,
+      //           style: "tableBody",
+      //           alignment: "right",
+      //           // colSpan: 4,
+      //           bold: true,
+      //         },
+      //       ],
+      //     ],
+      //   },
+      // },
 
-      {
-        text: "V. Detalle Gasto por tipo de Gasto",
-        style: "subTitle",
-        decoration: "underline",
-      },
+      // {
+      //   text: "IV. Detalle Gasto por tipo de Gasto",
+      //   style: "subTitle",
+      //   decoration: "underline",
+      // },
 
       // 🔹 Generar una tabla por cada fuente en resumenPorTipoGasto
-      ...values.resumenPorTipoGasto.flatMap(
-        (tipoFuente: any, index: number) => {
-          // Calcular total por fuente
-          const totalFuente = tipoFuente.sumaTotalGasto || 0;
+      // ...values.resumenPorTipoGasto.flatMap(
+      //   (tipoFuente: any, index: number) => {
+      //     // Calcular total por fuente
+      //     const totalFuente = tipoFuente.sumaTotalGasto || 0;
 
-          // Construir tabla de tipos de gasto
-          const tablaTipos: Content = {
-            layout: "customLayout05",
-            margin: [60, 0, 0, 0],
-            table: {
-              headerRows: 1,
-              widths: [20, 200, 100],
+      //     // Construir tabla de tipos de gasto
+      //     const tablaTipos: Content = {
+      //       layout: "customLayout05",
+      //       margin: [60, 0, 0, 0],
+      //       table: {
+      //         headerRows: 1,
+      //         widths: [20, 200, 100],
 
-              body: [
-                [
-                  { text: "Nº", style: "tableHeader" },
-                  { text: "Tipo de Gasto", style: "tableHeader" },
-                  { text: "Monto Ejecutado", style: "tableHeader" },
-                ],
-                ...tipoFuente.fuentes.map((f: any, i: number) => [
-                  { text: i + 1, style: "tableBody", alignment: "center" },
-                  { text: f._id, style: "tableBody" },
-                  {
-                    text: CurrencyFormatter.formatCurrency(f.totalGasto),
-                    style: "tableBody",
-                    alignment: "right",
-                  },
-                ]),
-                ["", "", ""],
-                [
-                  { text: "TOTAL", colSpan: 2, bold: true },
-                  "",
-                  {
-                    text: CurrencyFormatter.formatCurrency(totalFuente),
-                    style: "tableBody",
-                    alignment: "right",
-                    bold: true,
-                  },
-                ],
-              ],
-            },
-          };
+      //         body: [
+      //           [
+      //             { text: "Nº", style: "tableHeader" },
+      //             { text: "Tipo de Gasto", style: "tableHeader" },
+      //             { text: "Monto Ejecutado", style: "tableHeader" },
+      //           ],
+      //           ...tipoFuente.fuentes.map((f: any, i: number) => [
+      //             { text: i + 1, style: "tableBody", alignment: "center" },
+      //             { text: f._id, style: "tableBody" },
+      //             {
+      //               text: CurrencyFormatter.formatCurrency(f.totalGasto),
+      //               style: "tableBody",
+      //               alignment: "right",
+      //             },
+      //           ]),
+      //           ["", "", ""],
+      //           [
+      //             { text: "TOTAL", colSpan: 2, bold: true },
+      //             "",
+      //             {
+      //               text: CurrencyFormatter.formatCurrency(totalFuente),
+      //               style: "tableBody",
+      //               alignment: "right",
+      //               bold: true,
+      //             },
+      //           ],
+      //         ],
+      //       },
+      //     };
 
-          return [
-            {
-              text: `${index + 1}. Fuente: ${tipoFuente.tipoGasto} - ${
-                tipoFuente.denominacionFuente
-              }`,
-              bold: true,
-              margin: [0, 10, 0, 5],
-            },
-            tablaTipos,
-          ];
-        }
-      ),
-      {
-        text: `TOTAL GENERAL DEL GASTO: ${CurrencyFormatter.formatCurrency(
-          totalTipoGasto
-        )}`,
-        decoration: "underline",
-        margin: [0, 5, 0, 0],
-        alignment: "right",
-        bold: true,
-      },
+      //     return [
+      //       {
+      //         text: `${index + 1}. Fuente: ${tipoFuente.tipoGasto} - ${tipoFuente.denominacionFuente
+      //           }`,
+      //         bold: true,
+      //         margin: [0, 10, 0, 5],
+      //       },
+      //       tablaTipos,
+      //     ];
+      //   }
+      // ),
+      // {
+      //   text: `TOTAL GENERAL DEL GASTO: ${CurrencyFormatter.formatCurrency(
+      //     totalTipoGasto
+      //   )}`,
+      //   decoration: "underline",
+      //   margin: [0, 5, 0, 0],
+      //   alignment: "right",
+      //   bold: true,
+      // },
       // {
       //   margin: [10, 90, 0, 5],
       //   layout: "noBorders", // 'lightHorizontalLines', // optional

@@ -34,7 +34,9 @@ class BussGasto {
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
         .populate("idFuente")
-        .populate('idTipoGasto');
+        .populate('idTipoGasto')
+        .populate('facturas')
+        .populate('proveedor');
       return result;
     } else if (params1) {
       let skip = params2;
@@ -48,6 +50,8 @@ class BussGasto {
         .populate("idTipoDesembolso")
         .populate("idFuente")
         .populate('idTipoGasto')
+        .populate('facturas')
+        .populate('proveedor')
         .skip(skip)
         .limit(limit)
         .sort(order);
@@ -62,7 +66,9 @@ class BussGasto {
         .populate("idVehiculo")
         .populate("idTipoDesembolso")
         .populate("idFuente")
-        .populate('idTipoGasto');
+        .populate('idTipoGasto')
+        .populate('facturas')
+        .populate('proveedor');
 
       return Gasto;
     }

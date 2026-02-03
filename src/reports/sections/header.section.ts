@@ -49,7 +49,7 @@ export const headerSection = (options: HeaderOptions): Content => {
         alignment: 'center',
         margin: [0,0,0,0],
         style:{
-            fontSize:12,
+            fontSize:10,
             color: "#009ffe", 
         },
         
@@ -63,7 +63,7 @@ export const headerSection = (options: HeaderOptions): Content => {
             margin:[0,30,0,0],
             style:{
                 bold:true,
-                fontSize:15,
+                fontSize:13,
                 color: '#0e78d1',
             },
         },

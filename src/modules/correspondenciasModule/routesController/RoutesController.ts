@@ -19,6 +19,7 @@ import { ITipo } from "../models/tipo";
 import BussTipo from "../bussinesController/tipos";
 import { DateFormatter } from "../helpers";
 import BusinessUser from "../../usermodule/businessController/BusinessUser";
+import { log } from "console";
 
 class RoutesController {
   //* ---------------CorrespondenciaS--------------*//
@@ -242,7 +243,14 @@ class RoutesController {
   }
   public async getNota(request: Request, response: Response) {
     var Correspondencia: BussCorrespondencia = new BussCorrespondencia();
-    let res: any = await Correspondencia.getFile(request.params.fileName);;
+    log('res',request.params.fileName);
+    let res: any = await Correspondencia.getFile(request.params.fileName);
+    if (res == null) {
+      response
+        .status(300)
+        .json({ serverResponse: "No se encontro el archivo" });
+      return;
+    }
     let sigla = "";
     let siglaTipo = "";
     let nombreTipo = "";

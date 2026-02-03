@@ -127,278 +127,333 @@ class RoutesController {
     let result = await convenio.addConvenio(entidadData);
     response.status(201).json({ serverResponse: result });
   }
-//   public async getConvenios(request: Request, response: Response) {
-//     var segui: BussConvenio = new BussConvenio();
-//     var params: any = request.query;
-//     var limit = 0;
-//     var skip = 0;
-//     var aux: any = {};
-//     var order: any = {};
-//     var select = "";
-//     const filter: any = {};
-//     const hoy = new Date();
+  //   public async getConvenios(request: Request, response: Response) {
+  //     var segui: BussConvenio = new BussConvenio();
+  //     var params: any = request.query;
+  //     var limit = 0;
+  //     var skip = 0;
+  //     var aux: any = {};
+  //     var order: any = {};
+  //     var select = "";
+  //     const filter: any = {};
+  //     const hoy = new Date();
 
-//     if (params.vencimiento) {
+  //     if (params.vencimiento) {
 
-//       // 🔴 SOLO VENCIDOS
-//       if (params.vencimiento === 'vencido') {
-//         filter.$and = [
-//           { fechafin: { $ne: null } },
-//           { fechafin: { $lt: hoy } }
-//         ];
-//       }
+  //       // 🔴 SOLO VENCIDOS
+  //       if (params.vencimiento === 'vencido') {
+  //         filter.$and = [
+  //           { fechafin: { $ne: null } },
+  //           { fechafin: { $lt: hoy } }
+  //         ];
+  //       }
 
-//       // 🟢 ACTIVOS (con fecha futura)
-//       if (params.vencimiento === 'activo') {
-//         filter.$and = [
-//           { fechafin: { $ne: null } },
-//           { fechafin: { $gt: hoy } }
-//         ];
-//       }
+  //       // 🟢 ACTIVOS (con fecha futura)
+  //       if (params.vencimiento === 'activo') {
+  //         filter.$and = [
+  //           { fechafin: { $ne: null } },
+  //           { fechafin: { $gt: hoy } }
+  //         ];
+  //       }
 
-//       // 🔵 CONCLUSION = TRUE (pero NO vencidos)
-//       if (params.vencimiento === 'true') {
-//         filter.$and = [
-//           { conclusion: true },
-//           {
-//             $or: [
-//               { fechafin: null },
-//               { fechafin: { $gt: hoy } }
-//             ]
-//           }
-//         ];
-//       }
-//     }
+  //       // 🔵 CONCLUSION = TRUE (pero NO vencidos)
+  //       if (params.vencimiento === 'true') {
+  //         filter.$and = [
+  //           { conclusion: true },
+  //           {
+  //             $or: [
+  //               { fechafin: null },
+  //               { fechafin: { $gt: hoy } }
+  //             ]
+  //           }
+  //         ];
+  //       }
+  //     }
 
-// if (params.entidadFinan) {
-//   filter.financiadoras = new Types.ObjectId(params.entidadFinan);
-// }
+  // if (params.entidadFinan) {
+  //   filter.financiadoras = new Types.ObjectId(params.entidadFinan);
+  // }
 
 
-//     if (params.codigo) filter.codigo = params.codigo;
-//     if (params.estado) filter.estado = params.estado;
-//     if (params.financiamiento) filter.financiamiento = params.financiamiento;
-//     if (params.convenio) filter.convenio = params.convenio;
-//     if (params.conclusion) filter.conclusion = params.conclusion;
-//     if (params.nombre != null) {
-//       var expresion = new RegExp(params.nombre);
-//       filter["nombre"] = expresion;
-//     }
+  //     if (params.codigo) filter.codigo = params.codigo;
+  //     if (params.estado) filter.estado = params.estado;
+  //     if (params.financiamiento) filter.financiamiento = params.financiamiento;
+  //     if (params.convenio) filter.convenio = params.convenio;
+  //     if (params.conclusion) filter.conclusion = params.conclusion;
+  //     if (params.nombre != null) {
+  //       var expresion = new RegExp(params.nombre);
+  //       filter["nombre"] = expresion;
+  //     }
 
-//     if (params.limit) {
-//       limit = parseInt(params.limit);
-//     }
-//     if (params.dategt != null) {
-//       var gt = params.dategt;
-//       aux["$gt"] = gt;
-//     }
-//     if (params.datelt != null) {
-//       var lt = params.datelt;
-//       aux["$lt"] = lt;
-//     }
-//     if (Object.entries(aux).length > 0) {
-//       filter["firma"] = aux;
-//     }
-//     if (params.skip) {
-//       skip = parseInt(params.skip);
-//       if (skip >= 2) {
-//         skip = limit * (skip - 1);
-//       } else {
-//         skip = 0;
-//       }
-//     }
-//     if (params.order != null) {
-//       var data = params.order.split(",");
-//       var number = parseInt(data[1]);
-//       order[data[0]] = number;
-//     } else {
-//       order = { _id: -1 };
-//     }
-//     log("filter", filter);
-//     const [res, totalDocs] = await Promise.all([
-//       segui.readConvenio(filter, skip, limit, order),
-//       segui.total({}),
-//     ]);
-//     response.status(200).json({
-//       serverResponse: res,
-//       totalDocs,
-//       limit,
-//       totalpage: (number = Math.ceil(totalDocs / limit)),
-//       skip,
-//       order,
-//     });
-//     return;
-//   }
+  //     if (params.limit) {
+  //       limit = parseInt(params.limit);
+  //     }
+  //     if (params.dategt != null) {
+  //       var gt = params.dategt;
+  //       aux["$gt"] = gt;
+  //     }
+  //     if (params.datelt != null) {
+  //       var lt = params.datelt;
+  //       aux["$lt"] = lt;
+  //     }
+  //     if (Object.entries(aux).length > 0) {
+  //       filter["firma"] = aux;
+  //     }
+  //     if (params.skip) {
+  //       skip = parseInt(params.skip);
+  //       if (skip >= 2) {
+  //         skip = limit * (skip - 1);
+  //       } else {
+  //         skip = 0;
+  //       }
+  //     }
+  //     if (params.order != null) {
+  //       var data = params.order.split(",");
+  //       var number = parseInt(data[1]);
+  //       order[data[0]] = number;
+  //     } else {
+  //       order = { _id: -1 };
+  //     }
+  //     log("filter", filter);
+  //     const [res, totalDocs] = await Promise.all([
+  //       segui.readConvenio(filter, skip, limit, order),
+  //       segui.total({}),
+  //     ]);
+  //     response.status(200).json({
+  //       serverResponse: res,
+  //       totalDocs,
+  //       limit,
+  //       totalpage: (number = Math.ceil(totalDocs / limit)),
+  //       skip,
+  //       order,
+  //     });
+  //     return;
+  //   }
 
   public async getConvenios(request: Request, response: Response) {
-  const params: any = request.query;
-  const hoy = new Date();
+    const params: any = request.query;
+    const hoy = new Date();
 
-  const limit = params.limit ? parseInt(params.limit) : 10;
-  const page = params.skip ? parseInt(params.skip) : 1;
-  const skip = (page - 1) * limit;
+    const limit = params.limit ? parseInt(params.limit) : 10;
+    const page = params.skip ? parseInt(params.skip) : 1;
+    const skip = (page - 1) * limit;
 
-  let pipeline: any[] = [];
+    let pipeline: any[] = [];
 
-  /* =========================
-     JOIN FINANCIADORAS
-  ========================== */
-  pipeline.push({
-    $lookup: {
-      from: "cvfinanciadoras",
-      localField: "financiadoras",
-      foreignField: "_id",
-      as: "financiadoras"
-    }
-  });
-
-  /* =========================
-     FILTRO POR ENTIDAD FINANCIADORA
-  ========================== */
-  if (params.entidadFinan) {
+    /* =========================
+       JOIN FINANCIADORAS
+    ========================== */
     pipeline.push({
-      $match: {
-        "financiadoras.entidad": new Types.ObjectId(params.entidadFinan)
-      }
-    });
-  }
-
-  /* =========================
-     FILTROS DE VENCIMIENTO
-  ========================== */
-  if (params.vencimiento === "vencido") {
-    pipeline.push({
-      $match: {
-        fechafin: { $ne: null, $lt: hoy }
-      }
-    });
-  }
-
-  if (params.vencimiento === "activo") {
-    pipeline.push({
-      $match: {
-        fechafin: { $ne: null, $gt: hoy }
-      }
-    });
-  }
-
-  if (params.vencimiento === "true") {
-    pipeline.push({
-      $match: {
-        conclusion: true,
-        $or: [
-          { fechafin: null },
-          { fechafin: { $gt: hoy } }
-        ]
-      }
-    });
-  }
-
-  /* =========================
-     FILTROS SIMPLES
-  ========================== */
-  if (params.codigo) {
-    pipeline.push({ $match: { codigo: params.codigo } });
-  }
-
-  if (params.estado) {
-    pipeline.push({ $match: { estado: params.estado } });
-  }
-
-  if (params.convenio) {
-    pipeline.push({ $match: { convenio: params.convenio } });
-  }
-
-  if (params.conclusion !== undefined) {
-    pipeline.push({
-      $match: { conclusion: params.conclusion === "true" }
-    });
-  }
-
-  if (params.nombre) {
-    pipeline.push({
-      $match: { nombre: { $regex: params.nombre, $options: "i" } }
-    });
-  }
-
-  /* =========================
-     POPULATE ENTIDAD
-  ========================== */
-  pipeline.push({
-    $lookup: {
-      from: "entities",
-      localField: "financiadoras.entidad",
-      foreignField: "_id",
-      as: "entidadesFinanciadoras"
-    }
-  });
-
-  /* =========================
-     POPULATES EXTRAS
-  ========================== */
-  pipeline.push(
-    {
       $lookup: {
-        from: "cvfiles",
-        localField: "files",
+        from: "cvfinanciadoras",
+        localField: "financiadoras",
         foreignField: "_id",
-        as: "files"
+        as: "financiadoras"
       }
-    },
-    {
-      $lookup: {
-        from: "cvtransferencias",
-        localField: "transferencia",
-        foreignField: "_id",
-        as: "transferencia"
-      }
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "user",
-        foreignField: "_id",
-        as: "user"
-      }
-    },
-    {
-      $unwind: {
-        path: "$user",
-        preserveNullAndEmptyArrays: true
-      }
+    });
+
+    /* =========================
+       FILTRO POR ENTIDAD FINANCIADORA
+    ========================== */
+    if (params.entidadFinan) {
+      pipeline.push({
+        $match: {
+          "financiadoras.entidad": new Types.ObjectId(params.entidadFinan)
+        }
+      });
     }
-  );
 
-  /* =========================
-     ORDEN + PAGINACIÓN
-  ========================== */
-  pipeline.push(
-    { $sort: { _id: -1 } },
-    { $skip: skip },
-    { $limit: limit }
-  );
+    /* =========================
+       FILTROS DE VENCIMIENTO
+    ========================== */
+    if (params.vencimiento === "vencido") {
+      pipeline.push({
+        $match: {
+          fechafin: { $ne: null, $lt: hoy }
+        }
+      });
+    }
 
-  /* =========================
-     EJECUCIÓN
-  ========================== */
-  const [res, total] = await Promise.all([
-    ConvenioModule.aggregate(pipeline),
-    ConvenioModule.aggregate([
-      ...pipeline.filter(p => !("$skip" in p) && !("$limit" in p)),
-      { $count: "total" }
-    ])
-  ]);
+    if (params.vencimiento === "activo") {
+      pipeline.push({
+        $match: {
+          fechafin: { $ne: null, $gt: hoy }
+        }
+      });
+    }
 
-  const totalDocs = total[0]?.total || 0;
+    if (params.vencimiento === "true") {
+      pipeline.push({
+        $match: {
+          conclusion: true,
+          $or: [
+            { fechafin: null },
+            { fechafin: { $gt: hoy } }
+          ]
+        }
+      });
+    }
 
-  response.status(200).json({
-    serverResponse: res,
-    totalDocs,
-    limit,
-    totalpage: Math.ceil(totalDocs / limit),
-    skip: page
-  });
-}
+    /* =========================
+       FILTROS SIMPLES
+    ========================== */
+    if (params.codigo) {
+      pipeline.push({ $match: { codigo: params.codigo } });
+    }
+
+    if (params.objeto) {
+      pipeline.push({
+        $match: {
+          objeto: {
+            $regex: params.objeto,
+            $options: "i" // insensible a mayúsculas/minúsculas
+          }
+        }
+      });
+    }
+
+    if (params.estado) {
+      pipeline.push({ $match: { estado: params.estado } });
+    }
+
+    if (params.convenio) {
+      pipeline.push({ $match: { convenio: params.convenio } });
+    }
+
+    if (params.conclusion !== undefined) {
+      pipeline.push({
+        $match: { conclusion: params.conclusion === "true" }
+      });
+    }
+     if (params.financiamiento) {
+      pipeline.push({
+        $match: { financiamiento: params.financiamiento === "true" }
+      });
+    }
+
+    if (params.nombre) {
+      pipeline.push({
+        $match: { nombre: { $regex: params.nombre, $options: "i" } }
+      });
+    }
+
+    /* =========================
+       POPULATE ENTIDAD
+    ========================== */
+    pipeline.push(
+      { $unwind: "$financiadoras" },
+
+      {
+        $lookup: {
+          from: "entities",
+          localField: "financiadoras.entidad",
+          foreignField: "_id",
+          as: "financiadoras.entidad"
+        }
+      },
+
+      {
+        $unwind: {
+          path: "$financiadoras.entidad",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+
+      {
+        $group: {
+          _id: "$_id",
+          financiadoras: { $push: "$financiadoras" },
+
+          // ===== conservar el resto de campos =====
+          estado: { $first: "$estado" },
+          montototal: { $first: "$montototal" },
+          saldo: { $first: "$saldo" },
+          files: { $first: "$files" },
+          transferencia: { $first: "$transferencia" },
+          financiamiento: { $first: "$financiamiento" },
+          conclusion: { $first: "$conclusion" },
+          convenio: { $first: "$convenio" },
+          codigo: { $first: "$codigo" },
+          nombre: { $first: "$nombre" },
+          objeto: { $first: "$objeto" },
+          firma: { $first: "$firma" },
+          plazo: { $first: "$plazo" },
+          fechafin: { $first: "$fechafin" },
+          createdAt: { $first: "$createdAt" },
+          updatedAt: { $first: "$updatedAt" },
+          user: { $first: "$user" }
+        }
+      }
+    );
+
+
+    /* =========================
+       POPULATES EXTRAS
+    ========================== */
+    pipeline.push(
+      {
+        $lookup: {
+          from: "cvfiles",
+          localField: "files",
+          foreignField: "_id",
+          as: "files"
+        }
+      },
+      {
+        $lookup: {
+          from: "cvtransferencias",
+          localField: "transferencia",
+          foreignField: "_id",
+          as: "transferencia"
+        }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true
+        }
+      }
+    );
+
+    /* =========================
+       ORDEN + PAGINACIÓN
+    ========================== */
+    pipeline.push(
+      { $sort: { _id: -1 } },
+      { $skip: skip },
+      { $limit: limit }
+    );
+
+    /* =========================
+       EJECUCIÓN
+    ========================== */
+    // log("Pipeline Convenios:", JSON.stringify(pipeline, null, 2));
+    const [res, total] = await Promise.all([
+      ConvenioModule.aggregate(pipeline),
+      ConvenioModule.aggregate([
+        ...pipeline.filter(p => !("$skip" in p) && !("$limit" in p)),
+        { $count: "total" }
+      ])
+    ]);
+
+    const totalDocs = total[0]?.total || 0;
+
+    response.status(200).json({
+      serverResponse: res,
+      totalDocs,
+      limit,
+      totalpage: Math.ceil(totalDocs / limit),
+      skip: page
+    });
+  }
   public async searchCV(request: Request, response: Response) {
     var convenio: BussConvenio = new BussConvenio();
     var searchString = request.params.search;

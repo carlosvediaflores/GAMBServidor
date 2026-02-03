@@ -1436,11 +1436,13 @@ class RoutesController {
     var segui: BussinesSegui = new BussinesSegui();
     let oficina: string = request.params.oficina;
     var params = request.body;
-    var result = await segui.updateSeguiOfi(oficina, params);
-    console.log("oficina", oficina, "params", params);
+    let ofi = { destino: "DIRECCIÓN DE PLANIFICACIÓN", estado: "RECIBIDO" };
+    var result = await segui.updateSeguiOfi(ofi, params);
+    // console.log("oficina", ofi, "params", params);
 
-    response.status(200).json(result);
+    response.status(200).json("result");
   }
+  
   public async removeSegui(request: Request, response: Response) {
     let segui: BussinesSegui = new BussinesSegui();
     let idHoja: string = request.params.id;

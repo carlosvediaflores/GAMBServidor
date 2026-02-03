@@ -67,7 +67,7 @@ const gastoSchema: Schema = new Schema(
     idUserEdit: { type: Schema.Types.ObjectId, ref: "User" },
     descripcion: { type: String },
     proveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
-    facturas: [{ type: Schema.Types.ObjectId, ref: "alm_facturas" }],
+    facturas: [{ type: Schema.Types.ObjectId, ref: "alm_factura" }],
     encargado: { type: String },
     idEncargado: { type: Schema.Types.ObjectId, ref: "User" },
   },

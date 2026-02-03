@@ -6,6 +6,7 @@ export interface IFactura extends Document {
   cantidadFactura: number;
   idProveedor: string;
   idVale: string;
+  idGasto: string;
   
 }
 const facturaSchema: Schema = new Schema(
@@ -16,6 +17,7 @@ const facturaSchema: Schema = new Schema(
     cantidadFactura: { type: Number, default: 0 },
     idProveedor: { type: Schema.Types.ObjectId, ref: "alm_proveedores" },
     idVale: { type: Schema.Types.ObjectId, ref: "alm_vale" },
+    idGasto: { type: Schema.Types.ObjectId, ref: "alm_gasto" },
   },
   {
     timestamps: true,

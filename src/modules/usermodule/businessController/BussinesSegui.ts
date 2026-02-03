@@ -189,13 +189,15 @@ class BussinesSegui {
     let result = await SeguiModel.updateOne({ _id: id }, { $set: segui });
     return result;
   }
-  public async updateSeguiAs(nuit: string, segui: ISeguimiento) {
+  public async updateSeguiAs(nuit: string, segui: any) {
     let result = await SeguiModel.updateMany({ nuit: nuit }, { $set: segui });
     return result;
   }
-  public async updateSeguiOfi(destino:string  , segui: ISeguimiento) {
-    console.log( 'oficina', destino,"params", segui);
-    let result = await SeguiModel.updateMany({destino:destino}, { $set: segui });
+  public async updateSeguiOfi(destino: any, segui: any) {
+    console.log( 'oficina', destino, "params", segui);
+    let res = await SeguiModel.find(destino);
+    console.log('res', res);
+    let result = await SeguiModel.updateMany(destino, { $set: segui });
     return result;
   }
 

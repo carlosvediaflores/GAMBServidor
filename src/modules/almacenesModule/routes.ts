@@ -371,6 +371,9 @@ class Routes {
     app
       .route(`${this.routeparent}/addFactura/:id`)
       .put(this.routesController.addFactura);
+       app
+      .route(`${this.routeparent}/addFactura`)
+      .post(this.routesController.addFacturaGasto);
     //listar facturas
     app
       .route(`${this.routeparent}/facturas`)
@@ -590,6 +593,19 @@ class Routes {
     app
       .route(`${this.routeparent}/printDescargo/:id`)
       .get(jsonwebtokenSecurity, this.routesController.printDescargoGasto);
+
+      //-----Orden-----------//
+      app
+      .route(`${this.routeparent}/orden`)
+      .post(jsonwebtokenSecurity, this.routesController.createOrden);
+
+        app
+      .route(`${this.routeparent}/queryOrden`)
+      .get(this.routesController.queryOrden);
+
+      app
+      .route(`${this.routeparent}/printOrden/:id`)
+      .get(jsonwebtokenSecurity, this.routesController.printOrden);
   }
 }
 export default Routes;

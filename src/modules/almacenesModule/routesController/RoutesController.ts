@@ -4103,6 +4103,7 @@ class RoutesController {
     const fuente: BussFuente = new BussFuente();
     const tipoDesem: BussTipoDesembols = new BussTipoDesembols();
     var gastoData = request.body;
+    log("gastoData", gastoData);
     let user: any = request.body.user;
     const desembolsoData = await desembolso.readDesembolso(
       gastoData.idDesembolso
@@ -5385,6 +5386,19 @@ class RoutesController {
     pdfDoc.pipe(response);
     pdfDoc.end();
     return;
+  }
+  public async getOrden(request: Request, response: Response) {
+    var orden: BussOrden = new BussOrden();
+    let resp = await orden.readOrden(request.params.id);
+    response.status(200).json(resp);
+  }
+
+  public async updateOrden(request: Request, response: Response) {
+    var orden: BussOrden = new BussOrden();
+    let id: string = request.params.id;
+    var params = request.body;
+    var result = await orden.updateOrden(id, params);
+    response.status(200).json(result);
   }
 }
 export default RoutesController;

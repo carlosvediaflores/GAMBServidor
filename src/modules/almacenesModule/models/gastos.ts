@@ -36,6 +36,7 @@ export interface Igastos extends Document {
   encargado?: string;
   idEncargado?: string;
   idUserEdit?: string;
+  idOrden?: string;
 }
 const gastoSchema: Schema = new Schema(
   {
@@ -70,6 +71,7 @@ const gastoSchema: Schema = new Schema(
     facturas: [{ type: Schema.Types.ObjectId, ref: "alm_factura" }],
     encargado: { type: String },
     idEncargado: { type: Schema.Types.ObjectId, ref: "User" },
+    idOrden: { type: Schema.Types.ObjectId, ref: "alm_orden" },
   },
   {
     timestamps: true,

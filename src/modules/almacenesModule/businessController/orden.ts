@@ -183,11 +183,11 @@ class BussOrden {
     var result = await ordenModel.findOne().limit(1).sort({ _id: -1 });
     return result;
   }
-  public async updateVale(id: string, Vale: any) {
+  public async updateOrden(id: string, Vale: any) {
     let result = await ordenModel.updateOne({ _id: id }, { $set: Vale });
     return result;
   }
-  public async deleteVale(id: string) {
+  public async deleteOrden(id: string) {
     let result = await ordenModel.deleteOne({ _id: id });
     return result;
   }

@@ -606,6 +606,15 @@ class Routes {
       app
       .route(`${this.routeparent}/printOrden/:id`)
       .get(jsonwebtokenSecurity, this.routesController.printOrden);
+
+        app
+      .route(`${this.routeparent}/orden/:id`)
+      .get(this.routesController.getOrden);
+
+      app
+      .route(`${this.routeparent}/orden/:id`)
+      .patch(this.routesController.updateOrden);
+
   }
 }
 export default Routes;

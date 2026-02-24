@@ -13,14 +13,14 @@ const logoGamb: Content = {
     width: 100,
     height:40,
     alignment: 'center',
-    margin:[0,20,-20,0],
+    margin:[0,20,0,0],
 }
 const sisal: Content = {
     image: 'src/assets/sisal.png',
     width: 100,
     height:30,
     alignment: 'center',
-    margin:[0,30,20,0],
+    margin:[0,25,0,0],
 }
 
 const currentDate: Content = {
@@ -49,7 +49,7 @@ export const headerSection = (options: HeaderOptions): Content => {
         alignment: 'center',
         margin: [0,0,0,0],
         style:{
-            fontSize:10,
+            fontSize:9,
             color: "#009ffe", 
         },
         
@@ -63,7 +63,7 @@ export const headerSection = (options: HeaderOptions): Content => {
             margin:[0,30,0,0],
             style:{
                 bold:true,
-                fontSize:13,
+                fontSize:12,
                 color: '#0e78d1',
             },
         },

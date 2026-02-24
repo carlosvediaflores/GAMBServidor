@@ -1300,6 +1300,10 @@ class RoutesController {
       let expresionRec = params.recibidox;
       filter["recibidox"] = expresionRec;
     }
+    if (params.usuario != null) {
+      let expresionRec = params.usuario;
+      filter["usuario"] = expresionRec;
+    }
     if (params.fecharecepcion != null) {
       var expresion = new RegExp(params.fecharecepcion);
       filter["fecharecepcion"] = expresion;

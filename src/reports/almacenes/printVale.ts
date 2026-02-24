@@ -370,7 +370,7 @@ export const printVale = (
                             },
                             {
                               text: `${
-                                capitalize(producto.unidadMedida) || "N/A"
+                                capitalize(producto?.unidadMedida) || "N/A"
                               }s`,
                               alignment: "center",
                               fontSize: 7,

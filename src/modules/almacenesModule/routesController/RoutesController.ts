@@ -4156,7 +4156,7 @@ class RoutesController {
     gastoData.idTipoDesembolso = desembolsoData.idTipoDesembolso;
     gastoData.idVehiculo = gastoData.vehiculo;
     gastoData.idUserRegister = user._id;
-    gastoData.estado = "EJECUTADO";
+    gastoData.estado = gastoData.estado || "EJECUTADO";
     let result = await gasto.addGasto(gastoData);
     // desembolsoData.gastos.push(result._id);
     // Sumar el monto al montoasignado de desembolso

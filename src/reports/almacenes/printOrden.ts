@@ -12,6 +12,7 @@ import {
   DateFormatterSimple,
 } from "../../helpers";
 import { log, table } from "console";
+import { headerSectionSigm } from "../sections/header.sigm";
 
 const logoGamb: Content = {
   image: "src/assets/logogamb.png",
@@ -21,7 +22,7 @@ const logoGamb: Content = {
   margin: [0, 20, -20, 0],
 };
 const sisal: Content = {
-  image: "src/assets/sisal.png",
+  image: "src/assets/base4.png",
   width: 100,
   height: 30,
   alignment: "center",
@@ -136,7 +137,7 @@ export const printOrden = (
     },
     content: [
 
-       headerSection({
+       headerSectionSigm({
         title: `FORMULARIO ENTREGA DE EFECTIVO PARA ADQUISISICIÓN DE REPUESTOS Y MANTENIMIENTO DEL PARQUE AUTOMOTOR`,
         // subTitle: `TALLER MECÁNICO`,
         showLogo2: true,
@@ -239,7 +240,7 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: nombreSolicitado,
+                text: values.unidadSolicitante?.nombresubdir,
               },
               {
                 text: "CARGO:",
@@ -255,7 +256,7 @@ export const printOrden = (
             ],
             [
               {
-                text: "TIPO SERICIO:",
+                text: "TIPO SERICIO/COMPRA:",
                 fillColor: "#dbeffe",
                 bold: true,
               },
@@ -750,7 +751,7 @@ export const printOrden = (
       {
         layout: "noBorders",
         table: {
-          widths: [95, 132, 60, 125, 48, 55],
+          widths: [95, 132, 60, 100, 40, 90],
           body: [
             [
               {
@@ -828,7 +829,7 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: values.unidadSolicitante.nombresubdir,
+                text: values.unidadSolicitante?.nombresubdir,
               },
               {
                 text: "CARGO:",
@@ -844,7 +845,7 @@ export const printOrden = (
             ],
             [
               {
-                text: "TIPO SERVICIO:",
+                text: "TIPO SERVICIO/COMPRA:",
                 fillColor: "#e7f6de",
                 bold: true,
               },
@@ -858,6 +859,7 @@ export const printOrden = (
                 text: "DOC. PARA:",
                 fillColor: "#e7f6de",
                 bold: true,
+                fontSize: 7,
               },
                {
                 text: subTitulo2,

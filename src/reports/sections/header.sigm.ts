@@ -1,0 +1,85 @@
+import { Content } from "pdfmake/interfaces";
+import { DateFormatter } from "../../helpers";
+
+const logo: Content = {
+    image: 'src/assets/otro.png',
+    width: 40,
+    height:50,
+    alignment: 'center',
+    margin:[0,20,-20,0],
+}
+const logoGamb: Content = {
+    image: 'src/assets/logogamb1.png',
+    width: 100,
+    height:40,
+    alignment: 'center',
+    margin:[0,20,0,0],
+}
+const sisal: Content = {
+    image: 'src/assets/base4.png',
+    width: 100,
+    height:30,
+    alignment: 'center',
+    margin:[0,25,0,0],
+}
+
+const currentDate: Content = {
+    text:DateFormatter.getDDMMYYYY(new Date()),
+    alignment:'right',
+    margin:[20,30],
+    width:100,
+    fontSize:7
+}
+interface HeaderOptions{
+    title?: string;
+    subTitle?: string;
+    showLogo?: boolean;
+    showLogo2?: boolean;
+    userActual?:string;
+}
+
+export const headerSectionSigm = (options: HeaderOptions): Content => {
+    const {title, subTitle, showLogo= true, showLogo2=true,userActual} = options;
+    
+    const hedarLogo: Content = showLogo ? logoGamb : null;
+    const hedarLogo2: Content = showLogo2 ? sisal : null;
+ 
+    const headerSubTitle:Content=subTitle?{
+        text: subTitle,
+        alignment: 'center',
+        margin: [0,0,0,0],
+        style:{
+            fontSize:9,
+            color: "#009ffe", 
+        },
+        
+    }: null;
+
+    const headerTitle: Content = title
+    ? {
+        stack:[{
+            text:title,
+            alignment: 'center',
+            margin:[0,30,0,0],
+            style:{
+                bold:true,
+                fontSize:12,
+                color: '#0e78d1',
+            },
+        },
+        headerSubTitle,
+        ]
+        /* text: title,
+        style: {
+          bold: true,
+        }, */
+      }
+    : null;
+
+    return{
+        columns:[hedarLogo,headerTitle, hedarLogo2, ],
+        
+
+    };
+
+};

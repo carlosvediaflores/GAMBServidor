@@ -1292,6 +1292,15 @@ class RoutesController {
         filter["destino"] = params.destino;
       }
     }
+    // Filtro por fechas
+    if (params.deFecha || params.alFecha) {
+      filter.fechaderivado = {};
+      if (params.deFecha)
+        filter.fechaderivado.$gte = new Date(params.deFecha);
+      if (params.alFecha)
+        filter.fechaderivado.$lte = new Date(params.alFecha);
+    }
+
     if (params.estado != null) {
       var expresion = new RegExp(params.estado);
       filter["estado"] = expresion;
@@ -1344,7 +1353,7 @@ class RoutesController {
     } else {
       order = { fechaderivado: -1 };
     }
-    console.log("paramas", filter);
+    console.log("paramas filter", filter);
 
     let res: Array<ISeguimiento> = await segui.readOficina(
       filter,

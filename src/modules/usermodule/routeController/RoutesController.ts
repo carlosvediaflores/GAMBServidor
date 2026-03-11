@@ -1449,7 +1449,7 @@ class RoutesController {
     var segui: BussinesSegui = new BussinesSegui();
     let oficina: string = request.params.oficina;
     var params = request.body;
-    let ofi = { destino: "INGENIERO CIVIL II", estado: "RECIBIDO" };
+    let ofi = { destino: "INSTANCIA TECNICA DE SALUD Y RESP. DE SICOF DEL G.A.M.B.", estado: "RECIBIDO" };
     var result = await segui.updateSeguiOfi(ofi, params);
     // console.log("oficina", ofi, "params", params);
 

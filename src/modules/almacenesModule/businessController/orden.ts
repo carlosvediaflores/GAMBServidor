@@ -8,6 +8,7 @@ import {
   printVale2,
 } from "../../../reports/almacenes";
 import { log } from "console";
+import path from "path";
 class BussOrden {
   constructor(
     private readonly printerService: PrinterService = new PrinterService()
@@ -71,7 +72,16 @@ class BussOrden {
             },
           },
         })
-        .populate("unidadSolicitante")
+        .populate({
+          path:"unidadSolicitante",
+          model:"Subdirecciones",
+           populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
+          }
+        )
         .populate({
           path: "autorizacion",
           model: "act_autorizations",
@@ -79,6 +89,11 @@ class BussOrden {
             path: "conductor",
             model: "User",
             select: "_id ci email username surnames roles",
+            populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
           },
         })
         .populate({
@@ -136,7 +151,16 @@ class BussOrden {
             select: "_id ci email username surnames roles",
           },
         })
-        .populate("unidadSolicitante")
+        .populate({
+          path:"unidadSolicitante",
+          model:"Subdirecciones",
+           populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
+          }
+        )
         .populate({
           path: "autorizacion",
           model: "act_autorizations",
@@ -287,7 +311,16 @@ class BussOrden {
             },
           },
         })
-        .populate("unidadSolicitante")
+         .populate({
+          path:"unidadSolicitante",
+          model:"Subdirecciones",
+           populate: {
+              path: "user",
+              model: "User",
+              select: "_id ci email username surnames roles",
+            },
+          }
+        )
         .populate("idProducto")
         .populate("idFacturas");
       let docDefinition;

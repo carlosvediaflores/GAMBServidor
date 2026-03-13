@@ -4203,7 +4203,7 @@ class RoutesController {
         if (params.alFecha)
           filter.fechaRegistro.$lte = new Date(params.alFecha);
       }
-
+     
       if (params.estado) {
         filter.estado = params.estado;
       } else {
@@ -4564,6 +4564,209 @@ class RoutesController {
       // log("data", data);
 
       const pdfDoc = await gasto.printQueryGastos(data);
+      response.setHeader("Content-Type", "application/pdf");
+      pdfDoc.info.Title = "Reporte de gastos";
+      pdfDoc.pipe(response);
+      pdfDoc.end();
+      return;
+    } catch (error) {
+      console.error("❌ Error en queryGastos:", error);
+      return response.status(500).json({
+        message: "Error consultando gastos",
+        error,
+      });
+    }
+  }
+   public async printRepMant(request: Request, response: Response) {
+    try {
+      const gasto: BussGasto = new BussGasto();
+      const params: any = request.query;
+      let id: string = request.params.id;
+      let user: string = request.body.user;
+      // 🔹 Armamos el filtro
+      const filter: any = {};
+
+      if (params.deFecha || params.alFecha) {
+        filter.fechaRegistro = {};
+        if (params.deFecha)
+          filter.fechaRegistro.$gte = new Date(params.deFecha);
+        if (params.alFecha)
+          filter.fechaRegistro.$lte = new Date(params.alFecha);
+      }
+
+      if (params.estado) {
+        filter.estado = params.estado;
+      } else {
+        filter.estado = { $ne: "DESCARGO" };
+      }
+
+      if (params.isReposicion) filter.isReposicion = params.isReposicion;
+      if (params.gestion) filter.gestion = params.gestion;
+      if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
+      if (params.tipoGasto) filter.tipoGasto = params.tipoGasto;
+      if (params.fuente) filter.fuente = params.fuente;
+      if (params.borrador) filter.borrador = params.borrador;
+      if (params.partida) filter.partida = params.partida;
+      if (params.catProgra) filter.catProgra = params.catProgra;
+      if (params.solicitante) filter.solicitante = params.solicitante;
+      if (params.numDescargo) filter.numDescargo = params.numDescargo;
+      if (params.encargado) filter.encargado = params.encargado;
+
+      // 🔹 Orden y paginación
+      const order: any = { fechaRegistro: -1, _id: -1 };
+      const limit = params.limit;
+      const skip = params.skip ? parseInt(params.skip, 10) : 0;
+      let borrador: any = {};
+      if (params.borrador) {
+        borrador.borradorData = params.borrador;
+        delete filter.borrador;
+      }
+
+      // 🔹 Listado de gastos
+      const gastos = await gasto.readGasto(filter, skip, limit, order);
+
+      // 🔹 Resumen por fuente
+      const resumenPorFuente = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$fuente", // "41-113"
+            idFuente: { $first: "$idFuente" }, // actualmente string
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        // 🔹 Convertir a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+        {
+          $lookup: {
+            from: "alm_fuentes", // nombre real de la colección
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: "$fuenteData" },
+        {
+          $project: {
+            _id: 1,
+            idFuente: 1,
+            totalMonto: 1,
+            count: 1,
+            denominacion: "$fuenteData.denominacion",
+          },
+        },
+        { $sort: { totalMonto: -1 } },
+      ]);
+
+      // 🔹 Resumen por catProgra
+      const resumenPorCatProgra = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: "$catProgra",
+            nameCatProg: { $first: "$nameCatProg" },
+            fuente: { $first: "$fuente" },
+            totalMonto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+      const resumenPorTipoGasto = await gastoModule.aggregate([
+        { $match: filter },
+
+        // 🔹 Agrupar primero por fuente + tipoGasto
+        {
+          $group: {
+            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+            totalGasto: { $sum: "$montoGasto" },
+            count: { $sum: 1 },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Reagrupar por fuente
+        {
+          $group: {
+            _id: "$_id.fuente",
+            fuentes: {
+              $push: {
+                _id: "$_id.tipoGasto",
+                totalGasto: "$totalGasto",
+                count: "$count",
+              },
+            },
+            sumaTotalGasto: { $sum: "$totalGasto" },
+            sumaTotalCount: { $sum: "$count" },
+            idFuente: { $first: "$idFuente" },
+          },
+        },
+
+        // 🔹 Convertir idFuente a ObjectId
+        {
+          $addFields: {
+            idFuente: { $toObjectId: "$idFuente" },
+          },
+        },
+
+        // 🔹 Traer denominación desde alm_fuentes
+        {
+          $lookup: {
+            from: "alm_fuentes",
+            localField: "idFuente",
+            foreignField: "_id",
+            as: "fuenteData",
+          },
+        },
+        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+
+        // 🔹 Proyección final
+        {
+          $project: {
+            tipoGasto: "$_id",
+            _id: 0,
+            denominacionFuente: "$fuenteData.denominacion",
+            fuentes: 1,
+            sumaTotalGasto: 1,
+            sumaTotalCount: 1,
+          },
+        },
+
+        // 🔹 Ordenar por monto total
+        { $sort: { sumaTotalGasto: -1 } },
+      ]);
+
+      // 🔹 Monto total de todos los gastos
+      const montoTotalResult = await gastoModule.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: null,
+            montoTotalGasto: { $sum: "$montoGasto" },
+          },
+        },
+      ]);
+      const montoTotalGasto =
+        montoTotalResult.length > 0 ? montoTotalResult[0].montoTotalGasto : 0;
+
+      const data = {
+        borrador,
+        filter,
+        user,
+        gastos,
+        resumenPorFuente,
+        resumenPorCatProgra,
+        resumenPorTipoGasto,
+        montoTotalGasto, // ✅ aquí ya lo tienes
+      };
+      // log("data", data);
+
+      const pdfDoc = await gasto.printRepMant(data);
       response.setHeader("Content-Type", "application/pdf");
       pdfDoc.info.Title = "Reporte de gastos";
       pdfDoc.pipe(response);
@@ -5102,12 +5305,19 @@ class RoutesController {
     var order: any = {};
     // Filtro por fechas
     if (params.deFecha || params.alFecha) {
-      filter.fechaDesembolso = {};
+      filter.fechaDescargo = {};
       if (params.deFecha)
-        filter.fechaDesembolso.$gte = new Date(params.deFecha);
+        filter.fechaDescargo.$gte = params.deFecha;
       if (params.alFecha)
-        filter.fechaDesembolso.$lte = new Date(params.alFecha);
+        filter.fechaDescargo.$lte = params.alFecha;
     }
+     if (params.deGestion || params.alGestion) {
+        filter.gestion = {};
+        if (params.deGestion)
+          filter.gestion.$gte = params.deGestion;
+        if (params.alGestion)
+          filter.gestion.$lte =params.alGestion;
+      }
 
     // Filtro por montos
     if (params.deMonto || params.AMonto) {
@@ -5131,6 +5341,7 @@ class RoutesController {
     if (params.idTipoDesembolso) {
       filter.idTipoDesembolso = params.idTipoDesembolso;
     }
+    if (params.encargado) filter.encargado = params.encargado;
     let repres = await descargo.readDescargo(filter, skip, limit, order);
     response.status(200).json(repres);
   }

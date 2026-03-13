@@ -240,7 +240,11 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: values.unidadSolicitante?.nombresubdir,
+                text: values.unidadSolicitante?.user.username
+                  ? values.unidadSolicitante.user.username +
+                    " " +
+                    values.unidadSolicitante.user.surnames
+                  : "",
               },
               {
                 text: "CARGO:",
@@ -248,7 +252,7 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: cargo,
+                text: values.unidadSolicitante?.nombresubdir,
                 colSpan: 3,
               },
               {},
@@ -259,6 +263,7 @@ export const printOrden = (
                 text: "TIPO SERICIO/COMPRA:",
                 fillColor: "#dbeffe",
                 bold: true,
+                fontSize: 7,
               },
               {
                 text: values.tipoServicio || "N/A",
@@ -829,7 +834,11 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: values.unidadSolicitante?.nombresubdir,
+                 text: values.unidadSolicitante?.user.username
+                  ? values.unidadSolicitante.user.username +
+                    " " +
+                    values.unidadSolicitante.user.surnames
+                  : "",
               },
               {
                 text: "CARGO:",
@@ -837,7 +846,7 @@ export const printOrden = (
                 bold: true,
               },
               {
-                text: cargo,
+                text: values.unidadSolicitante?.nombresubdir,
                 colSpan: 3,
               },
               {},
@@ -848,6 +857,7 @@ export const printOrden = (
                 text: "TIPO SERVICIO/COMPRA:",
                 fillColor: "#e7f6de",
                 bold: true,
+                fontSize: 7,
               },
               {
                 text: values.tipoServicio || "N/A",

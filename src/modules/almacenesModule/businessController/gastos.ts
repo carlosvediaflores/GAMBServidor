@@ -4,6 +4,7 @@ import {
   printDesemFuente,
   printQueryGasto,
   printQueryGastos,
+  printRepMant,
 } from "../../../reports/almacenes";
 import gastoModule, { Igastos } from "../models/gastos";
 class BussGasto {
@@ -170,6 +171,32 @@ class BussGasto {
     const doc = this.printerService.createPdf(docDefinition);
     return doc;
   }
+
+   public async printRepMant(data?: any) {
+    // const listGasto: any = await gastoModule
+    //   .find(filter)
+    //   .populate("idSolicitante")
+    //   .populate("idCombustible")
+    //   .populate("idPartida")
+    //   .populate("idVehiculo")
+    //   .populate("idTipoDesembolso")
+    //   .populate({
+    //     path: "idFuentes",
+    //     model: "alm_desemFuente",
+    //     populate: { path: "idFuente", model: "alm_fuente" },
+    //   })
+    //   .sort({ fecha: -1 });
+    // console.log("listGasto", data);
+    let docDefinition;
+    if (data.borrador.borradorData) {
+      docDefinition = printRepMant(data);
+    } else {
+      docDefinition = printQueryGastos(data);
+    }
+    const doc = this.printerService.createPdf(docDefinition);
+    return doc;
+  }
+
   public async printDescargoRepuManteni(data?: any) {
     let docDefinition = printDescargoRepuManteni(data);
 

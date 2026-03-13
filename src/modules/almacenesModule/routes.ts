@@ -542,6 +542,10 @@ class Routes {
       .route(`${this.routeparent}/printQueryGastos`)
       .get(jsonwebtokenSecurity, this.routesController.printQueryGastos);
 
+      app
+      .route(`${this.routeparent}/printRepMant`)
+      .get(jsonwebtokenSecurity, this.routesController.printRepMant);
+
        app
       .route(`${this.routeparent}/printDescargoRepuManteni`)
       .get(jsonwebtokenSecurity, this.routesController.printDescargoRepuManteni);

@@ -97,9 +97,9 @@ class Routes {
     app
       .route(`${this.routeparent}/subUnidad/:id`)
       .get(this.routesController.getSubUnidad);
-    //app
-    //.route(`${this.routeparent}/subdir/:id`)
-    //.put(this.routesController.updateSubdir);
+    app
+    .route(`${this.routeparent}/subdirEstado/:id`)
+    .put(this.routesController.updateSubdir);
     app
       .route(`${this.routeparent}/subdir/:id`)
       .delete(this.routesController.removeSubdir);

@@ -7,7 +7,8 @@ const SubdirSchema = new Schema({
     nombresubdir: { type: String, required: true, unique: true },
     archivofi: { type: Array},
     unidad:{type: Schema.Types.ObjectId, ref: 'Organizacion'},
-    user:{type: Schema.Types.ObjectId, ref: 'User'}
+    user:{type: Schema.Types.ObjectId, ref: 'User'},
+    estado: { type: Boolean, default: true }
 },
 {
     timestamps: true,

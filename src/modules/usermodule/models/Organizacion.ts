@@ -4,17 +4,20 @@ export interface ISimpleOrganizacion {
   nombredir?: string;
   nombrecargo?: string;
   subdirecciones?: Array<ISubdireciones>; 
+  estado?: boolean;
 }
 export interface IOrganizacion extends Document {
     Array: any;
     nombredir: string;
     nombrecargo: string;
     subdirecciones: Array<ISubdireciones>;
+    estado: boolean;
   }
   const orgSchema: Schema = new Schema({
     nombredir: { type: String},
     nombrecargo: { type: String },
-    subdirecciones: {type: [Schema.Types.ObjectId], ref: "Subdirecciones"}
+    subdirecciones: {type: [Schema.Types.ObjectId], ref: "Subdirecciones"},
+    estado: { type: Boolean, default: true }
   },
   {
     timestamps: true,

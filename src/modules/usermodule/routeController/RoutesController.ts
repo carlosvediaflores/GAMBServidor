@@ -549,6 +549,7 @@ class RoutesController {
     var subdir: BussinesSubdir = new BussinesSubdir();
     let id: string = request.params.id;
     var params = request.body;
+    log("params", params);
     var result = await subdir.updateSubdi(id, params);
     response.status(200).json(result);
   }

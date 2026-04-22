@@ -140,11 +140,12 @@ export const printDescargoRepuManteni = (
       if (tieneFactura) return acc;
 
       const base = gasto.montoGasto / 0.84;
-      return acc + base * 0.13;
+      const porcentaje = gasto.partida === "3.9.8" ? 0.5 : 0.13;
+
+      return acc + base * porcentaje;
     },
     0
   );
-
 
 
   // log("values", values.idFuentes);
@@ -433,7 +434,11 @@ export const printDescargoRepuManteni = (
               {
                 text: `${desemGasto?.facturas && desemGasto.facturas.length > 0
                   ? ""
-                  : CurrencyFormatter.formatCurrency((desemGasto.montoGasto / 0.84) * 0.13)}`,
+                  : CurrencyFormatter.formatCurrency(
+                    (desemGasto.montoGasto / 0.84) *
+                    (desemGasto.partida === "3.9.8" ? 0.5 : 0.13)
+                  )
+                  }`,
                 style: "tableBody2",
                 alignment: "center",
               },

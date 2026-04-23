@@ -4222,7 +4222,7 @@ class RoutesController {
       if (params.numDescargo) filter.numDescargo = params.numDescargo;
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = {catProgra:1, fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       log("filter", filter);
@@ -4410,7 +4410,7 @@ class RoutesController {
       if (params.encargado) filter.encargado = params.encargado;
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = { catProgra: 1, fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       let borrador: any = {};
@@ -4613,7 +4613,7 @@ class RoutesController {
       if (params.encargado) filter.encargado = params.encargado;
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = { catProgra: 1, fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       let borrador: any = {};
@@ -4810,7 +4810,7 @@ class RoutesController {
       if (params.encargado) filter.encargado = params.encargado;
 
       // 🔹 Orden y paginación
-      const order: any = { fechaRegistro: -1, _id: -1 };
+      const order: any = { catProgra: 1, fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       let borrador: any = {};

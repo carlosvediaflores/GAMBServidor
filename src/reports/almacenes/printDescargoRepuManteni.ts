@@ -116,7 +116,7 @@ export const printDescargoRepuManteni = (
       const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
       const importe = tieneFactura
         ? gasto.montoGasto
-        : gasto.montoGasto / 0.84;
+        : gasto.montoGasto / (gasto.tipoGasto === "Repuestos" ? 0.92 : 0.84);
 
       return acc + importe;
     },
@@ -128,7 +128,7 @@ export const printDescargoRepuManteni = (
       const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
       if (tieneFactura) return acc;
 
-      const base = gasto.montoGasto / 0.84;
+      const base = gasto.montoGasto / (gasto.tipoGasto === "Repuestos" ? 0.92 : 0.84);
       return acc + base * 0.03;
     },
     0
@@ -139,8 +139,8 @@ export const printDescargoRepuManteni = (
       const tieneFactura = gasto.facturas && gasto.facturas.length > 0;
       if (tieneFactura) return acc;
 
-      const base = gasto.montoGasto / 0.84;
-      const porcentaje = gasto.partida === "3.9.8" ? 0.5 : 0.13;
+      const base = gasto.montoGasto / (gasto.tipoGasto === "Repuestos" ? 0.92 : 0.84);
+      const porcentaje = gasto.tipoGasto === "Repuestos" ? 0.05 : 0.13;
 
       return acc + base * porcentaje;
     },
@@ -419,14 +419,14 @@ export const printDescargoRepuManteni = (
               {
                 text: desemGasto?.facturas && desemGasto.facturas.length > 0
                   ? CurrencyFormatter.formatCurrency(desemGasto.montoGasto)
-                  : CurrencyFormatter.formatCurrency(desemGasto.montoGasto / 0.84),
+                  : CurrencyFormatter.formatCurrency(desemGasto.montoGasto / (desemGasto.tipoGasto === "Repuestos" ? 0.92 : 0.84)),
                 style: "tableBody2",
                 alignment: "right",
               },
               {
                 text: `${desemGasto?.facturas && desemGasto.facturas.length > 0
                   ? ""
-                  : CurrencyFormatter.formatCurrency((desemGasto.montoGasto / 0.84) * 0.03)}`,
+                  : CurrencyFormatter.formatCurrency((desemGasto.montoGasto / (desemGasto.tipoGasto === "Repuestos" ? 0.92 : 0.84)) * 0.03)}`,
                 style: "tableBody2",
                 alignment: "center",
               },
@@ -435,8 +435,8 @@ export const printDescargoRepuManteni = (
                 text: `${desemGasto?.facturas && desemGasto.facturas.length > 0
                   ? ""
                   : CurrencyFormatter.formatCurrency(
-                    (desemGasto.montoGasto / 0.84) *
-                    (desemGasto.partida === "3.9.8" ? 0.5 : 0.13)
+                    (desemGasto.montoGasto / (desemGasto.tipoGasto === "Repuestos" ? 0.92 : 0.84)) *
+                    (desemGasto.tipoGasto === "Repuestos" ? 0.05 : 0.13)
                   )
                   }`,
                 style: "tableBody2",

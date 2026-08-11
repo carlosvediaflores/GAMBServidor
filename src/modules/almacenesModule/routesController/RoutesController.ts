@@ -2828,7 +2828,7 @@ class RoutesController {
     }
 
     // Guardar la nueva factura
-    const resultFactura = await factura.addFactura(params);
+    const resultFactura:any = await factura.addFactura(params);
 
      (gastoResult as any).facturas.push(resultFactura._id);
      await gastoResult.save();
@@ -4281,7 +4281,6 @@ class RoutesController {
         },
         { $sort: { _id: -1 } },
       ]);
-
       // 🔹 Monto total de todos los gastos
       const montoTotalResult = await gastoModule.aggregate([
         { $match: filter },

@@ -92,6 +92,12 @@ class BussinesSegui {
       .populate("archivofi");
     return result;
   }
+
+  public async getSeguiId(id: string) {
+    let result = await SeguiModel.find({ idhj: id })
+      .populate("archivofi");
+    return result;
+  }
   public async total(query: any): Promise<any>;
 
   public async total(params1?: string | any) {

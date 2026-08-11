@@ -1261,6 +1261,13 @@ class RoutesController {
     response.status(200).json(res);
   }
 
+  public async getSeguiId(request: Request, response: Response) {
+    var segui: BussinesSegui = new BussinesSegui();
+    let id: string = request.params.id;
+    let res = await segui.getSeguiId(id);
+    response.status(200).json(res);
+  }
+
   public async getSeguiAs(request: Request, response: Response) {
     var segui: BussinesSegui = new BussinesSegui();
     let nuit: string = request.params.nuit;

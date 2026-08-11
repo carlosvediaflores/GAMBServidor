@@ -181,7 +181,7 @@ export const printDescargoRepuManteni = (
     pageOrientation: "landscape",
     styles: styles,
     pageSize: "LEGAL",
-    pageMargins: [30, 65, 30, 30],
+    pageMargins: [35, 65, 30, 30],
     defaultStyle: {
       fontSize: 10,
     },

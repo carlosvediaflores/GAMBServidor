@@ -2425,9 +2425,6 @@ class RoutesController {
       valeData.conductor ?? AutorizacionData.conductor._id;
     valeData["vehiculo"] = valeData.vehiculo ?? AutorizacionData.vehiculo._id;
 
-    const desembolsoData = await desembolso.readDesembolso(
-      valeData.idDesembolso
-    );
     const desemFuente: any = await desembolsoFuente.readDesemFuente(
       valeData.idDesemFuente
     );
@@ -2438,16 +2435,16 @@ class RoutesController {
     let tipoDes = await tipoDesem.readTipoDesem(valeData.idTipoDesembolso);
     const catProSimple = catPro[0];
 
-    let result = await vale.addVale(valeData);
+    let result: any = await vale.addVale(valeData);
+
+    log('result', result)
     const resultData: any = await vale.readVale(result._id);
     const resultDataSimple = resultData[0];
-    const solicitante: String = `${
-      resultDataSimple.conductor.username ??
+    const solicitante: String = `${resultDataSimple.conductor.username ??
       AutorizacionData.unidadSolicitante.user.username
-    } ${
-      resultDataSimple.conductor.surnames ??
+      } ${resultDataSimple.conductor.surnames ??
       AutorizacionData.unidadSolicitante.user.surnames
-    }`;
+      }`;
 
     if (result.precio != null && result.precio > 0) {
       const fechaGasto = new Date(valeData.fecha);
@@ -2480,9 +2477,12 @@ class RoutesController {
       gastoData.encargado = valeData.encargado;
       gastoData.idEncargado = valeData.idEncargado;
 
-      const resultGasto = await gasto.addGasto(gastoData);
+      const resultGasto: any = await gasto.addGasto(gastoData);
+      console.log("resultGasto", resultGasto);
 
       await vale.updateVale(result._id, { idGasto: resultGasto._id });
+
+      
     }
 
     paramsAut.numeroVale = result.numeroVale;
@@ -2494,9 +2494,8 @@ class RoutesController {
     const listCompra: any = await compra.readCompra(valeData.idCompra);
     let entrada: any = listCompra.idEntrada;
     let Simplearticulo: any = listCompra.idArticulo;
-    let entregadoA: String = `${AutorizacionData.conductor.username}${" "}${
-      AutorizacionData.conductor.surnames
-    }`;
+    let entregadoA: String = `${AutorizacionData.conductor.username}${" "}${AutorizacionData.conductor.surnames
+      }`;
     paramsEgreso.entregado = entregadoA;
     paramsEgreso.cargo = AutorizacionData.conductor.post;
     paramsEgreso.numeroSalida = respEgreso.numeroSalida + 1;
@@ -2807,10 +2806,10 @@ class RoutesController {
     return response.status(200).json(valeData);
   }
 
-   public async addFacturaGasto(request: Request, response: Response) {
+  public async addFacturaGasto(request: Request, response: Response) {
     const Vale = new BussVale();
     const factura = new BussFactura();
-    const gasto:BussGasto = new BussGasto();
+    const gasto: BussGasto = new BussGasto();
 
     let params = request.body;
 
@@ -2828,14 +2827,14 @@ class RoutesController {
     }
 
     // Guardar la nueva factura
-    const resultFactura:any = await factura.addFactura(params);
+    const resultFactura: any = await factura.addFactura(params);
 
-     (gastoResult as any).facturas.push(resultFactura._id);
-     await gastoResult.save();
+    (gastoResult as any).facturas.push(resultFactura._id);
+    await gastoResult.save();
     // ---------------- Lógica adicional para actualizar Gasto, Desembolso y DesemFondo ---------------- //
     log("gastoResult", resultFactura);
     const idGasto = gastoResult._id;
-    
+
 
     const montoFactura = resultFactura.montoFactura;
     const nuevoMontoGasto = montoFactura;
@@ -4125,9 +4124,8 @@ class RoutesController {
     if (sumMonto > desemFuente.montoTotal) {
       response.status(300).json({
         serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
-           Saldo disponible es de : ${
-             desemFuente.montoTotal - desemFuente.montoGasto
-           } Bs., 
+           Saldo disponible es de : ${desemFuente.montoTotal - desemFuente.montoGasto
+          } Bs., 
            Intentas pagar: ${gastoData.precio} Bs.`,
       });
       return;
@@ -4203,7 +4201,7 @@ class RoutesController {
         if (params.alFecha)
           filter.fechaRegistro.$lte = new Date(params.alFecha);
       }
-     
+
       if (params.estado) {
         filter.estado = params.estado;
       } else {
@@ -4222,7 +4220,7 @@ class RoutesController {
       if (params.numDescargo) filter.numDescargo = params.numDescargo;
 
       // 🔹 Orden y paginación
-      const order: any = {catProgra:1, fechaRegistro: -1, _id: -1 };
+      const order: any = { catProgra: 1, fechaRegistro: -1, _id: -1 };
       const limit = params.limit;
       const skip = params.skip ? parseInt(params.skip, 10) : 0;
       log("filter", filter);
@@ -4576,7 +4574,7 @@ class RoutesController {
       });
     }
   }
-   public async printRepMant(request: Request, response: Response) {
+  public async printRepMant(request: Request, response: Response) {
     try {
       const gasto: BussGasto = new BussGasto();
       const params: any = request.query;
@@ -4803,7 +4801,7 @@ class RoutesController {
           filter.fechaRegistro.$lte = new Date(params.alFecha);
       }
 
-      filter.tipoGasto  = params.tipoGasto;
+      filter.tipoGasto = params.tipoGasto;
       if (params.tipoFondo) filter.tipoFondo = params.tipoFondo;
       if (params.numDescargo) filter.numDescargo = params.numDescargo;
       if (params.encargado) filter.encargado = params.encargado;
@@ -5012,19 +5010,18 @@ class RoutesController {
     const catProSimple = catPro[0];
     const numPrecio = +gastoData.precio;
     const sumMonto = numPrecio + desemFuente.montoGasto;
-     if (sumMonto > desemFuente.montoTotal) {
+    if (sumMonto > desemFuente.montoTotal) {
       response.status(300).json({
         serverResponse: `El precio excede el total restante del monto asignado para este FF-OF. 
-           Saldo disponible es de : ${
-             desemFuente.montoTotal - desemFuente.montoGasto
-           } Bs., 
+           Saldo disponible es de : ${desemFuente.montoTotal - desemFuente.montoGasto
+          } Bs., 
            Intentas pagar: ${gastoData.precio} Bs.`,
       });
       return;
     }
     const fechaGasto = new Date(gastoData.fecha);
     const gestionGasto = fechaGasto.getFullYear();
-     gastoData.fechaRegistro = gastoData.fecha;
+    gastoData.fechaRegistro = gastoData.fecha;
     gastoData.gestion = gestionGasto;
     gastoData.montoGasto = gastoData.montoGasto;
     // gastoData.tipoFondo = tipoDes.denominacion;
@@ -5310,13 +5307,13 @@ class RoutesController {
       if (params.alFecha)
         filter.fechaDescargo.$lte = params.alFecha;
     }
-     if (params.deGestion || params.alGestion) {
-        filter.gestion = {};
-        if (params.deGestion)
-          filter.gestion.$gte = params.deGestion;
-        if (params.alGestion)
-          filter.gestion.$lte =params.alGestion;
-      }
+    if (params.deGestion || params.alGestion) {
+      filter.gestion = {};
+      if (params.deGestion)
+        filter.gestion.$gte = params.deGestion;
+      if (params.alGestion)
+        filter.gestion.$lte = params.alGestion;
+    }
 
     // Filtro por montos
     if (params.deMonto || params.AMonto) {
@@ -5422,69 +5419,69 @@ class RoutesController {
       { $sort: { _id: 1 } },
     ]);
 
-     const resumenPorTipoGasto = await gastoModule.aggregate([
-        { $match: { _id: { $in: gastoIds } }  },
+    const resumenPorTipoGasto = await gastoModule.aggregate([
+      { $match: { _id: { $in: gastoIds } } },
 
-        // 🔹 Agrupar primero por fuente + tipoGasto
-        {
-          $group: {
-            _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
-            totalGasto: { $sum: "$montoGasto" },
-            count: { $sum: 1 },
-            idFuente: { $first: "$idFuente" },
-          },
+      // 🔹 Agrupar primero por fuente + tipoGasto
+      {
+        $group: {
+          _id: { fuente: "$fuente", tipoGasto: "$tipoGasto" },
+          totalGasto: { $sum: "$montoGasto" },
+          count: { $sum: 1 },
+          idFuente: { $first: "$idFuente" },
         },
+      },
 
-        // 🔹 Reagrupar por fuente
-        {
-          $group: {
-            _id: "$_id.fuente",
-            fuentes: {
-              $push: {
-                _id: "$_id.tipoGasto",
-                totalGasto: "$totalGasto",
-                count: "$count",
-              },
+      // 🔹 Reagrupar por fuente
+      {
+        $group: {
+          _id: "$_id.fuente",
+          fuentes: {
+            $push: {
+              _id: "$_id.tipoGasto",
+              totalGasto: "$totalGasto",
+              count: "$count",
             },
-            sumaTotalGasto: { $sum: "$totalGasto" },
-            sumaTotalCount: { $sum: "$count" },
-            idFuente: { $first: "$idFuente" },
           },
+          sumaTotalGasto: { $sum: "$totalGasto" },
+          sumaTotalCount: { $sum: "$count" },
+          idFuente: { $first: "$idFuente" },
         },
+      },
 
-        // 🔹 Convertir idFuente a ObjectId
-        {
-          $addFields: {
-            idFuente: { $toObjectId: "$idFuente" },
-          },
+      // 🔹 Convertir idFuente a ObjectId
+      {
+        $addFields: {
+          idFuente: { $toObjectId: "$idFuente" },
         },
+      },
 
-        // 🔹 Traer denominación desde alm_fuentes
-        {
-          $lookup: {
-            from: "alm_fuentes",
-            localField: "idFuente",
-            foreignField: "_id",
-            as: "fuenteData",
-          },
+      // 🔹 Traer denominación desde alm_fuentes
+      {
+        $lookup: {
+          from: "alm_fuentes",
+          localField: "idFuente",
+          foreignField: "_id",
+          as: "fuenteData",
         },
-        { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
+      },
+      { $unwind: { path: "$fuenteData", preserveNullAndEmptyArrays: true } },
 
-        // 🔹 Proyección final
-        {
-          $project: {
-            tipoGasto: "$_id",
-            _id: 0,
-            denominacionFuente: "$fuenteData.denominacion",
-            fuentes: 1,
-            sumaTotalGasto: 1,
-            sumaTotalCount: 1,
-          },
+      // 🔹 Proyección final
+      {
+        $project: {
+          tipoGasto: "$_id",
+          _id: 0,
+          denominacionFuente: "$fuenteData.denominacion",
+          fuentes: 1,
+          sumaTotalGasto: 1,
+          sumaTotalCount: 1,
         },
+      },
 
-        // 🔹 Ordenar por monto total
-        { $sort: { sumaTotalGasto: -1 } },
-      ]);
+      // 🔹 Ordenar por monto total
+      { $sort: { sumaTotalGasto: -1 } },
+    ]);
     // 🔹 Monto total
     const montoTotalResult = await gastoModule.aggregate([
       { $match: { _id: { $in: gastoIds } } },
@@ -5509,7 +5506,7 @@ class RoutesController {
     pdfDoc.end();
     return;
   }
-    //----------Orden------------//
+  //----------Orden------------//
   public async createOrden(request: Request, response: Response) {
     var orden: BussOrden = new BussOrden();
     var ordenData = request.body;
@@ -5539,13 +5536,13 @@ class RoutesController {
   }
 
   public async queryOrden(request: Request, response: Response) {
-     var orden: BussOrden = new BussOrden();
+    var orden: BussOrden = new BussOrden();
     const filter: any = {};
     const params: any = request.query;
     var limit = 0;
     var skip = 0;
     var aux: any = {};
-    var order: any = {_id: -1};
+    var order: any = { _id: -1 };
     // Filtro por fechas
     if (params.deFecha || params.alFecha) {
       filter.fechaDesembolso = {};

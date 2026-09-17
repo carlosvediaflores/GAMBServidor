@@ -1884,8 +1884,8 @@ class RoutesController {
     params.numeroEntrada = 1;
     params.estado = "REGISTRADO";
     params.tipo = "SALDO_INICIAL";
-    params.idPersona = "6253bf6900ae6f0014f7bc23"; //cambiar
-    params.idUsuario = "6253bf6900ae6f0014f7bc23"; //cambiar
+    params.idPersona = "67bce59ce0f24e0014a2b72a"; //cambiar
+    params.idUsuario = "67bce59ce0f24e0014a2b72a"; //cambiar
     params.idProveedor = "65c63b0580c97d003f229223"; //cambiar a proveedor gamb
     let result = await ingreso.addIngreso(params);
     console.log(params);
@@ -2437,7 +2437,7 @@ class RoutesController {
 
     let result: any = await vale.addVale(valeData);
 
-    log('result', result)
+    // log('result', result)
     const resultData: any = await vale.readVale(result._id);
     const resultDataSimple = resultData[0];
     const solicitante: String = `${resultDataSimple.conductor.username ??
@@ -2478,7 +2478,7 @@ class RoutesController {
       gastoData.idEncargado = valeData.idEncargado;
 
       const resultGasto: any = await gasto.addGasto(gastoData);
-      console.log("resultGasto", resultGasto);
+      // console.log("resultGasto", resultGasto);
 
       await vale.updateVale(result._id, { idGasto: resultGasto._id });
 
@@ -2593,7 +2593,7 @@ class RoutesController {
     let fecha = dataFecha.createdAt;
 
     ingresoData.numeroEntrada = resNum.numeroEntrada + 1;
-    ingresoData.idPersona = "6253bf6900ae6f0014f7bc23";
+    ingresoData.idPersona = "67bce59ce0f24e0014a2b72a";
     ingresoData.idProveedor = "643473b2adb0190013ff255b";
     ingresoData.concepto =
       "Ingreso de COMBUSTIBLE para el viaje programado a diferentes comunidades";
@@ -2607,7 +2607,7 @@ class RoutesController {
       "Salida de COMBUSTIBLE para el viaje programado a diferentes comunidades";
     egresoData.entregado = "Conductores de vehículos";
     egresoData.cargo = "Chofer";
-    egresoData.idPersona = "6253bf6900ae6f0014f7bc23";
+    egresoData.idPersona = "67bce59ce0f24e0014a2b72a";
     egresoData.idProveedor = "643473b2adb0190013ff255b";
     egresoData.idIngreso = resultIngreso._id;
     egresoData.fecha = fecha;
@@ -4980,8 +4980,8 @@ class RoutesController {
     let id: string = request.params.id;
     var params = request.body;
     var result = await gasto.updateGastoMany({
-      encargado: "RENE VEDIA MAMANI",
-      idEncargado: "6253bf6900ae6f0014f7bc23",
+      encargado: "GUNAR ALEX LEON CHECA",
+      idEncargado: "67bce59ce0f24e0014a2b72a",
     });
     response.status(200).json(result);
   }

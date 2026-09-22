@@ -2416,7 +2416,7 @@ class RoutesController {
         valeData.cantidad = valeData.precio / 6.96;
       }
       if (valeData.idProducto === "6439b82156cc6b00132c9ab2") {
-        valeData.cantidad = valeData.precio / 9.80;
+        valeData.cantidad = valeData.precio / 17.95;
       }
     }
     // console.log('valeData',valeData);
@@ -2559,7 +2559,7 @@ class RoutesController {
         params.cantidad = params.precio / 6.96;
       }
       if (params.idProducto === "6439b82156cc6b00132c9ab2") {
-        params.cantidad = params.precio / 9.80;
+        params.cantidad = params.precio / 17.95;
       }
     }
     console.log("params", params);
@@ -2705,7 +2705,7 @@ class RoutesController {
     if (idProducto === "642c3e7b3b1ac20013da2571") {
       params.cantidadFactura = params.montoFactura / 6.96;
     } else if (idProducto === "6439b82156cc6b00132c9ab2") {
-      params.cantidadFactura = params.montoFactura / 9.80;
+      params.cantidadFactura = params.montoFactura / 17.95;
     }
 
     params.idVale = id;
